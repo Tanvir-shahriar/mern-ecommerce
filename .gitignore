@@ -13,3 +13,6 @@ server/uploads/*
 !server/uploads/.gitkeep
 !server/uploads/products/.gitkeep
 !server/uploads/users/.gitkeep
+.vercel
+
+.vercel
