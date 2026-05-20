@@ -10,7 +10,7 @@ const ensureDir = (dir) => {
   fs.mkdirSync(dir, { recursive: true });
 };
 
-const storage = multer.diskStorage({
+const diskStorage = multer.diskStorage({
   destination(req, _file, cb) {
     const folder = req.uploadFolder || 'products';
     const destination = path.join(uploadRoot, folder);
@@ -26,6 +26,8 @@ const storage = multer.diskStorage({
     cb(null, `${safeName || 'image'}-${Date.now()}${path.extname(file.originalname).toLowerCase()}`);
   }
 });
+
+const storage = process.env.VERCEL ? multer.memoryStorage() : diskStorage;
 
 const fileFilter = (_req, file, cb) => {
   if (!file.mimetype.startsWith('image/')) {

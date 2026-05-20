@@ -106,4 +106,4 @@ After the first deployment, set `CLIENT_URL` to the deployed Vercel URL, for exa
 CLIENT_URL=https://your-project.vercel.app
 ```
 
-Uploads currently use local filesystem storage. On Vercel this is not persistent; use Cloudinary or S3 before relying on admin image uploads in production.
+Uploads use local filesystem storage in development. On Vercel, uploaded images are returned as data URLs so product creation works without a writable filesystem. For a real production store, use Cloudinary or S3 instead.

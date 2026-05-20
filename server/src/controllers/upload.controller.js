@@ -7,11 +7,24 @@ export const uploadImages = asyncHandler(async (req, res) => {
   res.status(201).json({
     status: 'success',
     data: {
-      images: files.map((file) => ({
-        url: `/uploads/${folder}/${file.filename}`,
-        alt: file.originalname.replace(/\.[^.]+$/, ''),
-        publicId: file.filename
-      }))
+      images: files.map((file) => {
+        const alt = file.originalname.replace(/\.[^.]+$/, '');
+        const publicId = file.filename || `${alt || 'image'}-${Date.now()}`;
+
+        if (file.buffer) {
+          return {
+            url: `data:${file.mimetype};base64,${file.buffer.toString('base64')}`,
+            alt,
+            publicId
+          };
+        }
+
+        return {
+          url: `/uploads/${folder}/${file.filename}`,
+          alt,
+          publicId
+        };
+      })
     }
   });
 });
