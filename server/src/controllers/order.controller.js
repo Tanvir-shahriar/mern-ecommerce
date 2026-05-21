@@ -2,6 +2,7 @@ import { Cart } from '../models/cart.model.js';
 import { Coupon } from '../models/coupon.model.js';
 import { Order } from '../models/order.model.js';
 import { Product } from '../models/product.model.js';
+import { User } from '../models/user.model.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { emitOrderEvent } from '../sockets/socket.js';
@@ -11,6 +12,37 @@ const FREE_SHIPPING_THRESHOLD = 100;
 const STANDARD_SHIPPING = 8.99;
 
 const money = (value) => Math.round(value * 100) / 100;
+
+const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const csvValue = (value) => {
+  const text = value === undefined || value === null ? '' : String(value);
+  return `"${text.replace(/"/g, '""')}"`;
+};
+
+const buildOrderFilter = async (query) => {
+  const filter = {};
+  if (query.status && query.status !== 'all') filter.status = query.status;
+
+  if (query.search) {
+    const search = String(query.search).trim();
+    const regex = new RegExp(escapeRegex(search), 'i');
+    const matchedUsers = await User.find({ $or: [{ name: regex }, { email: regex }, { phone: regex }] })
+      .select('_id')
+      .limit(50);
+    filter.$or = [
+      { orderNumber: regex },
+      { user: { $in: matchedUsers.map((user) => user._id) } },
+      { 'shippingAddress.fullName': regex },
+      { 'shippingAddress.phone': regex },
+      { 'shippingAddress.city': regex },
+      { 'items.name': regex },
+      { 'items.sku': regex }
+    ];
+  }
+
+  return filter;
+};
 
 export const createOrder = asyncHandler(async (req, res) => {
   const cart = await Cart.findOne({ user: req.user._id });
@@ -130,12 +162,11 @@ export const getOrder = asyncHandler(async (req, res) => {
 export const getOrders = asyncHandler(async (req, res) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 100);
-  const filter = {};
-  if (req.query.status && req.query.status !== 'all') filter.status = req.query.status;
+  const filter = await buildOrderFilter(req.query);
 
   const [orders, total] = await Promise.all([
     Order.find(filter)
-      .populate('user', 'name email')
+      .populate('user', 'name email phone role status')
       .sort('-createdAt')
       .skip((page - 1) * limit)
       .limit(limit),
@@ -154,6 +185,73 @@ export const getOrders = asyncHandler(async (req, res) => {
       }
     }
   });
+});
+
+export const exportOrdersCsv = asyncHandler(async (req, res) => {
+  const filter = await buildOrderFilter(req.query);
+  const orders = await Order.find(filter)
+    .populate('user', 'name email phone')
+    .sort('-createdAt')
+    .limit(1000);
+
+  const headers = [
+    'Order Number',
+    'Created At',
+    'Customer Name',
+    'Customer Email',
+    'Customer Phone',
+    'Status',
+    'Payment Method',
+    'Payment Status',
+    'Items',
+    'Subtotal',
+    'Discount',
+    'Tax',
+    'Shipping',
+    'Total',
+    'Shipping Address',
+    'Customer Note'
+  ];
+
+  const rows = orders.map((order) => {
+    const address = order.shippingAddress
+      ? [
+          order.shippingAddress.line1,
+          order.shippingAddress.line2,
+          order.shippingAddress.city,
+          order.shippingAddress.state,
+          order.shippingAddress.postalCode,
+          order.shippingAddress.country
+        ]
+          .filter(Boolean)
+          .join(', ')
+      : '';
+
+    return [
+      order.orderNumber,
+      order.createdAt?.toISOString(),
+      order.user?.name || order.shippingAddress?.fullName,
+      order.user?.email,
+      order.user?.phone || order.shippingAddress?.phone,
+      order.status,
+      order.payment?.method,
+      order.payment?.status,
+      order.items.map((item) => `${item.name} x ${item.quantity}`).join('; '),
+      order.pricing.subtotal,
+      order.pricing.discount,
+      order.pricing.tax,
+      order.pricing.shipping,
+      order.pricing.total,
+      address,
+      order.customerNote
+    ].map(csvValue);
+  });
+
+  const csv = [headers.map(csvValue), ...rows].map((row) => row.join(',')).join('\n');
+
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="orders-export.csv"');
+  res.send(csv);
 });
 
 export const updateOrderStatus = asyncHandler(async (req, res) => {

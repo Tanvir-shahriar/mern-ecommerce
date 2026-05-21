@@ -1,4 +1,4 @@
-import { SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -20,7 +20,9 @@ export const ProductsPage = () => {
     if (debouncedSearch) next.set('search', debouncedSearch);
     else next.delete('search');
     next.set('page', '1');
-    setSearchParams(next, { replace: true });
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
   }, [debouncedSearch]);
 
   const { data: categories = [] } = useQuery({
@@ -59,7 +61,15 @@ export const ProductsPage = () => {
         </div>
         <label>
           Search
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Headphones" />
+          <div className="search-field">
+            <Search size={16} />
+            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by name, SKU, brand" />
+            {search ? (
+              <button type="button" onClick={() => setSearch('')} aria-label="Clear search">
+                <X size={15} />
+              </button>
+            ) : null}
+          </div>
         </label>
         <label>
           Category
@@ -97,6 +107,7 @@ export const ProductsPage = () => {
           <div>
             <p className="eyebrow">Catalog</p>
             <h1>Shop products</h1>
+            {params.search ? <span className="search-meta">{data?.pagination?.total || 0} result(s) for "{params.search}"</span> : null}
           </div>
           <select value={searchParams.get('sort') || 'newest'} onChange={(event) => updateFilter('sort', event.target.value)} aria-label="Sort products">
             <option value="newest">Newest</option>

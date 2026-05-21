@@ -170,6 +170,11 @@ const productSchema = new mongoose.Schema(
       default: 'active',
       index: true
     },
+    archivedAt: Date,
+    archivedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User'
+    },
     isFeatured: {
       type: Boolean,
       default: false

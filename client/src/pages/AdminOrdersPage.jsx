@@ -1,21 +1,30 @@
-import { Eye, RefreshCw } from 'lucide-react';
+import { Download, Eye, RefreshCw, Search } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminNav } from '../components/AdminNav.jsx';
 import { api, apiErrorMessage } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
+import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
 
 const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
 
 export const AdminOrdersPage = () => {
   const [message, setMessage] = useState('');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const debouncedSearch = useDebouncedValue(search);
   const queryClient = useQueryClient();
   const { data } = useQuery({
-    queryKey: ['admin-orders'],
+    queryKey: ['admin-orders', debouncedSearch, statusFilter],
     queryFn: async () => {
-      const { data } = await api.get('/orders');
-      return data.data.orders;
+      const { data } = await api.get('/orders', {
+        params: {
+          search: debouncedSearch || undefined,
+          status: statusFilter
+        }
+      });
+      return data.data;
     }
   });
 
@@ -30,6 +39,29 @@ export const AdminOrdersPage = () => {
     }
   };
 
+  const exportOrders = async () => {
+    try {
+      const response = await api.get('/orders/export.csv', {
+        params: {
+          search: debouncedSearch || undefined,
+          status: statusFilter
+        },
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(response.data);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'orders-export.csv';
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      setMessage(apiErrorMessage(error));
+    }
+  };
+
+  const orders = data?.orders || [];
+  const pagination = data?.pagination;
+
   return (
     <section className="admin-page section">
       <AdminNav />
@@ -38,13 +70,34 @@ export const AdminOrdersPage = () => {
           <p className="eyebrow">Admin</p>
           <h1>Orders</h1>
         </div>
-        <button className="button dark" type="button" onClick={() => queryClient.invalidateQueries({ queryKey: ['admin-orders'] })}>
-          <RefreshCw size={17} />
-          Refresh
-        </button>
+        <div className="toolbar-actions">
+          <button className="button dark" type="button" onClick={() => queryClient.invalidateQueries({ queryKey: ['admin-orders'] })}>
+            <RefreshCw size={17} />
+            Refresh
+          </button>
+          <button className="button primary" type="button" onClick={exportOrders}>
+            <Download size={17} />
+            Export CSV
+          </button>
+        </div>
       </div>
       {message ? <p className="form-note">{message}</p> : null}
       <div className="panel">
+        <div className="admin-toolbar">
+          <label className="search-field">
+            <Search size={16} />
+            <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search order, customer, SKU" />
+          </label>
+          <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Order status">
+            <option value="all">All statuses</option>
+            {statuses.map((status) => (
+              <option value={status} key={status}>
+                {statusLabel(status)}
+              </option>
+            ))}
+          </select>
+          {pagination ? <span className="search-meta">{pagination.total} order(s)</span> : null}
+        </div>
         <div className="admin-order-table">
           <div className="table-head">
             <span>Order</span>
@@ -54,7 +107,7 @@ export const AdminOrdersPage = () => {
             <span>Status</span>
             <span>Details</span>
           </div>
-          {data?.map((order) => (
+          {orders.map((order) => (
             <article className="table-row" key={order._id}>
               <strong>{order.orderNumber}</strong>
               <span>{order.user?.email || 'Guest'}</span>

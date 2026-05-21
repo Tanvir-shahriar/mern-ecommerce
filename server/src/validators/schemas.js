@@ -153,6 +153,17 @@ export const orderStatusSchema = z.object({
   paymentStatus: z.enum(['pending', 'authorized', 'paid', 'failed', 'refunded']).optional()
 });
 
+export const stockUpdateSchema = z
+  .object({
+    stock: z.coerce.number().int().min(0).optional(),
+    delta: z.coerce.number().int().optional(),
+    lowStockThreshold: z.coerce.number().int().min(0).optional(),
+    trackQuantity: z.boolean().optional()
+  })
+  .refine((value) => value.stock !== undefined || value.delta !== undefined || value.lowStockThreshold !== undefined || value.trackQuantity !== undefined, {
+    message: 'Provide stock, delta, lowStockThreshold, or trackQuantity'
+  });
+
 export const roleUpdateSchema = z.object({
   role: z.enum(['customer', 'admin']),
   status: z.enum(['active', 'blocked']).optional()

@@ -33,8 +33,15 @@ const buildProductFilter = async (query, includeInactive = false) => {
   }
 
   if (query.search) {
-    const regex = new RegExp(escapeRegex(String(query.search)), 'i');
-    filter.$or = [{ name: regex }, { description: regex }, { brand: regex }, { tags: regex }];
+    const search = String(query.search).trim();
+    const regex = new RegExp(escapeRegex(search), 'i');
+    filter.$or = [
+      { name: regex },
+      { sku: regex },
+      { description: regex },
+      { brand: regex },
+      { tags: regex }
+    ];
   }
 
   if (query.category && query.category !== 'all') {
@@ -125,6 +132,30 @@ export const getProduct = asyncHandler(async (req, res) => {
   });
 });
 
+export const getSimilarProducts = asyncHandler(async (req, res) => {
+  const product = await Product.findOne({ _id: req.params.id, status: 'active' }).select('category tags brand');
+  if (!product) throw new ApiError(404, 'Product not found');
+
+  const limit = Math.min(Number(req.query.limit) || 4, 12);
+  const products = await Product.find({
+    _id: { $ne: product._id },
+    status: 'active',
+    $or: [
+      { category: product.category },
+      { brand: product.brand },
+      { tags: { $in: product.tags || [] } }
+    ]
+  })
+    .populate('category', 'name slug')
+    .sort('-ratingsAverage -salesCount -createdAt')
+    .limit(limit);
+
+  res.json({
+    status: 'success',
+    data: { products }
+  });
+});
+
 export const createProduct = asyncHandler(async (req, res) => {
   const categoryExists = await Category.exists({ _id: req.body.category });
   if (!categoryExists) throw new ApiError(404, 'Category not found');
@@ -155,10 +186,43 @@ export const updateProduct = asyncHandler(async (req, res) => {
   });
 });
 
+export const updateProductStock = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id);
+  if (!product) throw new ApiError(404, 'Product not found');
+
+  if (req.body.stock !== undefined) {
+    product.inventory.stock = req.body.stock;
+  }
+
+  if (req.body.delta !== undefined) {
+    product.inventory.stock = Math.max(0, product.inventory.stock + req.body.delta);
+  }
+
+  if (req.body.lowStockThreshold !== undefined) {
+    product.inventory.lowStockThreshold = req.body.lowStockThreshold;
+  }
+
+  if (req.body.trackQuantity !== undefined) {
+    product.inventory.trackQuantity = req.body.trackQuantity;
+  }
+
+  await product.save();
+
+  res.json({
+    status: 'success',
+    message: 'Inventory updated',
+    data: { product }
+  });
+});
+
 export const deleteProduct = asyncHandler(async (req, res) => {
   const product = await Product.findByIdAndUpdate(
     req.params.id,
-    { status: 'archived' },
+    {
+      status: 'archived',
+      archivedAt: new Date(),
+      archivedBy: req.user._id
+    },
     { new: true }
   );
 
@@ -166,6 +230,7 @@ export const deleteProduct = asyncHandler(async (req, res) => {
 
   res.json({
     status: 'success',
+    message: `${product.name} was archived and removed from the storefront`,
     data: { product }
   });
 });

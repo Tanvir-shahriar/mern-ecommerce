@@ -1,4 +1,4 @@
-import { Heart, Minus, Plus, ShoppingBag, Star } from 'lucide-react';
+import { Heart, Minus, Plus, ShoppingBag, Star, Zap } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { money } from '../utils/format.js';
+import { ProductCard } from '../components/ProductCard.jsx';
 
 export const ProductDetailPage = () => {
   const { slugOrId } = useParams();
@@ -27,11 +28,30 @@ export const ProductDetailPage = () => {
     }
   });
 
+  const { data: similarProducts = [] } = useQuery({
+    queryKey: ['similar-products', product?._id],
+    enabled: Boolean(product?._id),
+    queryFn: async () => {
+      const { data } = await api.get(`/products/${product._id}/similar`, { params: { limit: 4 } });
+      return data.data.products;
+    }
+  });
+
   const addToCart = async () => {
     if (!user) return navigate('/login');
     try {
       await addItem(product._id, quantity);
       setMessage('Added to cart');
+    } catch (error) {
+      setMessage(apiErrorMessage(error));
+    }
+  };
+
+  const purchaseNow = async () => {
+    if (!user) return navigate('/login');
+    try {
+      await addItem(product._id, quantity);
+      navigate('/checkout');
     } catch (error) {
       setMessage(apiErrorMessage(error));
     }
@@ -98,6 +118,10 @@ export const ProductDetailPage = () => {
             <ShoppingBag size={18} />
             Add to cart
           </button>
+          <button className="button dark" type="button" onClick={purchaseNow} disabled={!inStock}>
+            <Zap size={18} />
+            Purchase now
+          </button>
           <button className="icon-button" type="button" onClick={toggleWishlist} aria-label="Wishlist">
             <Heart size={19} />
           </button>
@@ -160,6 +184,22 @@ export const ProductDetailPage = () => {
           </form>
         </div>
       </section>
+
+      {similarProducts.length ? (
+        <section className="similar-section">
+          <div className="section-heading compact">
+            <div>
+              <p className="eyebrow">Recommended</p>
+              <h2>Similar products</h2>
+            </div>
+          </div>
+          <div className="product-grid">
+            {similarProducts.map((item) => (
+              <ProductCard product={item} key={item._id} />
+            ))}
+          </div>
+        </section>
+      ) : null}
     </section>
   );
 };

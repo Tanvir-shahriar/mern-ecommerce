@@ -1,4 +1,5 @@
 import { Product } from '../models/product.model.js';
+import { Order } from '../models/order.model.js';
 import { User } from '../models/user.model.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
@@ -43,13 +44,20 @@ export const toggleWishlist = asyncHandler(async (req, res) => {
 export const getUsers = asyncHandler(async (req, res) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(Number(req.query.limit) || 20, 1), 100);
+  const filter = {};
+
+  if (req.query.search) {
+    const search = String(req.query.search).trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regex = new RegExp(search, 'i');
+    filter.$or = [{ name: regex }, { email: regex }, { phone: regex }, { role: regex }, { status: regex }];
+  }
 
   const [users, total] = await Promise.all([
-    User.find()
+    User.find(filter)
       .sort('-createdAt')
       .skip((page - 1) * limit)
       .limit(limit),
-    User.countDocuments()
+    User.countDocuments(filter)
   ]);
 
   res.json({
@@ -61,6 +69,37 @@ export const getUsers = asyncHandler(async (req, res) => {
         limit,
         total,
         pages: Math.ceil(total / limit)
+      }
+    }
+  });
+});
+
+export const getUser = asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id).populate('wishlist', 'name slug price images');
+  if (!user) throw new ApiError(404, 'User not found');
+
+  const [orders, totals] = await Promise.all([
+    Order.find({ user: user._id }).sort('-createdAt').limit(8),
+    Order.aggregate([
+      { $match: { user: user._id } },
+      {
+        $group: {
+          _id: '$user',
+          ordersCount: { $sum: 1 },
+          totalSpent: { $sum: '$pricing.total' }
+        }
+      }
+    ])
+  ]);
+
+  res.json({
+    status: 'success',
+    data: {
+      user,
+      orders,
+      stats: {
+        ordersCount: totals[0]?.ordersCount || 0,
+        totalSpent: totals[0]?.totalSpent || 0
       }
     }
   });

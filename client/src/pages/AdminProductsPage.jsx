@@ -1,9 +1,10 @@
-import { ImagePlus, Plus, Save, Trash2, X } from 'lucide-react';
+import { Archive, ImagePlus, Minus, Plus, Save, Search, X } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { AdminNav } from '../components/AdminNav.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { money } from '../utils/format.js';
+import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
 
 const productInitial = {
   name: '',
@@ -25,13 +26,22 @@ export const AdminProductsPage = () => {
   const [categoryName, setCategoryName] = useState('');
   const [message, setMessage] = useState('');
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const debouncedSearch = useDebouncedValue(search);
   const queryClient = useQueryClient();
 
   const { data: productData } = useQuery({
-    queryKey: ['admin-products'],
+    queryKey: ['admin-products', debouncedSearch, statusFilter],
     queryFn: async () => {
       const { data } = await api.get('/products', {
-        params: { admin: true, limit: 50, sort: 'newest' }
+        params: {
+          admin: true,
+          limit: 50,
+          sort: 'newest',
+          search: debouncedSearch || undefined,
+          status: statusFilter
+        }
       });
       return data.data.products;
     }
@@ -148,8 +158,28 @@ export const AdminProductsPage = () => {
   };
 
   const archiveProduct = async (id) => {
-    await api.delete(`/products/${id}`);
-    queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+    const product = productData?.find((item) => item._id === id);
+    if (!window.confirm(`Archive ${product?.name || 'this product'}? It will be removed from the storefront.`)) return;
+
+    try {
+      const { data } = await api.delete(`/products/${id}`);
+      setMessage(data.message || 'Product archived');
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    } catch (error) {
+      setMessage(apiErrorMessage(error));
+    }
+  };
+
+  const updateStock = async (productId, payload) => {
+    try {
+      const { data } = await api.patch(`/products/${productId}/stock`, payload);
+      setMessage(`${data.data.product.name} stock updated to ${data.data.product.inventory.stock}`);
+      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+    } catch (error) {
+      setMessage(apiErrorMessage(error));
+    }
   };
 
   return (
@@ -164,7 +194,22 @@ export const AdminProductsPage = () => {
 
       <div className="admin-products-layout">
         <div className="panel">
-          <h2>Inventory</h2>
+          <div className="panel-heading">
+            <h2>Inventory</h2>
+            <span>{productData?.length || 0} items</span>
+          </div>
+          <div className="admin-toolbar">
+            <label className="search-field">
+              <Search size={16} />
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, SKU, brand" />
+            </label>
+            <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Product status">
+              <option value="all">All statuses</option>
+              <option value="active">Active</option>
+              <option value="draft">Draft</option>
+              <option value="archived">Archived</option>
+            </select>
+          </div>
           <div className="admin-product-list">
             {productData?.map((product) => (
               <article className="admin-product-row" key={product._id}>
@@ -172,11 +217,26 @@ export const AdminProductsPage = () => {
                 <div>
                   <strong>{product.name}</strong>
                   <span>{product.sku}</span>
+                  <span className={`inventory-status ${product.status}`}>{product.status}</span>
                 </div>
                 <span>{money(product.price)}</span>
-                <span>{product.inventory.stock} stock</span>
-                <button type="button" className="icon-button" onClick={() => archiveProduct(product._id)} aria-label="Archive product">
-                  <Trash2 size={16} />
+                <div className="stock-controls">
+                  <button type="button" onClick={() => updateStock(product._id, { delta: -1 })} aria-label="Decrease stock">
+                    <Minus size={14} />
+                  </button>
+                  <input
+                    type="number"
+                    min="0"
+                    value={product.inventory.stock}
+                    onChange={(event) => updateStock(product._id, { stock: Number(event.target.value) })}
+                    aria-label={`Stock for ${product.name}`}
+                  />
+                  <button type="button" onClick={() => updateStock(product._id, { delta: 1 })} aria-label="Increase stock">
+                    <Plus size={14} />
+                  </button>
+                </div>
+                <button type="button" className="icon-button" onClick={() => archiveProduct(product._id)} aria-label="Archive product" disabled={product.status === 'archived'}>
+                  <Archive size={16} />
                 </button>
               </article>
             ))}

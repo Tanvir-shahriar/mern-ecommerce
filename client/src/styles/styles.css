@@ -706,7 +706,8 @@ textarea:focus {
 }
 
 .detail-block,
-.reviews-section {
+.reviews-section,
+.similar-section {
   margin-top: 28px;
 }
 
@@ -796,6 +797,71 @@ textarea:focus {
 .panel h2,
 .auth-card h1 {
   margin: 0 0 8px;
+}
+
+.panel-heading,
+.toolbar-actions,
+.admin-toolbar,
+.search-field,
+.stock-controls,
+.user-row,
+.mini-product-list a {
+  display: flex;
+  align-items: center;
+}
+
+.panel-heading {
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.panel-heading span,
+.search-meta {
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.admin-toolbar {
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.admin-toolbar .search-field {
+  flex: 1;
+}
+
+.toolbar-actions {
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.search-field {
+  min-height: 42px;
+  gap: 8px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.search-field input {
+  min-height: 38px;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.search-field button {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
 }
 
 .summary-row {
@@ -1080,6 +1146,11 @@ textarea:focus {
   margin-bottom: 22px;
 }
 
+.metric-grid.compact {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 18px 0;
+}
+
 .metric-card {
   display: grid;
   gap: 8px;
@@ -1141,10 +1212,140 @@ textarea:focus {
 
 .admin-product-row {
   display: grid;
-  grid-template-columns: 62px minmax(160px, 1fr) 80px 90px 42px;
+  grid-template-columns: 62px minmax(160px, 1fr) 80px 150px 42px;
   gap: 12px;
   padding: 10px 0;
   border-bottom: 1px solid var(--line);
+}
+
+.inventory-status {
+  width: fit-content;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: var(--blue);
+  font-size: 0.74rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.inventory-status.archived {
+  background: #fff0ec;
+  color: var(--red);
+}
+
+.inventory-status.draft {
+  background: #fff7e6;
+  color: var(--amber);
+}
+
+.stock-controls {
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.stock-controls button {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.stock-controls input {
+  width: 58px;
+  min-height: 32px;
+  padding: 5px;
+  text-align: center;
+}
+
+.admin-users-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 420px;
+  gap: 22px;
+  align-items: start;
+}
+
+.user-list {
+  display: grid;
+  gap: 10px;
+}
+
+.user-row {
+  width: 100%;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  text-align: left;
+}
+
+.user-row.active,
+.user-row:hover {
+  border-color: var(--blue);
+  background: #f3f7ff;
+}
+
+.user-row > span:nth-child(2) {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.user-row small {
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: #eef4ff;
+  color: var(--blue);
+}
+
+.user-avatar.large {
+  width: 52px;
+  height: 52px;
+}
+
+.user-detail-panel h3 {
+  margin: 18px 0 8px;
+}
+
+.info-list span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mini-product-list {
+  display: grid;
+  gap: 10px;
+}
+
+.mini-product-list a {
+  gap: 10px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.mini-product-list img {
+  width: 48px;
+  height: 44px;
+  border-radius: var(--radius);
+  object-fit: cover;
 }
 
 .admin-order-table {
@@ -1406,6 +1607,7 @@ textarea:focus {
   .account-grid,
   .admin-grid,
   .admin-products-layout,
+  .admin-users-layout,
   .order-detail-layout,
   .reviews-layout {
     grid-template-columns: 1fr;
@@ -1660,6 +1862,32 @@ textarea:focus {
     grid-column: 2;
   }
 
+  .stock-controls {
+    grid-column: 2;
+  }
+
+  .admin-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .toolbar-actions {
+    width: 100%;
+  }
+
+  .toolbar-actions .button {
+    flex: 1;
+  }
+
+  .user-row {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .user-row .status-pill {
+    grid-column: 2;
+    width: fit-content;
+  }
+
   .admin-tabs {
     padding-bottom: 4px;
   }
@@ -1755,6 +1983,14 @@ textarea:focus {
 
   .admin-product-row {
     grid-template-columns: 50px 1fr 36px;
+  }
+
+  .stock-controls {
+    flex-wrap: wrap;
+  }
+
+  .metric-grid.compact {
+    grid-template-columns: 1fr;
   }
 
   .low-stock-row {

@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+  getUser,
   getUsers,
   getWishlist,
   toggleWishlist,
@@ -17,6 +18,7 @@ router.post('/wishlist/:id', validate({ params: idParamSchema }), toggleWishlist
 
 router.use(restrictTo('admin'));
 router.get('/', getUsers);
+router.get('/:id', validate({ params: idParamSchema }), getUser);
 router.patch('/:id/role', validate({ params: idParamSchema, body: roleUpdateSchema }), updateUserRole);
 
 export default router;
