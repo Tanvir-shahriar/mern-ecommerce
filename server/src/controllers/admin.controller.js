@@ -24,8 +24,9 @@ export const getDashboard = asyncHandler(async (_req, res) => {
         $expr: { $lte: ['$inventory.stock', '$inventory.lowStockThreshold'] }
       })
         .select('name slug sku inventory images')
-        .limit(8),
-      Order.find().populate('user', 'name email').sort('-createdAt').limit(8)
+        .limit(8)
+        .lean(),
+      Order.find().populate('user', 'name email').sort('-createdAt').limit(8).lean()
     ]);
 
   res.json({

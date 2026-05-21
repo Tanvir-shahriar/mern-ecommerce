@@ -6,12 +6,13 @@ import {
   updateCategory
 } from '../controllers/category.controller.js';
 import { protect, restrictTo } from '../middleware/auth.middleware.js';
+import { cachePublic } from '../middleware/security.middleware.js';
 import { validate } from '../middleware/validate.middleware.js';
 import { categorySchema, idParamSchema } from '../validators/schemas.js';
 
 const router = express.Router();
 
-router.get('/', getCategories);
+router.get('/', cachePublic(300), getCategories);
 
 router.use(protect, restrictTo('admin'));
 router.post('/', validate({ body: categorySchema }), createCategory);

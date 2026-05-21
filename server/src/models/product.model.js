@@ -208,6 +208,10 @@ const productSchema = new mongoose.Schema(
 );
 
 productSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text' });
+productSchema.index({ status: 1, category: 1, createdAt: -1 });
+productSchema.index({ status: 1, brand: 1, createdAt: -1 });
+productSchema.index({ status: 1, isFeatured: 1, ratingsAverage: -1, salesCount: -1 });
+productSchema.index({ status: 1, 'inventory.stock': 1 });
 
 productSchema.virtual('isInStock').get(function inStock() {
   return !this.inventory?.trackQuantity || this.inventory.stock > 0;

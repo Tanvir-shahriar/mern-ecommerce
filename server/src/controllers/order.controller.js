@@ -29,7 +29,8 @@ const buildOrderFilter = async (query) => {
     const regex = new RegExp(escapeRegex(search), 'i');
     const matchedUsers = await User.find({ $or: [{ name: regex }, { email: regex }, { phone: regex }] })
       .select('_id')
-      .limit(50);
+      .limit(50)
+      .lean();
     filter.$or = [
       { orderNumber: regex },
       { user: { $in: matchedUsers.map((user) => user._id) } },
@@ -138,7 +139,7 @@ export const createOrder = asyncHandler(async (req, res) => {
 });
 
 export const getMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user._id }).sort('-createdAt');
+  const orders = await Order.find({ user: req.user._id }).sort('-createdAt').lean();
 
   res.json({
     status: 'success',
@@ -150,7 +151,7 @@ export const getOrder = asyncHandler(async (req, res) => {
   const filter = { _id: req.params.id };
   if (req.user.role !== 'admin') filter.user = req.user._id;
 
-  const order = await Order.findOne(filter).populate('user', 'name email');
+  const order = await Order.findOne(filter).populate('user', 'name email').lean();
   if (!order) throw new ApiError(404, 'Order not found');
 
   res.json({
@@ -169,7 +170,8 @@ export const getOrders = asyncHandler(async (req, res) => {
       .populate('user', 'name email phone role status')
       .sort('-createdAt')
       .skip((page - 1) * limit)
-      .limit(limit),
+      .limit(limit)
+      .lean(),
     Order.countDocuments(filter)
   ]);
 
@@ -192,7 +194,8 @@ export const exportOrdersCsv = asyncHandler(async (req, res) => {
   const orders = await Order.find(filter)
     .populate('user', 'name email phone')
     .sort('-createdAt')
-    .limit(1000);
+    .limit(1000)
+    .lean();
 
   const headers = [
     'Order Number',

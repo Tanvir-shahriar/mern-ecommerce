@@ -28,8 +28,23 @@ export const protect = asyncHandler(async (req, _res, next) => {
   next();
 });
 
+export const optionalProtect = asyncHandler(async (req, _res, next) => {
+  const token = getToken(req);
+  if (!token) return next();
+
+  try {
+    const decoded = jwt.verify(token, env.jwtSecret);
+    const user = await User.findById(decoded.id);
+    if (user?.status === 'active') req.user = user;
+  } catch {
+    req.user = undefined;
+  }
+
+  return next();
+});
+
 export const restrictTo = (...roles) => (req, _res, next) => {
-  if (!roles.includes(req.user.role)) {
+  if (!req.user || req.user.status !== 'active' || !roles.includes(req.user.role)) {
     return next(new ApiError(403, 'You do not have permission to perform this action'));
   }
 

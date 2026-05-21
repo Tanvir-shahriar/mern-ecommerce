@@ -9,7 +9,7 @@ export const getWishlist = asyncHandler(async (req, res) => {
     path: 'wishlist',
     match: { status: 'active' },
     populate: { path: 'category', select: 'name slug' }
-  });
+  }).lean();
 
   res.json({
     status: 'success',
@@ -56,7 +56,8 @@ export const getUsers = asyncHandler(async (req, res) => {
     User.find(filter)
       .sort('-createdAt')
       .skip((page - 1) * limit)
-      .limit(limit),
+      .limit(limit)
+      .lean(),
     User.countDocuments(filter)
   ]);
 
@@ -75,11 +76,13 @@ export const getUsers = asyncHandler(async (req, res) => {
 });
 
 export const getUser = asyncHandler(async (req, res) => {
-  const user = await User.findById(req.params.id).populate('wishlist', 'name slug price images');
+  const user = await User.findById(req.params.id)
+    .populate('wishlist', 'name slug price images')
+    .lean();
   if (!user) throw new ApiError(404, 'User not found');
 
   const [orders, totals] = await Promise.all([
-    Order.find({ user: user._id }).sort('-createdAt').limit(8),
+    Order.find({ user: user._id }).sort('-createdAt').limit(8).lean(),
     Order.aggregate([
       { $match: { user: user._id } },
       {

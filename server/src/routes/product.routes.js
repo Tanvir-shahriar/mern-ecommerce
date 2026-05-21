@@ -10,7 +10,8 @@ import {
   updateProductStock,
   updateProduct
 } from '../controllers/product.controller.js';
-import { protect, restrictTo } from '../middleware/auth.middleware.js';
+import { optionalProtect, protect, restrictTo } from '../middleware/auth.middleware.js';
+import { cachePublic } from '../middleware/security.middleware.js';
 import { validate } from '../middleware/validate.middleware.js';
 import {
   idParamSchema,
@@ -23,10 +24,10 @@ import {
 
 const router = express.Router();
 
-router.get('/', getProducts);
-router.get('/featured', getFeaturedProducts);
-router.get('/:id/similar', validate({ params: idParamSchema }), getSimilarProducts);
-router.get('/:slugOrId', validate({ params: slugOrIdParamSchema }), getProduct);
+router.get('/', optionalProtect, cachePublic(45), getProducts);
+router.get('/featured', cachePublic(90), getFeaturedProducts);
+router.get('/:id/similar', validate({ params: idParamSchema }), cachePublic(60), getSimilarProducts);
+router.get('/:slugOrId', validate({ params: slugOrIdParamSchema }), cachePublic(60), getProduct);
 router.post('/:id/reviews', protect, validate({ params: idParamSchema, body: reviewSchema }), addReview);
 
 router.use(protect, restrictTo('admin'));

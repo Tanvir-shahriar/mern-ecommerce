@@ -171,4 +171,10 @@ orderSchema.pre('validate', function assignOrderNumber() {
   }
 });
 
+orderSchema.index({ status: 1, createdAt: -1 });
+orderSchema.index({ user: 1, createdAt: -1 });
+orderSchema.index({ orderNumber: 1, createdAt: -1 });
+orderSchema.index({ 'items.sku': 1 });
+orderSchema.index({ 'shippingAddress.phone': 1 });
+
 export const Order = mongoose.model('Order', orderSchema);

@@ -6,7 +6,8 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 export const getCategories = asyncHandler(async (_req, res) => {
   const categories = await Category.find()
     .populate('parent', 'name slug')
-    .sort({ order: 1, name: 1 });
+    .sort({ order: 1, name: 1 })
+    .lean();
 
   res.json({
     status: 'success',

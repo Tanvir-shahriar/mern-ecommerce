@@ -79,7 +79,8 @@ export const getProducts = asyncHandler(async (req, res) => {
       .populate('category', 'name slug')
       .sort(sort)
       .skip(skip)
-      .limit(limit),
+      .limit(limit)
+      .lean(),
     Product.countDocuments(filter),
     Product.distinct('brand', { status: 'active', brand: { $ne: null } })
   ]);
@@ -107,7 +108,8 @@ export const getFeaturedProducts = asyncHandler(async (req, res) => {
   const products = await Product.find({ status: 'active', isFeatured: true })
     .populate('category', 'name slug')
     .sort('-ratingsAverage -salesCount')
-    .limit(limit);
+    .limit(limit)
+    .lean();
 
   res.json({
     status: 'success',
@@ -122,7 +124,8 @@ export const getProduct = asyncHandler(async (req, res) => {
 
   const product = await Product.findOne({ ...query, status: 'active' })
     .populate('category', 'name slug')
-    .populate('reviews.user', 'name avatar');
+    .populate('reviews.user', 'name avatar')
+    .lean();
 
   if (!product) throw new ApiError(404, 'Product not found');
 
@@ -133,7 +136,9 @@ export const getProduct = asyncHandler(async (req, res) => {
 });
 
 export const getSimilarProducts = asyncHandler(async (req, res) => {
-  const product = await Product.findOne({ _id: req.params.id, status: 'active' }).select('category tags brand');
+  const product = await Product.findOne({ _id: req.params.id, status: 'active' })
+    .select('category tags brand')
+    .lean();
   if (!product) throw new ApiError(404, 'Product not found');
 
   const limit = Math.min(Number(req.query.limit) || 4, 12);
@@ -148,7 +153,8 @@ export const getSimilarProducts = asyncHandler(async (req, res) => {
   })
     .populate('category', 'name slug')
     .sort('-ratingsAverage -salesCount -createdAt')
-    .limit(limit);
+    .limit(limit)
+    .lean();
 
   res.json({
     status: 'success',

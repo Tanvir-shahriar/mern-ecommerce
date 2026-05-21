@@ -130,4 +130,7 @@ userSchema.methods.comparePassword = function comparePassword(candidatePassword)
   return bcrypt.compare(candidatePassword, this.password);
 };
 
+userSchema.index({ role: 1, status: 1, createdAt: -1 });
+userSchema.index({ name: 'text', email: 'text', phone: 'text' });
+
 export const User = mongoose.model('User', userSchema);

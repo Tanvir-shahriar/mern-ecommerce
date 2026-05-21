@@ -12,7 +12,6 @@ export const sendAuthResponse = (res, user, statusCode = 200) => {
   res.cookie('token', token, cookieOptions());
   res.status(statusCode).json({
     status: 'success',
-    token,
     data: {
       user
     }

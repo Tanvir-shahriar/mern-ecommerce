@@ -37,6 +37,7 @@ export const env = {
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   cookieExpiresDays: Number(process.env.COOKIE_EXPIRES_DAYS || 7),
   uploadDir: process.env.UPLOAD_DIR || 'uploads',
+  cookieSameSite: process.env.COOKIE_SAME_SITE || 'lax',
   serverRoot,
   projectRoot,
   seedAdminEmail: process.env.SEED_ADMIN_EMAIL || 'admin@example.com',
@@ -46,6 +47,6 @@ export const env = {
 export const cookieOptions = () => ({
   httpOnly: true,
   secure: env.isProduction,
-  sameSite: env.isProduction ? 'none' : 'lax',
+  sameSite: env.cookieSameSite,
   expires: new Date(Date.now() + env.cookieExpiresDays * 24 * 60 * 60 * 1000)
 });
