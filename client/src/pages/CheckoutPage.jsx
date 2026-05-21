@@ -1,7 +1,8 @@
 import { CheckCircle2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { api, apiErrorMessage } from '../services/api.js';
 import { money } from '../utils/format.js';
@@ -14,10 +15,22 @@ const initialAddress = {
   city: '',
   state: '',
   postalCode: '',
-  country: 'United States'
+  country: 'Bangladesh'
 };
 
+const checkoutAddress = (savedAddress, user) => ({
+  fullName: savedAddress?.fullName || user?.name || '',
+  phone: savedAddress?.phone || user?.phone || '',
+  line1: savedAddress?.line1 || '',
+  line2: savedAddress?.line2 || '',
+  city: savedAddress?.city || '',
+  state: savedAddress?.state || '',
+  postalCode: savedAddress?.postalCode || '',
+  country: savedAddress?.country || 'Bangladesh'
+});
+
 export const CheckoutPage = () => {
+  const { user } = useAuth();
   const { cart, fetchCart } = useCart();
   const [address, setAddress] = useState(initialAddress);
   const [paymentMethod, setPaymentMethod] = useState('cash_on_delivery');
@@ -25,6 +38,17 @@ export const CheckoutPage = () => {
   const [order, setOrder] = useState(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState('');
+  const savedAddresses = user?.addresses || [];
+  const defaultAddress = useMemo(
+    () => savedAddresses.find((item) => item.isDefault) || savedAddresses[0],
+    [savedAddresses]
+  );
+
+  useEffect(() => {
+    setAddress(checkoutAddress(defaultAddress, user));
+    setSelectedAddressId(defaultAddress?._id || '');
+  }, [defaultAddress, user]);
 
   if (order) {
     return (
@@ -77,6 +101,26 @@ export const CheckoutPage = () => {
       </div>
       <div className="checkout-layout">
         <form className="form-panel" onSubmit={submit}>
+          {savedAddresses.length ? (
+            <div className="saved-address-picker">
+              <span>Saved delivery address</span>
+              <div>
+                {savedAddresses.map((item) => (
+                  <button
+                    type="button"
+                    className={item._id === selectedAddressId ? 'active' : ''}
+                    key={item._id || item.line1}
+                    onClick={() => {
+                      setSelectedAddressId(item._id || '');
+                      setAddress(checkoutAddress(item, user));
+                    }}
+                  >
+                    {item.label || item.city}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : null}
           <div className="form-grid">
             <label>
               Full name

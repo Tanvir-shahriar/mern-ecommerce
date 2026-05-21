@@ -224,7 +224,22 @@ const run = async () => {
       name: 'Demo Customer',
       email: 'customer@example.com',
       password: 'Customer123!',
-      role: 'customer'
+      role: 'customer',
+      phone: '+8801700000000',
+      addresses: [
+        {
+          label: 'Home',
+          fullName: 'Demo Customer',
+          phone: '+8801700000000',
+          line1: 'House 12, Road 4',
+          line2: 'Dhanmondi',
+          city: 'Dhaka',
+          state: 'Dhaka',
+          postalCode: '1209',
+          country: 'Bangladesh',
+          isDefault: true
+        }
+      ]
     }
   ]);
 

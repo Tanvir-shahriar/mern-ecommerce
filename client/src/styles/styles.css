@@ -1116,6 +1116,103 @@ textarea:focus {
   grid-column: 1 / -1;
 }
 
+.profile-snapshot,
+.address-summary {
+  display: grid;
+  gap: 4px;
+}
+
+.profile-snapshot {
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.profile-snapshot span,
+.address-summary span {
+  color: var(--muted);
+}
+
+.address-manager {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.address-form,
+.address-list {
+  display: grid;
+  gap: 14px;
+}
+
+.address-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.address-card-heading,
+.address-card-heading > div,
+.address-actions,
+.saved-address-picker,
+.saved-address-picker > div {
+  display: flex;
+  align-items: center;
+}
+
+.address-card-heading {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.address-card-heading > div {
+  gap: 8px;
+}
+
+.address-actions,
+.saved-address-picker > div {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.address-actions button,
+.saved-address-picker button {
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 800;
+}
+
+.saved-address-picker {
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--wash);
+}
+
+.saved-address-picker > span {
+  color: var(--muted);
+  font-weight: 900;
+}
+
+.saved-address-picker button.active {
+  border-color: var(--blue);
+  background: #eef4ff;
+  color: var(--blue);
+}
+
 .wishlist-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -1174,6 +1271,9 @@ textarea:focus {
 }
 
 .status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 5px 9px;
   border-radius: 999px;
   background: #eef4ff;
@@ -1729,6 +1829,7 @@ textarea:focus {
   .admin-products-layout,
   .admin-users-layout,
   .order-detail-layout,
+  .address-manager,
   .reviews-layout {
     grid-template-columns: 1fr;
   }
@@ -1801,6 +1902,7 @@ textarea:focus {
   .hero-specs,
   .perks-bar,
   .section-heading,
+  .saved-address-picker,
   .site-footer {
     align-items: stretch;
     flex-direction: column;

@@ -45,7 +45,7 @@ const addressSchema = new mongoose.Schema(
     country: {
       type: String,
       trim: true,
-      default: 'United States'
+      default: 'Bangladesh'
     },
     isDefault: {
       type: Boolean,

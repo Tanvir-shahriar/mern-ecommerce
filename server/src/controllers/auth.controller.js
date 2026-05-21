@@ -3,6 +3,16 @@ import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { clearAuthCookie, sendAuthResponse } from '../utils/tokens.js';
 
+const normalizeAddresses = (addresses = []) => {
+  const defaultIndex = addresses.findIndex((address) => address.isDefault);
+
+  return addresses.map((address, index) => ({
+    ...address,
+    country: address.country || 'Bangladesh',
+    isDefault: defaultIndex === -1 ? index === 0 : index === defaultIndex
+  }));
+};
+
 export const register = asyncHandler(async (req, res) => {
   const existingUser = await User.exists({ email: req.body.email });
   if (existingUser) throw new ApiError(409, 'Email is already registered');
@@ -47,7 +57,9 @@ export const updateProfile = asyncHandler(async (req, res) => {
   const allowedFields = ['name', 'phone', 'addresses'];
 
   allowedFields.forEach((field) => {
-    if (req.body[field] !== undefined) req.user[field] = req.body[field];
+    if (req.body[field] !== undefined) {
+      req.user[field] = field === 'addresses' ? normalizeAddresses(req.body[field]) : req.body[field];
+    }
   });
 
   await req.user.save();

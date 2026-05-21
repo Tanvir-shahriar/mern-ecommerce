@@ -63,7 +63,7 @@ export const Layout = () => {
             </Link>
           ) : null}
           {user ? (
-            <Link className="icon-button" to="/account" aria-label="Account">
+            <Link className="icon-button" to="/account" aria-label="Profile">
               <User size={19} />
             </Link>
           ) : (
