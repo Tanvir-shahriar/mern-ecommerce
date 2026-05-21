@@ -1,7 +1,9 @@
 export const money = (value = 0) =>
-  new Intl.NumberFormat('en-US', {
+  new Intl.NumberFormat('en-BD', {
     style: 'currency',
-    currency: 'USD'
+    currency: 'BDT',
+    currencyDisplay: 'narrowSymbol',
+    maximumFractionDigits: 0
   }).format(value);
 
 export const dateShort = (value) =>

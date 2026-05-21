@@ -8,8 +8,8 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { emitOrderEvent } from '../sockets/socket.js';
 
 const TAX_RATE = 0.08;
-const FREE_SHIPPING_THRESHOLD = 100;
-const STANDARD_SHIPPING = 8.99;
+const FREE_SHIPPING_THRESHOLD = 10000;
+const STANDARD_SHIPPING = 120;
 
 const money = (value) => Math.round(value * 100) / 100;
 
