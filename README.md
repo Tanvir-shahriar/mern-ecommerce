@@ -1,6 +1,6 @@
-# Northstar Commerce
+# Lahventure
 
-A full MERN stack e-commerce application with a MongoDB-backed API, responsive React storefront, account area, cart, checkout, orders, wishlist, reviews, coupon support, inventory management, and admin dashboards.
+A full MERN stack watch and smartwatch e-commerce application with a MongoDB-backed API, responsive React storefront, account area, cart, checkout, orders, wishlist, reviews, coupon support, inventory management, and admin dashboards.
 
 ## Stack
 

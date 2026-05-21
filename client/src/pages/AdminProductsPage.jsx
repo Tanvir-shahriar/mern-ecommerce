@@ -1,6 +1,7 @@
 import { Archive, ImagePlus, Minus, Plus, Save, Search, X } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { money } from '../utils/format.js';
@@ -31,7 +32,7 @@ export const AdminProductsPage = () => {
   const debouncedSearch = useDebouncedValue(search);
   const queryClient = useQueryClient();
 
-  const { data: productData } = useQuery({
+  const { data: productData, isLoading: productsLoading, isFetching: productsFetching } = useQuery({
     queryKey: ['admin-products', debouncedSearch, statusFilter],
     queryFn: async () => {
       const { data } = await api.get('/products', {
@@ -196,12 +197,12 @@ export const AdminProductsPage = () => {
         <div className="panel">
           <div className="panel-heading">
             <h2>Inventory</h2>
-            <span>{productData?.length || 0} items</span>
+            <span>{productsFetching ? <span className="admin-fetching"><span className="spinner tiny" /> Syncing</span> : `${productData?.length || 0} items`}</span>
           </div>
           <div className="admin-toolbar">
             <label className="search-field">
               <Search size={16} />
-              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, SKU, brand" />
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search watch, SKU, brand" />
             </label>
             <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Product status">
               <option value="all">All statuses</option>
@@ -210,37 +211,41 @@ export const AdminProductsPage = () => {
               <option value="archived">Archived</option>
             </select>
           </div>
-          <div className="admin-product-list">
-            {productData?.map((product) => (
-              <article className="admin-product-row" key={product._id}>
-                <img src={mediaUrl(product.images?.[0]?.url)} alt={product.name} />
-                <div>
-                  <strong>{product.name}</strong>
-                  <span>{product.sku}</span>
-                  <span className={`inventory-status ${product.status}`}>{product.status}</span>
-                </div>
-                <span>{money(product.price)}</span>
-                <div className="stock-controls">
-                  <button type="button" onClick={() => updateStock(product._id, { delta: -1 })} aria-label="Decrease stock">
-                    <Minus size={14} />
+          {productsLoading ? (
+            <AdminLoadingState label="Loading inventory" />
+          ) : (
+            <div className="admin-product-list">
+              {productData?.map((product) => (
+                <article className="admin-product-row" key={product._id}>
+                  <img src={mediaUrl(product.images?.[0]?.url)} alt={product.name} />
+                  <div>
+                    <strong>{product.name}</strong>
+                    <span>{product.sku}</span>
+                    <span className={`inventory-status ${product.status}`}>{product.status}</span>
+                  </div>
+                  <span>{money(product.price)}</span>
+                  <div className="stock-controls">
+                    <button type="button" onClick={() => updateStock(product._id, { delta: -1 })} aria-label="Decrease stock">
+                      <Minus size={14} />
+                    </button>
+                    <input
+                      type="number"
+                      min="0"
+                      value={product.inventory.stock}
+                      onChange={(event) => updateStock(product._id, { stock: Number(event.target.value) })}
+                      aria-label={`Stock for ${product.name}`}
+                    />
+                    <button type="button" onClick={() => updateStock(product._id, { delta: 1 })} aria-label="Increase stock">
+                      <Plus size={14} />
+                    </button>
+                  </div>
+                  <button type="button" className="icon-button" onClick={() => archiveProduct(product._id)} aria-label="Archive product" disabled={product.status === 'archived'}>
+                    <Archive size={16} />
                   </button>
-                  <input
-                    type="number"
-                    min="0"
-                    value={product.inventory.stock}
-                    onChange={(event) => updateStock(product._id, { stock: Number(event.target.value) })}
-                    aria-label={`Stock for ${product.name}`}
-                  />
-                  <button type="button" onClick={() => updateStock(product._id, { delta: 1 })} aria-label="Increase stock">
-                    <Plus size={14} />
-                  </button>
-                </div>
-                <button type="button" className="icon-button" onClick={() => archiveProduct(product._id)} aria-label="Archive product" disabled={product.status === 'archived'}>
-                  <Archive size={16} />
-                </button>
-              </article>
-            ))}
-          </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="stack">

@@ -63,7 +63,7 @@ export const ProductsPage = () => {
           Search
           <div className="search-field">
             <Search size={16} />
-            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search by name, SKU, brand" />
+            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search watches, SKU, brand" />
             {search ? (
               <button type="button" onClick={() => setSearch('')} aria-label="Clear search">
                 <X size={15} />
@@ -106,7 +106,7 @@ export const ProductsPage = () => {
         <div className="section-heading compact">
           <div>
             <p className="eyebrow">Catalog</p>
-            <h1>Shop products</h1>
+            <h1>Shop watches</h1>
             {params.search ? <span className="search-meta">{data?.pagination?.total || 0} result(s) for "{params.search}"</span> : null}
           </div>
           <select value={searchParams.get('sort') || 'newest'} onChange={(event) => updateFilter('sort', event.target.value)} aria-label="Sort products">

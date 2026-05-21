@@ -2,6 +2,7 @@ import { Mail, Search, Shield, UserRound } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
 import { api, mediaUrl } from '../services/api.js';
@@ -12,7 +13,7 @@ export const AdminUsersPage = () => {
   const [selectedUserId, setSelectedUserId] = useState('');
   const debouncedSearch = useDebouncedValue(search);
 
-  const { data } = useQuery({
+  const { data, isLoading: usersLoading, isFetching: usersFetching } = useQuery({
     queryKey: ['admin-users', debouncedSearch],
     queryFn: async () => {
       const { data } = await api.get('/users', {
@@ -28,7 +29,7 @@ export const AdminUsersPage = () => {
   const users = data?.users || [];
   const selectedId = selectedUserId || users[0]?._id;
 
-  const { data: selectedUserData } = useQuery({
+  const { data: selectedUserData, isLoading: detailLoading, isFetching: detailFetching } = useQuery({
     queryKey: ['admin-user', selectedId],
     enabled: Boolean(selectedId),
     queryFn: async () => {
@@ -56,32 +57,40 @@ export const AdminUsersPage = () => {
               <Search size={16} />
               <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search name, email, phone" />
             </label>
-            <span className="search-meta">{data?.pagination?.total || 0} user(s)</span>
+            <span className="search-meta">
+              {usersFetching ? <span className="admin-fetching"><span className="spinner tiny" /> Syncing</span> : `${data?.pagination?.total || 0} user(s)`}
+            </span>
           </div>
 
-          <div className="user-list">
-            {users.map((user) => (
-              <button
-                type="button"
-                className={selectedId === user._id ? 'user-row active' : 'user-row'}
-                key={user._id}
-                onClick={() => setSelectedUserId(user._id)}
-              >
-                <span className="user-avatar">
-                  <UserRound size={18} />
-                </span>
-                <span>
-                  <strong>{user.name}</strong>
-                  <small>{user.email}</small>
-                </span>
-                <span className={`status-pill ${user.status}`}>{statusLabel(user.status)}</span>
-              </button>
-            ))}
-          </div>
+          {usersLoading ? (
+            <AdminLoadingState label="Loading users" />
+          ) : (
+            <div className="user-list">
+              {users.map((user) => (
+                <button
+                  type="button"
+                  className={selectedId === user._id ? 'user-row active' : 'user-row'}
+                  key={user._id}
+                  onClick={() => setSelectedUserId(user._id)}
+                >
+                  <span className="user-avatar">
+                    <UserRound size={18} />
+                  </span>
+                  <span>
+                    <strong>{user.name}</strong>
+                    <small>{user.email}</small>
+                  </span>
+                  <span className={`status-pill ${user.status}`}>{statusLabel(user.status)}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <aside className="panel user-detail-panel">
-          {detail ? (
+          {detailLoading || detailFetching ? (
+            <AdminLoadingState label="Loading user details" />
+          ) : detail ? (
             <>
               <div className="detail-card-heading">
                 <div>

@@ -40,7 +40,7 @@ export const CheckoutPage = () => {
   }
 
   if (!cart?.items?.length) {
-    return <EmptyState title="Your cart is empty" actionLabel="Shop products" actionTo="/products" />;
+    return <EmptyState title="Your cart is empty" actionLabel="Shop watches" actionTo="/products" />;
   }
 
   const updateAddress = (key, value) => {

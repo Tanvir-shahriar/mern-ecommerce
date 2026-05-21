@@ -28,8 +28,8 @@ export const Layout = () => {
   return (
     <div className="site-shell">
       <header className="site-header">
-        <Link to="/" className="brand" aria-label="Northstar Commerce">
-          <span>Northstar</span>
+        <Link to="/" className="brand" aria-label="Lahventure">
+          <span>Lahventure</span>
         </Link>
 
         <nav className={open ? 'primary-nav open' : 'primary-nav'}>
@@ -51,8 +51,8 @@ export const Layout = () => {
           <input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search products"
-            aria-label="Search products"
+            placeholder="Search watches"
+            aria-label="Search watches and smartwatches"
           />
         </form>
 
@@ -94,9 +94,9 @@ export const Layout = () => {
       <footer className="site-footer">
         <div>
           <Link to="/" className="brand small">
-            Northstar
+            Lahventure
           </Link>
-          <p>Curated commerce powered by MongoDB, Express, React, and Node.</p>
+          <p>Watches, smartwatches, straps, and accessories with live order tracking.</p>
         </div>
         <div className="footer-links">
           <Link to="/products">Catalog</Link>

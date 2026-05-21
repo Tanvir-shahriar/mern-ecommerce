@@ -18,7 +18,7 @@ export const CartPage = () => {
   }
 
   if (!cart?.items?.length) {
-    return <EmptyState title="Your cart is empty" message="Add a few products before checkout." actionLabel="Shop products" actionTo="/products" />;
+    return <EmptyState title="Your cart is empty" message="Add a watch before checkout." actionLabel="Shop watches" actionTo="/products" />;
   }
 
   const submitCoupon = async (event) => {

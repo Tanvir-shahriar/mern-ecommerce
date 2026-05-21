@@ -2,6 +2,7 @@ import { Download, Eye, RefreshCw, Search } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
 import { api, apiErrorMessage } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
@@ -15,7 +16,7 @@ export const AdminOrdersPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const debouncedSearch = useDebouncedValue(search);
   const queryClient = useQueryClient();
-  const { data } = useQuery({
+  const { data, isLoading, isFetching } = useQuery({
     queryKey: ['admin-orders', debouncedSearch, statusFilter],
     queryFn: async () => {
       const { data } = await api.get('/orders', {
@@ -71,6 +72,7 @@ export const AdminOrdersPage = () => {
           <h1>Orders</h1>
         </div>
         <div className="toolbar-actions">
+          {isFetching ? <span className="admin-fetching"><span className="spinner tiny" /> Syncing</span> : null}
           <button className="button dark" type="button" onClick={() => queryClient.invalidateQueries({ queryKey: ['admin-orders'] })}>
             <RefreshCw size={17} />
             Refresh
@@ -98,35 +100,39 @@ export const AdminOrdersPage = () => {
           </select>
           {pagination ? <span className="search-meta">{pagination.total} order(s)</span> : null}
         </div>
-        <div className="admin-order-table">
-          <div className="table-head">
-            <span>Order</span>
-            <span>Customer</span>
-            <span>Date</span>
-            <span>Total</span>
-            <span>Status</span>
-            <span>Details</span>
+        {isLoading ? (
+          <AdminLoadingState label="Loading orders" />
+        ) : (
+          <div className="admin-order-table">
+            <div className="table-head">
+              <span>Order</span>
+              <span>Customer</span>
+              <span>Date</span>
+              <span>Total</span>
+              <span>Status</span>
+              <span>Details</span>
+            </div>
+            {orders.map((order) => (
+              <article className="table-row" key={order._id}>
+                <strong>{order.orderNumber}</strong>
+                <span>{order.user?.email || 'Guest'}</span>
+                <span>{dateShort(order.createdAt)}</span>
+                <strong>{money(order.pricing.total)}</strong>
+                <select value={order.status} onChange={(event) => updateStatus(order._id, event.target.value)} aria-label={`Status for ${order.orderNumber}`}>
+                  {statuses.map((status) => (
+                    <option value={status} key={status}>
+                      {statusLabel(status)}
+                    </option>
+                  ))}
+                </select>
+                <Link className="button compact" to={`/orders/${order._id}`}>
+                  <Eye size={16} />
+                  View
+                </Link>
+              </article>
+            ))}
           </div>
-          {orders.map((order) => (
-            <article className="table-row" key={order._id}>
-              <strong>{order.orderNumber}</strong>
-              <span>{order.user?.email || 'Guest'}</span>
-              <span>{dateShort(order.createdAt)}</span>
-              <strong>{money(order.pricing.total)}</strong>
-              <select value={order.status} onChange={(event) => updateStatus(order._id, event.target.value)} aria-label={`Status for ${order.orderNumber}`}>
-                {statuses.map((status) => (
-                  <option value={status} key={status}>
-                    {statusLabel(status)}
-                  </option>
-                ))}
-              </select>
-              <Link className="button compact" to={`/orders/${order._id}`}>
-                <Eye size={16} />
-                View
-              </Link>
-            </article>
-          ))}
-        </div>
+        )}
       </div>
     </section>
   );

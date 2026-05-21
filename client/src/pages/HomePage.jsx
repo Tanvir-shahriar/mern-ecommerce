@@ -1,12 +1,13 @@
-import { ArrowRight, ShieldCheck, Truck, WalletCards } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Timer, Truck, WalletCards } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard.jsx';
 import { api } from '../services/api.js';
 
 const perks = [
-  { icon: Truck, label: 'Fast shipping' },
+  { icon: Timer, label: 'Watch-first catalog' },
   { icon: ShieldCheck, label: 'Secure checkout' },
+  { icon: Truck, label: 'Tracked delivery' },
   { icon: WalletCards, label: 'Flexible payment' }
 ];
 
@@ -31,20 +32,31 @@ export const HomePage = () => {
     <>
       <section className="hero-section">
         <div className="hero-content">
-          <p className="eyebrow light">New season edit</p>
-          <h1>Northstar Commerce</h1>
+          <p className="eyebrow light">Lahventure watches</p>
+          <h1>Timepieces for work, sport, and every journey.</h1>
           <p>
-            Shop durable tech, home goods, apparel, and wellness essentials with a clean checkout
-            and live order tracking.
+            Discover classic watches, smartwatches, straps, and wearable accessories with secure
+            checkout, live order tracking, and inventory managed from one admin system.
           </p>
           <div className="hero-actions">
             <Link className="button primary" to="/products">
-              Shop catalog
+              Shop watches
               <ArrowRight size={18} />
             </Link>
             <Link className="button glass" to="/account">
               My orders
             </Link>
+          </div>
+        </div>
+        <div className="hero-media" aria-hidden="true">
+          <img
+            src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1100&q=85"
+            alt=""
+          />
+          <div className="hero-specs">
+            <span>Smart health tracking</span>
+            <span>Classic automatic styles</span>
+            <span>Premium straps</span>
           </div>
         </div>
       </section>
@@ -62,7 +74,7 @@ export const HomePage = () => {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Categories</p>
-            <h2>Shop by department</h2>
+            <h2>Shop by collection</h2>
           </div>
           <Link to="/products" className="text-link">
             View all
@@ -82,7 +94,7 @@ export const HomePage = () => {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Featured</p>
-            <h2>Popular picks</h2>
+            <h2>Lahventure picks</h2>
           </div>
           <Link to="/products?featured=true" className="text-link">
             More picks
