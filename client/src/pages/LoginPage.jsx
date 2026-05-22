@@ -15,7 +15,11 @@ export const LoginPage = () => {
     setError('');
     try {
       const user = await login(form);
-      navigate(location.state?.from?.pathname || (['admin', 'super_admin'].includes(user.role) ? '/admin' : '/account'), { replace: true });
+      const from = location.state?.from;
+      const redirectTo = from
+        ? `${from.pathname || ''}${from.search || ''}` || '/'
+        : (['admin', 'super_admin'].includes(user.role) ? '/admin' : '/account');
+      navigate(redirectTo, { replace: true });
     } catch (requestError) {
       setError(apiErrorMessage(requestError));
     }

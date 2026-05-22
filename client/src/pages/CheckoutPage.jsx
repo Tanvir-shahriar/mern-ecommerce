@@ -1,11 +1,18 @@
 import { CheckCircle2 } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
+import { LoadingScreen } from '../components/LoadingScreen.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
-import { api, apiErrorMessage } from '../services/api.js';
+import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
+import { clearDirectCheckout, readDirectCheckout } from '../utils/directCheckout.js';
 import { money } from '../utils/format.js';
+
+const TAX_RATE = 0.08;
+const FREE_SHIPPING_THRESHOLD = 10000;
+const STANDARD_SHIPPING = 120;
 
 const initialAddress = {
   fullName: '',
@@ -29,9 +36,26 @@ const checkoutAddress = (savedAddress, user) => ({
   country: savedAddress?.country || 'Bangladesh'
 });
 
+const roundedMoney = (value) => Math.round(value * 100) / 100;
+
+const directPurchaseTotals = (product, quantity) => {
+  const subtotal = roundedMoney((product?.price || 0) * quantity);
+  const tax = roundedMoney(subtotal * TAX_RATE);
+  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING;
+  return {
+    subtotal,
+    tax,
+    shipping,
+    total: roundedMoney(subtotal + tax + shipping)
+  };
+};
+
 export const CheckoutPage = () => {
+  const location = useLocation();
   const { user } = useAuth();
   const { cart, fetchCart } = useCart();
+  const isDirectCheckout = new URLSearchParams(location.search).get('mode') === 'buy-now';
+  const [directItem] = useState(() => (isDirectCheckout ? readDirectCheckout() : null));
   const [address, setAddress] = useState(initialAddress);
   const [paymentMethod, setPaymentMethod] = useState('cash_on_delivery');
   const [customerNote, setCustomerNote] = useState('');
@@ -44,6 +68,22 @@ export const CheckoutPage = () => {
     () => savedAddresses.find((item) => item.isDefault) || savedAddresses[0],
     [savedAddresses]
   );
+  const { data: directProduct, isLoading: directLoading, isError: directError } = useQuery({
+    queryKey: ['direct-checkout-product', directItem?.productId],
+    enabled: Boolean(isDirectCheckout && directItem?.productId),
+    queryFn: async () => {
+      const { data } = await api.get(`/products/${directItem.productId}`);
+      return data.data.product;
+    }
+  });
+  const directQuantity = directItem?.quantity || 1;
+  const directTotals = useMemo(
+    () => (directProduct ? directPurchaseTotals(directProduct, directQuantity) : null),
+    [directProduct, directQuantity]
+  );
+  const directHasStock = directProduct
+    ? !directProduct.inventory?.trackQuantity || directQuantity <= directProduct.inventory.stock
+    : true;
 
   useEffect(() => {
     setAddress(checkoutAddress(defaultAddress, user));
@@ -63,7 +103,21 @@ export const CheckoutPage = () => {
     );
   }
 
-  if (!cart?.items?.length) {
+  if (isDirectCheckout && !directItem?.productId) {
+    return <EmptyState title="Direct checkout expired" message="Choose Purchase now again to start a single-product checkout." actionLabel="Shop watches" actionTo="/products" />;
+  }
+
+  if (isDirectCheckout && directLoading) return <LoadingScreen />;
+
+  if (isDirectCheckout && (directError || !directProduct)) {
+    return <EmptyState title="Product unavailable" actionLabel="Back to catalog" actionTo="/products" />;
+  }
+
+  if (isDirectCheckout && !directHasStock) {
+    return <EmptyState title="Not enough stock" message="This product no longer has enough stock for direct checkout." actionLabel="Back to product" actionTo={`/products/${directProduct.slug || directProduct._id}`} />;
+  }
+
+  if (!isDirectCheckout && !cart?.items?.length) {
     return <EmptyState title="Your cart is empty" actionLabel="Shop watches" actionTo="/products" />;
   }
 
@@ -80,10 +134,21 @@ export const CheckoutPage = () => {
       const { data } = await api.post('/orders', {
         shippingAddress: address,
         paymentMethod,
-        customerNote
+        customerNote,
+        directItem: isDirectCheckout
+          ? {
+              productId: directItem.productId,
+              quantity: directQuantity,
+              variant: directItem.variant
+            }
+          : undefined
       });
       setOrder(data.data.order);
-      await fetchCart();
+      if (isDirectCheckout) {
+        clearDirectCheckout();
+      } else {
+        await fetchCart();
+      }
     } catch (requestError) {
       setError(apiErrorMessage(requestError));
     } finally {
@@ -184,16 +249,47 @@ export const CheckoutPage = () => {
         </form>
 
         <aside className="summary-panel">
-          <h2>Totals</h2>
-          <div className="summary-row">
-            <span>Items</span>
-            <strong>{cart.items.length}</strong>
-          </div>
-          <div className="summary-row">
-            <span>Cart total</span>
-            <strong>{money(cart.totals?.total)}</strong>
-          </div>
-          <p className="muted">Tax and shipping are finalized after order submission.</p>
+          <h2>{isDirectCheckout ? 'Direct purchase' : 'Totals'}</h2>
+          {isDirectCheckout ? (
+            <>
+              <div className="checkout-summary-item">
+                <img src={mediaUrl(directProduct.images?.[0]?.url)} alt={directProduct.images?.[0]?.alt || directProduct.name} />
+                <div>
+                  <strong>{directProduct.name}</strong>
+                  <span>Quantity: {directQuantity}</span>
+                </div>
+              </div>
+              <div className="summary-row">
+                <span>Subtotal</span>
+                <strong>{money(directTotals.subtotal)}</strong>
+              </div>
+              <div className="summary-row">
+                <span>Tax</span>
+                <strong>{money(directTotals.tax)}</strong>
+              </div>
+              <div className="summary-row">
+                <span>Shipping</span>
+                <strong>{directTotals.shipping ? money(directTotals.shipping) : 'Free'}</strong>
+              </div>
+              <div className="summary-row total">
+                <span>Total</span>
+                <strong>{money(directTotals.total)}</strong>
+              </div>
+              <p className="muted">Only this product will be ordered. Your cart will not be changed.</p>
+            </>
+          ) : (
+            <>
+              <div className="summary-row">
+                <span>Items</span>
+                <strong>{cart.items.length}</strong>
+              </div>
+              <div className="summary-row">
+                <span>Cart total</span>
+                <strong>{money(cart.totals?.total)}</strong>
+              </div>
+              <p className="muted">Tax and shipping are finalized after order submission.</p>
+            </>
+          )}
         </aside>
       </div>
     </section>

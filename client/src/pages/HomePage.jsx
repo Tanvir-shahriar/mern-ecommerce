@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import { useCart } from '../contexts/CartContext.jsx';
-import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
+import { api, mediaUrl } from '../services/api.js';
+import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
 import { money } from '../utils/format.js';
 
 const perks = [
@@ -18,9 +18,7 @@ const perks = [
 export const HomePage = () => {
   const [heroIndex, setHeroIndex] = useState(0);
   const [purchaseId, setPurchaseId] = useState('');
-  const [purchaseMessage, setPurchaseMessage] = useState('');
   const { user } = useAuth();
-  const { addItem } = useCart();
   const navigate = useNavigate();
 
   const { data: featuredData, isLoading } = useQuery({
@@ -61,23 +59,16 @@ export const HomePage = () => {
     return () => window.clearInterval(interval);
   }, [heroProducts.length]);
 
-  const purchaseNow = async (product) => {
+  const purchaseNow = (product) => {
+    setPurchaseId(product._id);
+    startDirectCheckout({ productId: product._id, quantity: 1 });
+
     if (!user) {
-      navigate('/login', { state: { from: { pathname: `/products/${product.slug || product._id}` } } });
+      navigate('/login', { state: { from: { pathname: '/checkout', search: '?mode=buy-now' } } });
       return;
     }
 
-    setPurchaseId(product._id);
-    setPurchaseMessage('');
-
-    try {
-      await addItem(product._id, 1);
-      navigate('/checkout');
-    } catch (error) {
-      setPurchaseMessage(apiErrorMessage(error));
-    } finally {
-      setPurchaseId('');
-    }
+    navigate(directCheckoutUrl);
   };
 
   return (
@@ -209,7 +200,6 @@ export const HomePage = () => {
                   );
                 })}
           </div>
-          {purchaseMessage ? <p className="future-purchase-message">{purchaseMessage}</p> : null}
         </div>
       </section>
 

@@ -20,6 +20,22 @@ const csvValue = (value) => {
   return `"${text.replace(/"/g, '""')}"`;
 };
 
+const createOrderItem = (product, quantity, variant) => {
+  if (product.inventory.trackQuantity && quantity > product.inventory.stock) {
+    throw new ApiError(409, `Only ${product.inventory.stock} ${product.name} available`);
+  }
+
+  return {
+    product: product._id,
+    name: product.name,
+    sku: product.sku,
+    image: product.images[0]?.url,
+    price: product.price,
+    quantity,
+    variant
+  };
+};
+
 const buildOrderFilter = async (query) => {
   const filter = {};
   if (query.status && query.status !== 'all') filter.status = query.status;
@@ -46,36 +62,37 @@ const buildOrderFilter = async (query) => {
 };
 
 export const createOrder = asyncHandler(async (req, res) => {
-  const cart = await Cart.findOne({ user: req.user._id });
-  if (!cart || !cart.items.length) throw new ApiError(400, 'Your cart is empty');
+  const directItem = req.body.directItem;
+  let cart;
+  let orderItems;
+  let productMap;
 
-  const productIds = cart.items.map((item) => item.product);
-  const products = await Product.find({ _id: { $in: productIds }, status: 'active' });
-  const productMap = new Map(products.map((product) => [product._id.toString(), product]));
+  if (directItem?.productId) {
+    const product = await Product.findOne({ _id: directItem.productId, status: 'active' });
+    if (!product) throw new ApiError(404, 'Product unavailable');
 
-  const orderItems = cart.items.map((item) => {
-    const product = productMap.get(item.product.toString());
-    if (!product) throw new ApiError(404, `Product unavailable: ${item.name}`);
-    if (product.inventory.trackQuantity && item.quantity > product.inventory.stock) {
-      throw new ApiError(409, `Only ${product.inventory.stock} ${product.name} available`);
-    }
+    orderItems = [createOrderItem(product, directItem.quantity, directItem.variant)];
+    productMap = new Map([[product._id.toString(), product]]);
+  } else {
+    cart = await Cart.findOne({ user: req.user._id });
+    if (!cart || !cart.items.length) throw new ApiError(400, 'Your cart is empty');
 
-    return {
-      product: product._id,
-      name: product.name,
-      sku: product.sku,
-      image: product.images[0]?.url,
-      price: product.price,
-      quantity: item.quantity,
-      variant: item.variant
-    };
-  });
+    const productIds = cart.items.map((item) => item.product);
+    const products = await Product.find({ _id: { $in: productIds }, status: 'active' });
+    productMap = new Map(products.map((product) => [product._id.toString(), product]));
+
+    orderItems = cart.items.map((item) => {
+      const product = productMap.get(item.product.toString());
+      if (!product) throw new ApiError(404, `Product unavailable: ${item.name}`);
+      return createOrderItem(product, item.quantity, item.variant);
+    });
+  }
 
   const subtotal = money(orderItems.reduce((sum, item) => sum + item.price * item.quantity, 0));
   let discount = 0;
   let couponSnapshot;
 
-  if (cart.coupon?.code) {
+  if (cart?.coupon?.code) {
     const coupon = await Coupon.findOne({ code: cart.coupon.code });
     if (coupon?.isUsableFor(subtotal)) {
       discount = coupon.calculateDiscount(subtotal);
@@ -121,9 +138,11 @@ export const createOrder = asyncHandler(async (req, res) => {
     })
   );
 
-  cart.items = [];
-  cart.coupon = undefined;
-  await cart.save();
+  if (cart) {
+    cart.items = [];
+    cart.coupon = undefined;
+    await cart.save();
+  }
 
   emitOrderEvent('order:created', {
     orderId: order._id,

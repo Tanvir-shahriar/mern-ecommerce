@@ -144,7 +144,8 @@ export const checkoutSchema = z.object({
   shippingAddress: addressSchema,
   billingAddress: addressSchema.optional(),
   paymentMethod: z.enum(['card', 'cash_on_delivery', 'paypal', 'stripe']).default('cash_on_delivery'),
-  customerNote: z.string().optional()
+  customerNote: z.string().optional(),
+  directItem: addCartItemSchema.optional()
 });
 
 export const orderStatusSchema = z.object({

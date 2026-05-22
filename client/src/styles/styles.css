@@ -1210,6 +1210,40 @@ textarea:focus {
   margin: 0 0 8px;
 }
 
+.checkout-summary-item {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.checkout-summary-item img {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius);
+  object-fit: cover;
+}
+
+.checkout-summary-item div {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.checkout-summary-item strong,
+.checkout-summary-item span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.checkout-summary-item span {
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
 .panel-heading,
 .toolbar-actions,
 .admin-toolbar,

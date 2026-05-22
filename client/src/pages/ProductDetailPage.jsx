@@ -9,6 +9,7 @@ import { useCart } from '../contexts/CartContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { money } from '../utils/format.js';
 import { ProductCard } from '../components/ProductCard.jsx';
+import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
 
 export const ProductDetailPage = () => {
   const { slugOrId } = useParams();
@@ -48,13 +49,9 @@ export const ProductDetailPage = () => {
   };
 
   const purchaseNow = async () => {
-    if (!user) return navigate('/login');
-    try {
-      await addItem(product._id, quantity);
-      navigate('/checkout');
-    } catch (error) {
-      setMessage(apiErrorMessage(error));
-    }
+    startDirectCheckout({ productId: product._id, quantity });
+    if (!user) return navigate('/login', { state: { from: { pathname: '/checkout', search: '?mode=buy-now' } } });
+    return navigate(directCheckoutUrl);
   };
 
   const toggleWishlist = async () => {
