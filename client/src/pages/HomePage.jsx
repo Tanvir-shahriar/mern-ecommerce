@@ -1,9 +1,11 @@
-import { ArrowRight, ShieldCheck, Timer, Truck, WalletCards } from 'lucide-react';
+import { ArrowRight, Cpu, ShieldCheck, Sparkles, Timer, Truck, WalletCards, Zap } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard.jsx';
-import { api, mediaUrl } from '../services/api.js';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import { useCart } from '../contexts/CartContext.jsx';
+import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { money } from '../utils/format.js';
 
 const perks = [
@@ -15,6 +17,11 @@ const perks = [
 
 export const HomePage = () => {
   const [heroIndex, setHeroIndex] = useState(0);
+  const [purchaseId, setPurchaseId] = useState('');
+  const [purchaseMessage, setPurchaseMessage] = useState('');
+  const { user } = useAuth();
+  const { addItem } = useCart();
+  const navigate = useNavigate();
 
   const { data: featuredData, isLoading } = useQuery({
     queryKey: ['featured-products'],
@@ -38,6 +45,7 @@ export const HomePage = () => {
   );
   const activeHeroIndex = heroProducts.length ? heroIndex % heroProducts.length : 0;
   const activeHeroProduct = heroProducts[activeHeroIndex];
+  const futureProducts = heroProducts.slice(0, 3);
 
   useEffect(() => {
     setHeroIndex(0);
@@ -52,6 +60,25 @@ export const HomePage = () => {
 
     return () => window.clearInterval(interval);
   }, [heroProducts.length]);
+
+  const purchaseNow = async (product) => {
+    if (!user) {
+      navigate('/login', { state: { from: { pathname: `/products/${product.slug || product._id}` } } });
+      return;
+    }
+
+    setPurchaseId(product._id);
+    setPurchaseMessage('');
+
+    try {
+      await addItem(product._id, 1);
+      navigate('/checkout');
+    } catch (error) {
+      setPurchaseMessage(apiErrorMessage(error));
+    } finally {
+      setPurchaseId('');
+    }
+  };
 
   return (
     <>
@@ -119,6 +146,70 @@ export const HomePage = () => {
             <span>Classic automatic styles</span>
             <span>Premium straps</span>
           </div>
+        </div>
+      </section>
+
+      <section className="future-showcase-section">
+        <div className="future-showcase-inner">
+          <div className="future-showcase-heading">
+            <div>
+              <p className="eyebrow future-eyebrow">
+                <Sparkles size={15} />
+                Next drop
+              </p>
+              <h2>Futuristic picks built for the next move.</h2>
+            </div>
+            <Link className="button glass future-catalog-link" to="/products?featured=true">
+              Explore all
+              <ArrowRight size={17} />
+            </Link>
+          </div>
+
+          <div className="future-product-grid">
+            {isLoading
+              ? Array.from({ length: 3 }).map((_, index) => <div className="future-product-card loading" key={index} />)
+              : futureProducts.map((product, index) => {
+                  const productTo = `/products/${product.slug || product._id}`;
+                  const inStock = !product.inventory?.trackQuantity || product.inventory.stock > 0;
+                  const isPurchasing = purchaseId === product._id;
+                  const stockLabel = product.inventory?.trackQuantity ? `${product.inventory.stock} in stock` : 'Ready to ship';
+
+                  return (
+                    <article className="future-product-card" style={{ '--delay': `${index * 90}ms` }} key={product._id}>
+                      <Link className="future-product-media" to={productTo}>
+                        <img src={mediaUrl(product.images?.[0]?.url)} alt={product.images?.[0]?.alt || product.name} />
+                        <span>
+                          <Cpu size={15} />
+                          {product.category?.name || product.brand || 'lahVenture'}
+                        </span>
+                      </Link>
+                      <div className="future-product-body">
+                        <Link to={productTo} className="future-product-title">
+                          {product.name}
+                        </Link>
+                        <p>{product.shortDescription || product.description}</p>
+                        <div className="future-product-meta">
+                          <div>
+                            <strong>{money(product.price)}</strong>
+                            {product.compareAtPrice ? <span>{money(product.compareAtPrice)}</span> : null}
+                          </div>
+                          <em>{inStock ? stockLabel : 'Out of stock'}</em>
+                        </div>
+                      </div>
+                      <button
+                        className="future-purchase-button"
+                        type="button"
+                        onClick={() => purchaseNow(product)}
+                        disabled={!inStock || isPurchasing}
+                      >
+                        {isPurchasing ? <span className="spinner tiny" /> : <Zap size={17} />}
+                        {isPurchasing ? 'Processing' : 'Purchase now'}
+                      </button>
+                    </article>
+                  );
+                })}
+          </div>
+          {purchaseMessage ? <p className="future-purchase-message">{purchaseMessage}</p> : null}
         </div>
       </section>
 
