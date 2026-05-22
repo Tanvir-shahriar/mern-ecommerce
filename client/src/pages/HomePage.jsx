@@ -77,8 +77,8 @@ export const HomePage = () => {
         <div className="hero-content">
           <p className="eyebrow light brand-eyebrow">
             <span className="inline-brand">
-              lah<span className="brand-v">Venture</span>
-            </span>{' '}
+              lahVenture
+            </span>{'  '}
             watches
           </p>
           <h1>Timepieces for work, sport, and every journey.</h1>
@@ -144,11 +144,7 @@ export const HomePage = () => {
         <div className="future-showcase-inner">
           <div className="future-showcase-heading">
             <div>
-              <p className="eyebrow future-eyebrow">
-                <Sparkles size={15} />
-                Next drop
-              </p>
-              <h2>Futuristic picks built for the next move.</h2>
+              <h2>Picks built for the next move.</h2>
             </div>
             <Link className="button glass future-catalog-link" to="/products?featured=true">
               Explore all
