@@ -67,7 +67,7 @@ const buildProductFilter = async (query, includeInactive = false) => {
 };
 
 export const getProducts = asyncHandler(async (req, res) => {
-  const includeInactive = req.user?.role === 'admin' && req.query.admin === 'true';
+  const includeInactive = ['admin', 'super_admin'].includes(req.user?.role) && req.query.admin === 'true';
   const filter = await buildProductFilter(req.query, includeInactive);
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(Number(req.query.limit) || 12, 1), 48);

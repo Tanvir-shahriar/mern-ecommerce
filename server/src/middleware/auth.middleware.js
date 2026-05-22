@@ -44,7 +44,9 @@ export const optionalProtect = asyncHandler(async (req, _res, next) => {
 });
 
 export const restrictTo = (...roles) => (req, _res, next) => {
-  if (!req.user || req.user.status !== 'active' || !roles.includes(req.user.role)) {
+  const isAllowed = roles.includes(req.user?.role) || (req.user?.role === 'super_admin' && roles.includes('admin'));
+
+  if (!req.user || req.user.status !== 'active' || !isAllowed) {
     return next(new ApiError(403, 'You do not have permission to perform this action'));
   }
 

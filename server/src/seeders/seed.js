@@ -218,7 +218,7 @@ const run = async () => {
       name: 'Store Admin',
       email: env.seedAdminEmail,
       password: env.seedAdminPassword,
-      role: 'admin'
+      role: 'super_admin'
     },
     {
       name: 'Demo Customer',

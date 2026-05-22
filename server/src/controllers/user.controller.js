@@ -109,10 +109,22 @@ export const getUser = asyncHandler(async (req, res) => {
 });
 
 export const updateUserRole = asyncHandler(async (req, res) => {
+  if (req.user.role !== 'super_admin') {
+    throw new ApiError(403, 'Only the super admin can change user access');
+  }
+
   const user = await User.findById(req.params.id);
   if (!user) throw new ApiError(404, 'User not found');
 
-  user.role = req.body.role;
+  if (user._id.equals(req.user._id)) {
+    throw new ApiError(400, 'You cannot change your own admin access here');
+  }
+
+  if (user.role === 'super_admin') {
+    throw new ApiError(400, 'Super admin access is protected');
+  }
+
+  if (req.body.role) user.role = req.body.role;
   if (req.body.status) user.status = req.body.status;
   await user.save({ validateBeforeSave: false });
 

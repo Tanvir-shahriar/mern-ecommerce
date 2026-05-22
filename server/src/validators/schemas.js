@@ -164,7 +164,11 @@ export const stockUpdateSchema = z
     message: 'Provide stock, delta, lowStockThreshold, or trackQuantity'
   });
 
-export const roleUpdateSchema = z.object({
-  role: z.enum(['customer', 'admin']),
-  status: z.enum(['active', 'blocked']).optional()
-});
+export const roleUpdateSchema = z
+  .object({
+    role: z.enum(['customer', 'admin']).optional(),
+    status: z.enum(['active', 'blocked']).optional()
+  })
+  .refine((value) => value.role !== undefined || value.status !== undefined, {
+    message: 'Provide role or status'
+  });

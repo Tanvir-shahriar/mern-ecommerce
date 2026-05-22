@@ -17,7 +17,7 @@ export const initSocket = (server) => {
     });
 
     socket.on('join:admin', (role) => {
-      if (role === 'admin') socket.join('admin');
+      if (['admin', 'super_admin'].includes(role)) socket.join('admin');
     });
   });
 

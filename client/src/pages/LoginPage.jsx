@@ -15,7 +15,7 @@ export const LoginPage = () => {
     setError('');
     try {
       const user = await login(form);
-      navigate(location.state?.from?.pathname || (user.role === 'admin' ? '/admin' : '/account'), { replace: true });
+      navigate(location.state?.from?.pathname || (['admin', 'super_admin'].includes(user.role) ? '/admin' : '/account'), { replace: true });
     } catch (requestError) {
       setError(apiErrorMessage(requestError));
     }
