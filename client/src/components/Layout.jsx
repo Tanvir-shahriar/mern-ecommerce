@@ -27,6 +27,7 @@ export const Layout = () => {
 
   const handleLogout = async () => {
     await logout();
+    setOpen(false);
     navigate('/');
   };
 
@@ -50,6 +51,11 @@ export const Layout = () => {
               <NavLink className={navClass} to="/admin" onClick={() => setOpen(false)}>
                 Admin
               </NavLink>
+            ) : null}
+            {user ? (
+              <button type="button" className="nav-link mobile-signout" onClick={handleLogout}>
+                Sign out
+              </button>
             ) : null}
           </nav>
 

@@ -232,6 +232,13 @@ main {
   color: var(--blue);
 }
 
+.mobile-signout {
+  display: none;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
 .admin-tab:hover {
   transform: translateY(-1px);
 }
@@ -2331,6 +2338,10 @@ textarea:focus {
 
   .primary-nav .nav-link {
     width: 100%;
+  }
+
+  .primary-nav .mobile-signout {
+    display: inline-flex;
   }
 
   .header-search {
