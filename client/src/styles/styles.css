@@ -80,14 +80,22 @@ main {
   position: sticky;
   top: 0;
   z-index: 20;
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) minmax(240px, 420px) auto auto;
-  align-items: center;
-  gap: 18px;
-  padding: 14px clamp(18px, 4vw, 56px);
-  background: rgba(255, 255, 255, 0.94);
+  padding: 12px 0;
+  background: rgba(255, 255, 255, 0.96);
+  border-top: 10px solid #4a321b;
   border-bottom: 1px solid var(--line);
+  box-shadow: 0 10px 28px rgba(23, 32, 38, 0.08);
   backdrop-filter: blur(12px);
+}
+
+.header-inner {
+  position: relative;
+  width: min(1180px, calc(100% - 48px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: auto auto minmax(280px, 1fr) auto auto;
+  align-items: center;
+  gap: clamp(14px, 2.5vw, 28px);
 }
 
 .brand {
@@ -115,6 +123,40 @@ main {
 
 .brand-v {
   color: #f04e0ff0;
+}
+
+.site-header .brand {
+  min-width: 230px;
+  justify-content: center;
+  gap: 9px;
+}
+
+.site-header .brand-name {
+  position: relative;
+  display: inline-block;
+  padding-bottom: 5px;
+  color: #050505;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: clamp(1.85rem, 2.8vw, 2.4rem);
+  font-style: normal;
+  font-weight: 950;
+  line-height: 0.95;
+  text-shadow: none;
+}
+
+.site-header .brand-name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  border-radius: 999px;
+  background: #d71920;
+}
+
+.site-header .brand-v {
+  color: #d71920;
 }
 
 .brand-logo {
@@ -200,14 +242,15 @@ main {
 }
 
 .header-search {
-  min-height: 40px;
+  min-height: 42px;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 0 12px;
-  border: 1px solid var(--line);
+  padding: 0 14px;
+  border: 1px solid #dde3ea;
   border-radius: var(--radius);
   background: var(--paper);
+  box-shadow: inset 0 0 0 1px rgba(23, 32, 38, 0.02);
 }
 
 .header-search input {
@@ -215,6 +258,22 @@ main {
   border: 0;
   outline: 0;
   background: transparent;
+}
+
+.header-search-button {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  flex: 0 0 30px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #0a0a0a;
+}
+
+.header-search-button:hover {
+  background: #eef2f5;
 }
 
 .header-actions {
@@ -243,6 +302,18 @@ main {
   border-radius: var(--radius);
   background: var(--paper);
   color: var(--ink);
+}
+
+.site-header .icon-button {
+  width: 42px;
+  height: 42px;
+  border: 0;
+  border-radius: 999px;
+  background: #f1f3f5;
+}
+
+.site-header .icon-button:hover {
+  background: #e8edf2;
 }
 
 .icon-button.dark {
@@ -2226,14 +2297,25 @@ textarea:focus {
 
 @media (max-width: 1060px) {
   .site-header {
+    padding: 10px 0;
+  }
+
+  .header-inner {
+    width: min(1180px, calc(100% - 28px));
     grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .site-header .brand {
+    min-width: 0;
+    justify-content: flex-start;
   }
 
   .primary-nav {
     position: absolute;
     top: calc(100% + 8px);
-    left: 18px;
-    right: 18px;
+    left: 0;
+    right: 0;
     display: none;
     padding: 12px;
     background: var(--paper);
@@ -2332,8 +2414,12 @@ textarea:focus {
 
 @media (max-width: 680px) {
   .site-header {
-    padding: 12px 14px;
+    padding: 8px 0;
     gap: 10px 8px;
+  }
+
+  .header-inner {
+    width: min(100% - 24px, 1180px);
   }
 
   .header-actions {
@@ -2677,7 +2763,7 @@ textarea:focus {
 
 @media (max-width: 420px) {
   .site-header {
-    padding: 10px 12px;
+    padding: 8px 0;
   }
 
   .header-actions {
