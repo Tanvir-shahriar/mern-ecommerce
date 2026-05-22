@@ -8,7 +8,7 @@ const navClass = ({ isActive }) => (isActive ? 'nav-link active' : 'nav-link');
 const logoPath = '/lahventure.png';
 const BrandName = () => (
   <span className="brand-name">
-    lah<span className="brand-v">V</span>enture
+    lah<span className="brand-v">Venture</span>
   </span>
 );
 

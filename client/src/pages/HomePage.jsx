@@ -34,7 +34,7 @@ export const HomePage = () => {
         <div className="hero-content">
           <p className="eyebrow light brand-eyebrow">
             <span className="inline-brand">
-              lah<span className="brand-v">V</span>enture
+              lah<span className="brand-v">Venture</span>
             </span>{' '}
             watches
           </p>
@@ -101,7 +101,7 @@ export const HomePage = () => {
             <p className="eyebrow">Featured</p>
             <h2>
               <span className="inline-brand">
-                lah<span className="brand-v">V</span>enture
+                lah<span className="brand-v">Venture</span>
               </span>{' '}
               picks
             </h2>
