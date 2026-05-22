@@ -1,4 +1,4 @@
-import { Heart, Minus, Plus, ShoppingBag, Star, Zap } from 'lucide-react';
+import { CreditCard, Heart, Minus, Plus, ShoppingBag, Star } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -116,7 +116,7 @@ export const ProductDetailPage = () => {
             Add to cart
           </button>
           <button className="button dark" type="button" onClick={purchaseNow} disabled={!inStock}>
-            <Zap size={18} />
+            <CreditCard size={18} />
             Purchase now
           </button>
           <button className="icon-button" type="button" onClick={toggleWishlist} aria-label="Wishlist">

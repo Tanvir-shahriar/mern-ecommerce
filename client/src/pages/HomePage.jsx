@@ -1,4 +1,4 @@
-import { ArrowRight, Cpu, ShieldCheck, Sparkles, Timer, Truck, WalletCards, Zap } from 'lucide-react';
+import { ArrowRight, Cpu, CreditCard, ShieldCheck, Sparkles, Timer, Truck, WalletCards } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -193,7 +193,7 @@ export const HomePage = () => {
                         onClick={() => purchaseNow(product)}
                         disabled={!inStock || isPurchasing}
                       >
-                        {isPurchasing ? <span className="spinner tiny" /> : <Zap size={17} />}
+                        {isPurchasing ? <span className="spinner tiny" /> : <CreditCard size={17} />}
                         {isPurchasing ? 'Processing' : 'Purchase now'}
                       </button>
                     </article>
