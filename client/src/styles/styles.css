@@ -98,6 +98,25 @@ main {
   font-size: 1.15rem;
 }
 
+.brand-name,
+.inline-brand {
+  color: #9a641c;
+  font-family: Georgia, "Times New Roman", serif;
+  font-style: italic;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.45);
+}
+
+.brand-name {
+  font-size: 1.34rem;
+}
+
+.brand-v {
+  color: #246bfe;
+}
+
 .brand-logo {
   width: 52px;
   height: 52px;
@@ -109,6 +128,10 @@ main {
 
 .brand.small {
   font-size: 1rem;
+}
+
+.brand.small .brand-name {
+  font-size: 1.12rem;
 }
 
 .brand.small .brand-logo {
@@ -399,6 +422,14 @@ main {
 
 .eyebrow.light {
   color: #b7d2ff;
+}
+
+.brand-eyebrow {
+  text-transform: none;
+}
+
+.brand-eyebrow .inline-brand {
+  color: #f0c66a;
 }
 
 .muted {

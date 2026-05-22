@@ -60,16 +60,16 @@ const run = async () => {
 
   await Product.create([
     {
-      name: 'Lahventure Apex S9 Smartwatch',
+      name: 'lahVenture Apex S9 Smartwatch',
       shortDescription: 'AMOLED smartwatch with GPS, calls, and seven-day battery.',
       description:
         'A polished everyday smartwatch with GPS workouts, Bluetooth calling, health metrics, sleep reports, and a bright always-on display.',
       category: categories.smartwatches,
-      brand: 'Lahventure',
+      brand: 'lahVenture',
       sku: 'LV-SMART-APEX-S9',
       price: 22900,
       compareAtPrice: 27900,
-      images: [image('photo-1523275335684-37898b6baf30', 'Lahventure Apex smartwatch')],
+      images: [image('photo-1523275335684-37898b6baf30', 'lahVenture Apex smartwatch')],
       tags: ['smartwatch', 'gps', 'wearable', 'featured'],
       inventory: { stock: 32, lowStockThreshold: 8, trackQuantity: true },
       shipping: { weight: 1.2, freeShipping: true },
@@ -78,12 +78,12 @@ const run = async () => {
       ratingsCount: 42
     },
     {
-      name: 'Lahventure Heritage Automatic',
+      name: 'lahVenture Heritage Automatic',
       shortDescription: 'Dress automatic with sapphire crystal and leather strap.',
       description:
         'A refined automatic watch with a 38mm stainless steel case, sapphire crystal, exhibition caseback, and hand-finished dial details.',
       category: categories.automatics,
-      brand: 'Lahventure',
+      brand: 'lahVenture',
       sku: 'LV-AUTO-HERITAGE-38',
       price: 34900,
       compareAtPrice: 42900,
@@ -95,12 +95,12 @@ const run = async () => {
       ratingsCount: 18
     },
     {
-      name: 'Lahventure Expedition GMT',
+      name: 'lahVenture Expedition GMT',
       shortDescription: 'Dual-time travel watch with 100m water resistance.',
       description:
         'A travel-ready GMT watch with independent hour hand adjustment, luminous markers, screw-down crown, and brushed steel bracelet.',
       category: categories.automatics,
-      brand: 'Lahventure',
+      brand: 'lahVenture',
       sku: 'LV-AUTO-EXP-GMT',
       price: 48900,
       compareAtPrice: 56000,
@@ -112,12 +112,12 @@ const run = async () => {
       ratingsCount: 31
     },
     {
-      name: 'Lahventure Pulse Pro Smartwatch',
+      name: 'lahVenture Pulse Pro Smartwatch',
       shortDescription: 'Health, activity, and sleep tracking in a slim case.',
       description:
         'An everyday smartwatch with heart-rate monitoring, GPS activity tracking, sleep reports, water resistance, and seven-day battery life.',
       category: categories.smartwatches,
-      brand: 'Lahventure',
+      brand: 'lahVenture',
       sku: 'LV-SMART-PULSE-PRO',
       price: 21400,
       compareAtPrice: 26000,
@@ -129,12 +129,12 @@ const run = async () => {
       ratingsCount: 24
     },
     {
-      name: 'Lahventure Rally Chronograph',
+      name: 'lahVenture Rally Chronograph',
       shortDescription: 'Sport chronograph with tachymeter bezel and steel bracelet.',
       description:
         'A bold chronograph with a high-contrast dial, accurate timing registers, 316L stainless steel case, and quick-release bracelet.',
       category: categories.chronographs,
-      brand: 'Lahventure',
+      brand: 'lahVenture',
       sku: 'LV-CHRONO-RALLY',
       price: 29900,
       compareAtPrice: 36900,
@@ -146,12 +146,12 @@ const run = async () => {
       ratingsCount: 16
     },
     {
-      name: 'Lahventure Leather Strap Set',
+      name: 'lahVenture Leather Strap Set',
       shortDescription: 'Two quick-release leather straps for daily rotation.',
       description:
         'A pair of full-grain leather straps with quick-release spring bars, reinforced stitching, and polished stainless buckles.',
       category: categories.accessories,
-      brand: 'Lahventure',
+      brand: 'lahVenture',
       sku: 'LV-STRAP-LEATHER-DUO',
       price: 6800,
       images: [image('photo-1524592094714-0f0654e20314', 'Leather watch strap')],
@@ -161,12 +161,12 @@ const run = async () => {
       ratingsCount: 12
     },
     {
-      name: 'Lahventure Trainer Sport Smartwatch',
+      name: 'lahVenture Trainer Sport Smartwatch',
       shortDescription: 'Lightweight sport smartwatch with workout coaching.',
       description:
         'A lightweight smartwatch built for training with workout coaching, heart-rate zones, recovery insights, and a breathable silicone strap.',
       category: categories.smartwatches,
-      brand: 'Lahventure',
+      brand: 'lahVenture',
       sku: 'LV-SMART-TRAINER',
       price: 18900,
       images: [image('photo-1523275335684-37898b6baf30', 'Sport smartwatch')],
@@ -176,12 +176,12 @@ const run = async () => {
       ratingsCount: 9
     },
     {
-      name: 'Lahventure Watch Care Kit',
+      name: 'lahVenture Watch Care Kit',
       shortDescription: 'Cleaning cloth, tool, and travel case for watch upkeep.',
       description:
         'A compact watch-care kit with microfiber cloths, case brush, strap tool, and a structured travel case for daily maintenance.',
       category: categories.accessories,
-      brand: 'Lahventure',
+      brand: 'lahVenture',
       sku: 'LV-CARE-KIT',
       price: 4900,
       compareAtPrice: 6900,

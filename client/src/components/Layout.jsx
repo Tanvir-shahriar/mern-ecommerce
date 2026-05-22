@@ -6,6 +6,11 @@ import { useCart } from '../contexts/CartContext.jsx';
 
 const navClass = ({ isActive }) => (isActive ? 'nav-link active' : 'nav-link');
 const logoPath = '/lahventure.png';
+const BrandName = () => (
+  <span className="brand-name">
+    lah<span className="brand-v">V</span>enture
+  </span>
+);
 
 export const Layout = () => {
   const [open, setOpen] = useState(false);
@@ -29,9 +34,9 @@ export const Layout = () => {
   return (
     <div className="site-shell">
       <header className="site-header">
-        <Link to="/" className="brand" aria-label="Lahventure">
+        <Link to="/" className="brand" aria-label="lahVenture">
           <img className="brand-logo" src={logoPath} alt="" />
-          <span>Lahventure</span>
+          <BrandName />
         </Link>
 
         <nav className={open ? 'primary-nav open' : 'primary-nav'}>
@@ -97,7 +102,7 @@ export const Layout = () => {
         <div>
           <Link to="/" className="brand small">
             <img className="brand-logo" src={logoPath} alt="" />
-            <span>Lahventure</span>
+            <BrandName />
           </Link>
           <p>Watches, smartwatches, straps, and accessories with live order tracking.</p>
         </div>

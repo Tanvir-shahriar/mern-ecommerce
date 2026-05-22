@@ -32,7 +32,12 @@ export const HomePage = () => {
     <>
       <section className="hero-section">
         <div className="hero-content">
-          <p className="eyebrow light">Lahventure watches</p>
+          <p className="eyebrow light brand-eyebrow">
+            <span className="inline-brand">
+              lah<span className="brand-v">V</span>enture
+            </span>{' '}
+            watches
+          </p>
           <h1>Timepieces for work, sport, and every journey.</h1>
           <p>
             Discover classic watches, smartwatches, straps, and wearable accessories with secure
@@ -94,7 +99,12 @@ export const HomePage = () => {
         <div className="section-heading">
           <div>
             <p className="eyebrow">Featured</p>
-            <h2>Lahventure picks</h2>
+            <h2>
+              <span className="inline-brand">
+                lah<span className="brand-v">V</span>enture
+              </span>{' '}
+              picks
+            </h2>
           </div>
           <Link to="/products?featured=true" className="text-link">
             More picks
