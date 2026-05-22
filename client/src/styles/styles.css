@@ -322,14 +322,103 @@ main {
   gap: 14px;
 }
 
-.hero-media img {
+.hero-product-slide {
+  position: relative;
   width: 100%;
   height: min(58vw, 520px);
   min-height: 390px;
+  overflow: hidden;
   border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.32);
+  isolation: isolate;
+  animation: hero-slide-in 420ms ease;
+}
+
+.hero-product-slide::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(180deg, rgba(5, 7, 10, 0.04) 36%, rgba(5, 7, 10, 0.76));
+}
+
+.hero-product-slide img {
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   object-position: center;
-  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.32);
+  transition: transform 520ms ease;
+}
+
+.hero-product-slide:hover img {
+  transform: scale(1.04);
+}
+
+.hero-product-overlay {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2;
+  display: grid;
+  gap: 6px;
+  color: white;
+}
+
+.hero-product-overlay span {
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #f4ce7a;
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.hero-product-overlay strong {
+  font-size: clamp(1.25rem, 2.2vw, 1.9rem);
+  line-height: 1.05;
+}
+
+.hero-product-overlay em {
+  color: #dbe7ff;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.hero-product-loading {
+  display: grid;
+  place-items: center;
+}
+
+.hero-product-loading::after {
+  display: none;
+}
+
+.hero-carousel-controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.hero-carousel-controls button {
+  width: 34px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.38);
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    width 160ms ease;
+}
+
+.hero-carousel-controls button.active,
+.hero-carousel-controls button:hover {
+  width: 46px;
+  background: #f4ce7a;
 }
 
 .hero-specs {
@@ -1815,6 +1904,18 @@ textarea:focus {
   }
 }
 
+@keyframes hero-slide-in {
+  from {
+    opacity: 0.72;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 1060px) {
   .site-header {
     grid-template-columns: auto minmax(0, 1fr) auto;
@@ -1875,7 +1976,7 @@ textarea:focus {
     min-height: auto;
   }
 
-  .hero-media img {
+  .hero-product-slide {
     height: 380px;
     min-height: 320px;
   }
@@ -1966,7 +2067,7 @@ textarea:focus {
     line-height: 1.6;
   }
 
-  .hero-media img {
+  .hero-product-slide {
     height: 300px;
     min-height: 260px;
   }
@@ -2257,7 +2358,7 @@ textarea:focus {
     font-size: 2.35rem;
   }
 
-  .hero-media img {
+  .hero-product-slide {
     height: 240px;
     min-height: 220px;
   }

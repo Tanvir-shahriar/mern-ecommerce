@@ -1,8 +1,10 @@
 import { ArrowRight, ShieldCheck, Timer, Truck, WalletCards } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard.jsx';
-import { api } from '../services/api.js';
+import { api, mediaUrl } from '../services/api.js';
+import { money } from '../utils/format.js';
 
 const perks = [
   { icon: Timer, label: 'Watch-first catalog' },
@@ -12,6 +14,8 @@ const perks = [
 ];
 
 export const HomePage = () => {
+  const [heroIndex, setHeroIndex] = useState(0);
+
   const { data: featuredData, isLoading } = useQuery({
     queryKey: ['featured-products'],
     queryFn: async () => {
@@ -27,6 +31,27 @@ export const HomePage = () => {
       return data.data.categories;
     }
   });
+
+  const heroProducts = useMemo(
+    () => (featuredData || []).filter((product) => product.images?.[0]?.url).slice(0, 6),
+    [featuredData]
+  );
+  const activeHeroIndex = heroProducts.length ? heroIndex % heroProducts.length : 0;
+  const activeHeroProduct = heroProducts[activeHeroIndex];
+
+  useEffect(() => {
+    setHeroIndex(0);
+  }, [heroProducts.length]);
+
+  useEffect(() => {
+    if (heroProducts.length < 2) return undefined;
+
+    const interval = window.setInterval(() => {
+      setHeroIndex((index) => (index + 1) % heroProducts.length);
+    }, 4800);
+
+    return () => window.clearInterval(interval);
+  }, [heroProducts.length]);
 
   return (
     <>
@@ -53,11 +78,42 @@ export const HomePage = () => {
             </Link>
           </div>
         </div>
-        <div className="hero-media" aria-hidden="true">
-          <img
-            src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1100&q=85"
-            alt=""
-          />
+        <div className="hero-media">
+          {activeHeroProduct ? (
+            <>
+              <Link
+                className="hero-product-slide"
+                to={`/products/${activeHeroProduct.slug || activeHeroProduct._id}`}
+                key={activeHeroProduct._id}
+                aria-label={`View ${activeHeroProduct.name}`}
+              >
+                <img
+                  src={mediaUrl(activeHeroProduct.images?.[0]?.url)}
+                  alt={activeHeroProduct.images?.[0]?.alt || activeHeroProduct.name}
+                />
+                <div className="hero-product-overlay">
+                  <span>{activeHeroProduct.brand || activeHeroProduct.category?.name}</span>
+                  <strong>{activeHeroProduct.name}</strong>
+                  <em>{money(activeHeroProduct.price)}</em>
+                </div>
+              </Link>
+              <div className="hero-carousel-controls" aria-label="Featured product carousel">
+                {heroProducts.map((product, index) => (
+                  <button
+                    type="button"
+                    className={index === activeHeroIndex ? 'active' : ''}
+                    key={product._id}
+                    onClick={() => setHeroIndex(index)}
+                    aria-label={`Show ${product.name}`}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="hero-product-slide hero-product-loading">
+              <span className="spinner" />
+            </div>
+          )}
           <div className="hero-specs">
             <span>Smart health tracking</span>
             <span>Classic automatic styles</span>
