@@ -1,4 +1,4 @@
-import { ArrowRight, Cpu, CreditCard, ShieldCheck, Sparkles, Timer, Truck, WalletCards } from 'lucide-react';
+import { ArrowRight, Cpu, CreditCard, ShieldCheck, Timer, Truck, WalletCards } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,6 +15,33 @@ const perks = [
   { icon: WalletCards, label: 'Flexible payment' }
 ];
 
+const chineseWatchBrands = [
+  { name: 'Sea-Gull', mark: 'SG', type: 'Tianjin watchmaking' },
+  { name: 'Shanghai Watch', mark: 'SH', type: 'Classic mechanical' },
+  { name: 'Beijing Watch', mark: 'BJ', type: 'Heritage atelier' },
+  { name: 'Fiyta', mark: 'FY', type: 'Aerospace inspired' },
+  { name: 'Rossini', mark: 'RS', type: 'Dress watches' },
+  { name: 'Ebohr', mark: 'EB', type: 'Modern automatics' },
+  { name: 'Tian Wang', mark: 'TW', type: 'Mainstream collection' },
+  { name: 'Peacock', mark: 'PK', type: 'Movement maker' },
+  { name: 'CIGA Design', mark: 'CG', type: 'Design watches' },
+  { name: 'Memorigin', mark: 'MO', type: 'Tourbillon craft' },
+  { name: 'San Martin', mark: 'SM', type: 'Diver specialists' },
+  { name: 'Sugess', mark: 'SU', type: 'Mechanical chronos' },
+  { name: 'Pagani Design', mark: 'PD', type: 'Sport watches' },
+  { name: 'Cadisen', mark: 'CD', type: 'Value automatics' },
+  { name: 'Berny', mark: 'BY', type: 'Tool watches' },
+  { name: 'Addiesdive', mark: 'AD', type: 'Dive watches' },
+  { name: 'Heimdallr', mark: 'HD', type: 'Sapphire divers' },
+  { name: 'Proxima', mark: 'PX', type: 'Enthusiast divers' },
+  { name: 'Cronos', mark: 'CR', type: 'Premium homage' },
+  { name: 'Baltany', mark: 'BT', type: 'Vintage field' },
+  { name: 'Merkur', mark: 'MK', type: 'Retro mechanical' },
+  { name: 'Tandorio', mark: 'TD', type: 'Custom builds' },
+  { name: 'Guanqin', mark: 'GQ', type: 'Dress automatics' },
+  { name: 'Lobinni', mark: 'LB', type: 'Elegant mechanical' }
+];
+
 export const HomePage = () => {
   const [heroIndex, setHeroIndex] = useState(0);
   const [purchaseId, setPurchaseId] = useState('');
@@ -26,14 +53,6 @@ export const HomePage = () => {
     queryFn: async () => {
       const { data } = await api.get('/products/featured', { params: { limit: 8 } });
       return data.data.products;
-    }
-  });
-
-  const { data: categories = [] } = useQuery({
-    queryKey: ['categories'],
-    queryFn: async () => {
-      const { data } = await api.get('/categories');
-      return data.data.categories;
     }
   });
 
@@ -208,24 +227,33 @@ export const HomePage = () => {
         ))}
       </section>
 
-      <section className="section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Categories</p>
-            <h2>Shop by collection</h2>
+      <section className="brand-showcase-section">
+        <div className="brand-showcase-heading">
+          <p className="eyebrow">Shop by brand</p>
+          <h2>Explore Chinese watch brands</h2>
+          <p>
+            Browse heritage Chinese watchmakers and enthusiast-favorite microbrands, from classic
+            mechanical maisons to modern sport-watch specialists.
+          </p>
+        </div>
+        <div className="brand-marquee" aria-label="Popular Chinese watch brands">
+          <div className="brand-marquee-track">
+            {[...chineseWatchBrands, ...chineseWatchBrands].map((brand, index) => (
+              <Link
+                className="brand-logo-card"
+                to={`/products?brand=${encodeURIComponent(brand.name)}`}
+                key={`${brand.name}-${index}`}
+              >
+                <span className="brand-card-mark">{brand.mark}</span>
+                <strong>{brand.name}</strong>
+                <small>{brand.type}</small>
+              </Link>
+            ))}
           </div>
-          <Link to="/products" className="text-link">
-            View all
-          </Link>
         </div>
-        <div className="category-grid">
-          {categories.slice(0, 4).map((category) => (
-            <Link to={`/products?category=${category.slug}`} className="category-tile" key={category._id}>
-              <strong>{category.name}</strong>
-              <span>{category.description}</span>
-            </Link>
-          ))}
-        </div>
+        <Link to="/products" className="button brand-view-button">
+          View all brands
+        </Link>
       </section>
 
       <section className="section">

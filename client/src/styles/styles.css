@@ -381,7 +381,7 @@ main {
 
 .hero-content h1 {
   margin: 10px 0 14px;
-  font-size: clamp(3.4rem, 6.5vw, 6.1rem);
+  font-size: clamp(3rem, 5.7vw, 5.35rem);
   line-height: 0.95;
   letter-spacing: 0;
 }
@@ -894,6 +894,115 @@ main {
 .category-tile span {
   color: var(--muted);
   line-height: 1.5;
+}
+
+.brand-showcase-section {
+  display: grid;
+  justify-items: center;
+  gap: 28px;
+  padding: clamp(44px, 7vw, 74px) 0;
+  overflow: hidden;
+  background: #f5f6f7;
+}
+
+.brand-showcase-heading {
+  width: min(1040px, calc(100% - 36px));
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.brand-showcase-heading h2 {
+  margin: 0;
+  color: #050505;
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.brand-showcase-heading p:last-child {
+  width: min(920px, 100%);
+  margin: 0;
+  color: #1b2229;
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+.brand-marquee {
+  width: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+}
+
+.brand-marquee-track {
+  width: max-content;
+  display: flex;
+  gap: 18px;
+  animation: brand-marquee-left 42s linear infinite;
+}
+
+.brand-marquee:hover .brand-marquee-track {
+  animation-play-state: paused;
+}
+
+.brand-logo-card {
+  width: 252px;
+  min-height: 142px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid #d9dde1;
+  background: #ffffff;
+  color: #12181f;
+  text-align: center;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.brand-logo-card:hover {
+  border-color: #d71920;
+  box-shadow: 0 18px 36px rgba(23, 32, 38, 0.1);
+  transform: translateY(-2px);
+}
+
+.brand-card-mark {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border: 2px solid currentColor;
+  border-radius: 999px;
+  color: #d71920;
+  font-size: 0.82rem;
+  font-weight: 950;
+}
+
+.brand-logo-card strong {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-size: 1.32rem;
+  font-weight: 950;
+  line-height: 1.05;
+  text-transform: uppercase;
+}
+
+.brand-logo-card small {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.brand-view-button {
+  min-width: 200px;
+  border-color: #d71920;
+  background: transparent;
+  color: #d71920;
+  text-transform: uppercase;
 }
 
 .product-grid {
@@ -2265,6 +2374,12 @@ textarea:focus {
   }
 }
 
+@keyframes brand-marquee-left {
+  to {
+    transform: translateX(calc(-50% - 9px));
+  }
+}
+
 @keyframes future-grid-shift {
   to {
     background-position: 42px 42px, 42px 42px;
@@ -2370,7 +2485,7 @@ textarea:focus {
   }
 
   .hero-content h1 {
-    font-size: 4.1rem;
+    font-size: 3.55rem;
   }
 
   .hero-media {
@@ -2384,6 +2499,10 @@ textarea:focus {
 
   .future-product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .brand-logo-card {
+    width: 230px;
   }
 
   .section-heading h1,
@@ -2466,7 +2585,7 @@ textarea:focus {
   }
 
   .hero-content h1 {
-    font-size: 2.85rem;
+    font-size: 2.55rem;
     line-height: 1;
   }
 
@@ -2506,6 +2625,29 @@ textarea:focus {
   .future-product-meta {
     align-items: start;
     flex-direction: column;
+  }
+
+  .brand-showcase-section {
+    gap: 22px;
+    padding: 40px 0;
+  }
+
+  .brand-showcase-heading h2 {
+    font-size: 2rem;
+  }
+
+  .brand-showcase-heading p:last-child {
+    font-size: 0.95rem;
+  }
+
+  .brand-logo-card {
+    width: 205px;
+    min-height: 126px;
+    padding: 14px;
+  }
+
+  .brand-logo-card strong {
+    font-size: 1.08rem;
   }
 
   .hero-actions,
@@ -2791,7 +2933,7 @@ textarea:focus {
   }
 
   .hero-content h1 {
-    font-size: 2.35rem;
+    font-size: 2.12rem;
   }
 
   .hero-product-slide {
