@@ -267,7 +267,7 @@ export const AccountPage = () => {
                   <input required value={addressForm.city} onChange={(event) => updateAddressForm('city', event.target.value)} />
                 </label>
                 <label>
-                  State / Division
+                  District
                   <input required value={addressForm.state} onChange={(event) => updateAddressForm('state', event.target.value)} />
                 </label>
                 <label>

@@ -208,7 +208,7 @@ export const CheckoutPage = () => {
               <input required value={address.city} onChange={(event) => updateAddress('city', event.target.value)} />
             </label>
             <label>
-              State
+              District
               <input required value={address.state} onChange={(event) => updateAddress('state', event.target.value)} />
             </label>
             <label>
