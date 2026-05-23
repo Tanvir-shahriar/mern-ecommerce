@@ -115,7 +115,7 @@ export const ProductDetailPage = () => {
             <ShoppingBag size={18} />
             Add to cart
           </button>
-          <button className="button dark" type="button" onClick={purchaseNow} disabled={!inStock}>
+          <button className="button purchase-now-button" type="button" onClick={purchaseNow} disabled={!inStock}>
             <CreditCard size={18} />
             Purchase now
           </button>

@@ -736,10 +736,10 @@ main {
   gap: 8px;
   border: 0;
   border-radius: 6px;
-  background: linear-gradient(90deg, #246bfe, #19c2ff 54%, #f4ce7a);
-  color: #020611;
+  background: linear-gradient(135deg, #b7791f, #f3d36b 58%, #fff1b8);
+  color: #1e1506;
   font-weight: 900;
-  box-shadow: 0 14px 32px rgba(36, 107, 254, 0.34);
+  box-shadow: 0 14px 32px rgba(183, 121, 31, 0.34);
 }
 
 .future-purchase-button:not(:disabled):hover {
@@ -773,6 +773,13 @@ main {
 .button.dark {
   background: var(--dark);
   color: white;
+}
+
+.button.purchase-now-button {
+  border-color: #b7791f;
+  background: linear-gradient(135deg, #b7791f, #f3d36b 58%, #fff1b8);
+  color: #1e1506;
+  box-shadow: 0 12px 26px rgba(183, 121, 31, 0.28);
 }
 
 .button.glass {
@@ -949,11 +956,11 @@ main {
 }
 
 .brand-logo-card {
-  width: 252px;
-  min-height: 194px;
+  width: 286px;
+  min-height: 230px;
   display: grid;
   place-items: center;
-  grid-template-rows: 106px auto auto;
+  grid-template-rows: 140px auto auto;
   gap: 9px;
   padding: 18px;
   border: 1px solid #d9dde1;
@@ -974,7 +981,7 @@ main {
 
 .brand-image-shell {
   width: 100%;
-  height: 106px;
+  height: 140px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -994,18 +1001,18 @@ main {
 
 .brand-image-shell img {
   width: 100%;
-  max-width: 218px;
+  max-width: 252px;
   height: 100%;
   object-fit: contain;
 }
 
 .brand-image-shell.cover {
-  padding: 0;
+  padding: 10px 14px;
 }
 
 .brand-image-shell.cover img {
-  max-width: none;
-  object-fit: cover;
+  max-width: 252px;
+  object-fit: contain;
 }
 
 .brand-logo-card strong {
@@ -2438,7 +2445,7 @@ textarea:focus {
 @keyframes future-button-pulse {
   50% {
     transform: translateY(-1px);
-    box-shadow: 0 18px 42px rgba(36, 107, 254, 0.46);
+    box-shadow: 0 18px 42px rgba(183, 121, 31, 0.46);
   }
 }
 
@@ -2527,7 +2534,7 @@ textarea:focus {
   }
 
   .brand-logo-card {
-    width: 230px;
+    width: 252px;
   }
 
   .section-heading h1,
@@ -2666,19 +2673,27 @@ textarea:focus {
   }
 
   .brand-logo-card {
-    width: 205px;
-    min-height: 172px;
-    grid-template-rows: 92px auto auto;
+    width: 228px;
+    min-height: 196px;
+    grid-template-rows: 116px auto auto;
     padding: 14px;
   }
 
   .brand-image-shell {
-    height: 92px;
+    height: 116px;
     padding: 8px 12px;
   }
 
   .brand-image-shell img {
-    max-width: 178px;
+    max-width: 200px;
+  }
+
+  .brand-image-shell.cover {
+    padding: 8px 12px;
+  }
+
+  .brand-image-shell.cover img {
+    max-width: 200px;
   }
 
   .brand-logo-card strong {
