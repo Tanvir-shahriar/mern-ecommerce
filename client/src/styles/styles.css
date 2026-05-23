@@ -950,10 +950,10 @@ main {
 
 .brand-logo-card {
   width: 252px;
-  min-height: 174px;
+  min-height: 194px;
   display: grid;
   place-items: center;
-  grid-template-rows: 86px auto auto;
+  grid-template-rows: 106px auto auto;
   gap: 9px;
   padding: 18px;
   border: 1px solid #d9dde1;
@@ -974,7 +974,7 @@ main {
 
 .brand-image-shell {
   width: 100%;
-  height: 86px;
+  height: 106px;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -994,7 +994,7 @@ main {
 
 .brand-image-shell img {
   width: 100%;
-  max-width: 178px;
+  max-width: 218px;
   height: 100%;
   object-fit: contain;
 }
@@ -2667,18 +2667,18 @@ textarea:focus {
 
   .brand-logo-card {
     width: 205px;
-    min-height: 156px;
-    grid-template-rows: 76px auto auto;
+    min-height: 172px;
+    grid-template-rows: 92px auto auto;
     padding: 14px;
   }
 
   .brand-image-shell {
-    height: 76px;
+    height: 92px;
     padding: 8px 12px;
   }
 
   .brand-image-shell img {
-    max-width: 150px;
+    max-width: 178px;
   }
 
   .brand-logo-card strong {
