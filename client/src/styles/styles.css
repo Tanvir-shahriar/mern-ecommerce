@@ -1392,8 +1392,13 @@ textarea:focus {
 }
 
 .cart-line img {
-  height: 72px;
+  width: 88px;
+  height: 88px;
+  flex: 0 0 88px;
+  padding: 5px;
   border-radius: var(--radius);
+  background: #f6f8fa;
+  object-fit: contain;
 }
 
 .cart-line h2 {
@@ -2810,7 +2815,9 @@ textarea:focus {
   }
 
   .cart-line img {
-    height: 68px;
+    width: 72px;
+    height: 72px;
+    flex-basis: 72px;
   }
 
   .cart-line input,
@@ -3025,7 +3032,9 @@ textarea:focus {
   }
 
   .cart-line img {
+    width: 60px;
     height: 60px;
+    flex-basis: 60px;
   }
 
   .admin-product-row {
