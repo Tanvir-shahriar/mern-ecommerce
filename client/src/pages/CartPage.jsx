@@ -1,4 +1,4 @@
-import { Trash2 } from 'lucide-react';
+import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -31,6 +31,15 @@ export const CartPage = () => {
     }
   };
 
+  const adjustQuantity = async (item, nextQuantity) => {
+    try {
+      await updateItem(item._id, Math.max(1, nextQuantity));
+      setMessage('');
+    } catch (error) {
+      setMessage(error?.response?.data?.message || 'Quantity could not be updated');
+    }
+  };
+
   return (
     <section className="cart-page section">
       <div className="section-heading compact">
@@ -45,26 +54,43 @@ export const CartPage = () => {
 
       <div className="cart-layout">
         <div className="cart-lines">
-          {cart.items.map((item) => (
-            <article className="cart-line" key={item._id}>
-              <img src={mediaUrl(item.image)} alt={item.name} />
-              <div>
-                <h2>{item.name}</h2>
-                <p>{money(item.price)}</p>
-              </div>
-              <input
-                type="number"
-                min="1"
-                value={item.quantity}
-                onChange={(event) => updateItem(item._id, Number(event.target.value))}
-                aria-label={`Quantity for ${item.name}`}
-              />
-              <strong>{money(item.price * item.quantity)}</strong>
-              <button type="button" className="icon-button" onClick={() => removeItem(item._id)} aria-label="Remove item">
-                <Trash2 size={17} />
-              </button>
-            </article>
-          ))}
+          {cart.items.map((item) => {
+            const stock = item.product?.inventory?.stock;
+            const canIncrease = !item.product?.inventory?.trackQuantity || item.quantity < stock;
+
+            return (
+              <article className="cart-line" key={item._id}>
+                <img src={mediaUrl(item.image)} alt={item.name} />
+                <div className="cart-item-info">
+                  <h2>{item.name}</h2>
+                  <p>{money(item.price)}</p>
+                </div>
+                <div className="cart-quantity-control" aria-label={`Quantity for ${item.name}`}>
+                  <button
+                    type="button"
+                    onClick={() => adjustQuantity(item, item.quantity - 1)}
+                    disabled={item.quantity <= 1}
+                    aria-label={`Decrease quantity for ${item.name}`}
+                  >
+                    <Minus size={14} />
+                  </button>
+                  <span>{item.quantity}</span>
+                  <button
+                    type="button"
+                    onClick={() => adjustQuantity(item, item.quantity + 1)}
+                    disabled={!canIncrease}
+                    aria-label={`Increase quantity for ${item.name}`}
+                  >
+                    <Plus size={14} />
+                  </button>
+                </div>
+                <strong className="cart-line-total">{money(item.price * item.quantity)}</strong>
+                <button type="button" className="icon-button" onClick={() => removeItem(item._id)} aria-label="Remove item">
+                  <Trash2 size={17} />
+                </button>
+              </article>
+            );
+          })}
         </div>
 
         <aside className="summary-panel">
