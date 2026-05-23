@@ -950,10 +950,11 @@ main {
 
 .brand-logo-card {
   width: 252px;
-  min-height: 142px;
+  min-height: 174px;
   display: grid;
   place-items: center;
-  gap: 8px;
+  grid-template-rows: 86px auto auto;
+  gap: 9px;
   padding: 18px;
   border: 1px solid #d9dde1;
   background: #ffffff;
@@ -971,16 +972,40 @@ main {
   transform: translateY(-2px);
 }
 
-.brand-card-mark {
-  width: 42px;
-  height: 42px;
+.brand-image-shell {
+  width: 100%;
+  height: 86px;
   display: grid;
   place-items: center;
-  border: 2px solid currentColor;
-  border-radius: 999px;
-  color: #d71920;
-  font-size: 0.82rem;
-  font-weight: 950;
+  overflow: hidden;
+  padding: 10px 14px;
+  border: 1px solid #edf0f3;
+  border-radius: 6px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(245, 247, 249, 0.96)),
+    #ffffff;
+}
+
+.brand-image-shell.dark,
+.brand-image-shell.cover {
+  border-color: rgba(255, 255, 255, 0.08);
+  background: #090a0c;
+}
+
+.brand-image-shell img {
+  width: 100%;
+  max-width: 178px;
+  height: 100%;
+  object-fit: contain;
+}
+
+.brand-image-shell.cover {
+  padding: 0;
+}
+
+.brand-image-shell.cover img {
+  max-width: none;
+  object-fit: cover;
 }
 
 .brand-logo-card strong {
@@ -2642,8 +2667,18 @@ textarea:focus {
 
   .brand-logo-card {
     width: 205px;
-    min-height: 126px;
+    min-height: 156px;
+    grid-template-rows: 76px auto auto;
     padding: 14px;
+  }
+
+  .brand-image-shell {
+    height: 76px;
+    padding: 8px 12px;
+  }
+
+  .brand-image-shell img {
+    max-width: 150px;
   }
 
   .brand-logo-card strong {

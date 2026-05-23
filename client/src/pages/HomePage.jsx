@@ -4,6 +4,30 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import addiesdiveLogo from '../assets/brands/addiesdive.png';
+import baltanyLogo from '../assets/brands/baltany.png';
+import beijingLogo from '../assets/brands/beijing.png';
+import bernyLogo from '../assets/brands/berny.png';
+import cadisenLogo from '../assets/brands/cadisen.png';
+import cigaLogo from '../assets/brands/ciga.png';
+import cronosLogo from '../assets/brands/cronos.png';
+import ebohrLogo from '../assets/brands/ebohr.png';
+import fiytaLogo from '../assets/brands/fiyta.png';
+import guanqinLogo from '../assets/brands/guanqin.webp';
+import heimdallrLogo from '../assets/brands/heimdallr.jpg';
+import lobinniLogo from '../assets/brands/lobinni.png';
+import memoriginLogo from '../assets/brands/memorigin.svg';
+import merkurLogo from '../assets/brands/merkur.jpg';
+import paganiLogo from '../assets/brands/pagani.png';
+import peacockLogo from '../assets/brands/peacock.png';
+import proximaLogo from '../assets/brands/proxima.jpg';
+import rossiniLogo from '../assets/brands/rossini.png';
+import sanmartinLogo from '../assets/brands/sanmartin.png';
+import seagullLogo from '../assets/brands/seagull.png';
+import shanghaiLogo from '../assets/brands/shanghai.png';
+import sugessLogo from '../assets/brands/sugess.png';
+import tandorioLogo from '../assets/brands/tandorio.png';
+import tianwangLogo from '../assets/brands/tianwang.svg';
 import { api, mediaUrl } from '../services/api.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
 import { money } from '../utils/format.js';
@@ -16,30 +40,30 @@ const perks = [
 ];
 
 const chineseWatchBrands = [
-  { name: 'Sea-Gull', mark: 'SG', type: 'Tianjin watchmaking' },
-  { name: 'Shanghai Watch', mark: 'SH', type: 'Classic mechanical' },
-  { name: 'Beijing Watch', mark: 'BJ', type: 'Heritage atelier' },
-  { name: 'Fiyta', mark: 'FY', type: 'Aerospace inspired' },
-  { name: 'Rossini', mark: 'RS', type: 'Dress watches' },
-  { name: 'Ebohr', mark: 'EB', type: 'Modern automatics' },
-  { name: 'Tian Wang', mark: 'TW', type: 'Mainstream collection' },
-  { name: 'Peacock', mark: 'PK', type: 'Movement maker' },
-  { name: 'CIGA Design', mark: 'CG', type: 'Design watches' },
-  { name: 'Memorigin', mark: 'MO', type: 'Tourbillon craft' },
-  { name: 'San Martin', mark: 'SM', type: 'Diver specialists' },
-  { name: 'Sugess', mark: 'SU', type: 'Mechanical chronos' },
-  { name: 'Pagani Design', mark: 'PD', type: 'Sport watches' },
-  { name: 'Cadisen', mark: 'CD', type: 'Value automatics' },
-  { name: 'Berny', mark: 'BY', type: 'Tool watches' },
-  { name: 'Addiesdive', mark: 'AD', type: 'Dive watches' },
-  { name: 'Heimdallr', mark: 'HD', type: 'Sapphire divers' },
-  { name: 'Proxima', mark: 'PX', type: 'Enthusiast divers' },
-  { name: 'Cronos', mark: 'CR', type: 'Premium homage' },
-  { name: 'Baltany', mark: 'BT', type: 'Vintage field' },
-  { name: 'Merkur', mark: 'MK', type: 'Retro mechanical' },
-  { name: 'Tandorio', mark: 'TD', type: 'Custom builds' },
-  { name: 'Guanqin', mark: 'GQ', type: 'Dress automatics' },
-  { name: 'Lobinni', mark: 'LB', type: 'Elegant mechanical' }
+  { name: 'Sea-Gull', logo: seagullLogo, type: 'Tianjin watchmaking' },
+  { name: 'Shanghai Watch', logo: shanghaiLogo, type: 'Classic mechanical' },
+  { name: 'Beijing Watch', logo: beijingLogo, type: 'Heritage atelier' },
+  { name: 'Fiyta', logo: fiytaLogo, type: 'Aerospace inspired' },
+  { name: 'Rossini', logo: rossiniLogo, type: 'Dress watches', imageMode: 'dark' },
+  { name: 'Ebohr', logo: ebohrLogo, type: 'Modern automatics', imageMode: 'cover' },
+  { name: 'Tian Wang', logo: tianwangLogo, type: 'Mainstream collection' },
+  { name: 'Peacock', logo: peacockLogo, type: 'Movement maker' },
+  { name: 'CIGA Design', logo: cigaLogo, type: 'Design watches' },
+  { name: 'Memorigin', logo: memoriginLogo, type: 'Tourbillon craft' },
+  { name: 'San Martin', logo: sanmartinLogo, type: 'Diver specialists' },
+  { name: 'Sugess', logo: sugessLogo, type: 'Mechanical chronos' },
+  { name: 'Pagani Design', logo: paganiLogo, type: 'Sport watches' },
+  { name: 'Cadisen', logo: cadisenLogo, type: 'Value automatics' },
+  { name: 'Berny', logo: bernyLogo, type: 'Tool watches' },
+  { name: 'Addiesdive', logo: addiesdiveLogo, type: 'Dive watches', imageMode: 'cover' },
+  { name: 'Heimdallr', logo: heimdallrLogo, type: 'Sapphire divers', imageMode: 'cover' },
+  { name: 'Proxima', logo: proximaLogo, type: 'Enthusiast divers', imageMode: 'cover' },
+  { name: 'Cronos', logo: cronosLogo, type: 'Premium homage' },
+  { name: 'Baltany', logo: baltanyLogo, type: 'Vintage field' },
+  { name: 'Merkur', logo: merkurLogo, type: 'Retro mechanical', imageMode: 'dark' },
+  { name: 'Tandorio', logo: tandorioLogo, type: 'Custom builds' },
+  { name: 'Guanqin', logo: guanqinLogo, type: 'Dress automatics' },
+  { name: 'Lobinni', logo: lobinniLogo, type: 'Elegant mechanical' }
 ];
 
 export const HomePage = () => {
@@ -244,7 +268,9 @@ export const HomePage = () => {
                 to={`/products?brand=${encodeURIComponent(brand.name)}`}
                 key={`${brand.name}-${index}`}
               >
-                <span className="brand-card-mark">{brand.mark}</span>
+                <span className={`brand-image-shell${brand.imageMode ? ` ${brand.imageMode}` : ''}`}>
+                  <img src={brand.logo} alt={`${brand.name} brand logo`} loading="lazy" />
+                </span>
                 <strong>{brand.name}</strong>
                 <small>{brand.type}</small>
               </Link>
