@@ -1448,7 +1448,7 @@ textarea:focus {
   cursor: not-allowed;
 }
 
-.cart-quantity-control span {
+.cart-quantity-control > span {
   display: grid;
   place-items: center;
   height: 100%;
