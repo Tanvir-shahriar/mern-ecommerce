@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { Category } from '../models/category.model.js';
+import { Order } from '../models/order.model.js';
 import { Product } from '../models/product.model.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
@@ -245,6 +246,19 @@ export const addReview = asyncHandler(async (req, res) => {
   const product = await Product.findOne({ _id: req.params.id, status: 'active' });
   if (!product) throw new ApiError(404, 'Product not found');
 
+  const deliveredOrder = await Order.findOne({
+    _id: req.body.orderId,
+    user: req.user._id,
+    status: 'delivered',
+    'items.product': product._id
+  })
+    .select('_id')
+    .lean();
+
+  if (!deliveredOrder) {
+    throw new ApiError(403, 'You can review this product after it has been delivered to you');
+  }
+
   const existingReview = product.reviews.find(
     (review) => review.user.toString() === req.user._id.toString()
   );
@@ -255,6 +269,7 @@ export const addReview = asyncHandler(async (req, res) => {
 
   product.reviews.push({
     user: req.user._id,
+    order: deliveredOrder._id,
     name: req.user.name,
     rating: req.body.rating,
     title: req.body.title,

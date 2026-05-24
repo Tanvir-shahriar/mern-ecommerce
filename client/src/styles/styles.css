@@ -2497,6 +2497,43 @@ textarea:focus {
   gap: 4px;
 }
 
+.order-review-form,
+.order-review-submitted {
+  grid-column: 1 / -1;
+}
+
+.order-review-form {
+  display: grid;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.order-review-form h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.order-review-grid {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  gap: 10px;
+}
+
+.order-review-form textarea {
+  min-height: 86px;
+}
+
+.order-review-form .button {
+  justify-self: start;
+}
+
+.order-review-submitted {
+  margin: 0;
+  color: var(--green);
+  font-weight: 900;
+}
+
 .order-item-detail span,
 .info-list span,
 .address-lines span,
@@ -3144,6 +3181,14 @@ textarea:focus {
   .order-item-detail > span,
   .order-item-detail > strong {
     grid-column: 2;
+  }
+
+  .order-review-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .order-review-grid .span-2 {
+    grid-column: auto;
   }
 
   .wishlist-item {

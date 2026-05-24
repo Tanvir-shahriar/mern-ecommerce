@@ -1,5 +1,5 @@
 import { CreditCard, Heart, Minus, Plus, ShoppingBag, Star } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
@@ -13,13 +13,11 @@ import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.
 export const ProductDetailPage = () => {
   const { slugOrId } = useParams();
   const [quantity, setQuantity] = useState(1);
-  const [review, setReview] = useState({ rating: 5, title: '', comment: '' });
   const [message, setMessage] = useState('');
   const [similarActionId, setSimilarActionId] = useState('');
   const { user, isAdmin } = useAuth();
   const { addItem } = useCart();
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
   const { data: product, isLoading, isError } = useQuery({
     queryKey: ['product', slugOrId],
@@ -77,20 +75,6 @@ export const ProductDetailPage = () => {
     if (!user) return navigate('/login');
     await api.post(`/users/wishlist/${product._id}`);
     setMessage('Wishlist updated');
-  };
-
-  const submitReview = async (event) => {
-    event.preventDefault();
-    if (!user) return navigate('/login');
-
-    try {
-      await api.post(`/products/${product._id}/reviews`, review);
-      setReview({ rating: 5, title: '', comment: '' });
-      setMessage('Review posted');
-      queryClient.invalidateQueries({ queryKey: ['product', slugOrId] });
-    } catch (error) {
-      setMessage(apiErrorMessage(error));
-    }
   };
 
   if (isLoading) return <LoadingScreen />;
@@ -160,47 +144,21 @@ export const ProductDetailPage = () => {
             <h2>Customer notes</h2>
           </div>
         </div>
-        <div className="reviews-layout">
-          <div className="review-list">
-            {product.reviews?.length ? (
-              product.reviews.map((item) => (
-                <article className="review-item" key={item._id}>
-                  <div className="rating-row">
-                    <Star size={15} fill="currentColor" />
-                    <strong>{item.rating}</strong>
-                  </div>
-                  <h3>{item.title || item.name}</h3>
-                  <p>{item.comment}</p>
-                </article>
-              ))
-            ) : (
-              <p className="muted">No reviews yet.</p>
-            )}
-          </div>
-          <form className="form-panel" onSubmit={submitReview}>
-            <h3>Write a review</h3>
-            <label>
-              Rating
-              <select value={review.rating} onChange={(event) => setReview((value) => ({ ...value, rating: Number(event.target.value) }))}>
-                {[5, 4, 3, 2, 1].map((item) => (
-                  <option value={item} key={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Title
-              <input value={review.title} onChange={(event) => setReview((value) => ({ ...value, title: event.target.value }))} />
-            </label>
-            <label>
-              Comment
-              <textarea required value={review.comment} onChange={(event) => setReview((value) => ({ ...value, comment: event.target.value }))} />
-            </label>
-            <button className="button dark" type="submit">
-              Post review
-            </button>
-          </form>
+        <div className="review-list">
+          {product.reviews?.length ? (
+            product.reviews.map((item) => (
+              <article className="review-item" key={item._id}>
+                <div className="rating-row">
+                  <Star size={15} fill="currentColor" />
+                  <strong>{item.rating}</strong>
+                </div>
+                <h3>{item.title || item.name}</h3>
+                <p>{item.comment}</p>
+              </article>
+            ))
+          ) : (
+            <p className="muted">No reviews yet.</p>
+          )}
         </div>
       </section>
 

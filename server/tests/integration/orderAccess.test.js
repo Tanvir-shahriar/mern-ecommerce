@@ -3,7 +3,9 @@ import { MongoMemoryServer } from 'mongodb-memory-server';
 import request from 'supertest';
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { app } from '../../src/app.js';
+import { Category } from '../../src/models/category.model.js';
 import { Order } from '../../src/models/order.model.js';
+import { Product } from '../../src/models/product.model.js';
 import { User } from '../../src/models/user.model.js';
 import { signToken } from '../../src/utils/tokens.js';
 
@@ -28,12 +30,31 @@ const createUser = (overrides = {}) =>
     phone: overrides.phone || '01800000000'
   });
 
-const createOrder = (user) =>
+const createProduct = async () => {
+  const suffix = new mongoose.Types.ObjectId().toString();
+  const category = await Category.create({ name: `Review Watches ${suffix}` });
+
+  return Product.create({
+    name: `Review Watch ${suffix}`,
+    shortDescription: 'A reviewable delivery watch.',
+    description: 'A reviewable delivery watch for integration tests.',
+    category: category._id,
+    brand: 'lahVenture',
+    sku: `REV-${suffix.slice(-8)}`,
+    price: 2500,
+    images: [{ url: 'https://example.com/watch.jpg', alt: 'Review watch' }],
+    inventory: { stock: 5, lowStockThreshold: 2, trackQuantity: true }
+  });
+};
+
+const createOrder = (user, overrides = {}) =>
   Order.create({
     user: user._id,
+    status: overrides.status || 'pending',
+    deliveredAt: overrides.status === 'delivered' ? new Date() : undefined,
     items: [
       {
-        product: new mongoose.Types.ObjectId(),
+        product: overrides.productId || new mongoose.Types.ObjectId(),
         name: 'LahVenture Classic Watch',
         sku: 'LV-CLASSIC',
         price: 2500,
@@ -60,7 +81,7 @@ describe('order access', () => {
   });
 
   afterEach(async () => {
-    await Promise.all([Order.deleteMany({}), User.deleteMany({})]);
+    await Promise.all([Order.deleteMany({}), Product.deleteMany({}), Category.deleteMany({}), User.deleteMany({})]);
   });
 
   afterAll(async () => {
@@ -93,5 +114,43 @@ describe('order access', () => {
       .expect(404);
 
     expect(response.body.message).toBe('Order not found');
+  });
+
+  it('lets a customer review a product from their delivered order', async () => {
+    const customer = await createUser({ email: 'review-customer@example.com' });
+    const product = await createProduct();
+    const order = await createOrder(customer, { productId: product._id, status: 'delivered' });
+
+    const response = await request(app)
+      .post(`/api/products/${product._id}/reviews`)
+      .set('Authorization', `Bearer ${signToken(customer._id)}`)
+      .send({
+        orderId: order._id.toString(),
+        rating: 5,
+        title: 'Excellent watch',
+        comment: 'Arrived safely and wears very well.'
+      })
+      .expect(201);
+
+    expect(response.body.data.product.ratingsCount).toBe(1);
+    expect(response.body.data.product.reviews[0].order).toBe(order._id.toString());
+  });
+
+  it('blocks product reviews until the order has been delivered', async () => {
+    const customer = await createUser({ email: 'pending-review@example.com' });
+    const product = await createProduct();
+    const order = await createOrder(customer, { productId: product._id, status: 'processing' });
+
+    const response = await request(app)
+      .post(`/api/products/${product._id}/reviews`)
+      .set('Authorization', `Bearer ${signToken(customer._id)}`)
+      .send({
+        orderId: order._id.toString(),
+        rating: 4,
+        comment: 'Trying to review before delivery.'
+      })
+      .expect(403);
+
+    expect(response.body.message).toBe('You can review this product after it has been delivered to you');
   });
 });
