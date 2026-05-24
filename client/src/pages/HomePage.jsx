@@ -202,7 +202,6 @@ export const HomePage = () => {
                   const productTo = `/products/${product.slug || product._id}`;
                   const inStock = !product.inventory?.trackQuantity || product.inventory.stock > 0;
                   const isPurchasing = purchaseId === product._id;
-                  const stockLabel = product.inventory?.trackQuantity ? `${product.inventory.stock} in stock` : 'Ready to ship';
 
                   return (
                     <article className="future-product-card" style={{ '--delay': `${index * 90}ms` }} key={product._id}>
@@ -223,7 +222,6 @@ export const HomePage = () => {
                             <strong>{money(product.price)}</strong>
                             {product.compareAtPrice ? <span>{money(product.compareAtPrice)}</span> : null}
                           </div>
-                          <em>{inStock ? stockLabel : 'Out of stock'}</em>
                         </div>
                       </div>
                       <button

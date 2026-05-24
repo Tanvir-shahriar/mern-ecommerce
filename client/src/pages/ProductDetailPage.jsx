@@ -16,7 +16,7 @@ export const ProductDetailPage = () => {
   const [review, setReview] = useState({ rating: 5, title: '', comment: '' });
   const [message, setMessage] = useState('');
   const [similarActionId, setSimilarActionId] = useState('');
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { addItem } = useCart();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -97,6 +97,7 @@ export const ProductDetailPage = () => {
   if (isError || !product) return <EmptyState title="Product not found" actionLabel="Back to catalog" actionTo="/products" />;
 
   const inStock = !product.inventory?.trackQuantity || product.inventory.stock > 0;
+  const stockStatusText = product.inventory?.trackQuantity ? `${product.inventory.stock} in stock` : 'Ready to ship';
 
   return (
     <section className="product-detail">
@@ -118,7 +119,9 @@ export const ProductDetailPage = () => {
           <strong>{money(product.price)}</strong>
           {product.compareAtPrice ? <span>{money(product.compareAtPrice)}</span> : null}
         </div>
-        <p className={inStock ? 'stock ok' : 'stock empty'}>{inStock ? `${product.inventory.stock} in stock` : 'Out of stock'}</p>
+        {isAdmin || !inStock ? (
+          <p className={inStock ? 'stock ok' : 'stock empty'}>{inStock ? stockStatusText : 'Out of stock'}</p>
+        ) : null}
 
         <div className="purchase-row">
           <div className="stepper">
@@ -214,7 +217,6 @@ export const ProductDetailPage = () => {
               const itemTo = `/products/${item.slug || item._id}`;
               const itemInStock = !item.inventory?.trackQuantity || item.inventory.stock > 0;
               const isAddingSimilar = similarActionId === `cart-${item._id}`;
-              const stockText = item.inventory?.trackQuantity ? `${item.inventory.stock} in stock` : 'Ready to ship';
 
               return (
                 <article className="similar-product-card" key={item._id}>
@@ -234,20 +236,20 @@ export const ProductDetailPage = () => {
                         <strong>{money(item.price)}</strong>
                         {item.compareAtPrice ? <span>{money(item.compareAtPrice)}</span> : null}
                       </div>
-                      <em className={itemInStock ? 'in-stock' : 'out-stock'}>{itemInStock ? stockText : 'Out of stock'}</em>
                     </div>
                     <div className="similar-product-actions">
                       <button
-                        className="button primary compact"
+                        className="button primary compact similar-cart-button"
                         type="button"
                         onClick={() => addSimilarToCart(item)}
                         disabled={!itemInStock || isAddingSimilar}
+                        aria-label={`Add ${item.name} to cart`}
+                        title="Add to cart"
                       >
                         {isAddingSimilar ? <span className="spinner tiny" /> : <ShoppingBag size={16} />}
-                        {isAddingSimilar ? 'Adding' : 'Add to cart'}
                       </button>
                       <button
-                        className="button purchase-now-button compact"
+                        className="button purchase-now-button compact similar-purchase-button"
                         type="button"
                         onClick={() => purchaseSimilarNow(item)}
                         disabled={!itemInStock}

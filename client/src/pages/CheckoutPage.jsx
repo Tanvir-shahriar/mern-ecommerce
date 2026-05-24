@@ -1,4 +1,4 @@
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, MapPin, Plus } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -36,6 +36,22 @@ const checkoutAddress = (savedAddress, user) => ({
   country: savedAddress?.country || 'Bangladesh'
 });
 
+const CheckoutAddressSummary = ({ address }) => (
+  <div className="checkout-address-summary">
+    <MapPin size={18} />
+    <div className="address-summary">
+      <strong>{address.fullName}</strong>
+      <span>{address.phone}</span>
+      <span>{address.line1}</span>
+      {address.line2 ? <span>{address.line2}</span> : null}
+      <span>
+        {address.city}, {address.state} {address.postalCode}
+      </span>
+      <span>{address.country}</span>
+    </div>
+  </div>
+);
+
 const roundedMoney = (value) => Math.round(value * 100) / 100;
 
 const directPurchaseTotals = (product, quantity) => {
@@ -63,10 +79,16 @@ export const CheckoutPage = () => {
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [selectedAddressId, setSelectedAddressId] = useState('');
+  const [addressMode, setAddressMode] = useState('new');
+  const [showAddressChoices, setShowAddressChoices] = useState(false);
   const savedAddresses = user?.addresses || [];
   const defaultAddress = useMemo(
     () => savedAddresses.find((item) => item.isDefault) || savedAddresses[0],
     [savedAddresses]
+  );
+  const selectedSavedAddress = useMemo(
+    () => savedAddresses.find((item) => item._id === selectedAddressId) || defaultAddress,
+    [defaultAddress, savedAddresses, selectedAddressId]
   );
   const { data: directProduct, isLoading: directLoading, isError: directError } = useQuery({
     queryKey: ['direct-checkout-product', directItem?.productId],
@@ -86,8 +108,16 @@ export const CheckoutPage = () => {
     : true;
 
   useEffect(() => {
-    setAddress(checkoutAddress(defaultAddress, user));
-    setSelectedAddressId(defaultAddress?._id || '');
+    if (defaultAddress) {
+      setAddress(checkoutAddress(defaultAddress, user));
+      setSelectedAddressId(defaultAddress._id || '');
+      setAddressMode('saved');
+    } else {
+      setAddress(checkoutAddress(null, user));
+      setSelectedAddressId('');
+      setAddressMode('new');
+    }
+    setShowAddressChoices(false);
   }, [defaultAddress, user]);
 
   if (order) {
@@ -125,6 +155,20 @@ export const CheckoutPage = () => {
     setAddress((current) => ({ ...current, [key]: value }));
   };
 
+  const chooseSavedAddress = (item) => {
+    setSelectedAddressId(item._id || '');
+    setAddress(checkoutAddress(item, user));
+    setAddressMode('saved');
+    setShowAddressChoices(false);
+  };
+
+  const startNewAddress = () => {
+    setSelectedAddressId('');
+    setAddress(checkoutAddress(null, user));
+    setAddressMode('new');
+    setShowAddressChoices(false);
+  };
+
   const submit = async (event) => {
     event.preventDefault();
     setSubmitting(true);
@@ -156,6 +200,8 @@ export const CheckoutPage = () => {
     }
   };
 
+  const isUsingSavedAddress = Boolean(savedAddresses.length && selectedSavedAddress && addressMode === 'saved');
+
   return (
     <section className="checkout-page section">
       <div className="section-heading compact">
@@ -166,60 +212,83 @@ export const CheckoutPage = () => {
       </div>
       <div className="checkout-layout">
         <form className="form-panel" onSubmit={submit}>
-          {savedAddresses.length ? (
-            <div className="saved-address-picker">
-              <span>Saved delivery address</span>
-              <div>
-                {savedAddresses.map((item) => (
-                  <button
-                    type="button"
-                    className={item._id === selectedAddressId ? 'active' : ''}
-                    key={item._id || item.line1}
-                    onClick={() => {
-                      setSelectedAddressId(item._id || '');
-                      setAddress(checkoutAddress(item, user));
-                    }}
-                  >
-                    {item.label || item.city}
+          {isUsingSavedAddress ? (
+            <div className="checkout-address-panel">
+              <span className="form-section-label">Delivery address</span>
+              <CheckoutAddressSummary address={selectedSavedAddress} />
+              <div className="toolbar-actions">
+                {savedAddresses.length > 1 ? (
+                  <button className="button dark compact" type="button" onClick={() => setShowAddressChoices((value) => !value)}>
+                    Use another address
                   </button>
-                ))}
+                ) : null}
+                <button className="button primary compact" type="button" onClick={startNewAddress}>
+                  <Plus size={16} />
+                  New address
+                </button>
               </div>
+              {showAddressChoices ? (
+                <div className="saved-address-picker">
+                  <span>Choose delivery address</span>
+                  <div>
+                    {savedAddresses.map((item) => (
+                      <button
+                        type="button"
+                        className={item._id === selectedAddressId ? 'active' : ''}
+                        key={item._id || item.line1}
+                        onClick={() => chooseSavedAddress(item)}
+                      >
+                        {item.label || item.city}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : savedAddresses.length ? (
+            <div className="checkout-address-switch">
+              <button className="button dark compact" type="button" onClick={() => chooseSavedAddress(selectedSavedAddress)}>
+                Use saved address
+              </button>
             </div>
           ) : null}
-          <div className="form-grid">
-            <label>
-              Full name
-              <input required value={address.fullName} onChange={(event) => updateAddress('fullName', event.target.value)} />
-            </label>
-            <label>
-              Phone
-              <input required value={address.phone} onChange={(event) => updateAddress('phone', event.target.value)} />
-            </label>
-            <label className="span-2">
-              Address line 1
-              <input required value={address.line1} onChange={(event) => updateAddress('line1', event.target.value)} />
-            </label>
-            <label className="span-2">
-              Address line 2
-              <input value={address.line2} onChange={(event) => updateAddress('line2', event.target.value)} />
-            </label>
-            <label>
-              City
-              <input required value={address.city} onChange={(event) => updateAddress('city', event.target.value)} />
-            </label>
-            <label>
-              District
-              <input required value={address.state} onChange={(event) => updateAddress('state', event.target.value)} />
-            </label>
-            <label>
-              Postal code
-              <input required value={address.postalCode} onChange={(event) => updateAddress('postalCode', event.target.value)} />
-            </label>
-            <label>
-              Country
-              <input required value={address.country} onChange={(event) => updateAddress('country', event.target.value)} />
-            </label>
-          </div>
+
+          {!isUsingSavedAddress ? (
+            <div className="form-grid">
+              <label>
+                Full name
+                <input required value={address.fullName} onChange={(event) => updateAddress('fullName', event.target.value)} />
+              </label>
+              <label>
+                Phone
+                <input required value={address.phone} onChange={(event) => updateAddress('phone', event.target.value)} />
+              </label>
+              <label className="span-2">
+                Address line 1
+                <input required value={address.line1} onChange={(event) => updateAddress('line1', event.target.value)} />
+              </label>
+              <label className="span-2">
+                Address line 2
+                <input value={address.line2} onChange={(event) => updateAddress('line2', event.target.value)} />
+              </label>
+              <label>
+                City
+                <input required value={address.city} onChange={(event) => updateAddress('city', event.target.value)} />
+              </label>
+              <label>
+                District
+                <input required value={address.state} onChange={(event) => updateAddress('state', event.target.value)} />
+              </label>
+              <label>
+                Postal code
+                <input required value={address.postalCode} onChange={(event) => updateAddress('postalCode', event.target.value)} />
+              </label>
+              <label>
+                Country
+                <input required value={address.country} onChange={(event) => updateAddress('country', event.target.value)} />
+              </label>
+            </div>
+          ) : null}
 
           <div className="segmented">
             {[

@@ -63,19 +63,22 @@ export const AccountPage = () => {
   const [addresses, setAddresses] = useState(() => normalizeAddresses(user?.addresses || []));
   const [addressForm, setAddressForm] = useState(() => emptyAddress(user));
   const [editingAddressIndex, setEditingAddressIndex] = useState(-1);
+  const [showAddressForm, setShowAddressForm] = useState(() => !(user?.addresses || []).length);
   const [message, setMessage] = useState('');
   const [addressMessage, setAddressMessage] = useState('');
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingAddress, setSavingAddress] = useState(false);
 
   useEffect(() => {
+    const normalizedAddresses = normalizeAddresses(user?.addresses || []);
     setProfile({ name: user?.name || '', phone: user?.phone || '' });
-    setAddresses(normalizeAddresses(user?.addresses || []));
+    setAddresses(normalizedAddresses);
     setAddressForm((current) => ({
       ...emptyAddress(user),
       label: current.label || 'Home'
     }));
     setEditingAddressIndex(-1);
+    setShowAddressForm(!normalizedAddresses.length);
   }, [user]);
 
   const defaultAddress = useMemo(() => addresses.find((address) => address.isDefault) || addresses[0], [addresses]);
@@ -120,6 +123,7 @@ export const AccountPage = () => {
       setAddressMessage(successMessage);
       setAddressForm(emptyAddress(user));
       setEditingAddressIndex(-1);
+      setShowAddressForm(!normalized.length);
     } catch (error) {
       setAddressMessage(apiErrorMessage(error));
     } finally {
@@ -147,6 +151,7 @@ export const AccountPage = () => {
     setEditingAddressIndex(index);
     setAddressForm(normalizeAddress(addresses[index]));
     setAddressMessage('');
+    setShowAddressForm(true);
   };
 
   const removeAddress = async (index) => {
@@ -166,10 +171,18 @@ export const AccountPage = () => {
     setEditingAddressIndex(-1);
     setAddressForm(emptyAddress(user));
     setAddressMessage('');
+    setShowAddressForm(!addresses.length);
   };
 
   const updateAddressForm = (key, value) => {
     setAddressForm((current) => ({ ...current, [key]: value }));
+  };
+
+  const startAddressAdd = () => {
+    setEditingAddressIndex(-1);
+    setAddressForm(emptyAddress(user));
+    setAddressMessage('');
+    setShowAddressForm(true);
   };
 
   return (
@@ -239,66 +252,76 @@ export const AccountPage = () => {
               <p className="eyebrow">Delivery</p>
               <h2>Saved addresses</h2>
             </div>
-            <span>{addresses.length} saved</span>
+            <div className="toolbar-actions">
+              <span>{addresses.length} saved</span>
+              {addresses.length && !showAddressForm ? (
+                <button className="button primary compact" type="button" onClick={startAddressAdd}>
+                  <Plus size={16} />
+                  Add another
+                </button>
+              ) : null}
+            </div>
           </div>
 
           <div className="address-manager">
-            <form className="address-form" onSubmit={saveAddress}>
-              <div className="form-grid">
-                <label>
-                  Label
-                  <input required value={addressForm.label} onChange={(event) => updateAddressForm('label', event.target.value)} placeholder="Home, Office" />
-                </label>
-                <label>
-                  Full name
-                  <input required value={addressForm.fullName} onChange={(event) => updateAddressForm('fullName', event.target.value)} />
-                </label>
-                <label>
-                  Phone
-                  <input required value={addressForm.phone} onChange={(event) => updateAddressForm('phone', event.target.value)} />
-                </label>
-                <label className="span-2">
-                  Address line 1
-                  <input required value={addressForm.line1} onChange={(event) => updateAddressForm('line1', event.target.value)} />
-                </label>
-                <label className="span-2">
-                  Address line 2
-                  <input value={addressForm.line2} onChange={(event) => updateAddressForm('line2', event.target.value)} />
-                </label>
-                <label>
-                  City
-                  <input required value={addressForm.city} onChange={(event) => updateAddressForm('city', event.target.value)} />
-                </label>
-                <label>
-                  District
-                  <input required value={addressForm.state} onChange={(event) => updateAddressForm('state', event.target.value)} />
-                </label>
-                <label>
-                  Postal code
-                  <input required value={addressForm.postalCode} onChange={(event) => updateAddressForm('postalCode', event.target.value)} />
-                </label>
-                <label>
-                  Country
-                  <input required value={addressForm.country} onChange={(event) => updateAddressForm('country', event.target.value)} />
-                </label>
-                <label className="checkbox-row span-2">
-                  <input type="checkbox" checked={addressForm.isDefault} onChange={(event) => updateAddressForm('isDefault', event.target.checked)} />
-                  Use as default delivery address
-                </label>
-              </div>
-              {addressMessage ? <p className={addressMessage.includes('updated') || addressMessage.includes('added') || addressMessage.includes('removed') ? 'form-note' : 'form-error'}>{addressMessage}</p> : null}
-              <div className="toolbar-actions">
-                <button className="button primary" type="submit" disabled={savingAddress}>
-                  <Plus size={17} />
-                  {savingAddress ? 'Saving...' : editingAddressIndex >= 0 ? 'Update address' : 'Add address'}
-                </button>
-                {editingAddressIndex >= 0 ? (
-                  <button className="button dark" type="button" onClick={cancelAddressEdit}>
-                    Cancel edit
+            {showAddressForm ? (
+              <form className="address-form" onSubmit={saveAddress}>
+                <div className="form-grid">
+                  <label>
+                    Label
+                    <input required value={addressForm.label} onChange={(event) => updateAddressForm('label', event.target.value)} placeholder="Home, Office" />
+                  </label>
+                  <label>
+                    Full name
+                    <input required value={addressForm.fullName} onChange={(event) => updateAddressForm('fullName', event.target.value)} />
+                  </label>
+                  <label>
+                    Phone
+                    <input required value={addressForm.phone} onChange={(event) => updateAddressForm('phone', event.target.value)} />
+                  </label>
+                  <label className="span-2">
+                    Address line 1
+                    <input required value={addressForm.line1} onChange={(event) => updateAddressForm('line1', event.target.value)} />
+                  </label>
+                  <label className="span-2">
+                    Address line 2
+                    <input value={addressForm.line2} onChange={(event) => updateAddressForm('line2', event.target.value)} />
+                  </label>
+                  <label>
+                    City
+                    <input required value={addressForm.city} onChange={(event) => updateAddressForm('city', event.target.value)} />
+                  </label>
+                  <label>
+                    District
+                    <input required value={addressForm.state} onChange={(event) => updateAddressForm('state', event.target.value)} />
+                  </label>
+                  <label>
+                    Postal code
+                    <input required value={addressForm.postalCode} onChange={(event) => updateAddressForm('postalCode', event.target.value)} />
+                  </label>
+                  <label>
+                    Country
+                    <input required value={addressForm.country} onChange={(event) => updateAddressForm('country', event.target.value)} />
+                  </label>
+                  <label className="checkbox-row span-2">
+                    <input type="checkbox" checked={addressForm.isDefault} onChange={(event) => updateAddressForm('isDefault', event.target.checked)} />
+                    Use as default delivery address
+                  </label>
+                </div>
+                {addressMessage ? <p className={addressMessage.includes('updated') || addressMessage.includes('added') || addressMessage.includes('removed') ? 'form-note' : 'form-error'}>{addressMessage}</p> : null}
+                <div className="toolbar-actions">
+                  <button className="button primary" type="submit" disabled={savingAddress}>
+                    <Plus size={17} />
+                    {savingAddress ? 'Saving...' : editingAddressIndex >= 0 ? 'Update address' : 'Add address'}
                   </button>
-                ) : null}
-              </div>
-            </form>
+                  {addresses.length ? (
+                    <button className="button dark" type="button" onClick={cancelAddressEdit}>
+                      {editingAddressIndex >= 0 ? 'Cancel edit' : 'Cancel'}
+                    </button>
+                  ) : null}
+                </div>
+              </form>
+            ) : null}
 
             <div className="address-list">
               {addresses.length ? (

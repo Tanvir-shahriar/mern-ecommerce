@@ -698,8 +698,7 @@ main {
 
 .future-product-meta {
   display: flex;
-  align-items: end;
-  justify-content: space-between;
+  align-items: start;
   gap: 12px;
 }
 
@@ -1430,10 +1429,7 @@ textarea:focus {
 }
 
 .similar-product-meta {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 10px;
+  display: block;
   margin-top: auto;
 }
 
@@ -1470,8 +1466,23 @@ textarea:focus {
 
 .similar-product-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 42px minmax(0, 1fr);
+  align-items: center;
   gap: 8px;
+}
+
+.similar-product-actions .similar-cart-button.button {
+  width: 42px;
+  min-width: 42px;
+  height: 38px;
+  min-height: 38px;
+  padding: 0;
+}
+
+.similar-product-actions .similar-purchase-button.button {
+  min-height: 38px;
+  padding: 7px 9px;
+  font-size: 0.82rem;
 }
 
 .cart-layout,
@@ -1895,6 +1906,13 @@ textarea:focus {
   gap: 4px;
 }
 
+.form-section-label {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .profile-snapshot {
   padding: 10px 0;
   border-top: 1px solid var(--line);
@@ -1916,6 +1934,38 @@ textarea:focus {
 .address-list {
   display: grid;
   gap: 14px;
+}
+
+.address-list:only-child {
+  grid-column: 1 / -1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.checkout-address-panel,
+.checkout-address-switch {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.checkout-address-summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--wash);
+}
+
+.checkout-address-summary svg {
+  margin-top: 2px;
+  color: var(--blue);
+}
+
+.checkout-address-panel .saved-address-picker {
+  margin-bottom: 0;
 }
 
 .address-card {
@@ -2863,12 +2913,16 @@ textarea:focus {
   }
 
   .similar-product-actions {
-    grid-template-columns: 1fr;
+    grid-template-columns: 42px minmax(0, 1fr);
   }
 
   .future-product-meta {
     align-items: start;
     flex-direction: column;
+  }
+
+  .address-list:only-child {
+    grid-template-columns: 1fr;
   }
 
   .brand-showcase-section {
