@@ -8,7 +8,6 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { money } from '../utils/format.js';
-import { ProductCard } from '../components/ProductCard.jsx';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
 
 export const ProductDetailPage = () => {
@@ -16,6 +15,7 @@ export const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [review, setReview] = useState({ rating: 5, title: '', comment: '' });
   const [message, setMessage] = useState('');
+  const [similarActionId, setSimilarActionId] = useState('');
   const { user } = useAuth();
   const { addItem } = useCart();
   const navigate = useNavigate();
@@ -50,6 +50,25 @@ export const ProductDetailPage = () => {
 
   const purchaseNow = async () => {
     startDirectCheckout({ productId: product._id, quantity });
+    if (!user) return navigate('/login', { state: { from: { pathname: '/checkout', search: '?mode=buy-now' } } });
+    return navigate(directCheckoutUrl);
+  };
+
+  const addSimilarToCart = async (item) => {
+    if (!user) return navigate('/login');
+    setSimilarActionId(`cart-${item._id}`);
+    try {
+      await addItem(item._id, 1);
+      setMessage(`${item.name} added to cart`);
+    } catch (error) {
+      setMessage(apiErrorMessage(error));
+    } finally {
+      setSimilarActionId('');
+    }
+  };
+
+  const purchaseSimilarNow = (item) => {
+    startDirectCheckout({ productId: item._id, quantity: 1 });
     if (!user) return navigate('/login', { state: { from: { pathname: '/checkout', search: '?mode=buy-now' } } });
     return navigate(directCheckoutUrl);
   };
@@ -190,10 +209,57 @@ export const ProductDetailPage = () => {
               <h2>Similar products</h2>
             </div>
           </div>
-          <div className="product-grid">
-            {similarProducts.map((item) => (
-              <ProductCard product={item} key={item._id} />
-            ))}
+          <div className="similar-product-grid">
+            {similarProducts.map((item) => {
+              const itemTo = `/products/${item.slug || item._id}`;
+              const itemInStock = !item.inventory?.trackQuantity || item.inventory.stock > 0;
+              const isAddingSimilar = similarActionId === `cart-${item._id}`;
+              const stockText = item.inventory?.trackQuantity ? `${item.inventory.stock} in stock` : 'Ready to ship';
+
+              return (
+                <article className="similar-product-card" key={item._id}>
+                  <Link className="similar-product-media" to={itemTo}>
+                    <img src={mediaUrl(item.images?.[0]?.url)} alt={item.images?.[0]?.alt || item.name} />
+                  </Link>
+                  <div className="similar-product-body">
+                    <p className="eyebrow">{item.brand || item.category?.name || 'lahVenture'}</p>
+                    <Link className="similar-product-title" to={itemTo}>
+                      {item.name}
+                    </Link>
+                    <p className="similar-product-description">
+                      {item.shortDescription || item.description}
+                    </p>
+                    <div className="similar-product-meta">
+                      <div>
+                        <strong>{money(item.price)}</strong>
+                        {item.compareAtPrice ? <span>{money(item.compareAtPrice)}</span> : null}
+                      </div>
+                      <em className={itemInStock ? 'in-stock' : 'out-stock'}>{itemInStock ? stockText : 'Out of stock'}</em>
+                    </div>
+                    <div className="similar-product-actions">
+                      <button
+                        className="button primary compact"
+                        type="button"
+                        onClick={() => addSimilarToCart(item)}
+                        disabled={!itemInStock || isAddingSimilar}
+                      >
+                        {isAddingSimilar ? <span className="spinner tiny" /> : <ShoppingBag size={16} />}
+                        {isAddingSimilar ? 'Adding' : 'Add to cart'}
+                      </button>
+                      <button
+                        className="button purchase-now-button compact"
+                        type="button"
+                        onClick={() => purchaseSimilarNow(item)}
+                        disabled={!itemInStock}
+                      >
+                        <CreditCard size={16} />
+                        Purchase now
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         </section>
       ) : null}
