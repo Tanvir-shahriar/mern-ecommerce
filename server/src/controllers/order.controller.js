@@ -11,8 +11,10 @@ import { emitOrderEvent } from '../sockets/socket.js';
 const TAX_RATE = 0.08;
 const FREE_SHIPPING_THRESHOLD = 10000;
 const STANDARD_SHIPPING = 120;
+const ADMIN_ROLES = new Set(['admin', 'super_admin']);
 
 const money = (value) => Math.round(value * 100) / 100;
+const canViewAllOrders = (user) => ADMIN_ROLES.has(user?.role);
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -181,9 +183,9 @@ export const getMyOrders = asyncHandler(async (req, res) => {
 
 export const getOrder = asyncHandler(async (req, res) => {
   const filter = { _id: req.params.id };
-  if (req.user.role !== 'admin') filter.user = req.user._id;
+  if (!canViewAllOrders(req.user)) filter.user = req.user._id;
 
-  const order = await Order.findOne(filter).populate('user', 'name email').lean();
+  const order = await Order.findOne(filter).populate('user', 'name email phone role status').lean();
   if (!order) throw new ApiError(404, 'Order not found');
 
   res.json({

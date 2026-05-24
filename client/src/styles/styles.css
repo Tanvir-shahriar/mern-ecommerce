@@ -2014,6 +2014,10 @@ textarea:focus {
   color: inherit;
 }
 
+.dashboard-order-row {
+  grid-template-columns: minmax(0, 1fr) auto max-content auto;
+}
+
 .order-row div {
   min-width: 0;
   display: grid;

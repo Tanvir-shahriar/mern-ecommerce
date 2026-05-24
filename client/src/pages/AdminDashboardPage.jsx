@@ -1,5 +1,6 @@
-import { AlertTriangle, Boxes, DollarSign, ShoppingCart, Users } from 'lucide-react';
+import { AlertTriangle, Boxes, DollarSign, Eye, ShoppingCart, Users } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
 import { api, mediaUrl } from '../services/api.js';
@@ -60,7 +61,7 @@ export const AdminDashboardPage = () => {
           ) : (
             <div className="order-list">
               {data?.recentOrders?.map((order) => (
-                <article className="order-row" key={order._id}>
+                <article className="order-row dashboard-order-row" key={order._id}>
                   <div>
                     <strong>{order.orderNumber}</strong>
                     <span>{order.customer?.email || order.customer?.name || dateShort(order.createdAt)}</span>
@@ -68,6 +69,10 @@ export const AdminDashboardPage = () => {
                   </div>
                   <span className={`status-pill ${order.status}`}>{statusLabel(order.status)}</span>
                   <strong>{money(order.pricing.total)}</strong>
+                  <Link className="button compact" to={`/orders/${order._id}`}>
+                    <Eye size={16} />
+                    View
+                  </Link>
                 </article>
               ))}
             </div>
