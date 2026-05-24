@@ -219,8 +219,10 @@ export const AdminUsersPage = () => {
                   detail.orders.map((order) => (
                     <Link className="order-row" to={`/orders/${order._id}`} key={order._id}>
                       <div>
-                        <strong>{order.orderNumber}</strong>
-                        <span>{dateShort(order.createdAt)}</span>
+                        <strong>{order.itemSummary?.label || order.orderNumber}</strong>
+                        <span>
+                          {order.orderNumber} · {dateShort(order.createdAt)}
+                        </span>
                       </div>
                       <span className={`status-pill ${order.status}`}>{statusLabel(order.status)}</span>
                       <strong>{money(order.pricing.total)}</strong>

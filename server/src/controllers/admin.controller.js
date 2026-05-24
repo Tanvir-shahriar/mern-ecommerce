@@ -2,6 +2,7 @@ import { Order } from '../models/order.model.js';
 import { Product } from '../models/product.model.js';
 import { User } from '../models/user.model.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { presentOrders } from '../utils/orderPresenter.js';
 
 export const getDashboard = asyncHandler(async (_req, res) => {
   const [ordersCount, productsCount, usersCount, revenue, lowStockProducts, recentOrders] =
@@ -40,7 +41,7 @@ export const getDashboard = asyncHandler(async (_req, res) => {
         averageOrderValue: revenue[0]?.averageOrderValue || 0
       },
       lowStockProducts,
-      recentOrders
+      recentOrders: presentOrders(recentOrders)
     }
   });
 });

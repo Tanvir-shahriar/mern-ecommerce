@@ -66,6 +66,15 @@ const orderItemSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const customerSnapshotSchema = new mongoose.Schema(
+  {
+    name: String,
+    email: String,
+    phone: String
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema(
   {
     orderNumber: {
@@ -93,6 +102,7 @@ const orderSchema = new mongoose.Schema(
       required: true
     },
     billingAddress: orderAddressSchema,
+    customerSnapshot: customerSnapshotSchema,
     payment: {
       method: {
         type: String,
@@ -175,6 +185,8 @@ orderSchema.index({ status: 1, createdAt: -1 });
 orderSchema.index({ user: 1, createdAt: -1 });
 orderSchema.index({ orderNumber: 1, createdAt: -1 });
 orderSchema.index({ 'items.sku': 1 });
+orderSchema.index({ 'customerSnapshot.email': 1 });
+orderSchema.index({ 'customerSnapshot.phone': 1 });
 orderSchema.index({ 'shippingAddress.phone': 1 });
 
 export const Order = mongoose.model('Order', orderSchema);

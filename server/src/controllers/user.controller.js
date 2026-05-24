@@ -3,6 +3,7 @@ import { Order } from '../models/order.model.js';
 import { User } from '../models/user.model.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { presentOrders } from '../utils/orderPresenter.js';
 
 export const getWishlist = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id).populate({
@@ -99,7 +100,7 @@ export const getUser = asyncHandler(async (req, res) => {
     status: 'success',
     data: {
       user,
-      orders,
+      orders: presentOrders(orders),
       stats: {
         ordersCount: totals[0]?.ordersCount || 0,
         totalSpent: totals[0]?.totalSpent || 0

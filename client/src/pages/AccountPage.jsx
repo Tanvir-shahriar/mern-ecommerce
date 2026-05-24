@@ -217,8 +217,11 @@ export const AccountPage = () => {
               orders.map((order) => (
                 <Link className="order-row" key={order._id} to={`/orders/${order._id}`}>
                   <div>
-                    <strong>{order.orderNumber}</strong>
-                    <span>{dateShort(order.createdAt)}</span>
+                    <strong>{order.itemSummary?.label || order.orderNumber}</strong>
+                    <span>
+                      {order.orderNumber} · {dateShort(order.createdAt)}
+                    </span>
+                    <span>Deliver to {order.customer?.name || order.shippingAddress?.fullName || 'Customer'}</span>
                   </div>
                   <span className={`status-pill ${order.status}`}>{statusLabel(order.status)}</span>
                   <strong>{money(order.pricing.total)}</strong>

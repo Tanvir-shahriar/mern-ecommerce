@@ -141,12 +141,13 @@ export const OrderDetailPage = () => {
             <div className="detail-card-heading">
               <div>
                 <p className="eyebrow">Customer</p>
-                <h2>{order.user?.name || order.shippingAddress.fullName}</h2>
+                <h2>{order.customer?.name || order.shippingAddress.fullName}</h2>
               </div>
               <UserRound size={22} />
             </div>
             <div className="info-list">
-              <span>{order.user?.email || 'Customer email unavailable'}</span>
+              <span>{order.customer?.email || 'Customer email unavailable'}</span>
+              <span>Phone: {order.customer?.phone || order.shippingAddress.phone}</span>
               <span>Placed {dateShort(order.createdAt)}</span>
               <span>Payment: {statusLabel(order.payment?.method || '')}</span>
               <span>Payment status: {statusLabel(order.payment?.status || '')}</span>

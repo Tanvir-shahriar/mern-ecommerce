@@ -115,7 +115,7 @@ export const AdminOrdersPage = () => {
             {orders.map((order) => (
               <article className="table-row" key={order._id}>
                 <strong>{order.orderNumber}</strong>
-                <span>{order.user?.email || 'Guest'}</span>
+                <span>{order.customer?.email || order.customer?.name || order.user?.email || 'Customer'}</span>
                 <span>{dateShort(order.createdAt)}</span>
                 <strong>{money(order.pricing.total)}</strong>
                 <select value={order.status} onChange={(event) => updateStatus(order._id, event.target.value)} aria-label={`Status for ${order.orderNumber}`}>

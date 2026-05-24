@@ -5,6 +5,7 @@ import { Product } from '../models/product.model.js';
 import { User } from '../models/user.model.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { presentOrder, presentOrders } from '../utils/orderPresenter.js';
 import { emitOrderEvent } from '../sockets/socket.js';
 
 const TAX_RATE = 0.08;
@@ -50,6 +51,9 @@ const buildOrderFilter = async (query) => {
     filter.$or = [
       { orderNumber: regex },
       { user: { $in: matchedUsers.map((user) => user._id) } },
+      { 'customerSnapshot.name': regex },
+      { 'customerSnapshot.email': regex },
+      { 'customerSnapshot.phone': regex },
       { 'shippingAddress.fullName': regex },
       { 'shippingAddress.phone': regex },
       { 'shippingAddress.city': regex },
@@ -106,12 +110,18 @@ export const createOrder = asyncHandler(async (req, res) => {
   const tax = money(discountedSubtotal * TAX_RATE);
   const shipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING;
   const total = money(discountedSubtotal + tax + shipping);
+  const shippingAddress = req.body.shippingAddress;
 
   const order = await Order.create({
     user: req.user._id,
     items: orderItems,
-    shippingAddress: req.body.shippingAddress,
-    billingAddress: req.body.billingAddress || req.body.shippingAddress,
+    shippingAddress,
+    billingAddress: req.body.billingAddress || shippingAddress,
+    customerSnapshot: {
+      name: shippingAddress.fullName || req.user.name,
+      email: req.user.email,
+      phone: shippingAddress.phone || req.user.phone
+    },
     payment: {
       method: req.body.paymentMethod,
       status: req.body.paymentMethod === 'cash_on_delivery' ? 'pending' : 'authorized',
@@ -153,16 +163,19 @@ export const createOrder = asyncHandler(async (req, res) => {
 
   res.status(201).json({
     status: 'success',
-    data: { order }
+    data: { order: presentOrder(order) }
   });
 });
 
 export const getMyOrders = asyncHandler(async (req, res) => {
-  const orders = await Order.find({ user: req.user._id }).sort('-createdAt').lean();
+  const orders = await Order.find({ user: req.user._id })
+    .populate('user', 'name email phone')
+    .sort('-createdAt')
+    .lean();
 
   res.json({
     status: 'success',
-    data: { orders }
+    data: { orders: presentOrders(orders) }
   });
 });
 
@@ -175,7 +188,7 @@ export const getOrder = asyncHandler(async (req, res) => {
 
   res.json({
     status: 'success',
-    data: { order }
+    data: { order: presentOrder(order) }
   });
 });
 
@@ -197,7 +210,7 @@ export const getOrders = asyncHandler(async (req, res) => {
   res.json({
     status: 'success',
     data: {
-      orders,
+      orders: presentOrders(orders),
       pagination: {
         page,
         limit,
@@ -235,7 +248,7 @@ export const exportOrdersCsv = asyncHandler(async (req, res) => {
     'Customer Note'
   ];
 
-  const rows = orders.map((order) => {
+  const rows = presentOrders(orders).map((order) => {
     const address = order.shippingAddress
       ? [
           order.shippingAddress.line1,
@@ -252,9 +265,9 @@ export const exportOrdersCsv = asyncHandler(async (req, res) => {
     return [
       order.orderNumber,
       order.createdAt?.toISOString(),
-      order.user?.name || order.shippingAddress?.fullName,
-      order.user?.email,
-      order.user?.phone || order.shippingAddress?.phone,
+      order.customer?.name,
+      order.customer?.email,
+      order.customer?.phone,
       order.status,
       order.payment?.method,
       order.payment?.status,
@@ -299,6 +312,6 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
   res.json({
     status: 'success',
-    data: { order }
+    data: { order: presentOrder(order) }
   });
 });

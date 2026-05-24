@@ -63,7 +63,8 @@ export const AdminDashboardPage = () => {
                 <article className="order-row" key={order._id}>
                   <div>
                     <strong>{order.orderNumber}</strong>
-                    <span>{order.user?.email || dateShort(order.createdAt)}</span>
+                    <span>{order.customer?.email || order.customer?.name || dateShort(order.createdAt)}</span>
+                    <span>{order.itemSummary?.label || `${order.items?.length || 0} product(s)`}</span>
                   </div>
                   <span className={`status-pill ${order.status}`}>{statusLabel(order.status)}</span>
                   <strong>{money(order.pricing.total)}</strong>
