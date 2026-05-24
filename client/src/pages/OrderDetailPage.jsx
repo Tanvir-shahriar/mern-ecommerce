@@ -9,7 +9,7 @@ import { dateShort, money, statusLabel } from '../utils/format.js';
 import { useState } from 'react';
 
 const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
-const emptyReview = { rating: 5, title: '', comment: '' };
+const emptyReview = { rating: 5, comment: '' };
 
 const orderItemProductId = (item) => (typeof item.product === 'object' ? item.product?._id : item.product);
 
@@ -157,20 +157,22 @@ export const OrderDetailPage = () => {
                       <form className="order-review-form" onSubmit={(event) => submitReview(event, item)}>
                         <h3>Write a review</h3>
                         <div className="order-review-grid">
-                          <label>
-                            Rating
-                            <select value={draft.rating} onChange={(event) => updateReviewDraft(productId, 'rating', Number(event.target.value))}>
-                              {[5, 4, 3, 2, 1].map((rating) => (
-                                <option value={rating} key={rating}>
-                                  {rating}
-                                </option>
+                          <div className="order-review-rating">
+                            <span>Rating</span>
+                            <div className="star-rating-control" aria-label={`Rating ${draft.rating} out of 5`}>
+                              {[1, 2, 3, 4, 5].map((rating) => (
+                                <button
+                                  type="button"
+                                  className={rating <= draft.rating ? 'active' : ''}
+                                  key={rating}
+                                  onClick={() => updateReviewDraft(productId, 'rating', rating)}
+                                  aria-label={`${rating} star${rating === 1 ? '' : 's'}`}
+                                >
+                                  <Star size={22} fill="currentColor" />
+                                </button>
                               ))}
-                            </select>
-                          </label>
-                          <label>
-                            Title
-                            <input value={draft.title} onChange={(event) => updateReviewDraft(productId, 'title', event.target.value)} />
-                          </label>
+                            </div>
+                          </div>
                           <label className="span-2">
                             Comment
                             <textarea required value={draft.comment} onChange={(event) => updateReviewDraft(productId, 'comment', event.target.value)} />

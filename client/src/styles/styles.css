@@ -2516,8 +2516,40 @@ textarea:focus {
 
 .order-review-grid {
   display: grid;
-  grid-template-columns: 110px minmax(0, 1fr);
+  grid-template-columns: 1fr;
   gap: 10px;
+}
+
+.order-review-rating {
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.star-rating-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.star-rating-control button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: #cbd5e1;
+}
+
+.star-rating-control button.active,
+.star-rating-control button:hover,
+.star-rating-control button:focus-visible {
+  color: #f3b321;
 }
 
 .order-review-form textarea {

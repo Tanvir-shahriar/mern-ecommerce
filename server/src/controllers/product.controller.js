@@ -272,7 +272,6 @@ export const addReview = asyncHandler(async (req, res) => {
     order: deliveredOrder._id,
     name: req.user.name,
     rating: req.body.rating,
-    title: req.body.title,
     comment: req.body.comment
   });
   product.recalculateRatings();

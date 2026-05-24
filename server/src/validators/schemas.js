@@ -123,7 +123,6 @@ export const productUpdateSchema = productSchema.partial();
 export const reviewSchema = z.object({
   orderId: objectId,
   rating: z.coerce.number().min(1).max(5),
-  title: z.string().optional(),
   comment: z.string().min(5)
 });
 

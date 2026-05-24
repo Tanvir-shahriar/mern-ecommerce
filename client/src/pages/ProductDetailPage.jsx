@@ -152,7 +152,7 @@ export const ProductDetailPage = () => {
                   <Star size={15} fill="currentColor" />
                   <strong>{item.rating}</strong>
                 </div>
-                <h3>{item.title || item.name}</h3>
+                <h3>{item.name}</h3>
                 <p>{item.comment}</p>
               </article>
             ))

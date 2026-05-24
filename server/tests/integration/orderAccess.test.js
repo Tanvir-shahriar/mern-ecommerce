@@ -127,7 +127,6 @@ describe('order access', () => {
       .send({
         orderId: order._id.toString(),
         rating: 5,
-        title: 'Excellent watch',
         comment: 'Arrived safely and wears very well.'
       })
       .expect(201);
