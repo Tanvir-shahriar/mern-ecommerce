@@ -1392,12 +1392,14 @@ textarea:focus {
   place-items: center;
   padding: 12px;
   background: #f4f7fa;
+  overflow: hidden;
 }
 
 .similar-product-media img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center 58%;
 }
 
 .similar-product-body {
