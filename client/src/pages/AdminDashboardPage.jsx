@@ -53,7 +53,7 @@ export const AdminDashboardPage = () => {
         })}
       </div>
 
-      <div className="admin-grid">
+      <div className="admin-grid dashboard-grid">
         <div className="panel">
           <h2>Recent orders</h2>
           {isLoading ? (
@@ -67,12 +67,14 @@ export const AdminDashboardPage = () => {
                     <span>{order.customer?.email || order.customer?.name || dateShort(order.createdAt)}</span>
                     <span>{order.itemSummary?.label || `${order.items?.length || 0} product(s)`}</span>
                   </div>
-                  <span className={`status-pill ${order.status}`}>{statusLabel(order.status)}</span>
-                  <strong>{money(order.pricing.total)}</strong>
-                  <Link className="button compact" to={`/orders/${order._id}`}>
-                    <Eye size={16} />
-                    View
-                  </Link>
+                  <div className="dashboard-order-meta">
+                    <span className={`status-pill ${order.status}`}>{statusLabel(order.status)}</span>
+                    <strong>{money(order.pricing.total)}</strong>
+                    <Link className="button compact" to={`/orders/${order._id}`}>
+                      <Eye size={16} />
+                      View
+                    </Link>
+                  </div>
                 </article>
               ))}
             </div>
