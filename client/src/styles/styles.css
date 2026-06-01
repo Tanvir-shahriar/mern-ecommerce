@@ -2531,19 +2531,21 @@ textarea:focus {
   font-weight: 800;
 }
 
-.star-rating-control {
-  width: max-content;
-  display: flex;
+.order-review-rating .star-rating-control {
+  width: 186px;
+  display: grid;
+  grid-template-columns: repeat(5, 34px);
+  grid-auto-flow: column;
   align-items: center;
-  flex-direction: row;
-  flex-wrap: nowrap;
+  justify-content: start;
   gap: 4px;
 }
 
-.star-rating-control button {
-  flex: 0 0 34px;
+.order-review-rating .star-rating-button {
   width: 34px;
+  min-width: 34px;
   height: 34px;
+  min-height: 34px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -2553,9 +2555,9 @@ textarea:focus {
   color: #cbd5e1;
 }
 
-.star-rating-control button.active,
-.star-rating-control button:hover,
-.star-rating-control button:focus-visible {
+.order-review-rating .star-rating-button.active,
+.order-review-rating .star-rating-button:hover,
+.order-review-rating .star-rating-button:focus-visible {
   color: #f3b321;
 }
 

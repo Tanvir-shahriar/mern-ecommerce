@@ -163,7 +163,7 @@ export const OrderDetailPage = () => {
                               {[1, 2, 3, 4, 5].map((rating) => (
                                 <button
                                   type="button"
-                                  className={rating <= draft.rating ? 'active' : ''}
+                                  className={rating <= draft.rating ? 'star-rating-button active' : 'star-rating-button'}
                                   key={rating}
                                   onClick={() => updateReviewDraft(productId, 'rating', rating)}
                                   aria-label={`${rating} star${rating === 1 ? '' : 's'}`}
