@@ -27,7 +27,7 @@ const router = express.Router();
 router.get('/', optionalProtect, cachePublic(45), getProducts);
 router.get('/featured', cachePublic(90), getFeaturedProducts);
 router.get('/:id/similar', validate({ params: idParamSchema }), cachePublic(60), getSimilarProducts);
-router.get('/:slugOrId', validate({ params: slugOrIdParamSchema }), cachePublic(60), getProduct);
+router.get('/:slugOrId', validate({ params: slugOrIdParamSchema }), getProduct);
 router.post('/:id/reviews', protect, validate({ params: idParamSchema, body: reviewSchema }), addReview);
 
 router.use(protect, restrictTo('admin'));

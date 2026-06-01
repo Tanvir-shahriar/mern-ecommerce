@@ -7,8 +7,16 @@ import { LoadingScreen } from '../components/LoadingScreen.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
-import { money } from '../utils/format.js';
+import { dateShort, money } from '../utils/format.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
+
+const ReviewStars = ({ rating = 0 }) => (
+  <div className="review-stars" aria-label={`${rating} out of 5 stars`}>
+    {[1, 2, 3, 4, 5].map((star) => (
+      <Star size={15} fill="currentColor" key={star} className={star <= rating ? 'filled' : ''} />
+    ))}
+  </div>
+);
 
 export const ProductDetailPage = () => {
   const { slugOrId } = useParams();
@@ -137,23 +145,27 @@ export const ProductDetailPage = () => {
         </div>
       </div>
 
-      <section className="reviews-section">
+      <section className="reviews-section" id="reviews">
         <div className="section-heading compact">
           <div>
             <p className="eyebrow">Reviews</p>
             <h2>Customer notes</h2>
           </div>
+          <span className="review-count">{product.ratingsCount || 0} verified review(s)</span>
         </div>
         <div className="review-list">
           {product.reviews?.length ? (
             product.reviews.map((item) => (
               <article className="review-item" key={item._id}>
-                <div className="rating-row">
-                  <Star size={15} fill="currentColor" />
-                  <strong>{item.rating}</strong>
+                <div className="review-item-header">
+                  <div>
+                    <h3>{item.name}</h3>
+                    {item.createdAt ? <span>{dateShort(item.createdAt)}</span> : null}
+                  </div>
+                  <ReviewStars rating={item.rating} />
                 </div>
-                <h3>{item.name}</h3>
                 <p>{item.comment}</p>
+                <span className="verified-review">Verified purchase</span>
               </article>
             ))
           ) : (

@@ -12,6 +12,7 @@ const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 
 const emptyReview = { rating: 5, comment: '' };
 
 const orderItemProductId = (item) => (typeof item.product === 'object' ? item.product?._id : item.product);
+const productReviewPath = (item) => `/products/${orderItemProductId(item)}#reviews`;
 
 const AddressBlock = ({ title, address }) => {
   if (!address) return null;
@@ -93,7 +94,7 @@ export const OrderDetailPage = () => {
         [productId]: emptyReview
       }));
       queryClient.invalidateQueries({ queryKey: ['product'] });
-      setMessage({ text: 'Review submitted', type: 'success' });
+      setMessage({ text: 'Review submitted. It will show below the product reviews.', type: 'success' });
     } catch (error) {
       setMessage({ text: apiErrorMessage(error), type: 'error' });
     } finally {
@@ -184,7 +185,12 @@ export const OrderDetailPage = () => {
                         </button>
                       </form>
                     ) : reviewedProducts[productId] ? (
-                      <p className="order-review-submitted">Review submitted</p>
+                      <div className="order-review-submitted">
+                        <span>Review submitted</span>
+                        <Link className="text-link" to={productReviewPath(item)}>
+                          View under product
+                        </Link>
+                      </div>
                     ) : null}
                   </div>
                 );

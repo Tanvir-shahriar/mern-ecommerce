@@ -1360,14 +1360,58 @@ textarea:focus {
 
 .review-list {
   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 12px;
 }
 
 .review-item {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
   padding: 16px;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--radius);
+}
+
+.review-item-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.review-item-header h3,
+.review-item p {
+  margin: 0;
+}
+
+.review-item-header span,
+.review-count {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.review-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  color: #cbd5e1;
+}
+
+.review-stars .filled {
+  color: #f3b321;
+}
+
+.verified-review {
+  width: fit-content;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: var(--green);
+  font-size: 0.78rem;
+  font-weight: 900;
 }
 
 .similar-product-grid {
@@ -2570,9 +2614,17 @@ textarea:focus {
 }
 
 .order-review-submitted {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   margin: 0;
   color: var(--green);
   font-weight: 900;
+}
+
+.order-review-submitted .text-link {
+  color: var(--blue);
 }
 
 .order-item-detail span,
