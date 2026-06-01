@@ -165,7 +165,40 @@ describe('order access', () => {
       .expect(201);
 
     expect(response.body.data.product.ratingsCount).toBe(1);
-    expect(response.body.data.product.reviews[0].order).toBe(order._id.toString());
+    expect(response.body.data.product.reviews[0]).toMatchObject({
+      name: customer.name,
+      verifiedPurchase: true
+    });
+  });
+
+  it('shows delivered-order reviews on the public product detail page', async () => {
+    const customer = await createUser({ name: 'Public Reviewer', email: 'public-reviewer@example.com' });
+    const product = await createProduct();
+    const order = await createOrder(customer, { productId: product._id, status: 'delivered' });
+
+    await request(app)
+      .post(`/api/products/${product._id}/reviews`)
+      .set('Authorization', `Bearer ${signToken(customer._id)}`)
+      .send({
+        orderId: order._id.toString(),
+        rating: 5,
+        comment: 'This review should be visible to everyone.'
+      })
+      .expect(201);
+
+    const response = await request(app).get(`/api/products/${product._id}`).expect(200);
+
+    expect(response.headers['cache-control']).toContain('no-store');
+    expect(response.body.data.product.ratingsCount).toBe(1);
+    expect(response.body.data.product.reviews).toEqual([
+      expect.objectContaining({
+        name: 'Public Reviewer',
+        rating: 5,
+        comment: 'This review should be visible to everyone.',
+        verifiedPurchase: true
+      })
+    ]);
+    expect(response.body.data.product.reviews[0].user).toBeUndefined();
   });
 
   it('blocks product reviews until the order has been delivered', async () => {

@@ -165,7 +165,7 @@ export const ProductDetailPage = () => {
                   <ReviewStars rating={item.rating} />
                 </div>
                 <p>{item.comment}</p>
-                <span className="verified-review">Verified purchase</span>
+                {item.verifiedPurchase ? <span className="verified-review">Verified purchase</span> : null}
               </article>
             ))
           ) : (

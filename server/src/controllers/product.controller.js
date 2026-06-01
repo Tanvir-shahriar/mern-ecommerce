@@ -16,6 +16,36 @@ const sortOptions = {
   popular: '-salesCount'
 };
 
+const approvedReviews = (reviews = []) =>
+  reviews
+    .filter((review) => review.status === 'approved')
+    .sort((first, second) => new Date(second.createdAt || 0) - new Date(first.createdAt || 0));
+
+const presentPublicReview = (review) => ({
+  _id: review._id?.toString?.() || review.id,
+  name: review.name || review.user?.name || 'Verified customer',
+  rating: review.rating,
+  comment: review.comment,
+  createdAt: review.createdAt,
+  verifiedPurchase: Boolean(review.order)
+});
+
+const presentProductDetail = (product) => {
+  if (!product) return product;
+
+  const reviews = approvedReviews(product.reviews).map(presentPublicReview);
+  const ratingsAverage = reviews.length
+    ? Math.round((reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length) * 10) / 10
+    : 0;
+
+  return {
+    ...product,
+    ratingsAverage: reviews.length ? ratingsAverage : product.ratingsAverage || 0,
+    ratingsCount: reviews.length ? reviews.length : product.ratingsCount || 0,
+    reviews
+  };
+};
+
 const resolveCategory = async (category) => {
   if (!category) return null;
   if (mongoose.isValidObjectId(category)) return category;
@@ -130,9 +160,10 @@ export const getProduct = asyncHandler(async (req, res) => {
 
   if (!product) throw new ApiError(404, 'Product not found');
 
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
   res.json({
     status: 'success',
-    data: { product }
+    data: { product: presentProductDetail(product) }
   });
 });
 
@@ -277,8 +308,13 @@ export const addReview = asyncHandler(async (req, res) => {
   product.recalculateRatings();
   await product.save();
 
+  const reviewedProduct = await Product.findById(product._id)
+    .populate('category', 'name slug')
+    .populate('reviews.user', 'name avatar')
+    .lean();
+
   res.status(201).json({
     status: 'success',
-    data: { product }
+    data: { product: presentProductDetail(reviewedProduct) }
   });
 });

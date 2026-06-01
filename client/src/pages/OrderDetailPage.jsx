@@ -87,10 +87,15 @@ export const OrderDetailPage = () => {
     setMessage({ text: '', type: 'success' });
     setReviewingProducts((current) => ({ ...current, [productId]: true }));
     try {
-      await api.post(`/products/${productId}/reviews`, {
+      const { data } = await api.post(`/products/${productId}/reviews`, {
         ...draft,
         orderId: orderIdentifier(order)
       });
+      const reviewedProduct = data.data.product;
+      if (reviewedProduct) {
+        queryClient.setQueryData(['product', productId], reviewedProduct);
+        if (reviewedProduct.slug) queryClient.setQueryData(['product', reviewedProduct.slug], reviewedProduct);
+      }
       setReviewedProducts((current) => ({ ...current, [productId]: true }));
       setReviewDrafts((current) => ({
         ...current,
