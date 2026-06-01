@@ -27,7 +27,7 @@ export const getDashboard = asyncHandler(async (_req, res) => {
         .select('name slug sku inventory images')
         .limit(8)
         .lean(),
-      Order.find().populate('user', 'name email').sort('-createdAt').limit(8).lean()
+      Order.find().populate('user', 'name email phone role status').sort('-createdAt').limit(8).lean()
     ]);
 
   res.json({

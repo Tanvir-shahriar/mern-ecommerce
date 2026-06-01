@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Cart } from '../models/cart.model.js';
 import { Coupon } from '../models/coupon.model.js';
 import { Order } from '../models/order.model.js';
@@ -17,6 +18,12 @@ const money = (value) => Math.round(value * 100) / 100;
 const canViewAllOrders = (user) => ADMIN_ROLES.has(user?.role);
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const buildOrderLookupFilter = (value) => {
+  const lookup = String(value || '').trim();
+  if (mongoose.isValidObjectId(lookup)) return { _id: lookup };
+  return { orderNumber: lookup.toUpperCase() };
+};
 
 const csvValue = (value) => {
   const text = value === undefined || value === null ? '' : String(value);
@@ -182,7 +189,7 @@ export const getMyOrders = asyncHandler(async (req, res) => {
 });
 
 export const getOrder = asyncHandler(async (req, res) => {
-  const filter = { _id: req.params.id };
+  const filter = buildOrderLookupFilter(req.params.id);
   if (!canViewAllOrders(req.user)) filter.user = req.user._id;
 
   const order = await Order.findOne(filter).populate('user', 'name email phone role status').lean();

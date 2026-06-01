@@ -4,23 +4,35 @@ export const presentOrder = (order) => {
   const plain = typeof order?.toObject === 'function' ? order.toObject({ virtuals: true }) : order;
   if (!plain) return plain;
 
+  const orderId = plain._id?.toString?.() || plain.id || '';
   const account = hasPopulatedUser(plain.user) ? plain.user : {};
   const shipping = plain.shippingAddress || {};
   const snapshot = plain.customerSnapshot || {};
   const items = plain.items || [];
   const products = items.map((item) => item.name).filter(Boolean);
   const count = items.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+  const deliveryName = shipping.fullName || snapshot.name || account.name || 'Customer';
+  const deliveryPhone = shipping.phone || snapshot.phone || account.phone || '';
+  const accountName = account.name || '';
+  const accountEmail = account.email || snapshot.email || '';
+  const accountPhone = account.phone || '';
+  const customerEmail = snapshot.email || account.email || '';
+  const customerPhone = snapshot.phone || deliveryPhone;
 
   return {
     ...plain,
+    id: orderId,
     customer: {
-      name: snapshot.name || shipping.fullName || account.name || 'Customer',
-      email: snapshot.email || account.email || '',
-      phone: snapshot.phone || shipping.phone || account.phone || '',
-      accountName: account.name || snapshot.name || '',
-      accountEmail: account.email || snapshot.email || '',
-      deliveryName: shipping.fullName || snapshot.name || '',
-      deliveryPhone: shipping.phone || snapshot.phone || ''
+      name: snapshot.name || deliveryName,
+      email: customerEmail,
+      phone: customerPhone,
+      accountName: accountName || snapshot.name || deliveryName,
+      accountEmail,
+      accountPhone,
+      deliveryName,
+      deliveryPhone,
+      displayName: deliveryName,
+      displayEmail: customerEmail
     },
     itemSummary: {
       count,

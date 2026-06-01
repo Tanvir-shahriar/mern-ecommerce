@@ -2459,6 +2459,28 @@ textarea:focus {
   border-top: 1px solid var(--line);
 }
 
+.table-customer {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.table-customer strong,
+.table-customer small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-customer strong {
+  color: var(--ink);
+}
+
+.table-customer small {
+  color: var(--muted);
+  font-weight: 700;
+}
+
 .back-link {
   width: fit-content;
   display: inline-flex;

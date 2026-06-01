@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
+import { orderCustomerName, orderDetailPath, orderIdentifier } from '../utils/orders.js';
 
 const emptyAddress = (user) => ({
   label: 'Home',
@@ -228,13 +229,13 @@ export const AccountPage = () => {
           <div className="order-list">
             {orders.length ? (
               orders.map((order) => (
-                <Link className="order-row" key={order._id} to={`/orders/${order._id}`}>
+                <Link className="order-row" key={orderIdentifier(order)} to={orderDetailPath(order)}>
                   <div>
                     <strong>{order.itemSummary?.label || order.orderNumber}</strong>
                     <span>
                       {order.orderNumber} · {dateShort(order.createdAt)}
                     </span>
-                    <span>Deliver to {order.customer?.name || order.shippingAddress?.fullName || 'Customer'}</span>
+                    <span>Deliver to {orderCustomerName(order)}</span>
                   </div>
                   <span className={`status-pill ${order.status}`}>{statusLabel(order.status)}</span>
                   <strong>{money(order.pricing.total)}</strong>

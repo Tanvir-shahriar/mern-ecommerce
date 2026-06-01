@@ -29,7 +29,12 @@ describe('presentOrder', () => {
       email: 'checkout@example.com',
       phone: '01800000000',
       accountName: 'Updated Account Name',
-      deliveryName: 'Checkout Recipient'
+      accountEmail: 'updated@example.com',
+      accountPhone: '01700000000',
+      deliveryName: 'Checkout Recipient',
+      deliveryPhone: '01800000000',
+      displayName: 'Checkout Recipient',
+      displayEmail: 'checkout@example.com'
     });
     expect(order.itemSummary).toMatchObject({
       count: 3,
@@ -54,7 +59,10 @@ describe('presentOrder', () => {
     expect(order.customer).toMatchObject({
       name: 'Delivery Person',
       email: 'account@example.com',
-      phone: '01900000000'
+      phone: '01900000000',
+      accountName: 'Account Name',
+      deliveryName: 'Delivery Person',
+      deliveryPhone: '01900000000'
     });
     expect(order.itemSummary.label).toBe('Field Watch');
   });

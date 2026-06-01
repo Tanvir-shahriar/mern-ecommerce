@@ -9,7 +9,7 @@ import {
 } from '../controllers/order.controller.js';
 import { protect, restrictTo } from '../middleware/auth.middleware.js';
 import { validate } from '../middleware/validate.middleware.js';
-import { checkoutSchema, idParamSchema, orderStatusSchema } from '../validators/schemas.js';
+import { checkoutSchema, idParamSchema, orderLookupParamSchema, orderStatusSchema } from '../validators/schemas.js';
 
 const router = express.Router();
 
@@ -20,6 +20,6 @@ router.get('/mine', getMyOrders);
 router.get('/', restrictTo('admin'), getOrders);
 router.get('/export.csv', restrictTo('admin'), exportOrdersCsv);
 router.patch('/:id/status', restrictTo('admin'), validate({ params: idParamSchema, body: orderStatusSchema }), updateOrderStatus);
-router.get('/:id', validate({ params: idParamSchema }), getOrder);
+router.get('/:id', validate({ params: orderLookupParamSchema }), getOrder);
 
 export default router;

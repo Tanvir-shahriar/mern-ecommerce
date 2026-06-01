@@ -6,6 +6,7 @@ import { LoadingScreen } from '../components/LoadingScreen.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
+import { orderCustomerEmail, orderCustomerName, orderCustomerPhone, orderIdentifier } from '../utils/orders.js';
 import { useState } from 'react';
 
 const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
@@ -42,6 +43,7 @@ export const OrderDetailPage = () => {
   const [reviewDrafts, setReviewDrafts] = useState({});
   const [reviewingProducts, setReviewingProducts] = useState({});
   const [reviewedProducts, setReviewedProducts] = useState({});
+  const backTo = isAdmin ? '/admin/orders' : '/account';
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ['order', id],
@@ -54,7 +56,8 @@ export const OrderDetailPage = () => {
   const updateStatus = async (status) => {
     setMessage({ text: '', type: 'success' });
     try {
-      const { data } = await api.patch(`/orders/${id}/status`, { status });
+      const statusOrderId = order?._id || order?.id || id;
+      const { data } = await api.patch(`/orders/${statusOrderId}/status`, { status });
       queryClient.setQueryData(['order', id], data.data.order);
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
@@ -86,7 +89,7 @@ export const OrderDetailPage = () => {
     try {
       await api.post(`/products/${productId}/reviews`, {
         ...draft,
-        orderId: order._id
+        orderId: orderIdentifier(order)
       });
       setReviewedProducts((current) => ({ ...current, [productId]: true }));
       setReviewDrafts((current) => ({
@@ -104,11 +107,15 @@ export const OrderDetailPage = () => {
 
   if (isLoading) return <LoadingScreen />;
   if (isError || !order) {
-    return <EmptyState title="Order not found" actionLabel="Back to account" actionTo="/account" />;
+    return <EmptyState title="Order not found" actionLabel={isAdmin ? 'Back to orders' : 'Back to account'} actionTo={backTo} />;
   }
 
-  const backTo = isAdmin ? '/admin/orders' : '/account';
   const canReviewDeliveredItems = !isAdmin && order.status === 'delivered';
+  const customerName = orderCustomerName(order);
+  const customerEmail = orderCustomerEmail(order);
+  const customerPhone = orderCustomerPhone(order);
+  const accountName = order.customer?.accountName;
+  const accountEmail = order.customer?.accountEmail;
 
   return (
     <section className="order-detail-page section">
@@ -231,13 +238,15 @@ export const OrderDetailPage = () => {
             <div className="detail-card-heading">
               <div>
                 <p className="eyebrow">Customer</p>
-                <h2>{order.customer?.name || order.shippingAddress.fullName}</h2>
+                <h2>{customerName}</h2>
               </div>
               <UserRound size={22} />
             </div>
             <div className="info-list">
-              <span>{order.customer?.email || 'Customer email unavailable'}</span>
-              <span>Phone: {order.customer?.phone || order.shippingAddress.phone}</span>
+              <span>Email: {customerEmail || 'Unavailable'}</span>
+              <span>Delivery phone: {customerPhone || 'Unavailable'}</span>
+              <span>Account: {accountName || customerName}</span>
+              {accountEmail && accountEmail !== customerEmail ? <span>Account email: {accountEmail}</span> : null}
               <span>Placed {dateShort(order.createdAt)}</span>
               <span>Payment: {statusLabel(order.payment?.method || '')}</span>
               <span>Payment status: {statusLabel(order.payment?.status || '')}</span>

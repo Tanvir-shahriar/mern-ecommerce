@@ -5,6 +5,7 @@ import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
 import { api, mediaUrl } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
+import { orderCustomerName, orderDetailPath, orderIdentifier } from '../utils/orders.js';
 
 const metricIcon = {
   totalRevenue: DollarSign,
@@ -61,16 +62,16 @@ export const AdminDashboardPage = () => {
           ) : (
             <div className="order-list">
               {data?.recentOrders?.map((order) => (
-                <article className="order-row dashboard-order-row" key={order._id}>
+                <article className="order-row dashboard-order-row" key={orderIdentifier(order)}>
                   <div>
                     <strong>{order.orderNumber}</strong>
-                    <span>{order.customer?.email || order.customer?.name || dateShort(order.createdAt)}</span>
+                    <span>{orderCustomerName(order) || dateShort(order.createdAt)}</span>
                     <span>{order.itemSummary?.label || `${order.items?.length || 0} product(s)`}</span>
                   </div>
                   <div className="dashboard-order-meta">
                     <span className={`status-pill ${order.status}`}>{statusLabel(order.status)}</span>
                     <strong>{money(order.pricing.total)}</strong>
-                    <Link className="button compact" to={`/orders/${order._id}`}>
+                    <Link className="button compact" to={orderDetailPath(order)}>
                       <Eye size={16} />
                       View
                     </Link>

@@ -103,6 +103,26 @@ describe('order access', () => {
     expect(response.body.data.order.customer.email).toBe(customer.email);
   });
 
+  it('lets the owner and admins view an order by order number', async () => {
+    const customer = await createUser({ email: 'number-owner@example.com' });
+    const superAdmin = await createUser({ email: 'number-admin@example.com', role: 'super_admin' });
+    const order = await createOrder(customer);
+
+    const ownerResponse = await request(app)
+      .get(`/api/orders/${order.orderNumber}`)
+      .set('Authorization', `Bearer ${signToken(customer._id)}`)
+      .expect(200);
+
+    const adminResponse = await request(app)
+      .get(`/api/orders/${order.orderNumber.toLowerCase()}`)
+      .set('Authorization', `Bearer ${signToken(superAdmin._id)}`)
+      .expect(200);
+
+    expect(ownerResponse.body.data.order._id).toBe(order._id.toString());
+    expect(ownerResponse.body.data.order.id).toBe(order._id.toString());
+    expect(adminResponse.body.data.order.orderNumber).toBe(order.orderNumber);
+  });
+
   it('keeps customer order detail access scoped to their own orders', async () => {
     const owner = await createUser({ email: 'owner-customer@example.com' });
     const otherCustomer = await createUser({ email: 'other-customer@example.com' });
@@ -110,6 +130,19 @@ describe('order access', () => {
 
     const response = await request(app)
       .get(`/api/orders/${order._id}`)
+      .set('Authorization', `Bearer ${signToken(otherCustomer._id)}`)
+      .expect(404);
+
+    expect(response.body.message).toBe('Order not found');
+  });
+
+  it('keeps customer order-number access scoped to their own orders', async () => {
+    const owner = await createUser({ email: 'owner-number@example.com' });
+    const otherCustomer = await createUser({ email: 'other-number@example.com' });
+    const order = await createOrder(owner);
+
+    const response = await request(app)
+      .get(`/api/orders/${order.orderNumber}`)
       .set('Authorization', `Bearer ${signToken(otherCustomer._id)}`)
       .expect(404);
 

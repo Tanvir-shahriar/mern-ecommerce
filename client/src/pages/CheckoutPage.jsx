@@ -9,6 +9,7 @@ import { useCart } from '../contexts/CartContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { clearDirectCheckout, readDirectCheckout } from '../utils/directCheckout.js';
 import { money } from '../utils/format.js';
+import { orderDetailPath } from '../utils/orders.js';
 
 const TAX_RATE = 0.08;
 const FREE_SHIPPING_THRESHOLD = 10000;
@@ -126,7 +127,7 @@ export const CheckoutPage = () => {
         <CheckCircle2 size={48} />
         <h1>Order placed</h1>
         <p>{order.orderNumber}</p>
-        <Link className="button primary" to={`/orders/${order._id}`}>
+        <Link className="button primary" to={orderDetailPath(order)}>
           View order details
         </Link>
       </section>

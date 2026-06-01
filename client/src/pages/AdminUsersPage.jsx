@@ -8,6 +8,7 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
+import { orderDetailPath, orderIdentifier } from '../utils/orders.js';
 
 export const AdminUsersPage = () => {
   const [search, setSearch] = useState('');
@@ -217,7 +218,7 @@ export const AdminUsersPage = () => {
               <div className="order-list">
                 {detail.orders.length ? (
                   detail.orders.map((order) => (
-                    <Link className="order-row" to={`/orders/${order._id}`} key={order._id}>
+                    <Link className="order-row" to={orderDetailPath(order)} key={orderIdentifier(order)}>
                       <div>
                         <strong>{order.itemSummary?.label || order.orderNumber}</strong>
                         <span>

@@ -6,6 +6,10 @@ export const idParamSchema = z.object({
   id: objectId
 });
 
+export const orderLookupParamSchema = z.object({
+  id: z.string().trim().min(1)
+});
+
 export const slugOrIdParamSchema = z.object({
   slugOrId: z.string().min(1)
 });

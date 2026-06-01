@@ -7,6 +7,7 @@ import { AdminNav } from '../components/AdminNav.jsx';
 import { api, apiErrorMessage } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
+import { orderCustomerEmail, orderCustomerName, orderDetailPath, orderIdentifier } from '../utils/orders.js';
 
 const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
 
@@ -112,25 +113,33 @@ export const AdminOrdersPage = () => {
               <span>Status</span>
               <span>Details</span>
             </div>
-            {orders.map((order) => (
-              <article className="table-row" key={order._id}>
-                <strong>{order.orderNumber}</strong>
-                <span>{order.customer?.email || order.customer?.name || order.user?.email || 'Customer'}</span>
-                <span>{dateShort(order.createdAt)}</span>
-                <strong>{money(order.pricing.total)}</strong>
-                <select value={order.status} onChange={(event) => updateStatus(order._id, event.target.value)} aria-label={`Status for ${order.orderNumber}`}>
-                  {statuses.map((status) => (
-                    <option value={status} key={status}>
-                      {statusLabel(status)}
-                    </option>
-                  ))}
-                </select>
-                <Link className="button compact" to={`/orders/${order._id}`}>
-                  <Eye size={16} />
-                  View
-                </Link>
-              </article>
-            ))}
+            {orders.map((order) => {
+              const customerName = orderCustomerName(order);
+              const customerEmail = orderCustomerEmail(order);
+
+              return (
+                <article className="table-row" key={orderIdentifier(order)}>
+                  <strong>{order.orderNumber}</strong>
+                  <span className="table-customer">
+                    <strong>{customerName}</strong>
+                    {customerEmail ? <small>{customerEmail}</small> : null}
+                  </span>
+                  <span>{dateShort(order.createdAt)}</span>
+                  <strong>{money(order.pricing.total)}</strong>
+                  <select value={order.status} onChange={(event) => updateStatus(order._id || order.id, event.target.value)} aria-label={`Status for ${order.orderNumber}`}>
+                    {statuses.map((status) => (
+                      <option value={status} key={status}>
+                        {statusLabel(status)}
+                      </option>
+                    ))}
+                  </select>
+                  <Link className="button compact" to={orderDetailPath(order)}>
+                    <Eye size={16} />
+                    View
+                  </Link>
+                </article>
+              );
+            })}
           </div>
         )}
       </div>
