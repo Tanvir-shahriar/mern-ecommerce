@@ -228,7 +228,7 @@ productSchema.pre('validate', function makeSlug() {
 });
 
 productSchema.methods.recalculateRatings = function recalculateRatings() {
-  const approvedReviews = this.reviews.filter((review) => review.status === 'approved');
+  const approvedReviews = this.reviews.filter((review) => !review.status || review.status === 'approved');
   this.ratingsCount = approvedReviews.length;
   this.ratingsAverage = approvedReviews.length
     ? approvedReviews.reduce((sum, review) => sum + review.rating, 0) / approvedReviews.length

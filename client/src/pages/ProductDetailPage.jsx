@@ -169,7 +169,7 @@ export const ProductDetailPage = () => {
               </article>
             ))
           ) : (
-            <p className="muted">No reviews yet.</p>
+            <p className="muted">No written customer reviews yet.</p>
           )}
         </div>
       </section>

@@ -201,6 +201,38 @@ describe('order access', () => {
     expect(response.body.data.product.reviews[0].user).toBeUndefined();
   });
 
+  it('keeps legacy customer reviews visible when status is missing', async () => {
+    const customer = await createUser({ name: 'Legacy Reviewer', email: 'legacy-reviewer@example.com' });
+    const product = await createProduct();
+
+    await Product.collection.updateOne(
+      { _id: product._id },
+      {
+        $push: {
+          reviews: {
+            _id: new mongoose.Types.ObjectId(),
+            user: customer._id,
+            order: new mongoose.Types.ObjectId(),
+            name: customer.name,
+            rating: 4,
+            comment: 'A legacy review without a status should still be public.',
+            createdAt: new Date(),
+            updatedAt: new Date()
+          }
+        }
+      }
+    );
+
+    const response = await request(app).get(`/api/products/${product._id}`).expect(200);
+
+    expect(response.body.data.product.ratingsCount).toBe(1);
+    expect(response.body.data.product.reviews[0]).toMatchObject({
+      name: 'Legacy Reviewer',
+      rating: 4,
+      comment: 'A legacy review without a status should still be public.'
+    });
+  });
+
   it('blocks product reviews until the order has been delivered', async () => {
     const customer = await createUser({ email: 'pending-review@example.com' });
     const product = await createProduct();

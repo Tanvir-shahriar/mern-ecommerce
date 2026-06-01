@@ -16,9 +16,11 @@ const sortOptions = {
   popular: '-salesCount'
 };
 
+const isPublishedReview = (review) => !review.status || review.status === 'approved';
+
 const approvedReviews = (reviews = []) =>
   reviews
-    .filter((review) => review.status === 'approved')
+    .filter(isPublishedReview)
     .sort((first, second) => new Date(second.createdAt || 0) - new Date(first.createdAt || 0));
 
 const presentPublicReview = (review) => ({
@@ -40,8 +42,8 @@ const presentProductDetail = (product) => {
 
   return {
     ...product,
-    ratingsAverage: reviews.length ? ratingsAverage : product.ratingsAverage || 0,
-    ratingsCount: reviews.length ? reviews.length : product.ratingsCount || 0,
+    ratingsAverage,
+    ratingsCount: reviews.length,
     reviews
   };
 };
