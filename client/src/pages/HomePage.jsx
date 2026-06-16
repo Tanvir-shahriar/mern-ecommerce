@@ -117,68 +117,40 @@ export const HomePage = () => {
   return (
     <>
       <section className="hero-section">
-        <div className="hero-content">
-          <p className="eyebrow light brand-eyebrow">
-            <span className="inline-brand">
-              lahVenture
-            </span>{'  '}
-            watches
-          </p>
-          <h1>Timepieces for work, sport, and every journey.</h1>
-          <p>
-            Discover classic watches, smartwatches, straps, and wearable accessories with secure
-            checkout, live order tracking, and inventory managed from one admin system.
-          </p>
-          <div className="hero-actions">
-            <Link className="button primary" to="/products">
-              Shop watches
-              <ArrowRight size={18} />
-            </Link>
-            <Link className="button glass" to="/account">
-              My orders
-            </Link>
+        <div className="hero-content-custom">
+          <span className="hero-badge-pill">LIMITED TO 50 PIECES</span>
+          <span className="hero-sku">CH-9343.2-CUBK</span>
+          <h1 className="hero-title-custom">
+            <span>SPACE</span>
+            <span>TIMER</span>
+            <span>JUPITER</span>
+          </h1>
+          <h2 className="hero-slogan-custom">The Time Is Yours</h2>
+          
+          <div className="hero-subtext-container">
+            <span className="find-out-more-badge">FIND OUT MORE</span>
+            <p className="hero-subtext-custom">
+              Shop our exquisite collection of luxury watches and elevate your style today
+            </p>
           </div>
+          
+          <Link to="/products" className="hero-shop-btn">
+            SHOP
+          </Link>
         </div>
-        <div className="hero-media">
-          {activeHeroProduct ? (
-            <>
-              <Link
-                className="hero-product-slide"
-                to={`/products/${activeHeroProduct.slug || activeHeroProduct._id}`}
-                key={activeHeroProduct._id}
-                aria-label={`View ${activeHeroProduct.name}`}
-              >
-                <img
-                  src={mediaUrl(activeHeroProduct.images?.[0]?.url)}
-                  alt={activeHeroProduct.images?.[0]?.alt || activeHeroProduct.name}
-                />
-                <div className="hero-product-overlay">
-                  <span>{activeHeroProduct.brand || activeHeroProduct.category?.name}</span>
-                  <strong>{activeHeroProduct.name}</strong>
-                  <em>{money(activeHeroProduct.price)}</em>
-                </div>
-              </Link>
-              <div className="hero-carousel-controls" aria-label="Featured product carousel">
-                {heroProducts.map((product, index) => (
-                  <button
-                    type="button"
-                    className={index === activeHeroIndex ? 'active' : ''}
-                    key={product._id}
-                    onClick={() => setHeroIndex(index)}
-                    aria-label={`Show ${product.name}`}
-                  />
-                ))}
-              </div>
-            </>
-          ) : (
-            <div className="hero-product-slide hero-product-loading">
-              <span className="spinner" />
-            </div>
-          )}
-          <div className="hero-specs">
-            <span>Smart health tracking</span>
-            <span>Classic automatic styles</span>
-            <span>Premium straps</span>
+
+        <div className="hero-visual-custom">
+          <span className="hero-available-label">AVAILABLE</span>
+          
+          <div className="hero-watch-container">
+            <img src="/jupiter_watch.png" alt="Space Timer Jupiter luxury skeleton mechanical watch" className="hero-watch-image" />
+          </div>
+
+          <div className="hero-video-widget">
+            <img src="/watch_video_thumbnail.png" alt="Watch video preview" />
+            <button className="play-button-custom" aria-label="Play video">
+              <span className="play-icon-circle"></span>
+            </button>
           </div>
         </div>
       </section>

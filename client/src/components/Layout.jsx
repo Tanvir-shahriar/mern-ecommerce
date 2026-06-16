@@ -31,24 +31,45 @@ export const Layout = () => {
     navigate('/');
   };
 
+  const [showSearch, setShowSearch] = useState(false);
+
   return (
     <div className="site-shell">
       <header className="site-header">
         <div className="header-inner">
-          <Link to="/" className="brand" aria-label="lahVenture">
-            <img className="brand-logo" src={logoPath} alt="" />
-            <BrandName />
-          </Link>
+          <div className="brand-group">
+            <button
+              type="button"
+              className="header-menu-toggle"
+              onClick={() => setOpen((value) => !value)}
+              aria-label="Menu"
+            >
+              {open ? <X size={20} /> : <Menu size={20} />}
+            </button>
+            <Link to="/" className="brand" aria-label="lahVenture">
+              <img className="brand-logo" src={logoPath} alt="" />
+              <span className="brand-title">LAHVENTURE</span>
+            </Link>
+          </div>
 
           <nav className={open ? 'primary-nav open' : 'primary-nav'}>
-            <NavLink className={navClass} to="/" onClick={() => setOpen(false)}>
-              Home
-            </NavLink>
             <NavLink className={navClass} to="/products" onClick={() => setOpen(false)}>
               Shop
             </NavLink>
+            <NavLink className={navClass} to="/products?filter=brands" onClick={() => setOpen(false)}>
+              Brands
+            </NavLink>
+            <NavLink className={navClass} to="/products" onClick={() => setOpen(false)}>
+              Catalog
+            </NavLink>
+            <NavLink className={navClass} to="/about" onClick={() => setOpen(false)}>
+              About
+            </NavLink>
+            <NavLink className={navClass} to="/contact" onClick={() => setOpen(false)}>
+              Contact
+            </NavLink>
             {isAdmin ? (
-              <NavLink className={navClass} to="/admin" onClick={() => setOpen(false)}>
+              <NavLink className={`${navClass} nav-admin-only`} to="/admin" onClick={() => setOpen(false)}>
                 Admin
               </NavLink>
             ) : null}
@@ -59,47 +80,50 @@ export const Layout = () => {
             ) : null}
           </nav>
 
-          <form className="header-search" onSubmit={submitSearch}>
-            <input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Search Watches..."
-              aria-label="Search watches and smartwatches"
-            />
-            <button type="submit" className="header-search-button" aria-label="Search">
-              <Search size={18} />
-            </button>
-          </form>
+          {showSearch ? (
+            <form className="header-search-active" onSubmit={submitSearch}>
+              <input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search watches..."
+                autoFocus
+                onBlur={() => {
+                  if (!search) {
+                    setTimeout(() => setShowSearch(false), 200);
+                  }
+                }}
+              />
+              <button type="submit" className="search-active-submit" aria-label="Submit search">
+                <Search size={18} />
+              </button>
+            </form>
+          ) : null}
 
           <div className="header-actions">
-            {isAdmin ? (
-              <Link className="icon-button" to="/admin" aria-label="Dashboard">
-                <LayoutDashboard size={19} />
-              </Link>
-            ) : null}
+            {!showSearch && (
+              <button
+                type="button"
+                className="header-action-btn search-toggle"
+                onClick={() => setShowSearch(true)}
+                aria-label="Search"
+              >
+                <Search size={19} />
+              </button>
+            )}
             {user ? (
-              <Link className="icon-button" to="/account" aria-label="Profile">
+              <Link className="header-action-btn" to="/account" aria-label="Profile">
                 <User size={19} />
               </Link>
             ) : (
-              <Link className="icon-button" to="/login" aria-label="Sign in">
+              <Link className="header-action-btn" to="/login" aria-label="Sign in">
                 <User size={19} />
               </Link>
             )}
-            <Link className="icon-button cart-link" to="/cart" aria-label="Cart">
+            <Link className="header-action-btn cart-link-custom" to="/cart" aria-label="Cart">
               <ShoppingBag size={19} />
-              {itemCount ? <span>{itemCount}</span> : null}
+              {itemCount ? <span className="cart-badge-dot-custom">{itemCount}</span> : null}
             </Link>
-            <button type="button" className="icon-button mobile-toggle" onClick={() => setOpen((value) => !value)} aria-label="Menu">
-              {open ? <X size={20} /> : <Menu size={20} />}
-            </button>
           </div>
-
-          {user ? (
-            <button type="button" className="logout-button" onClick={handleLogout}>
-              Sign out
-            </button>
-          ) : null}
         </div>
       </header>
 
