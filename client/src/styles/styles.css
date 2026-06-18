@@ -1053,16 +1053,23 @@ main {
   transform: translateY(-4px);
 }
 
+.product-card__content-box {
+  background: #ebebeb;
+  padding: 16px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+}
+
 .product-card__media {
   position: relative;
   aspect-ratio: 1 / 1;
-  background: #f4f5f7;
+  background: transparent;
   overflow: hidden;
-  border-radius: var(--radius);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
 }
 
 .product-card__media img {
@@ -1079,11 +1086,11 @@ main {
 
 .product-card__wishlist {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 0;
+  right: 0;
   background: transparent;
   border: none;
-  padding: 4px;
+  padding: 0;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1096,48 +1103,41 @@ main {
   transform: scale(1.15);
 }
 
-.product-card__body {
-  min-height: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 12px 4px 8px;
-}
-
 .product-card__info-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 12px;
+  margin-top: 4px;
 }
 
 .product-card__title {
   display: block;
   font-size: 0.95rem;
   font-weight: 700;
-  color: #7a0b17;
+  color: #66000c;
   line-height: 1.35;
   transition: color 0.2s ease;
   overflow-wrap: anywhere;
 }
 
 .product-card__title:hover {
-  color: #9c1021;
+  color: #8c0011;
 }
 
 .product-card__price {
   font-size: 0.95rem;
   font-weight: 700;
-  color: #7a0b17;
+  color: #66000c;
   white-space: nowrap;
 }
 
 .product-card__add-to-cart {
   display: block;
   width: 85%;
-  margin: 4px auto 0;
-  padding: 9px 16px;
-  background: #7a0b17;
+  margin: 12px auto 0;
+  padding: 10px 16px;
+  background: #66000c;
   color: #ffffff;
   font-size: 0.88rem;
   font-weight: 700;
@@ -1149,8 +1149,8 @@ main {
 }
 
 .product-card__add-to-cart:hover {
-  background: #5f0812;
-  box-shadow: 0 4px 12px rgba(122, 11, 23, 0.25);
+  background: #4d0009;
+  box-shadow: 0 4px 12px rgba(102, 0, 12, 0.25);
   transform: translateY(-1px);
 }
 

@@ -34,16 +34,16 @@ export const ProductCard = ({ product, onChanged }) => {
 
   return (
     <article className="product-card">
-      <div className="product-card__media">
-        <Link to={`/products/${product.slug || product._id}`}>
-          <img src={mediaUrl(product.images?.[0]?.url)} alt={product.images?.[0]?.alt || product.name} />
-        </Link>
-        <button type="button" className="product-card__wishlist" onClick={handleWishlist} aria-label="Wishlist">
-          <Heart size={20} fill={isWishlisted ? '#7a0b17' : 'none'} color="#7a0b17" />
-        </button>
-        {product.compareAtPrice ? <span className="badge sale">Sale</span> : null}
-      </div>
-      <div className="product-card__body">
+      <div className="product-card__content-box">
+        <div className="product-card__media">
+          <Link to={`/products/${product.slug || product._id}`}>
+            <img src={mediaUrl(product.images?.[0]?.url)} alt={product.images?.[0]?.alt || product.name} />
+          </Link>
+          <button type="button" className="product-card__wishlist" onClick={handleWishlist} aria-label="Wishlist">
+            <Heart size={20} fill={isWishlisted ? '#66000c' : 'none'} color="#66000c" />
+          </button>
+          {product.compareAtPrice ? <span className="badge sale">Sale</span> : null}
+        </div>
         <div className="product-card__info-row">
           <Link to={`/products/${product.slug || product._id}`} className="product-card__title">
             {product.name}
@@ -52,10 +52,10 @@ export const ProductCard = ({ product, onChanged }) => {
             {money(product.price)}
           </span>
         </div>
-        <button type="button" className="product-card__add-to-cart" onClick={handleCart}>
-          Add to cart
-        </button>
       </div>
+      <button type="button" className="product-card__add-to-cart" onClick={handleCart}>
+        Add to cart
+      </button>
     </article>
   );
 };
