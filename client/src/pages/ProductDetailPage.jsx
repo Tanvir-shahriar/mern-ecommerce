@@ -1,6 +1,25 @@
-import { CreditCard, Heart, Minus, Plus, ShoppingBag, Star } from 'lucide-react';
+import {
+  CreditCard,
+  Heart,
+  Minus,
+  Plus,
+  ShoppingBag,
+  Star,
+  Award,
+  Settings,
+  Circle,
+  Maximize2,
+  Palette,
+  Layers,
+  Paintbrush,
+  Sparkles,
+  CircleDot,
+  Link2,
+  Droplets,
+  Tag
+} from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { LoadingScreen } from '../components/LoadingScreen.jsx';
@@ -23,7 +42,14 @@ export const ProductDetailPage = () => {
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState('');
   const [similarActionId, setSimilarActionId] = useState('');
-  const { user, isAdmin } = useAuth();
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [activeTab, setActiveTab] = useState('specifications');
+  const { user, isAdmin, refreshUser } = useAuth();
+
+  useEffect(() => {
+    setActiveImageIndex(0);
+  }, [slugOrId]);
+
   const { addItem } = useCart();
   const navigate = useNavigate();
 
@@ -91,57 +117,173 @@ export const ProductDetailPage = () => {
   const inStock = !product.inventory?.trackQuantity || product.inventory.stock > 0;
   const stockStatusText = product.inventory?.trackQuantity ? `${product.inventory.stock} in stock` : 'Ready to ship';
 
+  const isWishlisted = user?.wishlist?.some(
+    (item) => (typeof item === 'string' ? item : item?._id) === product._id
+  );
+
+  const getSpecs = (prod) => {
+    const nameLower = (prod.name || '').toLowerCase();
+    const isSmart = nameLower.includes('smart') || nameLower.includes('pulse') || nameLower.includes('apex');
+    const isGold = nameLower.includes('gold') || nameLower.includes('rose');
+    
+    return [
+      {
+        icon: <Tag size={16} />,
+        label: 'Product code',
+        value: `SKU: ${prod.sku || 'CR4007ZA RG BL LT'}`
+      },
+      {
+        icon: <Award size={16} />,
+        label: 'Family',
+        value: prod.brand || 'lahVenture'
+      },
+      {
+        icon: <Settings size={16} />,
+        label: 'Movement',
+        value: isSmart ? 'SMART / QUARTZ' : 'AUTOMATIC'
+      },
+      {
+        icon: <Circle size={16} />,
+        label: 'Case Metal',
+        value: isGold ? 'Rose Gold / Steel' : 'Stainless Steel'
+      },
+      {
+        icon: <Maximize2 size={16} />,
+        label: 'Case Size',
+        value: isSmart ? '44 mm' : '42 mm'
+      },
+      {
+        icon: <Palette size={16} />,
+        label: 'Case Color',
+        value: isGold ? 'Rose Gold' : 'Stainless Steel'
+      },
+      {
+        icon: <Layers size={16} />,
+        label: 'Bracelet Material',
+        value: nameLower.includes('strap') || nameLower.includes('leather') ? 'Leather' : isSmart ? 'Silicone' : 'Stainless Steel'
+      },
+      {
+        icon: <Paintbrush size={16} />,
+        label: 'Bracelete Color',
+        value: nameLower.includes('black') ? 'Black' : nameLower.includes('brown') || nameLower.includes('leather') ? 'Leather' : 'Stainless Steel'
+      },
+      {
+        icon: <Sparkles size={16} />,
+        label: 'Glass',
+        value: isSmart ? 'Gorilla Glass' : 'Sapphire'
+      },
+      {
+        icon: <CircleDot size={16} />,
+        label: 'Dial Color',
+        value: nameLower.includes('white') ? 'White' : nameLower.includes('blue') ? 'Blue' : 'Black'
+      },
+      {
+        icon: <Link2 size={16} />,
+        label: 'Buckle',
+        value: isSmart ? 'Pin Buckle' : 'Butterfly Buckle with Double push'
+      },
+      {
+        icon: <Droplets size={16} />,
+        label: 'WR',
+        value: isSmart ? 'IP68' : '5 ATM'
+      }
+    ];
+  };
+
   return (
     <section className="product-detail">
-      <div className="product-gallery">
-        <img src={mediaUrl(product.images?.[0]?.url)} alt={product.images?.[0]?.alt || product.name} />
-      </div>
-      <div className="product-info">
-        <Link className="eyebrow" to={`/products?category=${product.category?.slug || ''}`}>
-          {product.category?.name || product.brand}
-        </Link>
-        <h1>{product.name}</h1>
-        <div className="rating-row">
-          <Star size={17} fill="currentColor" />
-          <strong>{product.ratingsAverage?.toFixed?.(1) || '0.0'}</strong>
-          <span className="muted">{product.ratingsCount || 0} reviews</span>
-        </div>
-        <p className="lead">{product.shortDescription || product.description}</p>
-        <div className="price-stack">
-          <strong>{money(product.price)}</strong>
-          {product.compareAtPrice ? <span>{money(product.compareAtPrice)}</span> : null}
-        </div>
-        {isAdmin || !inStock ? (
-          <p className={inStock ? 'stock ok' : 'stock empty'}>{inStock ? stockStatusText : 'Out of stock'}</p>
-        ) : null}
-
-        <div className="purchase-row">
-          <div className="stepper">
-            <button type="button" onClick={() => setQuantity((value) => Math.max(1, value - 1))} aria-label="Decrease quantity">
-              <Minus size={16} />
-            </button>
-            <span>{quantity}</span>
-            <button type="button" onClick={() => setQuantity((value) => value + 1)} aria-label="Increase quantity">
-              <Plus size={16} />
-            </button>
+      <div className="product-detail-left">
+        <div className="product-gallery-container">
+          <div className="product-gallery__main-frame">
+            <div className="product-gallery__image-box">
+              <img src={mediaUrl(product.images?.[activeImageIndex]?.url || product.images?.[0]?.url)} alt={product.name} />
+              <div className="product-gallery__dots">
+                {(product.images || []).map((_, idx) => (
+                  <span key={idx} className={`dot ${idx === activeImageIndex ? 'active' : ''}`} />
+                ))}
+              </div>
+            </div>
           </div>
-          <button className="button primary" type="button" onClick={addToCart} disabled={!inStock}>
-            <ShoppingBag size={18} />
-            Add to cart
+          {product.images && product.images.length > 1 && (
+            <div className="product-gallery__thumbnails">
+              {product.images.map((img, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`thumbnail-btn ${idx === activeImageIndex ? 'active' : ''}`}
+                  onClick={() => setActiveImageIndex(idx)}
+                >
+                  <img src={mediaUrl(img.url)} alt={`Thumbnail ${idx + 1}`} />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="product-detail-right">
+        <div className="product-specs-list">
+          <p className="spec-item"><strong>Model:</strong> {product.sku || 'CR4007ZA RG BL LT'}</p>
+          <p className="spec-item"><strong>Barcode:</strong> {parseInt(product._id.slice(-6), 16) || '7037306'}</p>
+          <p className="spec-item"><strong>Gender:</strong> {product.gender || (product.tags?.includes('women') ? 'FEMALE' : 'MALE')}</p>
+          <p className="spec-item"><strong>Bracelet:</strong> {product.name.toLowerCase().includes('strap') || product.name.toLowerCase().includes('leather') ? 'LEATHER' : 'STAINLESS STEEL'}</p>
+          <p className="spec-item">
+            <strong>In Stock:</strong> <span className={inStock ? 'status-available' : 'status-unavailable'}>{inStock ? 'AVAILABLE' : 'OUT OF STOCK'}</span>
+          </p>
+          <p className="spec-price-row">
+            <strong>Price:</strong> <span className="spec-price-val">{money(product.price)}</span>
+          </p>
+        </div>
+
+        <div className="product-actions-row">
+          <button className="button-buy-now" type="button" onClick={purchaseNow} disabled={!inStock}>
+            <Star size={16} fill="white" color="white" />
+            Buy Now
           </button>
-          <button className="button purchase-now-button" type="button" onClick={purchaseNow} disabled={!inStock}>
-            <CreditCard size={18} />
-            Purchase now
+          <button className="button-add-to-cart" type="button" onClick={addToCart} disabled={!inStock}>
+            <ShoppingBag size={16} color="white" />
+            Add To Cart
           </button>
-          <button className="icon-button" type="button" onClick={toggleWishlist} aria-label="Wishlist">
-            <Heart size={19} />
+          <button className="button-wishlist" type="button" onClick={toggleWishlist} aria-label="Wishlist">
+            <Heart size={16} fill={isWishlisted ? '#66000c' : 'none'} color="#66000c" />
           </button>
         </div>
+        
         {message ? <p className="form-note">{message}</p> : null}
 
-        <div className="detail-block">
-          <h2>Details</h2>
-          <p>{product.description}</p>
+        <div className="product-tabs-container">
+          <div className="product-tabs">
+            <button
+              type="button"
+              className={`tab-btn ${activeTab === 'specifications' ? 'active' : ''}`}
+              onClick={() => setActiveTab('specifications')}
+            >
+              Specifications
+            </button>
+            <button
+              type="button"
+              className={`tab-btn ${activeTab === 'descriptions' ? 'active' : ''}`}
+              onClick={() => setActiveTab('descriptions')}
+            >
+              Descriptions
+            </button>
+          </div>
+          <div className="tab-content">
+            {activeTab === 'specifications' ? (
+              <table className="specs-table">
+                <tbody>
+                  {getSpecs(product).map((spec, index) => (
+                    <tr key={index}>
+                      <td className="spec-icon-col">{spec.icon}</td>
+                      <td className="spec-label-col">{spec.label}</td>
+                      <td className="spec-value-col">{spec.value}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="tab-description-text">{product.description}</p>
+            )}
+          </div>
         </div>
       </div>
 
