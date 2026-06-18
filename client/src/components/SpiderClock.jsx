@@ -2,56 +2,56 @@ import React, { useEffect, useRef, useState } from 'react';
 
 export const SpiderClock = () => {
   const containerRef = useRef(null);
-  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    // Dynamic script loader helper
-    const loadScript = (src) => {
-      return new Promise((resolve, reject) => {
-        if (document.querySelector(`script[src="${src}"]`)) {
-          resolve();
-          return;
-        }
-        const script = document.createElement('script');
-        script.src = src;
-        script.onload = () => resolve();
-        script.onerror = () => reject(new Error(`Failed to load script: ${src}`));
-        document.body.appendChild(script);
-      });
+    if (!containerRef.current) return;
+
+    let cleanupFn = null;
+
+    const runInit = () => {
+      const gsap = window.gsap;
+      const MorphSVGPlugin = window.MorphSVGPlugin;
+      if (gsap) {
+        cleanupFn = initAnimation(gsap, MorphSVGPlugin);
+      }
     };
 
-    // Load GSAP and MorphSVGPlugin in order
-    loadScript('https://unpkg.com/gsap@3/dist/gsap.min.js')
-      .then(() => loadScript('https://assets.codepen.io/16327/MorphSVGPlugin3.min.js'))
-      .then(() => {
-        setLoaded(true);
-      })
-      .catch((err) => {
-        console.error('Error loading clock animation libraries:', err);
-      });
+    // Check if gsap is loaded globally immediately
+    if (window.gsap) {
+      runInit();
+    } else {
+      // Small backup polling if script parsing is slightly delayed
+      const interval = setInterval(() => {
+        if (window.gsap) {
+          clearInterval(interval);
+          runInit();
+        }
+      }, 100);
+      return () => {
+        clearInterval(interval);
+        if (cleanupFn) cleanupFn();
+        if (window.gsap) {
+          window.gsap.killTweensOf('*');
+        }
+      };
+    }
 
     return () => {
-      // Stop animations on unmount
+      if (cleanupFn) cleanupFn();
       if (window.gsap) {
         window.gsap.killTweensOf('*');
       }
     };
-  }, []);
 
-  useEffect(() => {
-    if (!loaded || !containerRef.current) return;
+    function initAnimation(gsap, MorphSVGPlugin) {
+      if (!containerRef.current) return null;
 
-    const gsap = window.gsap;
-    const MorphSVGPlugin = window.MorphSVGPlugin;
+      // Register plugin if available
+      if (MorphSVGPlugin) {
+        gsap.registerPlugin(MorphSVGPlugin);
+      }
 
-    if (!gsap) return;
-
-    // Register plugin if available
-    if (MorphSVGPlugin) {
-      gsap.registerPlugin(MorphSVGPlugin);
-    }
-
-    const select = (e) => containerRef.current.querySelector(e);
+      const select = (e) => containerRef.current.querySelector(e);
 
     const faceEl = select("#face");
     const handSecEl = select("#hand-sec");
@@ -282,7 +282,8 @@ export const SpiderClock = () => {
       tg2.kill();
       tg3.kill();
     };
-  }, [loaded]);
+  }
+}, []);
 
   return (
     <section className="spider-clock-section" ref={containerRef}>
@@ -358,8 +359,6 @@ export const SpiderClock = () => {
 
           <path id="face01" d="m 37.9,43.9 h 3.6 c 0.5,0.5 -0.3,2.2 -0.7,2.4 -0.2,0 -0.3,0.1 -0.5,0.1 -0.1,-0.5 0.6,-1.4 0.4,-1.6 -0.1,-0.1 -0.7,0.3 -1.2,0.3 -0.4,0 -0.6,-0.3 -0.9,-0.4 -0.4,0 0.1,1 0.2,1.7 0,0 -0.3,-0.1 -0.5,-0.1 -0.6,-0.7 -0.8,-1.7 -0.4,-2.4 z" />
           <path id="face02" d="m 37.9,43.9 h 3.6 c 0.5,0.5 -0.8,2.2 -1.2,2.4 -0.2,0 -0.3,0.1 -0.5,0.1 -0.1,-0.5 1.1,-1.4 0.9,-1.6 -0.1,-0.1 -0.7,0.3 -1.2,0.3 -0.4,0 -0.6,-0.3 -0.9,-0.4 -0.4,0 0.6,1 0.7,1.7 0,0 -0.3,-0.1 -0.5,-0.1 -0.6,-0.7 -1.3,-1.7 -0.9,-2.4 z" />
-
-          {/* Unused duplicate face01/face02 comments removed, leaving the distinct paths */}
           <path id="handSec01" d="M 39.4,-15.1 40,-15 c -1.8,11.7 -5.3,33.8 -4.7,34.6 -0.8,9.4 1.6,11.6 5.9,18.6 0.6,2 -1.8,3 -2.8,1.4 L 34.7,31.8 33.9,19.6 Z" />
           <path id="handSec02" d="m 39.4,-16.9 0.7,0.1 c -0.9,12.2 -2.8,36 -2,36.7 -0.4,7.1 1.1,11.1 3.2,18.5 0.3,2.1 -2.2,2.6 -3,1 l -1.4,-8 -0.2,-11.6 z" />
 

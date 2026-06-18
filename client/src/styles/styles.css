@@ -4397,14 +4397,18 @@ textarea:focus {
   align-items: center;
   width: 100%;
   height: 100%;
+  overflow: visible;
 }
+
 
 .spider-clock-section #wBody {
   position: relative;
   aspect-ratio: 1/1;
-  width: min(90vw, 80vh);
-  max-width: 900px;
+  width: min(70vw, 52vh);
+  max-width: 640px;
+  overflow: visible;
 }
+
 
 .spider-clock-section #watch {
   position: absolute;
@@ -4416,6 +4420,7 @@ textarea:focus {
   aspect-ratio: 1/1;
   overflow: visible;
 }
+
 
 .spider-clock-section #watch svg {
   overflow: visible;
