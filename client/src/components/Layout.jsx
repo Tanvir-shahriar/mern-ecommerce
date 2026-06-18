@@ -50,6 +50,84 @@ export const Layout = () => {
               <img className="brand-logo" src={logoPath} alt="" />
               <span className="brand-title">LAHVENTURE</span>
             </Link>
+
+            {open && (
+              <div className="hamburger-dropdown">
+                <Link to="/" className="hamburger-item" onClick={() => setOpen(false)}>
+                  Home
+                </Link>
+                
+                <div className="hamburger-item-has-submenu">
+                  <div className="hamburger-item">
+                    <span>Watch</span>
+                    <span className="submenu-plus">+</span>
+                  </div>
+                  <div className="hamburger-submenu">
+                    <Link to="/products?category=smartwatches" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Smartwatches</Link>
+                    <Link to="/products?category=automatic-watches" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Automatic Watches</Link>
+                    <Link to="/products?category=chronographs" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Chronographs</Link>
+                  </div>
+                </div>
+
+                <div className="hamburger-item-has-submenu">
+                  <div className="hamburger-item">
+                    <span>Sun Glass</span>
+                    <span className="submenu-plus">+</span>
+                  </div>
+                  <div className="hamburger-submenu">
+                    <Link to="/products?category=sun-glass-mens" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Mens</Link>
+                    <Link to="/products?category=sun-glass-women" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Women</Link>
+                  </div>
+                </div>
+
+                <div className="hamburger-item-has-submenu">
+                  <div className="hamburger-item">
+                    <span>Beauty Products</span>
+                    <span className="submenu-plus">+</span>
+                  </div>
+                  <div className="hamburger-submenu">
+                    <Link to="/products?category=skincare" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Skincare</Link>
+                    <Link to="/products?category=fragrance" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Fragrance</Link>
+                  </div>
+                </div>
+
+                <div className="hamburger-item-has-submenu">
+                  <div className="hamburger-item">
+                    <span>Clothing</span>
+                    <span className="submenu-plus">+</span>
+                  </div>
+                  <div className="hamburger-submenu">
+                    <Link to="/products?category=clothing-mens" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Mens</Link>
+                    <Link to="/products?category=clothing-women" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Women</Link>
+                    <Link to="/products?category=clothing-kids" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Kids</Link>
+                  </div>
+                </div>
+
+                <div className="hamburger-item-has-submenu">
+                  <div className="hamburger-item">
+                    <span>Shoes</span>
+                    <span className="submenu-plus">+</span>
+                  </div>
+                  <div className="hamburger-submenu">
+                    <Link to="/products?category=shoes-sneakers" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Sneakers</Link>
+                    <Link to="/products?category=shoes-formal" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Formal</Link>
+                    <Link to="/products?category=shoes-boots" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Boots</Link>
+                  </div>
+                </div>
+
+                <div className="hamburger-item-has-submenu">
+                  <div className="hamburger-item">
+                    <span>Accessories</span>
+                    <span className="submenu-plus">+</span>
+                  </div>
+                  <div className="hamburger-submenu">
+                    <Link to="/products?category=straps-accessories" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Straps</Link>
+                    <Link to="/products?category=cases" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Cases</Link>
+                    <Link to="/products?category=wallets" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Wallets</Link>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <nav className={open ? 'primary-nav open' : 'primary-nav'}>
