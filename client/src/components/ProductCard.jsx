@@ -6,13 +6,14 @@ import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { money } from '../utils/format.js';
 
 export const ProductCard = ({ product, onChanged }) => {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const { addItem } = useCart();
   const navigate = useNavigate();
 
   const handleCart = async () => {
     if (!user) return navigate('/login');
     await addItem(product._id, 1);
+    refreshUser?.();
     return onChanged?.('Added to cart');
   };
 
@@ -20,45 +21,42 @@ export const ProductCard = ({ product, onChanged }) => {
     if (!user) return navigate('/login');
     try {
       await api.post(`/users/wishlist/${product._id}`);
+      refreshUser?.();
       onChanged?.('Wishlist updated');
     } catch (error) {
       onChanged?.(apiErrorMessage(error));
     }
   };
 
+  const isWishlisted = user?.wishlist?.some(
+    (item) => (typeof item === 'string' ? item : item?._id) === product._id
+  );
+
   return (
     <article className="product-card">
-      <Link to={`/products/${product.slug || product._id}`} className="product-card__media">
-        <img src={mediaUrl(product.images?.[0]?.url)} alt={product.images?.[0]?.alt || product.name} />
+      <div className="product-card__media">
+        <Link to={`/products/${product.slug || product._id}`}>
+          <img src={mediaUrl(product.images?.[0]?.url)} alt={product.images?.[0]?.alt || product.name} />
+        </Link>
+        <button type="button" className="product-card__wishlist" onClick={handleWishlist} aria-label="Wishlist">
+          <Heart size={20} fill={isWishlisted ? '#7a0b17' : 'none'} color="#7a0b17" />
+        </button>
         {product.compareAtPrice ? <span className="badge sale">Sale</span> : null}
-      </Link>
+      </div>
       <div className="product-card__body">
-        <div>
-          <p className="eyebrow">{product.brand || product.category?.name}</p>
+        <div className="product-card__info-row">
           <Link to={`/products/${product.slug || product._id}`} className="product-card__title">
             {product.name}
           </Link>
+          <span className="product-card__price">
+            {money(product.price)}
+          </span>
         </div>
-        <div className="rating-row" aria-label={`${product.ratingsAverage || 0} stars`}>
-          <Star size={15} fill="currentColor" />
-          <span>{product.ratingsAverage?.toFixed?.(1) || '0.0'}</span>
-          <span className="muted">({product.ratingsCount || 0})</span>
-        </div>
-        <div className="product-card__footer">
-          <div>
-            <strong>{money(product.price)}</strong>
-            {product.compareAtPrice ? <span>{money(product.compareAtPrice)}</span> : null}
-          </div>
-          <div className="icon-actions">
-            <button type="button" className="icon-button" onClick={handleWishlist} aria-label="Wishlist">
-              <Heart size={18} />
-            </button>
-            <button type="button" className="icon-button dark" onClick={handleCart} aria-label="Add to cart">
-              <ShoppingBag size={18} />
-            </button>
-          </div>
-        </div>
+        <button type="button" className="product-card__add-to-cart" onClick={handleCart}>
+          Add to cart
+        </button>
       </div>
     </article>
   );
 };
+
