@@ -35,6 +35,7 @@ export const Layout = () => {
 
   return (
     <div className="site-shell">
+      {open && <div className="menu-backdrop" onClick={() => setOpen(false)} />}
       <header className="site-header">
         <div className="header-inner">
           <div className="brand-group">

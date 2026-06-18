@@ -4340,3 +4340,27 @@ textarea:focus {
   color: rgba(255, 255, 255, 0.85);
 }
 
+/* Page Blur Backdrop on Hamburger Menu Active */
+.menu-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 15; /* Behind sticky header (z-index 20) but above page content */
+  animation: fade-in-backdrop 0.2s ease-out both;
+}
+
+@keyframes fade-in-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+
