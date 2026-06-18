@@ -218,11 +218,13 @@ main {
   color: var(--blue);
 }
 
-.mobile-signout {
-  display: none;
+.signout-nav-link {
   border: 0;
   background: transparent;
   text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: inherit;
 }
 
 .admin-tab:hover {
@@ -3176,7 +3178,7 @@ textarea:focus {
     width: 100%;
   }
 
-  .primary-nav .mobile-signout {
+  .primary-nav .signout-nav-link {
     display: inline-flex;
   }
 
@@ -3841,6 +3843,85 @@ textarea:focus {
 .header-action-btn:hover {
   background: rgba(255, 255, 255, 0.12);
   transform: translateY(-1px);
+}
+
+.profile-menu-container {
+  position: relative;
+  display: inline-flex;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  padding-top: 8px; /* Bridges the gap between button and dropdown inner menu */
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
+}
+
+.profile-dropdown-inner {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius);
+  box-shadow: 0 10px 25px rgba(23, 32, 38, 0.15);
+  padding: 6px 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.profile-dropdown-inner::before {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 14px;
+  border: 6px solid transparent;
+  border-bottom-color: #ffffff;
+}
+
+.profile-menu-container:hover .profile-dropdown {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0);
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #172026;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+  white-space: nowrap;
+}
+
+.dropdown-item:hover {
+  background: #f5f7f9;
+  color: #66000c;
+}
+
+.dropdown-item.signout-btn {
+  border-top: 1px solid #f1f3f5;
+  color: #ef4444;
+}
+
+.dropdown-item.signout-btn:hover {
+  background: #fff0f0;
+  color: #dc2626;
 }
 
 .cart-link-custom {

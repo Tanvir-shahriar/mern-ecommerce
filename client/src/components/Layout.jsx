@@ -73,11 +73,6 @@ export const Layout = () => {
                 Admin
               </NavLink>
             ) : null}
-            {user ? (
-              <button type="button" className="nav-link mobile-signout" onClick={handleLogout}>
-                Sign out
-              </button>
-            ) : null}
           </nav>
 
           {showSearch ? (
@@ -111,9 +106,19 @@ export const Layout = () => {
               </button>
             )}
             {user ? (
-              <Link className="header-action-btn" to="/account" aria-label="Profile">
-                <User size={19} />
-              </Link>
+              <div className="profile-menu-container">
+                <Link className="header-action-btn" to="/account" aria-label="Profile">
+                  <User size={19} />
+                </Link>
+                <div className="profile-dropdown">
+                  <div className="profile-dropdown-inner">
+                    <Link to="/account" className="dropdown-item">My Account</Link>
+                    <button type="button" className="dropdown-item signout-btn" onClick={handleLogout}>
+                      Sign out
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : (
               <Link className="header-action-btn" to="/login" aria-label="Sign in">
                 <User size={19} />
