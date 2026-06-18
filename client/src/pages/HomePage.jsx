@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard.jsx';
+import { SpiderClock } from '../components/SpiderClock.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import addiesdiveLogo from '../assets/brands/addiesdive.png';
 import baltanyLogo from '../assets/brands/baltany.png';
@@ -211,6 +212,8 @@ export const HomePage = () => {
           </div>
         </div>
       </section>
+
+      <SpiderClock />
 
       <section className="perks-bar">
         {perks.map(({ icon: Icon, label }) => (

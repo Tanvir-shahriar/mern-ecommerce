@@ -4363,4 +4363,64 @@ textarea:focus {
   }
 }
 
+/* Spider Clock Showcase Section Styling */
+.spider-clock-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #000;
+  background-repeat: no-repeat;
+  color: #FFF;
+  position: relative;
+  min-height: clamp(550px, 85vh, 950px);
+  overflow: hidden;
+  padding: 60px 0;
+  width: 100%;
+}
+
+.spider-clock-section .vline {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 50%;
+  width: 2px;
+  background-color: #FFF;
+  z-index: 1;
+  opacity: 0.5;
+  visibility: hidden;
+}
+
+.spider-clock-section .gsapWrapper {
+  visibility: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+}
+
+.spider-clock-section #wBody {
+  position: relative;
+  aspect-ratio: 1/1;
+  width: min(90vw, 80vh);
+  max-width: 900px;
+}
+
+.spider-clock-section #watch {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1/1;
+  overflow: visible;
+}
+
+.spider-clock-section #watch svg {
+  overflow: visible;
+  width: 100%;
+  height: 100%;
+}
+
 
