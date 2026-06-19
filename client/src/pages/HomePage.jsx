@@ -1,6 +1,6 @@
-import { ArrowRight, Cpu, CreditCard, ShieldCheck, Timer, Truck, WalletCards } from 'lucide-react';
+import { ArrowRight, Cpu, CreditCard, ShieldCheck, Timer, Truck, WalletCards, Play, Pause } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard.jsx';
 import { SpiderClock } from '../components/SpiderClock.jsx';
@@ -67,11 +67,175 @@ const chineseWatchBrands = [
   { name: 'Lobinni', logo: lobinniLogo, type: 'Elegant mechanical' }
 ];
 
+const patekSlides = [
+  {
+    title: 'Sea-Gull Mechanical Excellence',
+    description: 'Discover the legendary 1963 Chronograph and heritage mechanical movements. Tianjin watchmaking craft meets timeless design.',
+    ctaUrl: '/products?brand=Sea-Gull',
+    ctaText: 'Explore Collection',
+    desktopVideo: '/videos/seagull_desktop.webm',
+    mobileVideo: '/videos/seagull_desktop.webm'
+  },
+  {
+    title: 'San Martin Diver Specialists',
+    description: 'Engineered for the deep. Featuring robust sapphire crystals, NH35 automatic movements, and premium luminous dials.',
+    ctaUrl: '/products?brand=San%20Martin',
+    ctaText: 'Explore Divers',
+    desktopVideo: '/videos/sanmartin_desktop.webm',
+    mobileVideo: '/videos/sanmartin_desktop.webm'
+  },
+  {
+    title: 'Sugess Mechanical Chronographs',
+    description: 'Featuring genuine Seagull ST19 column wheel movements, sapphire exhibition casebacks, and classic vintage styling.',
+    ctaUrl: '/products?brand=Sugess',
+    ctaText: 'Explore Chronos',
+    desktopVideo: '/videos/sugess_desktop.webm',
+    mobileVideo: '/videos/sugess_desktop.webm'
+  }
+];
+
 export const HomePage = () => {
   const [heroIndex, setHeroIndex] = useState(0);
   const [purchaseId, setPurchaseId] = useState('');
+  const [activePatekSlide, setActivePatekSlide] = useState(0);
+  const [isPatekPlaying, setIsPatekPlaying] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const carouselRef = useRef(null);
+  const activeSlideRef = useRef(0);
+  activeSlideRef.current = activePatekSlide;
+
+  useEffect(() => {
+    if (!isPatekPlaying) return;
+    const interval = setInterval(() => {
+      setActivePatekSlide((prev) => (prev + 1) % patekSlides.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [activePatekSlide, isPatekPlaying]);
+
+  useEffect(() => {
+    const carouselEl = carouselRef.current;
+    if (!carouselEl) return;
+
+    let lastScrollTime = 0;
+    let lastSnapTime = 0;
+    const cooldown = 800;
+    const snapCooldown = 1000;
+
+    const handleWheel = (e) => {
+      const rect = carouselEl.getBoundingClientRect();
+      const headerHeight = document.querySelector('.site-header')?.offsetHeight || 65;
+      const currentSlide = activeSlideRef.current;
+
+      console.log("CAROUSEL WHEEL:", {
+        rectTop: rect.top,
+        headerHeight,
+        diff: Math.abs(rect.top - headerHeight),
+        currentSlide
+      });
+
+      // If the top of the carousel is not aligned below the sticky header, smooth snap scroll to it
+      if (Math.abs(rect.top - headerHeight) > 8) {
+        e.preventDefault();
+        const now = Date.now();
+        console.log("CAROUSEL SNAP TRIGGERED. scrollY:", window.scrollY, "target:", rect.top + window.scrollY - headerHeight);
+        if (now - lastSnapTime > snapCooldown) {
+          window.scrollTo({
+            top: rect.top + window.scrollY - headerHeight,
+            behavior: 'smooth'
+          });
+          lastSnapTime = now;
+        }
+        return;
+      }
+
+      const now = Date.now();
+      if (now - lastScrollTime < cooldown) {
+        e.preventDefault();
+        return;
+      }
+
+      const deltaY = e.deltaY;
+      if (Math.abs(deltaY) < 15) return;
+
+      if (deltaY > 0) {
+        if (currentSlide < patekSlides.length - 1) {
+          e.preventDefault();
+          setActivePatekSlide(currentSlide + 1);
+          lastScrollTime = now;
+        }
+      } else {
+        if (currentSlide > 0) {
+          e.preventDefault();
+          setActivePatekSlide(currentSlide - 1);
+          lastScrollTime = now;
+        }
+      }
+    };
+
+    let touchStartY = 0;
+    const handleTouchStart = (e) => {
+      touchStartY = e.touches[0].clientY;
+    };
+
+    const handleTouchMove = (e) => {
+      if (!touchStartY) return;
+      
+      const rect = carouselEl.getBoundingClientRect();
+      const headerHeight = document.querySelector('.site-header')?.offsetHeight || 65;
+
+      if (Math.abs(rect.top - headerHeight) > 8) {
+        e.preventDefault();
+        const now = Date.now();
+        if (now - lastSnapTime > snapCooldown) {
+          window.scrollTo({
+            top: rect.top + window.scrollY - headerHeight,
+            behavior: 'smooth'
+          });
+          lastSnapTime = now;
+        }
+        return;
+      }
+
+      const touchEndY = e.touches[0].clientY;
+      const diffY = touchStartY - touchEndY;
+      if (Math.abs(diffY) > 50) {
+        const now = Date.now();
+        if (now - lastScrollTime < cooldown) {
+          e.preventDefault();
+          return;
+        }
+        
+        const currentSlide = activeSlideRef.current;
+
+        if (diffY > 0) {
+          if (currentSlide < patekSlides.length - 1) {
+            e.preventDefault();
+            setActivePatekSlide(currentSlide + 1);
+            lastScrollTime = now;
+          }
+        } else {
+          if (currentSlide > 0) {
+            e.preventDefault();
+            setActivePatekSlide(currentSlide - 1);
+            lastScrollTime = now;
+          }
+        }
+        touchStartY = 0;
+      }
+    };
+
+    carouselEl.addEventListener('wheel', handleWheel, { passive: false });
+    carouselEl.addEventListener('touchstart', handleTouchStart, { passive: true });
+    carouselEl.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    return () => {
+      carouselEl.removeEventListener('wheel', handleWheel);
+      carouselEl.removeEventListener('touchstart', handleTouchStart);
+      carouselEl.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, []);
 
   const { data: featuredData, isLoading } = useQuery({
     queryKey: ['featured-products'],
@@ -87,7 +251,6 @@ export const HomePage = () => {
   );
   const activeHeroIndex = heroProducts.length ? heroIndex % heroProducts.length : 0;
   const activeHeroProduct = heroProducts[activeHeroIndex];
-  const futureProducts = heroProducts.slice(0, 3);
 
   useEffect(() => {
     setHeroIndex(0);
@@ -156,59 +319,103 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <section className="future-showcase-section">
-        <div className="future-showcase-inner">
-          <div className="future-showcase-heading">
-            <div>
-              <h2>Picks built for the next move.</h2>
-            </div>
-            <Link className="button glass future-catalog-link" to="/products?featured=true">
-              Explore all
-              <ArrowRight size={17} />
-            </Link>
-          </div>
+      <section ref={carouselRef} className="hero-carousel_hero-carousel__bEV8J patek-hero-carousel">
+        <div className="patek-carousel-track" style={{ transform: `translateY(-${activePatekSlide * 100}%)` }}>
+          {patekSlides.map((slide, idx) => {
+            const isActive = idx === activePatekSlide;
+            return (
+              <article
+                key={idx}
+                className={`hero-carousel-item_hero-carousel-item__d5OPU patek-carousel-item ${
+                  isActive ? 'hero-carousel-item_--is-active active' : ''
+                }`}
+              >
+                {/* Media Wrapper */}
+                <div className="hero-carousel-item_media-wrapper__u6xit patek-carousel-media-wrapper">
+                  {/* Desktop Video */}
+                  <video
+                    className="patek-video desktop-only"
+                    src={slide.desktopVideo}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    referrerPolicy="no-referrer"
+                  />
+                  {/* Mobile Video */}
+                  <video
+                    className="patek-video mobile-only"
+                    src={slide.mobileVideo}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
 
-          <div className="future-product-grid">
-            {isLoading
-              ? Array.from({ length: 3 }).map((_, index) => <div className="future-product-card loading" key={index} />)
-              : futureProducts.map((product, index) => {
-                  const productTo = `/products/${product.slug || product._id}`;
-                  const inStock = !product.inventory?.trackQuantity || product.inventory.stock > 0;
-                  const isPurchasing = purchaseId === product._id;
+                {/* Background overlay */}
+                <div className="hero-carousel-item_background__t4Xol hero-carousel-item_--overlay-20__e2JiN patek-carousel-overlay" />
 
-                  return (
-                    <article className="future-product-card" style={{ '--delay': `${index * 90}ms` }} key={product._id}>
-                      <Link className="future-product-media" to={productTo}>
-                        <img src={mediaUrl(product.images?.[0]?.url)} alt={product.images?.[0]?.alt || product.name} />
-                        <span>
-                          <Cpu size={15} />
-                          {product.category?.name || product.brand || 'lahVenture'}
-                        </span>
-                      </Link>
-                      <div className="future-product-body">
-                        <Link to={productTo} className="future-product-title">
-                          {product.name}
-                        </Link>
-                        <p>{product.shortDescription || product.description}</p>
-                        <div className="future-product-meta">
-                          <div>
-                            <strong>{money(product.price)}</strong>
-                            {product.compareAtPrice ? <span>{money(product.compareAtPrice)}</span> : null}
-                          </div>
-                        </div>
-                      </div>
-                      <button
-                        className="future-purchase-button"
-                        type="button"
-                        onClick={() => purchaseNow(product)}
-                        disabled={!inStock || isPurchasing}
-                      >
-                        {isPurchasing ? <span className="spinner tiny" /> : <CreditCard size={17} />}
-                        {isPurchasing ? 'Processing' : 'Purchase now'}
-                      </button>
-                    </article>
-                  );
-                })}
+                {/* Content Container */}
+                <div className="hero-carousel-item_container__iKRW4 hero-carousel-item_--is-left__tnUic patek-carousel-content-container">
+                  <h2 className="hero-carousel-item_title__Rw_ym notranslate patek-carousel-title">
+                    {slide.title}
+                  </h2>
+                  <div className="hero-carousel-item_description__d6lT4 patek-carousel-description">
+                    <p>{slide.description}</p>
+                  </div>
+                  <div className="hero-carousel-item_cta-container__qsuy2 patek-carousel-cta-container">
+                    <Link
+                      to={slide.ctaUrl}
+                      className="cta_--is-white__0hlgs patek-carousel-cta"
+                    >
+                      {slide.ctaText}
+                      <ArrowRight size={16} />
+                    </Link>
+                  </div>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        {/* Carousel Pagination & Play/Pause controls */}
+        <div className="patek-carousel-controls">
+          <button
+            type="button"
+            className="patek-play-pause-btn"
+            onClick={() => setIsPatekPlaying((prev) => !prev)}
+            aria-label={isPatekPlaying ? 'Pause slide rotation' : 'Play slide rotation'}
+          >
+            {isPatekPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
+          </button>
+
+          <div className="patek-carousel-pagination">
+            {patekSlides.map((_, idx) => {
+              const isActive = idx === activePatekSlide;
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`patek-pagination-item ${isActive ? 'active' : ''}`}
+                  onClick={() => {
+                    setActivePatekSlide(idx);
+                  }}
+                  aria-label={`Go to slide ${idx + 1}`}
+                >
+                  <span className="patek-pagination-number">0{idx + 1}</span>
+                  <div className="patek-pagination-line-bg">
+                    <span
+                      key={`${idx}-${isPatekPlaying}-${activePatekSlide}`}
+                      className={`patek-pagination-line-fill ${isActive ? 'animate' : ''} ${
+                        !isPatekPlaying ? 'paused' : ''
+                      }`}
+                    />
+                  </div>
+                </button>
+              );
+            })}
           </div>
         </div>
       </section>
