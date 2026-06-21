@@ -1,5 +1,5 @@
 import { Heart, LayoutDashboard, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
@@ -17,6 +17,13 @@ export const Layout = () => {
   const navigate = useNavigate();
   const { user, isAdmin, logout } = useAuth();
   const { itemCount } = useCart();
+  const [activeCategory, setActiveCategory] = useState(null);
+
+  useEffect(() => {
+    if (!open) {
+      setActiveCategory(null);
+    }
+  }, [open]);
 
   const submitSearch = (event) => {
     event.preventDefault();
@@ -57,11 +64,22 @@ export const Layout = () => {
                 <Link to="/" className="hamburger-item" onClick={() => setOpen(false)}>
                   Home
                 </Link>
+
+                <Link to="/products" className="hamburger-item" onClick={() => setOpen(false)}>
+                  Shop
+                </Link>
+
+                <Link to="/products?filter=brands" className="hamburger-item" onClick={() => setOpen(false)}>
+                  Brands
+                </Link>
                 
-                <div className="hamburger-item-has-submenu">
-                  <div className="hamburger-item">
+                <div className={`hamburger-item-has-submenu ${activeCategory === 'watch' ? 'active' : ''}`}>
+                  <div className="hamburger-item" onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveCategory(prev => prev === 'watch' ? null : 'watch');
+                  }}>
                     <span>Watch</span>
-                    <span className="submenu-plus">+</span>
+                    <span className="submenu-plus">{activeCategory === 'watch' ? '−' : '+'}</span>
                   </div>
                   <div className="hamburger-submenu">
                     <Link to="/products?category=smartwatches" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Smartwatches</Link>
@@ -70,10 +88,13 @@ export const Layout = () => {
                   </div>
                 </div>
 
-                <div className="hamburger-item-has-submenu">
-                  <div className="hamburger-item">
+                <div className={`hamburger-item-has-submenu ${activeCategory === 'sunglass' ? 'active' : ''}`}>
+                  <div className="hamburger-item" onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveCategory(prev => prev === 'sunglass' ? null : 'sunglass');
+                  }}>
                     <span>Sun Glass</span>
-                    <span className="submenu-plus">+</span>
+                    <span className="submenu-plus">{activeCategory === 'sunglass' ? '−' : '+'}</span>
                   </div>
                   <div className="hamburger-submenu">
                     <Link to="/products?category=sun-glass-mens" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Mens</Link>
@@ -81,10 +102,13 @@ export const Layout = () => {
                   </div>
                 </div>
 
-                <div className="hamburger-item-has-submenu">
-                  <div className="hamburger-item">
+                <div className={`hamburger-item-has-submenu ${activeCategory === 'beauty' ? 'active' : ''}`}>
+                  <div className="hamburger-item" onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveCategory(prev => prev === 'beauty' ? null : 'beauty');
+                  }}>
                     <span>Beauty Products</span>
-                    <span className="submenu-plus">+</span>
+                    <span className="submenu-plus">{activeCategory === 'beauty' ? '−' : '+'}</span>
                   </div>
                   <div className="hamburger-submenu">
                     <Link to="/products?category=skincare" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Skincare</Link>
@@ -92,10 +116,13 @@ export const Layout = () => {
                   </div>
                 </div>
 
-                <div className="hamburger-item-has-submenu">
-                  <div className="hamburger-item">
+                <div className={`hamburger-item-has-submenu ${activeCategory === 'clothing' ? 'active' : ''}`}>
+                  <div className="hamburger-item" onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveCategory(prev => prev === 'clothing' ? null : 'clothing');
+                  }}>
                     <span>Clothing</span>
-                    <span className="submenu-plus">+</span>
+                    <span className="submenu-plus">{activeCategory === 'clothing' ? '−' : '+'}</span>
                   </div>
                   <div className="hamburger-submenu">
                     <Link to="/products?category=clothing-mens" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Mens</Link>
@@ -104,10 +131,13 @@ export const Layout = () => {
                   </div>
                 </div>
 
-                <div className="hamburger-item-has-submenu">
-                  <div className="hamburger-item">
+                <div className={`hamburger-item-has-submenu ${activeCategory === 'shoes' ? 'active' : ''}`}>
+                  <div className="hamburger-item" onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveCategory(prev => prev === 'shoes' ? null : 'shoes');
+                  }}>
                     <span>Shoes</span>
-                    <span className="submenu-plus">+</span>
+                    <span className="submenu-plus">{activeCategory === 'shoes' ? '−' : '+'}</span>
                   </div>
                   <div className="hamburger-submenu">
                     <Link to="/products?category=shoes-sneakers" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Sneakers</Link>
@@ -116,10 +146,13 @@ export const Layout = () => {
                   </div>
                 </div>
 
-                <div className="hamburger-item-has-submenu">
-                  <div className="hamburger-item">
+                <div className={`hamburger-item-has-submenu ${activeCategory === 'accessories' ? 'active' : ''}`}>
+                  <div className="hamburger-item" onClick={(e) => {
+                    e.stopPropagation();
+                    setActiveCategory(prev => prev === 'accessories' ? null : 'accessories');
+                  }}>
                     <span>Accessories</span>
-                    <span className="submenu-plus">+</span>
+                    <span className="submenu-plus">{activeCategory === 'accessories' ? '−' : '+'}</span>
                   </div>
                   <div className="hamburger-submenu">
                     <Link to="/products?category=straps-accessories" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Straps</Link>
@@ -127,6 +160,20 @@ export const Layout = () => {
                     <Link to="/products?category=wallets" className="hamburger-submenu-item" onClick={() => setOpen(false)}>Wallets</Link>
                   </div>
                 </div>
+
+                <Link to="/about" className="hamburger-item" onClick={() => setOpen(false)}>
+                  About
+                </Link>
+
+                <Link to="/contact" className="hamburger-item" onClick={() => setOpen(false)}>
+                  Contact
+                </Link>
+
+                {isAdmin ? (
+                  <Link to="/admin" className="hamburger-item" onClick={() => setOpen(false)}>
+                    Admin Panel
+                  </Link>
+                ) : null}
               </div>
             )}
           </div>

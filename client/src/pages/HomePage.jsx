@@ -124,23 +124,36 @@ export const HomePage = () => {
     const snapCooldown = 1000;
 
     const handleWheel = (e) => {
+      const deltaY = e.deltaY;
+      if (Math.abs(deltaY) < 12) {
+        // Ignore micro-scroll inputs / drift
+        return;
+      }
+
       const rect = carouselEl.getBoundingClientRect();
       const headerHeight = document.querySelector('.site-header')?.offsetHeight || 65;
       const currentSlide = activeSlideRef.current;
+      const diff = rect.top - headerHeight;
 
-      console.log("CAROUSEL WHEEL:", {
-        rectTop: rect.top,
-        headerHeight,
-        diff: Math.abs(rect.top - headerHeight),
-        currentSlide
-      });
+      // 1. Escaping checks: If scrolling away from the carousel, let it scroll normally
+      if (diff < -8 && deltaY > 0) {
+        return;
+      }
+      if (diff > 8 && deltaY < 0) {
+        return;
+      }
 
-      // If the top of the carousel is not aligned below the sticky header, smooth snap scroll to it
-      if (Math.abs(rect.top - headerHeight) > 8) {
+      // 2. Snapping checks: Only snap when scrolling towards the carousel and within local 200px boundary window
+      if ((diff > 8 && diff < 200 && deltaY > 0) || (diff < -8 && diff > -200 && deltaY < 0)) {
         e.preventDefault();
         const now = Date.now();
-        console.log("CAROUSEL SNAP TRIGGERED. scrollY:", window.scrollY, "target:", rect.top + window.scrollY - headerHeight);
         if (now - lastSnapTime > snapCooldown) {
+          if (diff > 8) {
+            setActivePatekSlide(0);
+          } else {
+            setActivePatekSlide(patekSlides.length - 1);
+          }
+
           window.scrollTo({
             top: rect.top + window.scrollY - headerHeight,
             behavior: 'smooth'
@@ -150,26 +163,35 @@ export const HomePage = () => {
         return;
       }
 
-      const now = Date.now();
-      if (now - lastScrollTime < cooldown) {
-        e.preventDefault();
-        return;
-      }
-
-      const deltaY = e.deltaY;
-      if (Math.abs(deltaY) < 15) return;
-
-      if (deltaY > 0) {
-        if (currentSlide < patekSlides.length - 1) {
-          e.preventDefault();
-          setActivePatekSlide(currentSlide + 1);
-          lastScrollTime = now;
+      // 3. Aligned state: Lock page scrolling and navigate slides unless escaping
+      if (Math.abs(diff) <= 8) {
+        if (deltaY > 0 && currentSlide === patekSlides.length - 1) {
+          return;
         }
-      } else {
-        if (currentSlide > 0) {
-          e.preventDefault();
-          setActivePatekSlide(currentSlide - 1);
-          lastScrollTime = now;
+        if (deltaY < 0 && currentSlide === 0) {
+          return;
+        }
+
+        e.preventDefault();
+
+        const now = Date.now();
+        if (now - lastScrollTime < cooldown) {
+          return;
+        }
+        if (Math.abs(deltaY) < 15) {
+          return;
+        }
+
+        if (deltaY > 0) {
+          if (currentSlide < patekSlides.length - 1) {
+            setActivePatekSlide(currentSlide + 1);
+            lastScrollTime = now;
+          }
+        } else {
+          if (currentSlide > 0) {
+            setActivePatekSlide(currentSlide - 1);
+            lastScrollTime = now;
+          }
         }
       }
     };
@@ -181,14 +203,36 @@ export const HomePage = () => {
 
     const handleTouchMove = (e) => {
       if (!touchStartY) return;
-      
+
       const rect = carouselEl.getBoundingClientRect();
       const headerHeight = document.querySelector('.site-header')?.offsetHeight || 65;
+      const currentSlide = activeSlideRef.current;
+      const diff = rect.top - headerHeight;
 
-      if (Math.abs(rect.top - headerHeight) > 8) {
+      const touchEndY = e.touches[0].clientY;
+      const diffY = touchStartY - touchEndY; // positive: swipe up (scrolling down), negative: swipe down (scrolling up)
+
+      if (Math.abs(diffY) < 12) return;
+
+      // 1. Escaping checks
+      if (diff < -8 && diffY > 0) {
+        return;
+      }
+      if (diff > 8 && diffY < 0) {
+        return;
+      }
+
+      // 2. Snapping checks: Only snap when scrolling towards the carousel and within local 200px boundary window
+      if ((diff > 8 && diff < 200 && diffY > 0) || (diff < -8 && diff > -200 && diffY < 0)) {
         e.preventDefault();
         const now = Date.now();
         if (now - lastSnapTime > snapCooldown) {
+          if (diff > 8) {
+            setActivePatekSlide(0);
+          } else {
+            setActivePatekSlide(patekSlides.length - 1);
+          }
+
           window.scrollTo({
             top: rect.top + window.scrollY - headerHeight,
             behavior: 'smooth'
@@ -198,31 +242,37 @@ export const HomePage = () => {
         return;
       }
 
-      const touchEndY = e.touches[0].clientY;
-      const diffY = touchStartY - touchEndY;
-      if (Math.abs(diffY) > 50) {
-        const now = Date.now();
-        if (now - lastScrollTime < cooldown) {
-          e.preventDefault();
+      // 3. Aligned state
+      if (Math.abs(diff) <= 8) {
+        if (diffY > 0 && currentSlide === patekSlides.length - 1) {
           return;
         }
-        
-        const currentSlide = activeSlideRef.current;
+        if (diffY < 0 && currentSlide === 0) {
+          return;
+        }
+
+        e.preventDefault();
+
+        const now = Date.now();
+        if (now - lastScrollTime < cooldown) {
+          return;
+        }
+        if (Math.abs(diffY) < 40) {
+          return;
+        }
 
         if (diffY > 0) {
           if (currentSlide < patekSlides.length - 1) {
-            e.preventDefault();
             setActivePatekSlide(currentSlide + 1);
             lastScrollTime = now;
           }
         } else {
           if (currentSlide > 0) {
-            e.preventDefault();
             setActivePatekSlide(currentSlide - 1);
             lastScrollTime = now;
           }
         }
-        touchStartY = 0;
+        touchStartY = touchEndY;
       }
     };
 
