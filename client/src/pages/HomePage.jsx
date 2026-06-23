@@ -102,46 +102,102 @@ export const HomePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
+  const carouselStageRef = useRef(null);
   const carouselRef = useRef(null);
+  const patekTrackRef = useRef(null);
   const patekVideoRefs = useRef([]);
   const activeSlideRef = useRef(0);
-  const scrollAccumulatorRef = useRef(0);
-  const transitionTimerRef = useRef(null);
-  const isCarouselTransitioningRef = useRef(false);
+  const targetProgressRef = useRef(0);
+  const renderedProgressRef = useRef(0);
+  const pageScrollAnimationRef = useRef(null);
   activeSlideRef.current = activePatekSlide;
 
-  const setPatekSlide = useCallback((nextSlide) => {
-    const nextIndex = Math.max(0, Math.min(patekSlides.length - 1, nextSlide));
-    if (nextIndex === activeSlideRef.current) return;
+  const clampPatekProgress = useCallback(
+    (progress) => Math.max(0, Math.min(patekSlides.length - 1, progress)),
+    []
+  );
 
-    activeSlideRef.current = nextIndex;
-    scrollAccumulatorRef.current = 0;
-    isCarouselTransitioningRef.current = true;
-    setActivePatekSlide(nextIndex);
+  const getPatekMetrics = useCallback(() => {
+    const stage = carouselStageRef.current;
+    if (!stage) return null;
 
-    if (transitionTimerRef.current) {
-      window.clearTimeout(transitionTimerRef.current);
-    }
-
-    transitionTimerRef.current = window.setTimeout(() => {
-      isCarouselTransitioningRef.current = false;
-    }, 1350);
+    const stageTop = stage.getBoundingClientRect().top + window.scrollY;
+    const scrollDistance = Math.max(1, stage.offsetHeight - window.innerHeight);
+    return { stage, stageTop, scrollDistance };
   }, []);
 
-  useEffect(() => {
-    if (!isPatekPlaying) return;
-    const interval = setInterval(() => {
-      setPatekSlide((activeSlideRef.current + 1) % patekSlides.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [activePatekSlide, isPatekPlaying, setPatekSlide]);
+  const applyPatekProgress = useCallback((progress) => {
+    const nextProgress = clampPatekProgress(progress);
+    renderedProgressRef.current = nextProgress;
+
+    if (patekTrackRef.current) {
+      patekTrackRef.current.style.transform = `translate3d(0, -${nextProgress * 100}%, 0)`;
+    }
+
+    const nextActive = Math.round(nextProgress);
+    if (nextActive !== activeSlideRef.current) {
+      activeSlideRef.current = nextActive;
+      setActivePatekSlide(nextActive);
+    }
+  }, [clampPatekProgress]);
+
+  const smoothPageScrollTo = useCallback((targetTop, duration = 1150) => {
+    if (pageScrollAnimationRef.current) {
+      window.cancelAnimationFrame(pageScrollAnimationRef.current);
+    }
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const startTop = window.scrollY;
+    const distance = targetTop - startTop;
+    if (reduceMotion || Math.abs(distance) < 2) {
+      window.scrollTo(0, targetTop);
+      return;
+    }
+
+    const startTime = window.performance.now();
+    const easeOutCubic = (value) => 1 - Math.pow(1 - value, 3);
+
+    const step = (timestamp) => {
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      window.scrollTo(0, startTop + distance * easeOutCubic(progress));
+
+      if (progress < 1) {
+        pageScrollAnimationRef.current = window.requestAnimationFrame(step);
+      } else {
+        pageScrollAnimationRef.current = null;
+      }
+    };
+
+    pageScrollAnimationRef.current = window.requestAnimationFrame(step);
+  }, []);
+
+  const setPatekSlide = useCallback((nextSlide) => {
+    const nextIndex = Math.round(clampPatekProgress(nextSlide));
+    const metrics = getPatekMetrics();
+    const stageRect = metrics?.stage.getBoundingClientRect();
+    const isStageVisible = stageRect && stageRect.bottom > 0 && stageRect.top < window.innerHeight;
+
+    targetProgressRef.current = nextIndex;
+
+    if (metrics && isStageVisible) {
+      const targetTop = metrics.stageTop + (metrics.scrollDistance * nextIndex) / (patekSlides.length - 1);
+      smoothPageScrollTo(targetTop);
+      return;
+    }
+
+    applyPatekProgress(nextIndex);
+  }, [applyPatekProgress, clampPatekProgress, getPatekMetrics, smoothPageScrollTo]);
 
   const syncPatekVideos = useCallback(() => {
+    const carouselRect = carouselRef.current?.getBoundingClientRect();
+    const isCarouselVisible = carouselRect && carouselRect.bottom > 0 && carouselRect.top < window.innerHeight;
+
     patekVideoRefs.current.forEach((slideVideos, slideIndex) => {
       slideVideos?.forEach((video) => {
         if (!video) return;
         const isVisible = window.getComputedStyle(video).display !== 'none';
-        if (slideIndex === activePatekSlide && isPatekPlaying && isVisible) {
+        if (isCarouselVisible && slideIndex === activePatekSlide && isPatekPlaying && isVisible) {
           video.play().catch(() => {});
         } else {
           video.pause();
@@ -156,119 +212,70 @@ export const HomePage = () => {
   }, [syncPatekVideos]);
 
   useEffect(() => {
-    const handleResize = () => {
-      window.requestAnimationFrame(syncPatekVideos);
+    let videoSyncFrame = null;
+    const requestVideoSync = () => {
+      if (videoSyncFrame) return;
+      videoSyncFrame = window.requestAnimationFrame(() => {
+        videoSyncFrame = null;
+        syncPatekVideos();
+      });
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener('scroll', requestVideoSync, { passive: true });
+    window.addEventListener('resize', requestVideoSync);
+    return () => {
+      window.removeEventListener('scroll', requestVideoSync);
+      window.removeEventListener('resize', requestVideoSync);
+      if (videoSyncFrame) window.cancelAnimationFrame(videoSyncFrame);
+    };
   }, [syncPatekVideos]);
 
   useEffect(() => {
-    const carouselEl = carouselRef.current;
-    if (!carouselEl) return;
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    let animationFrame = null;
 
-    let lastSnapTime = 0;
-    let touchStartY = 0;
-    const snapCooldown = 900;
-    const alignThreshold = 10;
-    const snapWindow = 260;
-    const wheelIntentThreshold = 125;
-    const touchIntentThreshold = 58;
-
-    const getHeaderHeight = () => document.querySelector('.site-header')?.offsetHeight || 65;
-
-    const snapCarouselIntoView = (targetSlide) => {
-      const rect = carouselEl.getBoundingClientRect();
-      const headerHeight = getHeaderHeight();
-      setPatekSlide(targetSlide);
-      window.scrollTo({
-        top: rect.top + window.scrollY - headerHeight,
-        behavior: 'smooth'
-      });
-      lastSnapTime = Date.now();
-    };
-
-    const shouldLetPageScroll = (delta, currentSlide, diff) => {
-      if (diff < -alignThreshold && delta > 0) return true;
-      if (diff > alignThreshold && delta < 0) return true;
-      if (Math.abs(diff) <= alignThreshold && delta > 0 && currentSlide === patekSlides.length - 1) return true;
-      if (Math.abs(diff) <= alignThreshold && delta < 0 && currentSlide === 0) return true;
-      return false;
-    };
-
-    const handleCarouselScroll = (event, rawDelta, threshold) => {
-      if (Math.abs(rawDelta) < 8) return;
-
-      const rect = carouselEl.getBoundingClientRect();
-      const headerHeight = getHeaderHeight();
-      const currentSlide = activeSlideRef.current;
-      const diff = rect.top - headerHeight;
-      const delta = Math.sign(rawDelta) * Math.min(Math.abs(rawDelta), 80);
-
-      if (shouldLetPageScroll(delta, currentSlide, diff)) {
-        scrollAccumulatorRef.current = 0;
-        return;
+    const animateFromScroll = () => {
+      const metrics = getPatekMetrics();
+      if (metrics) {
+        const rawProgress = (window.scrollY - metrics.stageTop) / metrics.scrollDistance;
+        targetProgressRef.current = clampPatekProgress(rawProgress * (patekSlides.length - 1));
       }
 
-      if ((diff > alignThreshold && diff < snapWindow && delta > 0) || (diff < -alignThreshold && diff > -snapWindow && delta < 0)) {
-        event.preventDefault();
-        if (Date.now() - lastSnapTime > snapCooldown) {
-          snapCarouselIntoView(diff > alignThreshold ? 0 : patekSlides.length - 1);
-        }
-        return;
+      const targetProgress = targetProgressRef.current;
+      const currentProgress = renderedProgressRef.current;
+      const nextProgress = mediaQuery.matches
+        ? targetProgress
+        : currentProgress + (targetProgress - currentProgress) * 0.18;
+
+      if (Math.abs(targetProgress - nextProgress) < 0.002) {
+        applyPatekProgress(targetProgress);
+      } else {
+        applyPatekProgress(nextProgress);
       }
 
-      if (Math.abs(diff) > alignThreshold) return;
-
-      event.preventDefault();
-      if (isCarouselTransitioningRef.current) return;
-
-      const nextAccumulator = scrollAccumulatorRef.current + delta;
-      scrollAccumulatorRef.current = Math.max(-threshold * 1.15, Math.min(threshold * 1.15, nextAccumulator));
-
-      if (Math.abs(scrollAccumulatorRef.current) < threshold) return;
-
-      const direction = scrollAccumulatorRef.current > 0 ? 1 : -1;
-      const nextSlide = currentSlide + direction;
-      if (nextSlide >= 0 && nextSlide < patekSlides.length) {
-        setPatekSlide(nextSlide);
-      }
+      animationFrame = window.requestAnimationFrame(animateFromScroll);
     };
 
-    const handleWheel = (e) => {
-      handleCarouselScroll(e, e.deltaY, wheelIntentThreshold);
-    };
-
-    const handleTouchStart = (e) => {
-      touchStartY = e.touches[0].clientY;
-      scrollAccumulatorRef.current = 0;
-    };
-
-    const handleTouchMove = (e) => {
-      if (!touchStartY) return;
-
-      const touchEndY = e.touches[0].clientY;
-      const diffY = touchStartY - touchEndY;
-      handleCarouselScroll(e, diffY, touchIntentThreshold);
-      if (Math.abs(diffY) > 8) {
-        touchStartY = touchEndY;
-      }
-    };
-
-    carouselEl.addEventListener('wheel', handleWheel, { passive: false });
-    carouselEl.addEventListener('touchstart', handleTouchStart, { passive: true });
-    carouselEl.addEventListener('touchmove', handleTouchMove, { passive: false });
+    animationFrame = window.requestAnimationFrame(animateFromScroll);
 
     return () => {
-      carouselEl.removeEventListener('wheel', handleWheel);
-      carouselEl.removeEventListener('touchstart', handleTouchStart);
-      carouselEl.removeEventListener('touchmove', handleTouchMove);
-      if (transitionTimerRef.current) {
-        window.clearTimeout(transitionTimerRef.current);
-      }
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
     };
-  }, [setPatekSlide]);
+  }, [applyPatekProgress, clampPatekProgress, getPatekMetrics]);
+
+  useEffect(() => {
+    if (!isPatekPlaying) return;
+    const interval = setInterval(() => {
+      setPatekSlide((activeSlideRef.current + 1) % patekSlides.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [isPatekPlaying, setPatekSlide]);
+
+  useEffect(() => () => {
+    if (pageScrollAnimationRef.current) {
+      window.cancelAnimationFrame(pageScrollAnimationRef.current);
+    }
+  }, []);
 
   const { data: featuredData, isLoading } = useQuery({
     queryKey: ['featured-products'],
@@ -352,8 +359,17 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <section ref={carouselRef} className="hero-carousel_hero-carousel__bEV8J patek-hero-carousel">
-        <div className="patek-carousel-track" style={{ transform: `translateY(-${activePatekSlide * 100}%)` }}>
+      <section
+        ref={carouselStageRef}
+        className="patek-carousel-scroll-stage"
+        style={{ '--patek-slide-count': patekSlides.length }}
+      >
+        <div ref={carouselRef} className="hero-carousel_hero-carousel__bEV8J patek-hero-carousel">
+          <div
+            ref={patekTrackRef}
+            className="patek-carousel-track"
+            style={{ transform: `translate3d(0, -${renderedProgressRef.current * 100}%, 0)` }}
+          >
           {patekSlides.map((slide, idx) => {
             const isActive = idx === activePatekSlide;
             return (
@@ -421,44 +437,45 @@ export const HomePage = () => {
               </article>
             );
           })}
-        </div>
+          </div>
 
-        {/* Carousel Pagination & Play/Pause controls */}
-        <div className="patek-carousel-controls">
-          <button
-            type="button"
-            className="patek-play-pause-btn"
-            onClick={() => setIsPatekPlaying((prev) => !prev)}
-            aria-label={isPatekPlaying ? 'Pause slide rotation' : 'Play slide rotation'}
-          >
-            {isPatekPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
-          </button>
+          {/* Carousel Pagination & Play/Pause controls */}
+          <div className="patek-carousel-controls">
+            <button
+              type="button"
+              className="patek-play-pause-btn"
+              onClick={() => setIsPatekPlaying((prev) => !prev)}
+              aria-label={isPatekPlaying ? 'Pause slide rotation' : 'Play slide rotation'}
+            >
+              {isPatekPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
+            </button>
 
-          <div className="patek-carousel-pagination">
-            {patekSlides.map((_, idx) => {
-              const isActive = idx === activePatekSlide;
-              return (
-                <button
-                  key={idx}
-                  type="button"
-                  className={`patek-pagination-item ${isActive ? 'active' : ''}`}
-                  onClick={() => {
-                    setPatekSlide(idx);
-                  }}
-                  aria-label={`Go to slide ${idx + 1}`}
-                >
-                  <span className="patek-pagination-number">0{idx + 1}</span>
-                  <div className="patek-pagination-line-bg">
-                    <span
-                      key={`${idx}-${isPatekPlaying}-${activePatekSlide}`}
-                      className={`patek-pagination-line-fill ${isActive ? 'animate' : ''} ${
-                        !isPatekPlaying ? 'paused' : ''
-                      }`}
-                    />
-                  </div>
-                </button>
-              );
-            })}
+            <div className="patek-carousel-pagination">
+              {patekSlides.map((_, idx) => {
+                const isActive = idx === activePatekSlide;
+                return (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`patek-pagination-item ${isActive ? 'active' : ''}`}
+                    onClick={() => {
+                      setPatekSlide(idx);
+                    }}
+                    aria-label={`Go to slide ${idx + 1}`}
+                  >
+                    <span className="patek-pagination-number">0{idx + 1}</span>
+                    <div className="patek-pagination-line-bg">
+                      <span
+                        key={`${idx}-${isPatekPlaying}-${activePatekSlide}`}
+                        className={`patek-pagination-line-fill ${isActive ? 'animate' : ''} ${
+                          !isPatekPlaying ? 'paused' : ''
+                        }`}
+                      />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
         </div>
       </section>
