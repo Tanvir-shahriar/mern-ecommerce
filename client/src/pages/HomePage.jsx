@@ -1,4 +1,4 @@
-import { ArrowRight, Cpu, CreditCard, ShieldCheck, Timer, Truck, WalletCards, Play, Pause } from 'lucide-react';
+import { ArrowRight, Cpu, CreditCard, ShieldCheck, Timer, Truck, Play, Pause } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -34,10 +34,30 @@ import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.
 import { money } from '../utils/format.js';
 
 const perks = [
-  { icon: Timer, label: 'Watch-first catalog' },
-  { icon: ShieldCheck, label: 'Secure checkout' },
-  { icon: Truck, label: 'Tracked delivery' },
-  { icon: WalletCards, label: 'Flexible payment' }
+  {
+    icon: Cpu,
+    label: 'Curated watch data',
+    meta: 'Movement, model, fit',
+    detail: 'Clear specs for mechanical watches, smartwatches, case sizes, straps, and daily-wear use.'
+  },
+  {
+    icon: ShieldCheck,
+    label: 'Verified checkout',
+    meta: 'Protected purchase',
+    detail: 'Account-aware orders, saved delivery details, and admin tracking keep each purchase traceable.'
+  },
+  {
+    icon: Truck,
+    label: 'Bangladesh delivery',
+    meta: 'Address-led dispatch',
+    detail: 'District-ready delivery profiles help orders move cleanly from checkout to customer handoff.'
+  },
+  {
+    icon: CreditCard,
+    label: 'Flexible payment',
+    meta: 'Fast decision point',
+    detail: 'Direct purchase paths and cart checkout support quick single-watch orders or planned baskets.'
+  }
 ];
 
 const chineseWatchBrands = [
@@ -141,10 +161,15 @@ export const HomePage = () => {
     }
   }, [clampPatekProgress]);
 
-  const smoothPageScrollTo = useCallback((targetTop, duration = 1150) => {
+  const cancelPatekPageScroll = useCallback(() => {
     if (pageScrollAnimationRef.current) {
       window.cancelAnimationFrame(pageScrollAnimationRef.current);
+      pageScrollAnimationRef.current = null;
     }
+  }, []);
+
+  const smoothPageScrollTo = useCallback((targetTop, duration = 1150) => {
+    cancelPatekPageScroll();
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const startTop = window.scrollY;
@@ -170,17 +195,17 @@ export const HomePage = () => {
     };
 
     pageScrollAnimationRef.current = window.requestAnimationFrame(step);
-  }, []);
+  }, [cancelPatekPageScroll]);
 
   const setPatekSlide = useCallback((nextSlide) => {
     const nextIndex = Math.round(clampPatekProgress(nextSlide));
     const metrics = getPatekMetrics();
     const stageRect = metrics?.stage.getBoundingClientRect();
-    const isStageVisible = stageRect && stageRect.bottom > 0 && stageRect.top < window.innerHeight;
+    const isStagePinned = stageRect && stageRect.top <= 1 && stageRect.bottom >= window.innerHeight - 1;
 
     targetProgressRef.current = nextIndex;
 
-    if (metrics && isStageVisible) {
+    if (metrics && isStagePinned) {
       const targetTop = metrics.stageTop + (metrics.scrollDistance * nextIndex) / (patekSlides.length - 1);
       smoothPageScrollTo(targetTop);
       return;
@@ -264,18 +289,21 @@ export const HomePage = () => {
   }, [applyPatekProgress, clampPatekProgress, getPatekMetrics]);
 
   useEffect(() => {
-    if (!isPatekPlaying) return;
-    const interval = setInterval(() => {
-      setPatekSlide((activeSlideRef.current + 1) % patekSlides.length);
-    }, 8000);
-    return () => clearInterval(interval);
-  }, [isPatekPlaying, setPatekSlide]);
+    const cancelOnUserInput = () => cancelPatekPageScroll();
+
+    window.addEventListener('wheel', cancelOnUserInput, { passive: true });
+    window.addEventListener('touchstart', cancelOnUserInput, { passive: true });
+    window.addEventListener('keydown', cancelOnUserInput);
+    return () => {
+      window.removeEventListener('wheel', cancelOnUserInput);
+      window.removeEventListener('touchstart', cancelOnUserInput);
+      window.removeEventListener('keydown', cancelOnUserInput);
+    };
+  }, [cancelPatekPageScroll]);
 
   useEffect(() => () => {
-    if (pageScrollAnimationRef.current) {
-      window.cancelAnimationFrame(pageScrollAnimationRef.current);
-    }
-  }, []);
+    cancelPatekPageScroll();
+  }, [cancelPatekPageScroll]);
 
   const { data: featuredData, isLoading } = useQuery({
     queryKey: ['featured-products'],
@@ -445,7 +473,7 @@ export const HomePage = () => {
               type="button"
               className="patek-play-pause-btn"
               onClick={() => setIsPatekPlaying((prev) => !prev)}
-              aria-label={isPatekPlaying ? 'Pause slide rotation' : 'Play slide rotation'}
+              aria-label={isPatekPlaying ? 'Pause carousel video' : 'Play carousel video'}
             >
               {isPatekPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
             </button>
@@ -480,46 +508,141 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <SpiderClock />
-
-      <section className="perks-bar">
-        {perks.map(({ icon: Icon, label }) => (
-          <div key={label}>
-            <Icon size={20} />
-            <span>{label}</span>
+      <section className="lahv-signature-section" aria-labelledby="lahv-signature-title">
+        <div className="lahv-signature-inner">
+          <div className="lahv-signature-copy">
+            <p className="eyebrow signature-eyebrow">LahVenture standard</p>
+            <h2 id="lahv-signature-title">A refined watch experience, built for everyday confidence.</h2>
+            <p>
+              Curated mechanical watches and smartwatches with clear sourcing, reliable delivery,
+              and after-purchase support for collectors across Bangladesh.
+            </p>
+            <div className="lahv-signature-actions">
+              <Link to="/products" className="lahv-signature-primary">
+                Explore watches
+                <ArrowRight size={18} />
+              </Link>
+              <Link to="/products?category=Smartwatch" className="lahv-signature-secondary">
+                Smartwatch edit
+              </Link>
+            </div>
           </div>
-        ))}
+
+          <div className="lahv-signature-visual" aria-hidden="true">
+            <span className="lahv-signature-index">LV-01</span>
+            <img src="/jupiter_watch.png" alt="" loading="lazy" />
+            <div className="lahv-signature-caption">
+              <span>Precision selected</span>
+              <strong>Mechanical and connected timepieces</strong>
+            </div>
+          </div>
+
+          <div className="lahv-signature-points">
+            <div className="lahv-signature-point">
+              <ShieldCheck size={22} />
+              <div>
+                <strong>Verified sourcing</strong>
+                <span>Brand, model, movement, and seller details reviewed before listing.</span>
+              </div>
+            </div>
+            <div className="lahv-signature-point">
+              <Timer size={22} />
+              <div>
+                <strong>Ready-to-wear setup</strong>
+                <span>Product details, care notes, and delivery information stay organized.</span>
+              </div>
+            </div>
+            <div className="lahv-signature-point">
+              <Truck size={22} />
+              <div>
+                <strong>Bangladesh delivery</strong>
+                <span>Address-aware checkout and order tracking for a smoother purchase.</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
-      <section className="brand-showcase-section">
-        <div className="brand-showcase-heading">
-          <p className="eyebrow">Shop by brand</p>
-          <h2>Explore Chinese watch brands</h2>
-          <p>
-            Browse heritage Chinese watchmakers and enthusiast-favorite microbrands, from classic
-            mechanical maisons to modern sport-watch specialists.
-          </p>
+      <SpiderClock />
+
+      <section className="perks-bar" aria-labelledby="perks-title">
+        <div className="perks-bar-header">
+          <p className="eyebrow">LahVenture promise</p>
+          <h2 id="perks-title">Service shaped for watch buyers</h2>
         </div>
-        <div className="brand-marquee" aria-label="Popular Chinese watch brands">
-          <div className="brand-marquee-track">
-            {[...chineseWatchBrands, ...chineseWatchBrands].map((brand, index) => (
-              <Link
-                className="brand-logo-card"
-                to={`/products?brand=${encodeURIComponent(brand.name)}`}
-                key={`${brand.name}-${index}`}
-              >
-                <span className={`brand-image-shell${brand.imageMode ? ` ${brand.imageMode}` : ''}`}>
-                  <img src={brand.logo} alt={`${brand.name} brand logo`} loading="lazy" />
-                </span>
-                <strong>{brand.name}</strong>
-                <small>{brand.type}</small>
-              </Link>
-            ))}
+
+        <div className="perks-grid">
+          {perks.map(({ icon: Icon, label, meta, detail }, index) => (
+            <article className="perk-card" key={label}>
+              <span className="perk-card-number">{String(index + 1).padStart(2, '0')}</span>
+              <span className="perk-icon-shell">
+                <Icon size={22} />
+              </span>
+              <div className="perk-card-copy">
+                <span>{meta}</span>
+                <h3>{label}</h3>
+                <p>{detail}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="brand-showcase-section" aria-labelledby="brand-showcase-title">
+        <div className="brand-showcase-inner">
+          <div className="brand-showcase-heading">
+            <div>
+              <p className="eyebrow brand-showcase-eyebrow">Curated maisons</p>
+              <h2 id="brand-showcase-title">Explore Chinese watchmaking houses</h2>
+            </div>
+            <p>
+              A considered edit of heritage manufacturers and enthusiast-led makers, selected for
+              mechanical character, finishing quality, and everyday wearability.
+            </p>
+          </div>
+
+          <div className="brand-showcase-meta" aria-label="Brand collection highlights">
+            <div>
+              <strong>{chineseWatchBrands.length}+</strong>
+              <span>curated brands</span>
+            </div>
+            <div>
+              <strong>1963</strong>
+              <span>heritage chronographs</span>
+            </div>
+            <div>
+              <strong>GMT</strong>
+              <span>divers and travel watches</span>
+            </div>
+          </div>
+
+          <div className="brand-marquee" aria-label="Popular Chinese watch brands">
+            <div className="brand-marquee-track">
+              {[...chineseWatchBrands, ...chineseWatchBrands].map((brand, index) => (
+                <Link
+                  className="brand-logo-card"
+                  to={`/products?brand=${encodeURIComponent(brand.name)}`}
+                  key={`${brand.name}-${index}`}
+                >
+                  <span className="brand-card-index">{String((index % chineseWatchBrands.length) + 1).padStart(2, '0')}</span>
+                  <span className={`brand-image-shell${brand.imageMode ? ` ${brand.imageMode}` : ''}`}>
+                    <img src={brand.logo} alt={`${brand.name} brand logo`} loading="lazy" />
+                  </span>
+                  <strong>{brand.name}</strong>
+                  <small>{brand.type}</small>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="brand-showcase-footer">
+            <span>Browse by brand, movement style, case profile, and daily-wear purpose.</span>
+            <Link to="/products" className="button brand-view-button">
+              View all brands
+              <ArrowRight size={17} />
+            </Link>
           </div>
         </div>
-        <Link to="/products" className="button brand-view-button">
-          View all brands
-        </Link>
       </section>
 
       <section className="section">

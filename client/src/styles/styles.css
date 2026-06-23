@@ -792,15 +792,245 @@ main {
   animation-play-state: paused;
 }
 
+.lahv-signature-section {
+  position: relative;
+  overflow: hidden;
+  padding: 86px 0;
+  background:
+    linear-gradient(90deg, rgba(128, 0, 16, 0.28), transparent 34%),
+    linear-gradient(135deg, #080707 0%, #14100d 54%, #2a070b 100%);
+  color: #fff7e8;
+}
+
+.lahv-signature-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(240, 198, 106, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240, 198, 106, 0.06) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  opacity: 0.34;
+}
+
+.lahv-signature-section::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(240, 198, 106, 0.72), transparent);
+}
+
+.lahv-signature-inner {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(320px, 0.8fr) minmax(260px, 0.55fr);
+  align-items: center;
+  gap: 42px;
+}
+
+.lahv-signature-section .signature-eyebrow {
+  color: #f0c66a;
+}
+
+.lahv-signature-copy {
+  display: grid;
+  gap: 22px;
+}
+
+.lahv-signature-copy h2 {
+  max-width: 720px;
+  margin: 0;
+  color: #fffaf0;
+  font-family: "Playfair Display", "Cinzel", "Didot", "Georgia", serif;
+  font-size: 3.2rem;
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: 0;
+}
+
+.lahv-signature-copy p:not(.eyebrow) {
+  max-width: 620px;
+  margin: 0;
+  color: rgba(255, 247, 232, 0.74);
+  font-size: 1.02rem;
+  line-height: 1.8;
+}
+
+.lahv-signature-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.lahv-signature-primary,
+.lahv-signature-secondary {
+  min-height: 46px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border: 1px solid rgba(240, 198, 106, 0.5);
+  color: #fff7e8;
+  font-size: 0.86rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease, color 180ms ease;
+}
+
+.lahv-signature-primary {
+  background: #f0c66a;
+  color: #171006;
+  border-color: #f0c66a;
+}
+
+.lahv-signature-secondary {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.lahv-signature-primary:hover,
+.lahv-signature-secondary:hover {
+  transform: translateY(-2px);
+}
+
+.lahv-signature-secondary:hover {
+  background: rgba(240, 198, 106, 0.1);
+  border-color: #f0c66a;
+}
+
+.lahv-signature-visual {
+  position: relative;
+  min-height: 520px;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.lahv-signature-visual::before {
+  content: "";
+  position: absolute;
+  width: min(420px, 82%);
+  aspect-ratio: 1;
+  border: 1px solid rgba(240, 198, 106, 0.24);
+  transform: rotate(18deg);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0)),
+    rgba(255, 255, 255, 0.02);
+  z-index: -1;
+}
+
+.lahv-signature-visual img {
+  width: min(420px, 92%);
+  filter: drop-shadow(0 32px 42px rgba(0, 0, 0, 0.54));
+  animation: signature-watch-float 6.5s ease-in-out infinite;
+}
+
+.lahv-signature-index {
+  position: absolute;
+  top: 28px;
+  right: 14px;
+  color: rgba(240, 198, 106, 0.78);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+}
+
+.lahv-signature-caption {
+  position: absolute;
+  left: 0;
+  bottom: 24px;
+  min-width: 260px;
+  padding: 14px 16px;
+  border-left: 2px solid #f0c66a;
+  background: rgba(8, 7, 7, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+.lahv-signature-caption span,
+.lahv-signature-caption strong {
+  display: block;
+}
+
+.lahv-signature-caption span {
+  color: rgba(255, 247, 232, 0.58);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.lahv-signature-caption strong {
+  margin-top: 5px;
+  color: #fff7e8;
+  font-family: "Playfair Display", "Georgia", serif;
+  font-size: 1.18rem;
+  font-weight: 500;
+}
+
+.lahv-signature-points {
+  display: grid;
+  gap: 16px;
+}
+
+.lahv-signature-point {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 14px;
+  padding: 18px 0;
+  border-top: 1px solid rgba(240, 198, 106, 0.18);
+}
+
+.lahv-signature-point:last-child {
+  border-bottom: 1px solid rgba(240, 198, 106, 0.18);
+}
+
+.lahv-signature-point svg {
+  color: #f0c66a;
+}
+
+.lahv-signature-point strong,
+.lahv-signature-point span {
+  display: block;
+}
+
+.lahv-signature-point strong {
+  color: #fff7e8;
+  font-size: 1rem;
+}
+
+.lahv-signature-point span {
+  margin-top: 6px;
+  color: rgba(255, 247, 232, 0.62);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .patek-carousel-track,
   .patek-video,
+  .lahv-signature-visual img,
   .hero-carousel-item_title__Rw_ym.patek-carousel-title,
   .hero-carousel-item_description__d6lT4.patek-carousel-description p,
   .hero-carousel-item_cta-container__qsuy2.patek-carousel-cta-container,
   .patek-pagination-line-fill.animate {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+@keyframes signature-watch-float {
+  50% {
+    transform: translateY(-10px) rotate(1deg);
   }
 }
 
@@ -900,26 +1130,179 @@ main {
 }
 
 .perks-bar {
-  width: min(1180px, calc(100% - 36px));
-  min-height: 78px;
-  justify-content: space-between;
-  gap: 16px;
-  margin: -24px auto 0;
-  padding: 14px 20px;
   position: relative;
+  display: grid;
+  gap: 28px;
+  width: 100%;
+  scroll-margin-top: 84px;
+  margin: 0;
+  padding: clamp(54px, 7vw, 86px) 0;
+  overflow: hidden;
   z-index: 2;
-  background: var(--paper);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  color: #fff7e8;
+  background:
+    linear-gradient(90deg, rgba(240, 198, 106, 0.12), transparent 22%, transparent 78%, rgba(240, 198, 106, 0.08)),
+    linear-gradient(135deg, #080707 0%, #150a0b 48%, #3d080f 100%);
+  border-top: 1px solid rgba(240, 198, 106, 0.16);
+  border-bottom: 1px solid rgba(240, 198, 106, 0.14);
 }
 
-.perks-bar div {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--muted);
+.perks-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(240, 198, 106, 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240, 198, 106, 0.045) 1px, transparent 1px);
+  background-size: 92px 92px, 92px 92px;
+  opacity: 0.46;
+}
+
+.perks-bar::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(240, 198, 106, 0.55), transparent);
+}
+
+.perks-bar-header,
+.perks-grid {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+}
+
+.perks-bar-header {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(280px, 0.5fr);
+  align-items: end;
+  gap: 32px;
+}
+
+.perks-bar-header .eyebrow {
+  color: #f0c66a;
+}
+
+.perks-bar-header h2 {
+  margin: 0;
+  max-width: 720px;
+  color: #fff7e8;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(2rem, 4.8vw, 4.15rem);
+  line-height: 0.98;
+  font-weight: 700;
+}
+
+.perks-bar-header::after {
+  content: "01 / 04 service standards";
+  justify-self: end;
+  max-width: 260px;
+  padding-bottom: 8px;
+  color: rgba(255, 247, 232, 0.7);
+  font-size: 0.78rem;
   font-weight: 800;
+  letter-spacing: 0.12em;
+  line-height: 1.7;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.perks-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border-top: 1px solid rgba(240, 198, 106, 0.22);
+  border-left: 1px solid rgba(240, 198, 106, 0.16);
+}
+
+.perk-card {
+  position: relative;
+  min-height: 260px;
+  display: grid;
+  align-content: space-between;
+  gap: 24px;
+  padding: 22px;
+  background: rgba(255, 247, 232, 0.035);
+  border-right: 1px solid rgba(240, 198, 106, 0.16);
+  border-bottom: 1px solid rgba(240, 198, 106, 0.16);
+  transition:
+    background 180ms ease,
+    transform 180ms ease,
+    border-color 180ms ease;
+}
+
+.perk-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 22px;
+  left: 22px;
+  height: 2px;
+  background: #f0c66a;
+  transform: scaleX(0.28);
+  transform-origin: left;
+  transition: transform 180ms ease;
+}
+
+.perk-card:hover {
+  background: rgba(255, 247, 232, 0.075);
+  border-color: rgba(240, 198, 106, 0.32);
+  transform: translateY(-4px);
+}
+
+.perk-card:hover::before {
+  transform: scaleX(1);
+}
+
+.perk-card-number {
+  color: rgba(240, 198, 106, 0.72);
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.perk-icon-shell {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #1a0c09;
+  background: #f0c66a;
+  border: 1px solid rgba(255, 247, 232, 0.35);
+  border-radius: 50%;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22);
+}
+
+.perk-card-copy {
+  display: grid;
+  gap: 10px;
+}
+
+.perk-card-copy span {
+  color: rgba(255, 247, 232, 0.62);
+  font-size: 0.74rem;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.perk-card-copy h3 {
+  margin: 0;
+  color: #fff7e8;
+  font-size: 1.24rem;
+  line-height: 1.18;
+}
+
+.perk-card-copy p {
+  margin: 0;
+  color: rgba(255, 247, 232, 0.72);
+  font-size: 0.94rem;
+  line-height: 1.65;
 }
 
 .category-grid,
@@ -956,51 +1339,119 @@ main {
 }
 
 .brand-showcase-section {
-  display: grid;
-  justify-items: center;
-  gap: 28px;
-  padding: clamp(44px, 7vw, 74px) 0;
+  position: relative;
   overflow: hidden;
-  background: #f5f6f7;
+  scroll-margin-top: 84px;
+  padding: clamp(68px, 8vw, 108px) 0;
+  background:
+    linear-gradient(120deg, rgba(128, 0, 16, 0.42), rgba(8, 7, 7, 0.2) 36%, rgba(240, 198, 106, 0.08)),
+    linear-gradient(180deg, #080707 0%, #130b0b 48%, #090707 100%);
+  color: #fff7e8;
+}
+
+.brand-showcase-section::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(240, 198, 106, 0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(240, 198, 106, 0.05) 1px, transparent 1px);
+  background-size: 86px 86px, 86px 86px;
+  opacity: 0.52;
+}
+
+.brand-showcase-inner {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, calc(100% - 36px));
+  margin: 0 auto;
+  display: grid;
+  gap: 34px;
 }
 
 .brand-showcase-heading {
-  width: min(1040px, calc(100% - 36px));
   display: grid;
-  justify-items: center;
-  gap: 8px;
-  text-align: center;
+  grid-template-columns: minmax(0, 0.9fr) minmax(280px, 0.62fr);
+  align-items: end;
+  gap: 38px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid rgba(240, 198, 106, 0.24);
 }
 
 .brand-showcase-heading h2 {
   margin: 0;
-  color: #050505;
-  font-size: clamp(2rem, 4vw, 3.5rem);
-  line-height: 1;
+  color: #fffaf0;
+  font-family: "Playfair Display", "Cinzel", "Didot", "Georgia", serif;
+  font-size: clamp(2.45rem, 5.4vw, 5.8rem);
+  font-weight: 400;
+  line-height: 0.96;
   letter-spacing: 0;
-  text-transform: uppercase;
+  text-transform: none;
+}
+
+.brand-showcase-eyebrow {
+  margin-bottom: 14px;
+  color: #f0c66a;
 }
 
 .brand-showcase-heading p:last-child {
-  width: min(920px, 100%);
   margin: 0;
-  color: #1b2229;
+  color: rgba(255, 247, 232, 0.68);
   font-size: 1.02rem;
-  line-height: 1.65;
+  line-height: 1.8;
+}
+
+.brand-showcase-meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand-showcase-meta div {
+  min-height: 98px;
+  display: grid;
+  align-content: center;
+  gap: 5px;
+  padding: 18px 24px;
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.brand-showcase-meta div:last-child {
+  border-right: none;
+}
+
+.brand-showcase-meta strong {
+  color: #f0c66a;
+  font-family: "Playfair Display", "Georgia", serif;
+  font-size: 2rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.brand-showcase-meta span {
+  color: rgba(255, 247, 232, 0.62);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
 .brand-marquee {
-  width: 100%;
+  width: calc(100vw - 16px);
+  margin-left: calc((min(1180px, calc(100vw - 36px)) - 100vw) / 2 + 8px);
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
-  mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent);
+  padding: 10px 0 14px;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
 }
 
 .brand-marquee-track {
   width: max-content;
   display: flex;
-  gap: 18px;
-  animation: brand-marquee-left 42s linear infinite;
+  gap: 16px;
+  animation: brand-marquee-left 56s linear infinite;
 }
 
 .brand-marquee:hover .brand-marquee-track {
@@ -1008,85 +1459,142 @@ main {
 }
 
 .brand-logo-card {
-  width: 286px;
-  min-height: 230px;
+  position: relative;
+  width: 302px;
+  min-height: 260px;
   display: grid;
-  place-items: center;
-  grid-template-rows: 140px auto auto;
-  gap: 9px;
+  align-content: start;
+  gap: 12px;
   padding: 18px;
-  border: 1px solid #d9dde1;
-  background: #ffffff;
-  color: #12181f;
-  text-align: center;
+  border: 1px solid rgba(240, 198, 106, 0.2);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.02)),
+    rgba(10, 8, 8, 0.76);
+  color: #fff7e8;
+  text-align: left;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition:
     border-color 160ms ease,
     box-shadow 160ms ease,
-    transform 160ms ease;
+    transform 160ms ease,
+    background 160ms ease;
+}
+
+.brand-logo-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, transparent 0%, rgba(240, 198, 106, 0.12) 42%, transparent 70%);
+  opacity: 0;
+  transition: opacity 160ms ease;
 }
 
 .brand-logo-card:hover {
-  border-color: #d71920;
-  box-shadow: 0 18px 36px rgba(23, 32, 38, 0.1);
-  transform: translateY(-2px);
+  border-color: rgba(240, 198, 106, 0.68);
+  background:
+    linear-gradient(135deg, rgba(240, 198, 106, 0.12), rgba(255, 255, 255, 0.03)),
+    rgba(12, 9, 8, 0.9);
+  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.28);
+  transform: translateY(-4px);
+}
+
+.brand-logo-card:hover::after {
+  opacity: 1;
+}
+
+.brand-card-index {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  color: rgba(240, 198, 106, 0.72);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
 }
 
 .brand-image-shell {
   width: 100%;
-  height: 140px;
+  height: 142px;
   display: grid;
   place-items: center;
   overflow: hidden;
-  padding: 10px 14px;
-  border: 1px solid #edf0f3;
-  border-radius: 6px;
+  padding: 14px 18px;
+  border: 1px solid rgba(240, 198, 106, 0.16);
+  border-radius: 2px;
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.94), rgba(245, 247, 249, 0.96)),
-    #ffffff;
+    linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(236, 231, 220, 0.94)),
+    #f6f1e8;
 }
 
 .brand-image-shell.dark,
 .brand-image-shell.cover {
-  border-color: rgba(255, 255, 255, 0.08);
-  background: #090a0c;
+  border-color: rgba(240, 198, 106, 0.2);
+  background: #090807;
 }
 
 .brand-image-shell img {
   width: 100%;
-  max-width: 252px;
+  max-width: 246px;
   height: 100%;
   object-fit: contain;
 }
 
 .brand-image-shell.cover {
-  padding: 10px 14px;
+  padding: 14px 18px;
 }
 
 .brand-image-shell.cover img {
-  max-width: 252px;
+  max-width: 246px;
   object-fit: contain;
 }
 
 .brand-logo-card strong {
   max-width: 100%;
   overflow-wrap: anywhere;
-  font-size: 1.32rem;
-  font-weight: 950;
-  line-height: 1.05;
+  color: #fffaf0;
+  font-family: "Playfair Display", "Georgia", serif;
+  font-size: 1.42rem;
+  font-weight: 600;
+  line-height: 1.08;
   text-transform: uppercase;
 }
 
 .brand-logo-card small {
-  color: var(--muted);
+  color: rgba(255, 247, 232, 0.58);
   font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.brand-showcase-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  padding-top: 6px;
+}
+
+.brand-showcase-footer > span {
+  color: rgba(255, 247, 232, 0.62);
+  font-size: 0.96rem;
+  line-height: 1.6;
 }
 
 .brand-view-button {
-  min-width: 200px;
-  border-color: #d71920;
-  background: transparent;
-  color: #d71920;
+  min-width: 210px;
+  border-color: #f0c66a;
+  background: #f0c66a;
+  color: #171006;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.brand-view-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px rgba(240, 198, 106, 0.2);
 }
 
 .product-grid {
@@ -3284,6 +3792,58 @@ textarea:focus {
     min-height: 320px;
   }
 
+  .lahv-signature-section {
+    padding: 68px 0;
+  }
+
+  .lahv-signature-inner {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 0.72fr);
+    gap: 28px;
+  }
+
+  .lahv-signature-copy h2 {
+    font-size: 2.5rem;
+  }
+
+  .lahv-signature-visual {
+    min-height: 430px;
+  }
+
+  .lahv-signature-points {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .lahv-signature-point {
+    grid-template-columns: 32px minmax(0, 1fr);
+    padding: 16px 0;
+  }
+
+  .perks-bar {
+    padding: 58px 0;
+  }
+
+  .perks-bar-header {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .perks-bar-header::after {
+    justify-self: start;
+    max-width: none;
+    padding-bottom: 0;
+    text-align: left;
+  }
+
+  .perks-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .perk-card {
+    min-height: 228px;
+  }
+
   .future-product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -3292,8 +3852,18 @@ textarea:focus {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .brand-showcase-heading {
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 16px;
+  }
+
+  .brand-showcase-meta div {
+    padding: 16px 18px;
+  }
+
   .brand-logo-card {
-    width: 252px;
+    width: 270px;
   }
 
   .section-heading h1,
@@ -3398,6 +3968,71 @@ textarea:focus {
     min-height: 260px;
   }
 
+  .lahv-signature-section {
+    padding: 48px 0;
+  }
+
+  .lahv-signature-inner {
+    width: min(100% - 28px, 1180px);
+    grid-template-columns: 1fr;
+    gap: 26px;
+  }
+
+  .lahv-signature-copy {
+    gap: 16px;
+  }
+
+  .lahv-signature-copy h2 {
+    font-size: 2.05rem;
+    line-height: 1.08;
+  }
+
+  .lahv-signature-copy p:not(.eyebrow) {
+    font-size: 0.96rem;
+    line-height: 1.65;
+  }
+
+  .lahv-signature-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .lahv-signature-primary,
+  .lahv-signature-secondary {
+    width: 100%;
+  }
+
+  .lahv-signature-visual {
+    min-height: 360px;
+  }
+
+  .lahv-signature-visual::before {
+    width: min(320px, 84%);
+  }
+
+  .lahv-signature-visual img {
+    width: min(320px, 86%);
+  }
+
+  .lahv-signature-index {
+    top: 12px;
+    right: 8px;
+  }
+
+  .lahv-signature-caption {
+    position: relative;
+    left: auto;
+    bottom: auto;
+    width: 100%;
+    min-width: 0;
+    margin-top: -14px;
+  }
+
+  .lahv-signature-points {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
   .hero-carousel_hero-carousel__bEV8J.patek-hero-carousel {
     height: 100vh;
   }
@@ -3495,28 +4130,66 @@ textarea:focus {
   }
 
   .brand-showcase-section {
-    gap: 22px;
-    padding: 40px 0;
+    padding: 48px 0;
+  }
+
+  .brand-showcase-inner {
+    width: min(100% - 28px, 1180px);
+    gap: 24px;
+  }
+
+  .brand-showcase-heading {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding-bottom: 18px;
   }
 
   .brand-showcase-heading h2 {
-    font-size: 2rem;
+    font-size: 2.25rem;
+    line-height: 1.04;
   }
 
   .brand-showcase-heading p:last-child {
     font-size: 0.95rem;
+    line-height: 1.65;
+  }
+
+  .brand-showcase-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .brand-showcase-meta div {
+    min-height: 78px;
+    padding: 14px 0;
+    border-right: none;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .brand-showcase-meta div:last-child {
+    border-bottom: none;
+  }
+
+  .brand-showcase-meta strong {
+    font-size: 1.7rem;
+  }
+
+  .brand-marquee {
+    width: 100vw;
+    margin-left: -14px;
+    padding: 4px 0 8px;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+    mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
   }
 
   .brand-logo-card {
-    width: 228px;
-    min-height: 196px;
-    grid-template-rows: 116px auto auto;
+    width: 236px;
+    min-height: 222px;
     padding: 14px;
   }
 
   .brand-image-shell {
-    height: 116px;
-    padding: 8px 12px;
+    height: 112px;
+    padding: 10px 12px;
   }
 
   .brand-image-shell img {
@@ -3524,7 +4197,7 @@ textarea:focus {
   }
 
   .brand-image-shell.cover {
-    padding: 8px 12px;
+    padding: 10px 12px;
   }
 
   .brand-image-shell.cover img {
@@ -3532,7 +4205,83 @@ textarea:focus {
   }
 
   .brand-logo-card strong {
+    font-size: 1.12rem;
+  }
+
+  .brand-showcase-footer {
+    display: grid;
+    gap: 14px;
+  }
+
+  .brand-view-button {
+    width: 100%;
+  }
+
+  .perks-bar {
+    padding: 44px 0;
+  }
+
+  .perks-bar-header,
+  .perks-grid {
+    width: min(100% - 28px, 1180px);
+  }
+
+  .perks-bar-header {
+    gap: 10px;
+  }
+
+  .perks-bar-header h2 {
+    font-size: 2.1rem;
+    line-height: 1.04;
+  }
+
+  .perks-bar-header::after {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+  }
+
+  .perks-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    border: 0;
+  }
+
+  .perk-card {
+    min-height: 0;
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-content: start;
+    align-items: start;
+    gap: 14px;
+    padding: 18px;
+    border: 1px solid rgba(240, 198, 106, 0.16);
+    border-radius: 8px;
+  }
+
+  .perk-card::before {
+    right: 18px;
+    left: 18px;
+  }
+
+  .perk-card-number {
+    grid-column: 1 / -1;
+  }
+
+  .perk-icon-shell {
+    width: 42px;
+    height: 42px;
+  }
+
+  .perk-card-copy {
+    gap: 7px;
+  }
+
+  .perk-card-copy h3 {
     font-size: 1.08rem;
+  }
+
+  .perk-card-copy p {
+    font-size: 0.88rem;
+    line-height: 1.55;
   }
 
   .hero-actions,
