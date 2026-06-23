@@ -512,8 +512,11 @@ main {
 .hero-carousel_hero-carousel__bEV8J.patek-hero-carousel {
   position: relative;
   width: 100%;
-  height: 100vh; /* 100vh vertical slide height */
+  height: 100vh;
   overflow: hidden;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  isolation: isolate;
   background-color: #000000;
 }
 
@@ -522,8 +525,10 @@ main {
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column; /* Vertical flex layout */
-  transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
+  flex-direction: column;
+  transition: transform 1.35s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+  backface-visibility: hidden;
 }
 
 .hero-carousel-item_hero-carousel-item__d5OPU.patek-carousel-item {
@@ -532,6 +537,8 @@ main {
   height: 100vh;
   flex-shrink: 0;
   overflow: hidden;
+  contain: paint;
+  transform: translateZ(0);
 }
 
 .hero-carousel-item_media-wrapper__u6xit.patek-carousel-media-wrapper {
@@ -540,12 +547,23 @@ main {
   width: 100%;
   height: 100%;
   z-index: 0;
+  background-color: #000000;
 }
 
 .patek-video {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  opacity: 0.72;
+  transform: scale(1.045);
+  transition: transform 1.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.9s ease;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.patek-carousel-item.active .patek-video {
+  opacity: 1;
+  transform: scale(1);
 }
 
 .desktop-only {
@@ -764,6 +782,18 @@ main {
 
 .patek-pagination-line-fill.paused {
   animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .patek-carousel-track,
+  .patek-video,
+  .hero-carousel-item_title__Rw_ym.patek-carousel-title,
+  .hero-carousel-item_description__d6lT4.patek-carousel-description p,
+  .hero-carousel-item_cta-container__qsuy2.patek-carousel-cta-container,
+  .patek-pagination-line-fill.animate {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 .button {
@@ -4514,5 +4544,4 @@ textarea:focus {
   width: 100%;
   height: 100%;
 }
-
 
