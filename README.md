@@ -1,10 +1,10 @@
 # lahVenture
 
-A full MERN stack watch and smartwatch e-commerce application with a MongoDB-backed API, responsive React storefront, account area, cart, checkout, orders, wishlist, reviews, coupon support, inventory management, and admin dashboards.
+A full MERN stack watch and smartwatch e-commerce application with a MongoDB-backed API by default, optional Hostinger/MySQL storage, responsive React storefront, account area, cart, checkout, orders, wishlist, reviews, coupon support, inventory management, and admin dashboards.
 
 ## Stack
 
-- MongoDB + Mongoose
+- MongoDB + Mongoose by default, or Hostinger/MySQL via `DATABASE_PROVIDER=mysql`
 - Express 5 API with JWT auth, httpOnly cookies, validation, rate limiting, and upload handling
 - React + Vite + React Router + TanStack Query
 - Socket.IO hooks for order events
@@ -64,14 +64,38 @@ npm run seed
 npm run dev
 ```
 
+## Hostinger MySQL
+
+The backend can run against Hostinger MySQL by setting `DATABASE_PROVIDER=mysql`. The MySQL adapter stores each ecommerce document in MySQL tables with JSON payloads so the existing API continues to work while moving away from MongoDB.
+
+Set these values in `.env`, `server/.env`, or your deployment environment:
+
+```env
+DATABASE_PROVIDER=mysql
+MYSQL_HOST=<hostinger-mysql-host>
+MYSQL_PORT=3306
+MYSQL_USER=<hostinger-mysql-user>
+MYSQL_PASSWORD=<hostinger-mysql-password>
+MYSQL_DATABASE=<hostinger-mysql-database>
+```
+
+Then initialize/seed the MySQL tables:
+
+```bash
+npm run seed
+npm run dev
+```
+
+Do not commit real MySQL credentials. If credentials were shared in chat or committed elsewhere, rotate the password in Hostinger before production use.
+
 ## Main Features
 
 - Customer authentication, profile updates, wishlist, cart, coupon application, checkout, and order history
 - Product catalog with search, category filtering, price filtering, sorting, stock status, product details, and reviews
 - Admin dashboard with revenue, order, user, product, recent order, and low-stock metrics
 - Admin product/category creation, product archiving, and order status updates
-- Local image upload endpoints and static upload serving
-- MongoDB seed data for categories, products, coupons, and demo users
+- Local image upload endpoints and static upload serving; on Vercel, images are returned as data URLs and saved in product records
+- Seed data for categories, products, coupons, and demo users
 
 ## Useful Scripts
 
@@ -79,7 +103,7 @@ npm run dev
 npm run dev          # client + server
 npm run dev:server   # Express API only
 npm run dev:client   # Vite client only
-npm run seed         # reset and seed MongoDB
+npm run seed         # reset and seed the selected database provider
 npm run build        # build React client
 npm test             # backend smoke tests
 ```
@@ -92,12 +116,24 @@ Set these Vercel environment variables before deploying:
 
 ```bash
 MONGO_URI=<your MongoDB Atlas connection string>
+DATABASE_PROVIDER=mongodb
 JWT_SECRET=<long random production secret>
 JWT_EXPIRES_IN=7d
 COOKIE_EXPIRES_DAYS=7
 UPLOAD_DIR=uploads
 SEED_ADMIN_EMAIL=admin@example.com
 SEED_ADMIN_PASSWORD=<secure admin password>
+```
+
+For Hostinger MySQL deployment, replace `MONGO_URI`/`DATABASE_PROVIDER=mongodb` with:
+
+```bash
+DATABASE_PROVIDER=mysql
+MYSQL_HOST=<hostinger-mysql-host>
+MYSQL_PORT=3306
+MYSQL_USER=<hostinger-mysql-user>
+MYSQL_PASSWORD=<hostinger-mysql-password>
+MYSQL_DATABASE=<hostinger-mysql-database>
 ```
 
 After the first deployment, set `CLIENT_URL` to the deployed Vercel URL, for example:

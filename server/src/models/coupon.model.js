@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { env } from '../config/env.js';
+import { mysqlModels } from './mysql/models.js';
 
 const couponSchema = new mongoose.Schema(
   {
@@ -70,4 +72,4 @@ couponSchema.methods.calculateDiscount = function calculateDiscount(amount) {
   return Math.min(amount, Math.round(cappedDiscount * 100) / 100);
 };
 
-export const Coupon = mongoose.model('Coupon', couponSchema);
+export const Coupon = env.databaseProvider === 'mysql' ? mysqlModels.Coupon : mongoose.model('Coupon', couponSchema);

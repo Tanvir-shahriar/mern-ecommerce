@@ -30,9 +30,17 @@ export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   isProduction,
   port: Number(process.env.PORT || 5001),
+  databaseProvider: (process.env.DATABASE_PROVIDER || process.env.DB_PROVIDER || 'mongodb').toLowerCase(),
   clientUrl,
   clientUrls,
   mongoUri: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/mern_ecommerce',
+  mysql: {
+    host: process.env.MYSQL_HOST || process.env.DB_HOST || '127.0.0.1',
+    port: Number(process.env.MYSQL_PORT || process.env.DB_PORT || 3306),
+    user: process.env.MYSQL_USER || process.env.DB_USER || '',
+    password: process.env.MYSQL_PASSWORD || process.env.DB_PASSWORD || '',
+    database: process.env.MYSQL_DATABASE || process.env.DB_NAME || ''
+  },
   jwtSecret: process.env.JWT_SECRET || 'dev-only-change-me',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   cookieExpiresDays: Number(process.env.COOKIE_EXPIRES_DAYS || 7),

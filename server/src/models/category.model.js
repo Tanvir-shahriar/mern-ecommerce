@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import slugify from 'slugify';
+import { env } from '../config/env.js';
+import { mysqlModels } from './mysql/models.js';
 
 const categorySchema = new mongoose.Schema(
   {
@@ -49,4 +51,4 @@ categorySchema.pre('validate', function makeSlug() {
   }
 });
 
-export const Category = mongoose.model('Category', categorySchema);
+export const Category = env.databaseProvider === 'mysql' ? mysqlModels.Category : mongoose.model('Category', categorySchema);

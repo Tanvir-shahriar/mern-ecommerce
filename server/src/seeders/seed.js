@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import { connectDB, disconnectDB } from '../config/db.js';
 import { env } from '../config/env.js';
 import { Cart } from '../models/cart.model.js';
@@ -254,7 +253,5 @@ run()
     process.exitCode = 1;
   })
   .finally(async () => {
-    if (mongoose.connection.readyState !== 0) {
-      await disconnectDB();
-    }
+    await disconnectDB();
   });

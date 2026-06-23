@@ -1,7 +1,10 @@
 import mongoose from 'mongoose';
 import { env } from './env.js';
+import { closeMysql, initMysql } from './mysql.js';
 
 export const connectDB = async () => {
+  if (env.databaseProvider === 'mysql') return initMysql();
+
   if (mongoose.connection.readyState === 1) return mongoose.connection;
   if (mongoose.connection.readyState === 2) {
     await mongoose.connection.asPromise();
@@ -19,5 +22,10 @@ export const connectDB = async () => {
 };
 
 export const disconnectDB = async () => {
+  if (env.databaseProvider === 'mysql') {
+    await closeMysql();
+    return;
+  }
+
   await mongoose.disconnect();
 };

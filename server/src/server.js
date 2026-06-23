@@ -1,7 +1,6 @@
 import http from 'http';
-import mongoose from 'mongoose';
 import { app } from './app.js';
-import { connectDB } from './config/db.js';
+import { connectDB, disconnectDB } from './config/db.js';
 import { env } from './config/env.js';
 import { initSocket } from './sockets/socket.js';
 
@@ -26,7 +25,7 @@ startServer();
 const shutdown = async (signal) => {
   console.log(`${signal} received. Closing server...`);
   server.close(async () => {
-    await mongoose.connection.close(false);
+    await disconnectDB();
     process.exit(0);
   });
 };

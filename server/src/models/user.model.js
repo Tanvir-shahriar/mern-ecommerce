@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import { env } from '../config/env.js';
+import { mysqlModels } from './mysql/models.js';
 
 const addressSchema = new mongoose.Schema(
   {
@@ -133,4 +135,4 @@ userSchema.methods.comparePassword = function comparePassword(candidatePassword)
 userSchema.index({ role: 1, status: 1, createdAt: -1 });
 userSchema.index({ name: 'text', email: 'text', phone: 'text' });
 
-export const User = mongoose.model('User', userSchema);
+export const User = env.databaseProvider === 'mysql' ? mysqlModels.User : mongoose.model('User', userSchema);

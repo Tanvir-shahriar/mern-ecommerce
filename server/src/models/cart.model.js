@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { env } from '../config/env.js';
+import { mysqlModels } from './mysql/models.js';
 
 const cartItemSchema = new mongoose.Schema(
   {
@@ -92,4 +94,4 @@ cartSchema.pre('save', function calculateTotals() {
   this.recalculateTotals();
 });
 
-export const Cart = mongoose.model('Cart', cartSchema);
+export const Cart = env.databaseProvider === 'mysql' ? mysqlModels.Cart : mongoose.model('Cart', cartSchema);

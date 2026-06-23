@@ -1,12 +1,9 @@
-import mongoose from 'mongoose';
 import { app } from '../server/src/app.js';
 import { connectDB } from '../server/src/config/db.js';
 
 let connectionPromise;
 
 const ensureDatabase = async () => {
-  if (mongoose.connection.readyState === 1) return;
-
   if (!connectionPromise) {
     connectionPromise = connectDB().catch((error) => {
       connectionPromise = null;

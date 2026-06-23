@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import slugify from 'slugify';
+import { env } from '../config/env.js';
+import { mysqlModels } from './mysql/models.js';
 
 const imageSchema = new mongoose.Schema(
   {
@@ -235,4 +237,4 @@ productSchema.methods.recalculateRatings = function recalculateRatings() {
     : 0;
 };
 
-export const Product = mongoose.model('Product', productSchema);
+export const Product = env.databaseProvider === 'mysql' ? mysqlModels.Product : mongoose.model('Product', productSchema);

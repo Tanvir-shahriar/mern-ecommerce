@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { env } from '../config/env.js';
+import { mysqlModels } from './mysql/models.js';
 
 const orderAddressSchema = new mongoose.Schema(
   {
@@ -189,4 +191,4 @@ orderSchema.index({ 'customerSnapshot.email': 1 });
 orderSchema.index({ 'customerSnapshot.phone': 1 });
 orderSchema.index({ 'shippingAddress.phone': 1 });
 
-export const Order = mongoose.model('Order', orderSchema);
+export const Order = env.databaseProvider === 'mysql' ? mysqlModels.Order : mongoose.model('Order', orderSchema);
