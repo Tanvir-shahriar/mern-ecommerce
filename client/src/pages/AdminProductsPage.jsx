@@ -22,6 +22,10 @@ const productInitial = {
   isFeatured: false
 };
 
+const MAX_PRODUCT_IMAGES = 8;
+const MAX_PRODUCT_IMAGE_SIZE_MB = 4;
+const MAX_PRODUCT_IMAGE_SIZE_BYTES = MAX_PRODUCT_IMAGE_SIZE_MB * 1024 * 1024;
+
 export const AdminProductsPage = () => {
   const [productForm, setProductForm] = useState(productInitial);
   const [categoryName, setCategoryName] = useState('');
@@ -64,6 +68,17 @@ export const AdminProductsPage = () => {
 
   const uploadProductImages = async (files) => {
     if (!files.length) return;
+
+    if (productForm.uploadedImages.length + files.length > MAX_PRODUCT_IMAGES) {
+      setMessage(`Upload up to ${MAX_PRODUCT_IMAGES} images for one product`);
+      return;
+    }
+
+    const oversizedFile = files.find((file) => file.size > MAX_PRODUCT_IMAGE_SIZE_BYTES);
+    if (oversizedFile) {
+      setMessage(`${oversizedFile.name} is too large. Upload images up to ${MAX_PRODUCT_IMAGE_SIZE_MB}MB each.`);
+      return;
+    }
 
     const formData = new FormData();
     files.forEach((file) => formData.append('images', file));
@@ -303,7 +318,7 @@ export const AdminProductsPage = () => {
                 <label className="image-dropzone">
                   <ImagePlus size={24} />
                   <strong>{uploadingImages ? 'Uploading...' : 'Upload images'}</strong>
-                  <small>PNG, JPG, WEBP, or GIF up to 4MB each</small>
+                  <small>PNG, JPG, WEBP, or GIF. Up to 4MB each, 8 images total.</small>
                   <input
                     type="file"
                     accept="image/*"

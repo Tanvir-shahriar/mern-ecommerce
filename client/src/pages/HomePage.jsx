@@ -565,10 +565,9 @@ export const HomePage = () => {
 
       <SpiderClock />
 
-      <section className="perks-bar" aria-labelledby="perks-title">
+      <section className="perks-bar" aria-label="LahVenture service promises">
         <div className="perks-bar-header">
           <p className="eyebrow">LahVenture promise</p>
-          <h2 id="perks-title">Service shaped for watch buyers</h2>
         </div>
 
         <div className="perks-grid">
@@ -645,25 +644,33 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <section className="section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Featured</p>
-            <h2>
-              <span className="inline-brand">
-                lah<span className="brand-v">Venture</span>
-              </span>{' '}
-              picks
-            </h2>
+      <section className="featured-watch-section" aria-labelledby="featured-watch-title">
+        <div className="featured-watch-inner">
+          <div className="featured-watch-heading">
+            <div className="featured-watch-copy">
+              <p className="eyebrow featured-watch-eyebrow">Featured watches</p>
+              <h2 id="featured-watch-title">
+                <span className="inline-brand">
+                  lah<span className="brand-v">Venture</span>
+                </span>{' '}
+                picks
+              </h2>
+              <p>
+                A focused edit of standout watches and smartwatches, selected for design,
+                daily usability, and confident gifting.
+              </p>
+            </div>
+            <Link to="/products?featured=true" className="featured-watch-link">
+              More picks
+              <ArrowRight size={17} />
+            </Link>
           </div>
-          <Link to="/products?featured=true" className="text-link">
-            More picks
-          </Link>
-        </div>
-        <div className="product-grid">
-          {isLoading
-            ? Array.from({ length: 4 }).map((_, index) => <div className="skeleton-card" key={index} />)
-            : featuredData?.map((product) => <ProductCard key={product._id} product={product} />)}
+
+          <div className="featured-product-grid">
+            {isLoading
+              ? Array.from({ length: 4 }).map((_, index) => <div className="skeleton-card" key={index} />)
+              : featuredData?.map((product) => <ProductCard key={product._id} product={product} />)}
+          </div>
         </div>
       </section>
     </>

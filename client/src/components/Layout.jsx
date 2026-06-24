@@ -1,4 +1,17 @@
-import { Heart, LayoutDashboard, Menu, Search, ShoppingBag, User, X } from 'lucide-react';
+import {
+  ArrowUpRight,
+  Clock3,
+  Heart,
+  Mail,
+  MapPin,
+  Menu,
+  Search,
+  ShieldCheck,
+  ShoppingBag,
+  Truck,
+  User,
+  X
+} from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -6,10 +19,6 @@ import { useCart } from '../contexts/CartContext.jsx';
 
 const navClass = ({ isActive }) => (isActive ? 'nav-link active' : 'nav-link');
 const logoPath = '/lahventure.png';
-const BrandName = () => (
-  <span className="brand-name">
-  </span>
-);
 
 export const Layout = () => {
   const [open, setOpen] = useState(false);
@@ -263,19 +272,109 @@ export const Layout = () => {
       </main>
 
       <footer className="site-footer">
-        <div>
-          <Link to="/" className="brand small">
-            <img className="brand-logo" src={logoPath} alt="" />
-            <BrandName />
-          </Link>
-          <p>Watches, smartwatches, straps, and accessories with live order tracking.</p>
+        <div className="footer-inner">
+          <div className="footer-brand-panel">
+            <Link to="/" className="footer-brand" aria-label="lahVenture home">
+              <img className="footer-logo" src={logoPath} alt="" />
+              <span>
+                lah<span>Venture</span>
+              </span>
+            </Link>
+            <p>
+              Curated watches and smartwatches for Bangladesh, with clear product data,
+              secure checkout, saved delivery profiles, and order tracking.
+            </p>
+
+            <div className="footer-service-strip" aria-label="LahVenture service highlights">
+              <span>
+                <ShieldCheck size={17} />
+                Verified listings
+              </span>
+              <span>
+                <Truck size={17} />
+                Tracked delivery
+              </span>
+              <span>
+                <Clock3 size={17} />
+                After-order updates
+              </span>
+            </div>
+          </div>
+
+          <div className="footer-directory" aria-label="Footer navigation">
+            <div className="footer-column">
+              <h2>Collections</h2>
+              <Link to="/products">All watches</Link>
+              <Link to="/products?category=Smartwatch">Smartwatches</Link>
+              <Link to="/products?category=Automatic%20Watches">Automatic watches</Link>
+              <Link to="/products?category=Chronographs">Chronographs</Link>
+              <Link to="/products?category=Straps%20%26%20Accessories">Straps and accessories</Link>
+            </div>
+
+            <div className="footer-column">
+              <h2>Brands</h2>
+              <Link to="/products?brand=Sea-Gull">Sea-Gull</Link>
+              <Link to="/products?brand=San%20Martin">San Martin</Link>
+              <Link to="/products?brand=Sugess">Sugess</Link>
+              <Link to="/products?brand=Pagani%20Design">Pagani Design</Link>
+              <Link to="/products?filter=brands">View all brands</Link>
+            </div>
+
+            <div className="footer-column">
+              <h2>Service</h2>
+              <Link to="/account">My account</Link>
+              <Link to="/cart">Cart</Link>
+              <Link to="/account">Order tracking</Link>
+              <Link to="/contact">Contact support</Link>
+              <Link to="/products">Search catalog</Link>
+            </div>
+
+            <div className="footer-column footer-contact-column">
+              <h2>Contact</h2>
+              <Link to="/contact">
+                <Mail size={16} />
+                Contact support
+              </Link>
+              <Link to="/account">
+                <Truck size={16} />
+                Track an order
+              </Link>
+              <span>
+                <MapPin size={16} />
+                Dhaka, Bangladesh
+              </span>
+              <Link className="footer-contact-cta" to="/contact">
+                Get assistance
+                <ArrowUpRight size={15} />
+              </Link>
+            </div>
+          </div>
+
+          <div className="footer-newsletter">
+            <div>
+              <p className="footer-kicker">Collectors desk</p>
+              <h2>Receive new arrivals and watch-care notes.</h2>
+            </div>
+            <form
+              className="footer-newsletter-form"
+              onSubmit={(event) => event.preventDefault()}
+              aria-label="Newsletter signup"
+            >
+              <input type="email" placeholder="Email address" aria-label="Email address" />
+              <button type="submit">Notify me</button>
+            </form>
+          </div>
+
+          <div className="footer-bottom">
+            <span>© 2026 LahVenture. Time well lived.</span>
+            <div className="footer-legal">
+              <span>Secure checkout</span>
+              <span>Bangladesh delivery</span>
+              <span>Customer-first support</span>
+            </div>
+            <Heart size={17} aria-hidden="true" />
+          </div>
         </div>
-        <div className="footer-links">
-          <Link to="/products">Catalog</Link>
-          <Link to="/cart">Cart</Link>
-          <Link to="/account">Account</Link>
-        </div>
-        <Heart size={18} />
       </footer>
     </div>
   );

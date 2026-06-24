@@ -68,8 +68,8 @@ app.use(globalRateLimiter);
 app.use(enforceTrustedOrigin);
 app.use(requireExpectedContentType);
 
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: env.apiBodyLimit }));
+app.use(express.urlencoded({ extended: true, limit: env.apiBodyLimit }));
 app.use(cookieParser());
 app.use(hpp());
 app.use(sanitizeMongo);

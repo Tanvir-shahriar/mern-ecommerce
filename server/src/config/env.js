@@ -21,6 +21,10 @@ if (vercelClientUrl && !clientUrls.includes(vercelClientUrl)) {
 }
 
 const isProduction = process.env.NODE_ENV === 'production';
+const positiveNumber = (value, fallback) => {
+  const number = Number(value);
+  return Number.isFinite(number) && number > 0 ? number : fallback;
+};
 
 if (isProduction && !process.env.JWT_SECRET) {
   throw new Error('JWT_SECRET is required in production');
@@ -44,7 +48,10 @@ export const env = {
   jwtSecret: process.env.JWT_SECRET || 'dev-only-change-me',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '7d',
   cookieExpiresDays: Number(process.env.COOKIE_EXPIRES_DAYS || 7),
+  apiBodyLimit: process.env.API_BODY_LIMIT || '64mb',
   uploadDir: process.env.UPLOAD_DIR || 'uploads',
+  uploadFileSizeMb: positiveNumber(process.env.UPLOAD_FILE_SIZE_MB, 4),
+  uploadMaxFiles: Math.max(1, Math.floor(positiveNumber(process.env.UPLOAD_MAX_FILES, 8))),
   cookieSameSite: process.env.COOKIE_SAME_SITE || 'lax',
   serverRoot,
   projectRoot,
