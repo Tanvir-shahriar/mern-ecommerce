@@ -2926,6 +2926,28 @@ textarea:focus {
   align-items: start;
 }
 
+.account-page {
+  width: min(1180px, calc(100% - 36px));
+  min-width: 0;
+  margin: 0 auto;
+  padding: 42px 0;
+}
+
+.account-page .section-heading,
+.account-page .panel,
+.account-page .form-panel,
+.account-page .address-card,
+.account-page .wishlist-item {
+  min-width: 0;
+}
+
+.account-page .profile-snapshot strong,
+.account-page .address-summary strong,
+.account-page .address-summary span,
+.account-page .wishlist-item span {
+  overflow-wrap: anywhere;
+}
+
 .dashboard-grid {
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
@@ -4265,6 +4287,11 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
+  .account-page {
+    width: min(100% - 28px, 1180px);
+    padding: 34px 0;
+  }
+
   .filters-panel,
   .summary-panel {
     position: static;
@@ -4782,6 +4809,107 @@ textarea:focus {
     line-height: 1.1;
   }
 
+  .account-page {
+    width: min(100% - 24px, 1180px);
+    padding: 24px 0 34px;
+  }
+
+  .account-page .section-heading.compact {
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .account-grid {
+    gap: 16px;
+  }
+
+  .account-page .panel,
+  .account-page .form-panel {
+    padding: 14px;
+  }
+
+  .account-page .panel-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .account-page .toolbar-actions {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .account-page .toolbar-actions .button {
+    width: 100%;
+    flex: none;
+  }
+
+  .account-page .order-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 14px 0;
+  }
+
+  .account-page .order-row div > strong,
+  .account-page .order-row div > span {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
+  .account-page .order-row .status-pill,
+  .account-page .order-row > strong {
+    justify-self: start;
+  }
+
+  .account-page .order-row > strong {
+    grid-column: auto;
+    text-align: left;
+  }
+
+  .account-page .address-manager {
+    gap: 14px;
+  }
+
+  .account-page .address-list:only-child {
+    grid-template-columns: 1fr;
+  }
+
+  .account-page .address-card {
+    padding: 13px;
+  }
+
+  .account-page .address-card-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .account-page .address-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .account-page .address-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .account-page .wishlist-grid {
+    gap: 10px;
+  }
+
+  .account-page .wishlist-item {
+    grid-template-columns: 58px minmax(0, 1fr);
+    min-height: 76px;
+  }
+
+  .account-page .wishlist-item img {
+    height: 56px;
+  }
+
   .button,
   .hero-actions .button {
     width: 100%;
@@ -5082,6 +5210,28 @@ textarea:focus {
   .section-heading h1,
   .section-heading h2 {
     font-size: 1.7rem;
+  }
+
+  .account-page {
+    width: min(100% - 20px, 1180px);
+    padding: 20px 0 30px;
+  }
+
+  .account-page .panel,
+  .account-page .form-panel {
+    padding: 12px;
+  }
+
+  .account-page .section-heading {
+    margin-bottom: 14px;
+  }
+
+  .account-page .section-heading h1 {
+    font-size: 1.55rem;
+  }
+
+  .account-page .address-card {
+    padding: 12px;
   }
 
   .catalog-page,
