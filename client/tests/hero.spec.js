@@ -16,9 +16,10 @@ test('Redesigned Header and Hero Section render correctly', async ({ page }) => 
   const bgColor = await header.evaluate((el) => window.getComputedStyle(el).backgroundColor);
   expect(bgColor).toBe('rgb(122, 11, 23)'); // #7a0b17 in RGB
 
-  // Verify LAHVENTURE brand text
-  const brandTitle = page.locator('.brand-title');
-  await expect(brandTitle).toHaveText('LAHVENTURE');
+  // Verify lahVenture image logo
+  const brandLogo = page.locator('.brand-logo');
+  await expect(brandLogo).toBeVisible();
+  await expect(brandLogo).toHaveAttribute('src', /Lahventure|lahventure/);
 
   // Verify navigation links
   const navLinks = page.locator('.primary-nav .nav-link');

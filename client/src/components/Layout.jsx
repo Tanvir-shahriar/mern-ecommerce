@@ -16,9 +16,10 @@ import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
+import lahventureLogo from '../assets/images/Lahventure Logo.png';
 
 const navClass = ({ isActive }) => (isActive ? 'nav-link active' : 'nav-link');
-const logoPath = '/lahventure.png';
+const logoPath = lahventureLogo;
 
 export const Layout = () => {
   const [open, setOpen] = useState(false);
@@ -65,7 +66,6 @@ export const Layout = () => {
             </button>
             <Link to="/" className="brand" aria-label="lahVenture">
               <img className="brand-logo" src={logoPath} alt="" />
-              <span className="brand-title">LAHVENTURE</span>
             </Link>
 
             {open && (
@@ -276,9 +276,6 @@ export const Layout = () => {
           <div className="footer-brand-panel">
             <Link to="/" className="footer-brand" aria-label="lahVenture home">
               <img className="footer-logo" src={logoPath} alt="" />
-              <span>
-                lah<span>Venture</span>
-              </span>
             </Link>
             <p>
               Curated watches and smartwatches for Bangladesh, with clear product data,
