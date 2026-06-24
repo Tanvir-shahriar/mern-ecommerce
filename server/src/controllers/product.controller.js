@@ -154,8 +154,9 @@ export const getProduct = asyncHandler(async (req, res) => {
   const query = mongoose.isValidObjectId(req.params.slugOrId)
     ? { _id: req.params.slugOrId }
     : { slug: req.params.slugOrId };
+  const includeInactive = ['admin', 'super_admin'].includes(req.user?.role) && req.query.admin === 'true';
 
-  const product = await Product.findOne({ ...query, status: 'active' })
+  const product = await Product.findOne(includeInactive ? query : { ...query, status: 'active' })
     .populate('category', 'name slug')
     .populate('reviews.user', 'name avatar')
     .lean();

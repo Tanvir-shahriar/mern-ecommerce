@@ -125,6 +125,10 @@ export const ProductDetailPage = () => {
     const nameLower = (prod.name || '').toLowerCase();
     const isSmart = nameLower.includes('smart') || nameLower.includes('pulse') || nameLower.includes('apex');
     const isGold = nameLower.includes('gold') || nameLower.includes('rose');
+    const attributes = new Map(
+      (prod.attributes || []).map((item) => [String(item.name || '').toLowerCase(), item.value])
+    );
+    const specValue = (label, fallback) => attributes.get(label.toLowerCase()) || fallback;
     
     return [
       {
@@ -140,52 +144,52 @@ export const ProductDetailPage = () => {
       {
         icon: <Settings size={16} />,
         label: 'Movement',
-        value: isSmart ? 'SMART / QUARTZ' : 'AUTOMATIC'
+        value: specValue('Movement', isSmart ? 'SMART / QUARTZ' : 'AUTOMATIC')
       },
       {
         icon: <Circle size={16} />,
         label: 'Case Metal',
-        value: isGold ? 'Rose Gold / Steel' : 'Stainless Steel'
+        value: specValue('Case Metal', isGold ? 'Rose Gold / Steel' : 'Stainless Steel')
       },
       {
         icon: <Maximize2 size={16} />,
         label: 'Case Size',
-        value: isSmart ? '44 mm' : '42 mm'
+        value: specValue('Case Size', isSmart ? '44 mm' : '42 mm')
       },
       {
         icon: <Palette size={16} />,
         label: 'Case Color',
-        value: isGold ? 'Rose Gold' : 'Stainless Steel'
+        value: specValue('Case Color', isGold ? 'Rose Gold' : 'Stainless Steel')
       },
       {
         icon: <Layers size={16} />,
         label: 'Bracelet Material',
-        value: nameLower.includes('strap') || nameLower.includes('leather') ? 'Leather' : isSmart ? 'Silicone' : 'Stainless Steel'
+        value: specValue('Bracelet Material', nameLower.includes('strap') || nameLower.includes('leather') ? 'Leather' : isSmart ? 'Silicone' : 'Stainless Steel')
       },
       {
         icon: <Paintbrush size={16} />,
-        label: 'Bracelete Color',
-        value: nameLower.includes('black') ? 'Black' : nameLower.includes('brown') || nameLower.includes('leather') ? 'Leather' : 'Stainless Steel'
+        label: 'Bracelet Color',
+        value: specValue('Bracelet Color', nameLower.includes('black') ? 'Black' : nameLower.includes('brown') || nameLower.includes('leather') ? 'Leather' : 'Stainless Steel')
       },
       {
         icon: <Sparkles size={16} />,
         label: 'Glass',
-        value: isSmart ? 'Gorilla Glass' : 'Sapphire'
+        value: specValue('Glass', isSmart ? 'Gorilla Glass' : 'Sapphire')
       },
       {
         icon: <CircleDot size={16} />,
         label: 'Dial Color',
-        value: nameLower.includes('white') ? 'White' : nameLower.includes('blue') ? 'Blue' : 'Black'
+        value: specValue('Dial Color', nameLower.includes('white') ? 'White' : nameLower.includes('blue') ? 'Blue' : 'Black')
       },
       {
         icon: <Link2 size={16} />,
         label: 'Buckle',
-        value: isSmart ? 'Pin Buckle' : 'Butterfly Buckle with Double push'
+        value: specValue('Buckle', isSmart ? 'Pin Buckle' : 'Butterfly Buckle with Double push')
       },
       {
         icon: <Droplets size={16} />,
         label: 'WR',
-        value: isSmart ? 'IP68' : '5 ATM'
+        value: specValue('WR', isSmart ? 'IP68' : '5 ATM')
       }
     ];
   };

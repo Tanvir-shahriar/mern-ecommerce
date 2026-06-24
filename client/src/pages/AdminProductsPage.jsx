@@ -1,36 +1,16 @@
-import { Archive, ImagePlus, Minus, Plus, Save, Search, X } from 'lucide-react';
+import { Archive, Edit3, Minus, PackagePlus, Plus, Search } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { money } from '../utils/format.js';
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
 
-const productInitial = {
-  name: '',
-  brand: '',
-  sku: '',
-  category: '',
-  price: '',
-  compareAtPrice: '',
-  stock: '',
-  imageUrl: '',
-  uploadedImages: [],
-  shortDescription: '',
-  description: '',
-  isFeatured: false
-};
-
-const MAX_PRODUCT_IMAGES = 8;
-const MAX_PRODUCT_IMAGE_SIZE_MB = 4;
-const MAX_PRODUCT_IMAGE_SIZE_BYTES = MAX_PRODUCT_IMAGE_SIZE_MB * 1024 * 1024;
-
 export const AdminProductsPage = () => {
-  const [productForm, setProductForm] = useState(productInitial);
   const [categoryName, setCategoryName] = useState('');
   const [message, setMessage] = useState('');
-  const [uploadingImages, setUploadingImages] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const debouncedSearch = useDebouncedValue(search);
@@ -60,57 +40,6 @@ export const AdminProductsPage = () => {
     }
   });
 
-  const formCategory = useMemo(() => productForm.category || categories[0]?._id || '', [productForm.category, categories]);
-
-  const updateProductForm = (key, value) => {
-    setProductForm((current) => ({ ...current, [key]: value }));
-  };
-
-  const uploadProductImages = async (files) => {
-    if (!files.length) return;
-
-    if (productForm.uploadedImages.length + files.length > MAX_PRODUCT_IMAGES) {
-      setMessage(`Upload up to ${MAX_PRODUCT_IMAGES} images for one product`);
-      return;
-    }
-
-    const oversizedFile = files.find((file) => file.size > MAX_PRODUCT_IMAGE_SIZE_BYTES);
-    if (oversizedFile) {
-      setMessage(`${oversizedFile.name} is too large. Upload images up to ${MAX_PRODUCT_IMAGE_SIZE_MB}MB each.`);
-      return;
-    }
-
-    const formData = new FormData();
-    files.forEach((file) => formData.append('images', file));
-
-    setUploadingImages(true);
-    setMessage('');
-    try {
-      const { data } = await api.post('/uploads/products', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        }
-      });
-
-      setProductForm((current) => ({
-        ...current,
-        uploadedImages: [...current.uploadedImages, ...data.data.images]
-      }));
-      setMessage('Image uploaded');
-    } catch (error) {
-      setMessage(apiErrorMessage(error));
-    } finally {
-      setUploadingImages(false);
-    }
-  };
-
-  const removeUploadedImage = (publicId) => {
-    setProductForm((current) => ({
-      ...current,
-      uploadedImages: current.uploadedImages.filter((image) => image.publicId !== publicId)
-    }));
-  };
-
   const createCategory = async (event) => {
     event.preventDefault();
     if (!categoryName.trim()) return;
@@ -119,55 +48,6 @@ export const AdminProductsPage = () => {
       setCategoryName('');
       setMessage('Category created');
       queryClient.invalidateQueries({ queryKey: ['categories'] });
-    } catch (error) {
-      setMessage(apiErrorMessage(error));
-    }
-  };
-
-  const createProduct = async (event) => {
-    event.preventDefault();
-    try {
-      if (!productForm.uploadedImages.length && !productForm.imageUrl.trim()) {
-        setMessage('Upload at least one image or add an image URL');
-        return;
-      }
-
-      const images = productForm.uploadedImages.length
-        ? productForm.uploadedImages.map((image) => ({
-            ...image,
-            alt: productForm.name || image.alt
-          }))
-        : [
-            {
-              url: productForm.imageUrl,
-              alt: productForm.name
-            }
-          ];
-
-      const payload = {
-        name: productForm.name,
-        brand: productForm.brand,
-        sku: productForm.sku,
-        category: formCategory,
-        price: Number(productForm.price),
-        compareAtPrice: productForm.compareAtPrice ? Number(productForm.compareAtPrice) : undefined,
-        shortDescription: productForm.shortDescription,
-        description: productForm.description,
-        isFeatured: productForm.isFeatured,
-        inventory: {
-          stock: Number(productForm.stock || 0),
-          lowStockThreshold: 5,
-          trackQuantity: true
-        },
-        images,
-        status: 'active'
-      };
-
-      await api.post('/products', payload);
-      setProductForm(productInitial);
-      setMessage('Product created');
-      queryClient.invalidateQueries({ queryKey: ['admin-products'] });
-      queryClient.invalidateQueries({ queryKey: ['products'] });
     } catch (error) {
       setMessage(apiErrorMessage(error));
     }
@@ -206,6 +86,10 @@ export const AdminProductsPage = () => {
           <p className="eyebrow">Admin</p>
           <h1>Products</h1>
         </div>
+        <Link className="button primary" to="/admin/products/new">
+          <PackagePlus size={17} />
+          Add product
+        </Link>
       </div>
 
       <div className="admin-products-layout">
@@ -254,9 +138,14 @@ export const AdminProductsPage = () => {
                       <Plus size={14} />
                     </button>
                   </div>
-                  <button type="button" className="icon-button" onClick={() => archiveProduct(product._id)} aria-label="Archive product" disabled={product.status === 'archived'}>
-                    <Archive size={16} />
-                  </button>
+                  <div className="admin-product-actions">
+                    <Link className="icon-button" to={`/admin/products/${product._id}/edit`} aria-label={`Edit ${product.name}`}>
+                      <Edit3 size={16} />
+                    </Link>
+                    <button type="button" className="icon-button" onClick={() => archiveProduct(product._id)} aria-label="Archive product" disabled={product.status === 'archived'}>
+                      <Archive size={16} />
+                    </button>
+                  </div>
                 </article>
               ))}
             </div>
@@ -273,101 +162,6 @@ export const AdminProductsPage = () => {
             <button className="button dark" type="submit">
               <Plus size={17} />
               Add category
-            </button>
-          </form>
-
-          <form className="form-panel" onSubmit={createProduct}>
-            <h2>New product</h2>
-            <div className="form-grid">
-              <label>
-                Name
-                <input required value={productForm.name} onChange={(event) => updateProductForm('name', event.target.value)} />
-              </label>
-              <label>
-                Brand
-                <input value={productForm.brand} onChange={(event) => updateProductForm('brand', event.target.value)} />
-              </label>
-              <label>
-                SKU
-                <input required value={productForm.sku} onChange={(event) => updateProductForm('sku', event.target.value)} />
-              </label>
-              <label>
-                Category
-                <select value={formCategory} onChange={(event) => updateProductForm('category', event.target.value)}>
-                  {categories.map((category) => (
-                    <option value={category._id} key={category._id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Price
-                <input required type="number" min="0" value={productForm.price} onChange={(event) => updateProductForm('price', event.target.value)} />
-              </label>
-              <label>
-                Compare at
-                <input type="number" min="0" value={productForm.compareAtPrice} onChange={(event) => updateProductForm('compareAtPrice', event.target.value)} />
-              </label>
-              <label>
-                Stock
-                <input type="number" min="0" value={productForm.stock} onChange={(event) => updateProductForm('stock', event.target.value)} />
-              </label>
-              <div className="image-upload-field span-2">
-                <span>Product images</span>
-                <label className="image-dropzone">
-                  <ImagePlus size={24} />
-                  <strong>{uploadingImages ? 'Uploading...' : 'Upload images'}</strong>
-                  <small>PNG, JPG, WEBP, or GIF. Up to 4MB each, 8 images total.</small>
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    disabled={uploadingImages}
-                    onChange={(event) => {
-                      uploadProductImages(Array.from(event.target.files || []));
-                      event.target.value = '';
-                    }}
-                  />
-                </label>
-                {productForm.uploadedImages.length ? (
-                  <div className="uploaded-image-grid">
-                    {productForm.uploadedImages.map((image) => (
-                      <div className="uploaded-image" key={image.publicId || image.url}>
-                        <img src={mediaUrl(image.url)} alt={image.alt || productForm.name || 'Uploaded product'} />
-                        <button type="button" onClick={() => removeUploadedImage(image.publicId)} aria-label="Remove image">
-                          <X size={15} />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-              <label className="span-2">
-                Image URL fallback
-                <input
-                  value={productForm.imageUrl}
-                  onChange={(event) => updateProductForm('imageUrl', event.target.value)}
-                  placeholder="https://example.com/product.jpg"
-                />
-              </label>
-              <label className="span-2">
-                Short description
-                <input value={productForm.shortDescription} onChange={(event) => updateProductForm('shortDescription', event.target.value)} />
-              </label>
-              <label className="span-2">
-                Description
-                <textarea required value={productForm.description} onChange={(event) => updateProductForm('description', event.target.value)} />
-              </label>
-              <label className="checkbox-row span-2">
-                <input type="checkbox" checked={productForm.isFeatured} onChange={(event) => updateProductForm('isFeatured', event.target.checked)} />
-                Featured product
-              </label>
-            </div>
-            {message ? <p className="form-note">{message}</p> : null}
-            <button className="button primary" type="submit">
-              <Save size={17} />
-              Save product
             </button>
           </form>
         </div>
