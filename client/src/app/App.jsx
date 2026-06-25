@@ -16,10 +16,13 @@ import { OrderDetailPage } from '../pages/OrderDetailPage.jsx';
 import { ProductDetailPage } from '../pages/ProductDetailPage.jsx';
 import { ProductsPage } from '../pages/ProductsPage.jsx';
 import { RegisterPage } from '../pages/RegisterPage.jsx';
+import { ScrollToTop } from '../components/ScrollToTop.jsx';
 
 export const App = () => (
-  <Routes>
-    <Route element={<Layout />}>
+  <>
+    <ScrollToTop />
+    <Routes>
+      <Route element={<Layout />}>
       <Route index element={<HomePage />} />
       <Route path="products" element={<ProductsPage />} />
       <Route path="products/:slugOrId" element={<ProductDetailPage />} />
@@ -80,4 +83,5 @@ export const App = () => (
       <Route path="*" element={<NotFoundPage />} />
     </Route>
   </Routes>
+  </>
 );
