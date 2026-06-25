@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100" width="100%" height="100%">
+  <!-- Maltese Cross -->
+  <g fill="#1c1a17">
+    <path d="M 120 28 L 110 14 L 120 20 L 130 14 Z" />
+    <path d="M 120 28 L 134 18 L 128 28 L 134 38 Z" />
+    <path d="M 120 28 L 130 42 L 120 36 L 110 42 Z" />
+    <path d="M 120 28 L 106 38 L 112 28 L 106 18 Z" />
+  </g>
+  <text x="120" y="66" font-family="'Cinzel', 'Playfair Display', 'Georgia', serif" font-size="13" font-weight="bold" fill="#1c1a17" text-anchor="middle" letter-spacing="3.5">VACHERON CONSTANTIN</text>
+  <text x="120" y="80" font-family="'Cinzel', 'Playfair Display', 'Georgia', serif" font-size="8" fill="#8f723b" text-anchor="middle" letter-spacing="4">GENÈVE</text>
+</svg>

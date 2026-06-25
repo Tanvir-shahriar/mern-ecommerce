@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100" width="100%" height="100%">
+  <!-- Hamilton H Symbol -->
+  <g fill="none" stroke="#1c1a17" stroke-width="1.8">
+    <circle cx="120" cy="27" r="13" />
+    <circle cx="120" cy="27" r="10.5" stroke="#8f723b" stroke-width="1" />
+  </g>
+  <!-- Stylized H inside -->
+  <text x="120" y="34" font-family="'Cinzel', 'Playfair Display', 'Georgia', serif" font-size="20" font-weight="900" font-style="italic" fill="#1c1a17" text-anchor="middle">H</text>
+  <!-- Wordmark -->
+  <text x="120" y="68" font-family="'Outfit', 'Inter', sans-serif" font-size="18" font-weight="900" fill="#1c1a17" text-anchor="middle" letter-spacing="4">HAMILTON</text>
+  <text x="120" y="82" font-family="'Outfit', 'Inter', sans-serif" font-size="8" font-weight="800" fill="#8f723b" text-anchor="middle" letter-spacing="3">AMERICAN SPIRIT • SWISS PRECISION</text>
+</svg>

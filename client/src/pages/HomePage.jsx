@@ -5,30 +5,22 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard.jsx';
 import { SpiderClock } from '../components/SpiderClock.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import addiesdiveLogo from '../assets/brands/addiesdive.png';
-import baltanyLogo from '../assets/brands/baltany.png';
-import beijingLogo from '../assets/brands/beijing.png';
-import bernyLogo from '../assets/brands/berny.png';
-import cadisenLogo from '../assets/brands/cadisen.png';
-import cigaLogo from '../assets/brands/ciga.png';
-import cronosLogo from '../assets/brands/cronos.png';
-import ebohrLogo from '../assets/brands/ebohr.png';
-import fiytaLogo from '../assets/brands/fiyta.png';
-import guanqinLogo from '../assets/brands/guanqin.webp';
-import heimdallrLogo from '../assets/brands/heimdallr.jpg';
-import lobinniLogo from '../assets/brands/lobinni.png';
-import memoriginLogo from '../assets/brands/memorigin.svg';
-import merkurLogo from '../assets/brands/merkur.jpg';
-import paganiLogo from '../assets/brands/pagani.png';
-import peacockLogo from '../assets/brands/peacock.png';
-import proximaLogo from '../assets/brands/proxima.jpg';
-import rossiniLogo from '../assets/brands/rossini.png';
-import sanmartinLogo from '../assets/brands/sanmartin.png';
-import seagullLogo from '../assets/brands/seagull.png';
-import shanghaiLogo from '../assets/brands/shanghai.png';
-import sugessLogo from '../assets/brands/sugess.png';
-import tandorioLogo from '../assets/brands/tandorio.png';
-import tianwangLogo from '../assets/brands/tianwang.svg';
+import rolexLogo from '../assets/brands/rolex.svg';
+import patekLogo from '../assets/brands/patek.svg';
+import apLogo from '../assets/brands/ap.svg';
+import vacheronLogo from '../assets/brands/vacheron.svg';
+import omegaLogo from '../assets/brands/omega.svg';
+import cartierLogo from '../assets/brands/cartier.svg';
+import tudorLogo from '../assets/brands/tudor.svg';
+import iwcLogo from '../assets/brands/iwc.svg';
+import jlcLogo from '../assets/brands/jlc.svg';
+import grandseikoLogo from '../assets/brands/grandseiko.svg';
+import seikoLogo from '../assets/brands/seiko.svg';
+import breitlingLogo from '../assets/brands/breitling.svg';
+import tagheuerLogo from '../assets/brands/tagheuer.svg';
+import tissotLogo from '../assets/brands/tissot.svg';
+import longinesLogo from '../assets/brands/longines.svg';
+import hamiltonLogo from '../assets/brands/hamilton.svg';
 import { api, mediaUrl } from '../services/api.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
 import { money } from '../utils/format.js';
@@ -60,31 +52,23 @@ const perks = [
   }
 ];
 
-const chineseWatchBrands = [
-  { name: 'Sea-Gull', logo: seagullLogo, type: 'Tianjin watchmaking' },
-  { name: 'Shanghai Watch', logo: shanghaiLogo, type: 'Classic mechanical' },
-  { name: 'Beijing Watch', logo: beijingLogo, type: 'Heritage atelier' },
-  { name: 'Fiyta', logo: fiytaLogo, type: 'Aerospace inspired' },
-  { name: 'Rossini', logo: rossiniLogo, type: 'Dress watches', imageMode: 'dark' },
-  { name: 'Ebohr', logo: ebohrLogo, type: 'Modern automatics', imageMode: 'cover' },
-  { name: 'Tian Wang', logo: tianwangLogo, type: 'Mainstream collection' },
-  { name: 'Peacock', logo: peacockLogo, type: 'Movement maker' },
-  { name: 'CIGA Design', logo: cigaLogo, type: 'Design watches' },
-  { name: 'Memorigin', logo: memoriginLogo, type: 'Tourbillon craft' },
-  { name: 'San Martin', logo: sanmartinLogo, type: 'Diver specialists' },
-  { name: 'Sugess', logo: sugessLogo, type: 'Mechanical chronos' },
-  { name: 'Pagani Design', logo: paganiLogo, type: 'Sport watches' },
-  { name: 'Cadisen', logo: cadisenLogo, type: 'Value automatics' },
-  { name: 'Berny', logo: bernyLogo, type: 'Tool watches' },
-  { name: 'Addiesdive', logo: addiesdiveLogo, type: 'Dive watches', imageMode: 'cover' },
-  { name: 'Heimdallr', logo: heimdallrLogo, type: 'Sapphire divers', imageMode: 'cover' },
-  { name: 'Proxima', logo: proximaLogo, type: 'Enthusiast divers', imageMode: 'cover' },
-  { name: 'Cronos', logo: cronosLogo, type: 'Premium homage' },
-  { name: 'Baltany', logo: baltanyLogo, type: 'Vintage field' },
-  { name: 'Merkur', logo: merkurLogo, type: 'Retro mechanical', imageMode: 'dark' },
-  { name: 'Tandorio', logo: tandorioLogo, type: 'Custom builds' },
-  { name: 'Guanqin', logo: guanqinLogo, type: 'Dress automatics' },
-  { name: 'Lobinni', logo: lobinniLogo, type: 'Elegant mechanical' }
+const topWatchBrands = [
+  { name: 'Rolex', logo: rolexLogo, type: 'Swiss Luxury Icon' },
+  { name: 'Patek Philippe', logo: patekLogo, type: 'Haute Horlogerie' },
+  { name: 'Audemars Piguet', logo: apLogo, type: 'Contemporary Prestige' },
+  { name: 'Vacheron Constantin', logo: vacheronLogo, type: 'Traditional Craft' },
+  { name: 'Omega', logo: omegaLogo, type: 'Precision & Heritage' },
+  { name: 'Cartier', logo: cartierLogo, type: 'Elegant Design' },
+  { name: 'Tudor', logo: tudorLogo, type: 'Robust Tool Watches' },
+  { name: 'IWC Schaffhausen', logo: iwcLogo, type: 'Swiss Engineering' },
+  { name: 'Jaeger-LeCoultre', logo: jlcLogo, type: 'Atelier Masterpieces' },
+  { name: 'Grand Seiko', logo: grandseikoLogo, type: 'Artisan Polishing' },
+  { name: 'Seiko', logo: seikoLogo, type: 'Pioneering Innovation' },
+  { name: 'Breitling', logo: breitlingLogo, type: 'Aviation Chronographs' },
+  { name: 'TAG Heuer', logo: tagheuerLogo, type: 'Avant-Garde Racing' },
+  { name: 'Tissot', logo: tissotLogo, type: 'Accessible Swiss Heritage' },
+  { name: 'Longines', logo: longinesLogo, type: 'Traditional Elegance' },
+  { name: 'Hamilton', logo: hamiltonLogo, type: 'American Spirit' }
 ];
 
 const patekSlides = [
@@ -592,38 +576,38 @@ export const HomePage = () => {
           <div className="brand-showcase-heading">
             <div>
               <p className="eyebrow brand-showcase-eyebrow">Curated maisons</p>
-              <h2 id="brand-showcase-title">Explore Chinese watchmaking houses</h2>
+              <h2 id="brand-showcase-title">Explore iconic watchmaking houses</h2>
             </div>
             <p>
-              A considered edit of heritage manufacturers and enthusiast-led makers, selected for
-              mechanical character, finishing quality, and everyday wearability.
+              A considered edit of heritage manufacturers and innovative makers, selected for
+              mechanical character, finishing quality, and historical significance.
             </p>
           </div>
 
           <div className="brand-showcase-meta" aria-label="Brand collection highlights">
             <div>
-              <strong>{chineseWatchBrands.length}+</strong>
+              <strong>{topWatchBrands.length}+</strong>
               <span>curated brands</span>
             </div>
             <div>
-              <strong>1963</strong>
-              <span>heritage chronographs</span>
+              <strong>Haute</strong>
+              <span>horlogerie maisons</span>
             </div>
             <div>
-              <strong>GMT</strong>
-              <span>divers and travel watches</span>
+              <strong>COSC</strong>
+              <span>chronometers & divers</span>
             </div>
           </div>
 
-          <div className="brand-marquee" aria-label="Popular Chinese watch brands">
+          <div className="brand-marquee" aria-label="Popular global watch brands">
             <div className="brand-marquee-track">
-              {[...chineseWatchBrands, ...chineseWatchBrands].map((brand, index) => (
+              {[...topWatchBrands, ...topWatchBrands].map((brand, index) => (
                 <Link
                   className="brand-logo-card"
                   to={`/products?brand=${encodeURIComponent(brand.name)}`}
                   key={`${brand.name}-${index}`}
                 >
-                  <span className="brand-card-index">{String((index % chineseWatchBrands.length) + 1).padStart(2, '0')}</span>
+                  <span className="brand-card-index">{String((index % topWatchBrands.length) + 1).padStart(2, '0')}</span>
                   <span className={`brand-image-shell${brand.imageMode ? ` ${brand.imageMode}` : ''}`}>
                     <img src={brand.logo} alt={`${brand.name} brand logo`} loading="lazy" />
                   </span>

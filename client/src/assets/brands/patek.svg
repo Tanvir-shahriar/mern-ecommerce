@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100" width="100%" height="100%">
+  <!-- Stylized Calatrava Cross -->
+  <g fill="#1c1a17">
+    <circle cx="120" cy="28" r="4" />
+    <path d="M 120 12 L 120 44 M 104 28 L 136 28" stroke="#1c1a17" stroke-width="2.5" />
+    <path d="M 120 12 C 117 17 114 16 112 18 C 115 20 120 20 120 20 C 120 20 125 20 128 18 C 126 16 123 17 120 12 Z" />
+    <path d="M 120 44 C 117 39 114 40 112 38 C 115 36 120 36 120 36 C 120 36 125 36 128 38 C 126 40 123 39 120 44 Z" />
+    <path d="M 104 28 C 109 25 108 22 110 20 C 112 23 112 28 112 28 C 112 28 112 33 110 36 C 108 34 109 31 104 28 Z" />
+    <path d="M 136 28 C 131 25 132 22 130 20 C 128 23 128 28 128 28 C 128 28 128 33 130 36 C 132 34 131 31 136 28 Z" />
+  </g>
+  <text x="120" y="68" font-family="'Cinzel', 'Playfair Display', 'Georgia', serif" font-size="15" font-weight="bold" fill="#1c1a17" text-anchor="middle" letter-spacing="3">PATEK PHILIPPE</text>
+  <text x="120" y="82" font-family="'Cinzel', 'Playfair Display', 'Georgia', serif" font-size="9" fill="#8f723b" text-anchor="middle" letter-spacing="5">GENEVE</text>
+</svg>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100" width="100%" height="100%">
+  <!-- JLC Monogram -->
+  <g fill="none" stroke="#1c1a17" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="106" y="12" width="28" height="34" rx="14" ry="14" stroke-width="1.8" />
+    <!-- Monogram curves -->
+    <path d="M 120 18 V 38" stroke-width="2.5" />
+    <path d="M 113 22 C 113 22 113 18 120 18" stroke-width="2" />
+    <path d="M 120 38 H 127" stroke-width="2.5" />
+    <path d="M 120 30 H 125" stroke-width="1.8" />
+    <path d="M 115 30 H 120" stroke-width="1.8" />
+  </g>
+  <text x="120" y="68" font-family="'Cinzel', 'Playfair Display', 'Georgia', serif" font-size="14" font-weight="bold" fill="#1c1a17" text-anchor="middle" letter-spacing="3.5">JAEGER-LECOULTRE</text>
+  <text x="120" y="82" font-family="'Outfit', 'Inter', sans-serif" font-size="8" font-weight="800" fill="#8f723b" text-anchor="middle" letter-spacing="4">VALLEE DE JOUX</text>
+</svg>

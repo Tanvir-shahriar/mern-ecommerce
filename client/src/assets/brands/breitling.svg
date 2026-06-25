@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100" width="100%" height="100%">
+  <!-- Breitling Monogram -->
+  <text x="120" y="44" font-family="'Brush Script MT', 'Bickham Script Pro', 'Georgia', cursive" font-size="38" font-style="italic" fill="#8f723b" text-anchor="middle">B</text>
+  <!-- Breitling wordmark -->
+  <text x="120" y="68" font-family="'Outfit', 'Inter', sans-serif" font-size="16" font-weight="900" fill="#1c1a17" text-anchor="middle" letter-spacing="4.5">BREITLING</text>
+  <text x="120" y="82" font-family="'Outfit', 'Inter', sans-serif" font-size="8" font-weight="700" fill="#8f723b" text-anchor="middle" letter-spacing="4.5">1884</text>
+</svg>

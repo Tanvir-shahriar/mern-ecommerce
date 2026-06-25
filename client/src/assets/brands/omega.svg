@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 100" width="100%" height="100%">
+  <!-- Omega Symbol -->
+  <path d="M 106 36 H 113.5 C 114.5 28 116 22 120 22 C 124 22 125.5 28 126.5 36 H 134 V 39 H 128 C 127.2 34 125 25 120 25 C 115 25 112.8 34 112 39 H 106 Z" fill="#c41230" />
+  <text x="120" y="68" font-family="'Cinzel', 'Playfair Display', 'Georgia', serif" font-size="19" font-weight="bold" fill="#1c1a17" text-anchor="middle" letter-spacing="5">OMEGA</text>
+  <text x="120" y="82" font-family="'Outfit', 'Inter', sans-serif" font-size="8" font-weight="800" fill="#8f723b" text-anchor="middle" letter-spacing="4">DE VILLE</text>
+</svg>
