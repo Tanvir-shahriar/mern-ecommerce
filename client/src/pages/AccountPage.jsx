@@ -2,6 +2,7 @@ import { CheckCircle2, Heart, LogOut, MapPin, Package, Plus, Save, Trash2, UserR
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AddressModal } from '../components/AddressModal.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
@@ -75,7 +76,7 @@ export const AccountPage = () => {
   const [addresses, setAddresses] = useState(() => normalizeAddresses(user?.addresses || []));
   const [addressForm, setAddressForm] = useState(() => emptyAddress(user));
   const [editingAddressIndex, setEditingAddressIndex] = useState(-1);
-  const [showAddressForm, setShowAddressForm] = useState(() => !(user?.addresses || []).length);
+  const [showAddressForm, setShowAddressForm] = useState(false);
   const [addressMessage, setAddressMessage] = useState('');
   const [savingAddress, setSavingAddress] = useState(false);
 
@@ -89,7 +90,7 @@ export const AccountPage = () => {
       label: current.label || 'Home'
     }));
     setEditingAddressIndex(-1);
-    setShowAddressForm(!normalizedAddresses.length);
+    setShowAddressForm(false);
   }, [user]);
 
   const { data: orders = [] } = useQuery({
@@ -146,17 +147,17 @@ export const AccountPage = () => {
       setAddressMessage(successMessage);
       setAddressForm(emptyAddress(user));
       setEditingAddressIndex(-1);
-      setShowAddressForm(!normalized.length);
+      setShowAddressForm(false);
     } catch (error) {
       setAddressMessage(apiErrorMessage(error));
+      throw error;
     } finally {
       setSavingAddress(false);
     }
   };
 
-  const saveAddress = async (event) => {
-    event.preventDefault();
-    const cleaned = normalizeAddress(addressForm);
+  const handleSaveAddressModal = async (formData) => {
+    const cleaned = normalizeAddress(formData);
     const nextAddresses =
       editingAddressIndex >= 0
         ? addresses.map((address, index) => (index === editingAddressIndex ? cleaned : address))
@@ -488,137 +489,42 @@ export const AccountPage = () => {
           {/* TAB 3: ADDRESSES */}
           {activeTab === 'addresses' && (
             <div className="account-tab-content">
-              <div className="panel-heading">
-                <div>
-                  <h1 className="account-tab-title">Saved Addresses</h1>
-                </div>
-                <div className="toolbar-actions">
-                  <span>{addresses.length} saved</span>
-                  {addresses.length && !showAddressForm ? (
-                    <button className="button primary compact" type="button" onClick={startAddressAdd}>
-                      <Plus size={16} />
-                      Add another
-                    </button>
-                  ) : null}
-                </div>
+              <AddressModal
+                isOpen={showAddressForm}
+                onClose={cancelAddressEdit}
+                onSave={handleSaveAddressModal}
+                addressData={editingAddressIndex >= 0 ? addresses[editingAddressIndex] : emptyAddress(user)}
+                isEditing={editingAddressIndex >= 0}
+                saving={savingAddress}
+              />
+
+              <div className="account-tab-header-flex">
+                <h1 className="account-tab-title">Address</h1>
+                <button
+                  type="button"
+                  className="pill-button add-address-pill-btn"
+                  onClick={startAddressAdd}
+                >
+                  Add New Address
+                </button>
               </div>
 
-              <div className="address-manager">
-                {showAddressForm ? (
-                  <form className="address-form" onSubmit={saveAddress}>
-                    <div className="form-grid">
-                      <label>
-                        Label
-                        <input
-                          required
-                          value={addressForm.label}
-                          onChange={(event) => updateAddressForm('label', event.target.value)}
-                          placeholder="Home, Office"
-                        />
-                      </label>
-                      <label>
-                        Full name
-                        <input
-                          required
-                          value={addressForm.fullName}
-                          onChange={(event) => updateAddressForm('fullName', event.target.value)}
-                        />
-                      </label>
-                      <label>
-                        Phone
-                        <input
-                          required
-                          value={addressForm.phone}
-                          onChange={(event) => updateAddressForm('phone', event.target.value)}
-                        />
-                      </label>
-                      <label className="span-2">
-                        Address line 1
-                        <input
-                          required
-                          value={addressForm.line1}
-                          onChange={(event) => updateAddressForm('line1', event.target.value)}
-                        />
-                      </label>
-                      <label className="span-2">
-                        Address line 2
-                        <input
-                          value={addressForm.line2}
-                          onChange={(event) => updateAddressForm('line2', event.target.value)}
-                        />
-                      </label>
-                      <label>
-                        City
-                        <input
-                          required
-                          value={addressForm.city}
-                          onChange={(event) => updateAddressForm('city', event.target.value)}
-                        />
-                      </label>
-                      <label>
-                        District
-                        <input
-                          required
-                          value={addressForm.state}
-                          onChange={(event) => updateAddressForm('state', event.target.value)}
-                        />
-                      </label>
-                      <label>
-                        Postal code
-                        <input
-                          required
-                          value={addressForm.postalCode}
-                          onChange={(event) => updateAddressForm('postalCode', event.target.value)}
-                        />
-                      </label>
-                      <label>
-                        Country
-                        <input
-                          required
-                          value={addressForm.country}
-                          onChange={(event) => updateAddressForm('country', event.target.value)}
-                        />
-                      </label>
-                      <label className="checkbox-row span-2">
-                        <input
-                          type="checkbox"
-                          checked={addressForm.isDefault}
-                          onChange={(event) => updateAddressForm('isDefault', event.target.checked)}
-                        />
-                        Use as default delivery address
-                      </label>
-                    </div>
-                    {addressMessage ? (
-                      <p
-                        className={
-                          addressMessage.includes('updated') ||
-                          addressMessage.includes('added') ||
-                          addressMessage.includes('removed')
-                            ? 'form-note'
-                            : 'form-error'
-                        }
-                      >
-                        {addressMessage}
-                      </p>
-                    ) : null}
-                    <div className="toolbar-actions">
-                      <button className="button primary" type="submit" disabled={savingAddress}>
-                        <Plus size={17} />
-                        {savingAddress
-                          ? 'Saving...'
-                          : editingAddressIndex >= 0
-                          ? 'Update address'
-                          : 'Add address'}
-                      </button>
-                      {addresses.length ? (
-                        <button className="button dark" type="button" onClick={cancelAddressEdit}>
-                          {editingAddressIndex >= 0 ? 'Cancel edit' : 'Cancel'}
-                        </button>
-                      ) : null}
-                    </div>
-                  </form>
-                ) : null}
+              {addressMessage ? (
+                <p
+                  className={
+                    addressMessage.includes('updated') ||
+                    addressMessage.includes('added') ||
+                    addressMessage.includes('removed')
+                      ? 'form-note'
+                      : 'form-error'
+                  }
+                  style={{ marginBottom: '16px' }}
+                >
+                  {addressMessage}
+                </p>
+              ) : null}
 
+              <div className="address-manager">
                 <div className="address-list">
                   {addresses.length ? (
                     addresses.map((address, index) => (
