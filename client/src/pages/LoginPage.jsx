@@ -1,6 +1,7 @@
-import { Apple, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { AppleLogo, FacebookLogo, GoogleLogo } from '../components/SocialLogos.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { apiErrorMessage } from '../services/api.js';
 
@@ -98,15 +99,15 @@ export const LoginPage = () => {
 
         <div className="social-login-grid" aria-label="Social sign in options">
           <button type="button" className="social-login-button" onClick={() => socialLoginNotice('Google')}>
-            <span className="social-mark google-mark">G</span>
+            <GoogleLogo size={18} />
             Google
           </button>
           <button type="button" className="social-login-button" onClick={() => socialLoginNotice('Apple')}>
-            <Apple size={18} />
+            <AppleLogo size={18} />
             Apple
           </button>
           <button type="button" className="social-login-button" onClick={() => socialLoginNotice('Facebook')}>
-            <span className="social-mark facebook-mark">f</span>
+            <FacebookLogo size={18} />
             Facebook
           </button>
         </div>
