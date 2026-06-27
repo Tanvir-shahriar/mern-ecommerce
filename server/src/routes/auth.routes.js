@@ -5,6 +5,7 @@ import {
   login,
   logout,
   register,
+  socialLogin,
   updateProfile
 } from '../controllers/auth.controller.js';
 import { protect } from '../middleware/auth.middleware.js';
@@ -13,6 +14,7 @@ import {
   changePasswordSchema,
   loginSchema,
   registerSchema,
+  socialAuthSchema,
   updateProfileSchema
 } from '../validators/schemas.js';
 
@@ -20,6 +22,7 @@ const router = express.Router();
 
 router.post('/register', validate({ body: registerSchema }), register);
 router.post('/login', validate({ body: loginSchema }), login);
+router.post('/social', validate({ body: socialAuthSchema }), socialLogin);
 router.post('/logout', logout);
 
 router.use(protect);

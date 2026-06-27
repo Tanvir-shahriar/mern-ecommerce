@@ -2,6 +2,7 @@ import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, Sparkles, UserRound } from
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AppleLogo, FacebookLogo, GoogleLogo } from '../components/SocialLogos.jsx';
+import { SocialAuthModal } from '../components/SocialAuthModal.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { apiErrorMessage } from '../services/api.js';
 
@@ -28,7 +29,8 @@ export const RegisterPage = () => {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { register } = useAuth();
+  const [activeSocial, setActiveSocial] = useState(null);
+  const { register, socialLogin } = useAuth();
   const navigate = useNavigate();
 
   const submit = async (event) => {
@@ -43,13 +45,24 @@ export const RegisterPage = () => {
     }
   };
 
-  const socialRegisterNotice = (provider) => {
+  const handleSocialAuth = async (socialData) => {
     setError('');
-    setNotice(`${provider} registration is not connected yet. Create your account with email and password for now.`);
+    setNotice('');
+    await socialLogin(socialData);
+    setActiveSocial(null);
+    navigate('/account');
   };
 
   return (
     <section className="auth-page login-page register-page">
+      {activeSocial ? (
+        <SocialAuthModal
+          provider={activeSocial}
+          onClose={() => setActiveSocial(null)}
+          onSuccess={handleSocialAuth}
+        />
+      ) : null}
+
       <div className="login-hero-panel register-hero-panel" aria-label="Create a LahVenture account">
         <div className="login-hero-copy">
           <p className="eyebrow">Create profile</p>
@@ -93,15 +106,15 @@ export const RegisterPage = () => {
         </div>
 
         <div className="social-login-grid" aria-label="Social registration options">
-          <button type="button" className="social-login-button" onClick={() => socialRegisterNotice('Google')}>
+          <button type="button" className="social-login-button" onClick={() => setActiveSocial('google')}>
             <GoogleLogo size={18} />
             Google
           </button>
-          <button type="button" className="social-login-button" onClick={() => socialRegisterNotice('Apple')}>
+          <button type="button" className="social-login-button" onClick={() => setActiveSocial('apple')}>
             <AppleLogo size={18} />
             Apple
           </button>
-          <button type="button" className="social-login-button" onClick={() => socialRegisterNotice('Facebook')}>
+          <button type="button" className="social-login-button" onClick={() => setActiveSocial('facebook')}>
             <FacebookLogo size={18} />
             Facebook
           </button>

@@ -2,6 +2,7 @@ import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-re
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AppleLogo, FacebookLogo, GoogleLogo } from '../components/SocialLogos.jsx';
+import { SocialAuthModal } from '../components/SocialAuthModal.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { apiErrorMessage } from '../services/api.js';
 
@@ -28,9 +29,18 @@ export const LoginPage = () => {
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const { login } = useAuth();
+  const [activeSocial, setActiveSocial] = useState(null);
+  const { login, socialLogin } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  const handleAuthSuccess = (user) => {
+    const from = location.state?.from;
+    const redirectTo = from
+      ? `${from.pathname || ''}${from.search || ''}` || '/'
+      : (['admin', 'super_admin'].includes(user.role) ? '/admin' : '/account');
+    navigate(redirectTo, { replace: true });
+  };
 
   const submit = async (event) => {
     event.preventDefault();
@@ -38,23 +48,30 @@ export const LoginPage = () => {
     setNotice('');
     try {
       const user = await login(form);
-      const from = location.state?.from;
-      const redirectTo = from
-        ? `${from.pathname || ''}${from.search || ''}` || '/'
-        : (['admin', 'super_admin'].includes(user.role) ? '/admin' : '/account');
-      navigate(redirectTo, { replace: true });
+      handleAuthSuccess(user);
     } catch (requestError) {
       setError(apiErrorMessage(requestError));
     }
   };
 
-  const socialLoginNotice = (provider) => {
+  const handleSocialAuth = async (socialData) => {
     setError('');
-    setNotice(`${provider} sign-in is not connected yet. Use email and password for now.`);
+    setNotice('');
+    const user = await socialLogin(socialData);
+    setActiveSocial(null);
+    handleAuthSuccess(user);
   };
 
   return (
     <section className="auth-page login-page">
+      {activeSocial ? (
+        <SocialAuthModal
+          provider={activeSocial}
+          onClose={() => setActiveSocial(null)}
+          onSuccess={handleSocialAuth}
+        />
+      ) : null}
+
       <div className="login-hero-panel" aria-label="LahVenture account access">
         <div className="login-hero-copy">
           <p className="eyebrow">Member access</p>
@@ -98,15 +115,15 @@ export const LoginPage = () => {
         </div>
 
         <div className="social-login-grid" aria-label="Social sign in options">
-          <button type="button" className="social-login-button" onClick={() => socialLoginNotice('Google')}>
+          <button type="button" className="social-login-button" onClick={() => setActiveSocial('google')}>
             <GoogleLogo size={18} />
             Google
           </button>
-          <button type="button" className="social-login-button" onClick={() => socialLoginNotice('Apple')}>
+          <button type="button" className="social-login-button" onClick={() => setActiveSocial('apple')}>
             <AppleLogo size={18} />
             Apple
           </button>
-          <button type="button" className="social-login-button" onClick={() => socialLoginNotice('Facebook')}>
+          <button type="button" className="social-login-button" onClick={() => setActiveSocial('facebook')}>
             <FacebookLogo size={18} />
             Facebook
           </button>

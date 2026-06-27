@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { User } from '../models/user.model.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
@@ -35,6 +36,30 @@ export const login = asyncHandler(async (req, res) => {
 
   user.lastLoginAt = new Date();
   await user.save({ validateBeforeSave: false });
+
+  sendAuthResponse(res, user);
+});
+
+export const socialLogin = asyncHandler(async (req, res) => {
+  const { email, name } = req.body;
+
+  let user = await User.findOne({ email });
+
+  if (!user) {
+    const randomPassword = crypto.randomBytes(16).toString('hex') + 'Aa1!';
+    const displayName = name || email.split('@')[0];
+    user = await User.create({
+      name: displayName,
+      email,
+      password: randomPassword
+    });
+  } else {
+    if (user.status !== 'active') {
+      throw new ApiError(403, 'This account has been blocked');
+    }
+    user.lastLoginAt = new Date();
+    await user.save({ validateBeforeSave: false });
+  }
 
   sendAuthResponse(res, user);
 });

@@ -44,6 +44,12 @@ export const loginSchema = z.object({
   password: z.string().min(1)
 });
 
+export const socialAuthSchema = z.object({
+  provider: z.enum(['google', 'apple', 'facebook']),
+  email: z.string().email(),
+  name: z.string().min(1).optional()
+});
+
 export const updateProfileSchema = z.object({
   name: z.string().min(2).optional(),
   phone: z.string().optional(),

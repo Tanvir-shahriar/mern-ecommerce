@@ -61,6 +61,14 @@ export const AuthProvider = ({ children }) => {
     return data.data.user;
   };
 
+  const socialLogin = async (payload) => {
+    const { data } = await api.post('/auth/social', payload);
+    authVersion.current += 1;
+    setUser(data.data.user);
+    setLoading(false);
+    return data.data.user;
+  };
+
   const logout = async () => {
     authVersion.current += 1;
     await api.post('/auth/logout');
@@ -85,6 +93,7 @@ export const AuthProvider = ({ children }) => {
       isSuperAdmin: user?.role === 'super_admin',
       login,
       register,
+      socialLogin,
       logout,
       refreshUser,
       updateProfile
