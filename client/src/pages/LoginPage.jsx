@@ -66,7 +66,9 @@ export const LoginPage = () => {
         <div className="login-slideshow" aria-hidden="true">
           {loginSlides.map((slide, index) => (
             <div className="login-slide" style={{ '--slide-index': index }} key={slide.title}>
-              <img src={slide.image} alt="" />
+              <span className="login-slide-media">
+                <img src={slide.image} alt="" />
+              </span>
               <div>
                 <strong>{slide.title}</strong>
                 <span>{slide.text}</span>

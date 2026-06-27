@@ -2936,6 +2936,12 @@ textarea:focus {
     url("/watch_video_thumbnail.png") center / cover;
 }
 
+.register-page::before {
+  background:
+    linear-gradient(120deg, rgba(8, 5, 5, 0.88), rgba(88, 13, 24, 0.7), rgba(8, 5, 5, 0.92)),
+    url("/jupiter_watch.png") center / cover;
+}
+
 .login-page::after {
   content: "";
   position: fixed;
@@ -3037,10 +3043,24 @@ textarea:focus {
   pointer-events: none;
 }
 
-.login-slide img {
+.login-slide-media {
+  position: relative;
+  z-index: 1;
   width: 100%;
+  min-width: 0;
+  height: 210px;
+  align-self: stretch;
+  display: grid;
+  place-items: center;
+}
+
+.login-slide-media img {
+  width: min(100%, 270px);
+  height: 210px;
+  max-width: 100%;
   max-height: 250px;
   object-fit: contain;
+  object-position: center;
   filter: drop-shadow(0 28px 42px rgba(0, 0, 0, 0.34));
 }
 
@@ -3237,6 +3257,10 @@ textarea:focus {
 .login-register-link a {
   color: #7a0b17;
   font-weight: 900;
+}
+
+.register-card.auth-card {
+  align-self: center;
 }
 
 .form-error {
@@ -5410,10 +5434,17 @@ textarea:focus {
   .login-slide {
     grid-template-columns: 1fr;
     align-content: center;
+    justify-items: center;
     text-align: center;
   }
 
-  .login-slide img {
+  .login-slide-media {
+    height: 190px;
+  }
+
+  .login-slide-media img {
+    width: min(220px, 78vw);
+    height: 190px;
     max-height: 190px;
   }
 
@@ -6062,6 +6093,16 @@ textarea:focus {
 
   .login-slide {
     padding: 16px;
+  }
+
+  .login-slide-media {
+    height: 170px;
+  }
+
+  .login-slide-media img {
+    width: min(200px, 75vw);
+    height: 170px;
+    max-height: 170px;
   }
 
   .admin-page {
