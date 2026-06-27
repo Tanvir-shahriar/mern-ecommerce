@@ -280,17 +280,24 @@ export const addReview = asyncHandler(async (req, res) => {
   const product = await Product.findOne({ _id: req.params.id, status: 'active' });
   if (!product) throw new ApiError(404, 'Product not found');
 
-  const deliveredOrder = await Order.findOne({
-    _id: req.body.orderId,
-    user: req.user._id,
-    status: 'delivered',
-    'items.product': product._id
-  })
-    .select('_id')
-    .lean();
-
-  if (!deliveredOrder) {
-    throw new ApiError(403, 'You can review this product after it has been delivered to you');
+  let deliveredOrder = null;
+  if (req.body.orderId) {
+    deliveredOrder = await Order.findOne({
+      _id: req.body.orderId,
+      user: req.user._id,
+      status: 'delivered',
+      'items.product': product._id
+    })
+      .select('_id')
+      .lean();
+  } else {
+    deliveredOrder = await Order.findOne({
+      user: req.user._id,
+      status: 'delivered',
+      'items.product': product._id
+    })
+      .select('_id')
+      .lean();
   }
 
   const existingReview = product.reviews.find(
@@ -303,7 +310,7 @@ export const addReview = asyncHandler(async (req, res) => {
 
   product.reviews.push({
     user: req.user._id,
-    order: deliveredOrder._id,
+    order: deliveredOrder ? deliveredOrder._id : null,
     name: req.user.name,
     rating: req.body.rating,
     comment: req.body.comment

@@ -137,7 +137,7 @@ export const productSchema = z.object({
 export const productUpdateSchema = productSchema.partial();
 
 export const reviewSchema = z.object({
-  orderId: objectId,
+  orderId: objectId.optional(),
   rating: z.coerce.number().min(1).max(5),
   comment: z.string().min(5)
 });

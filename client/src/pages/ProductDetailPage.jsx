@@ -18,11 +18,12 @@ import {
   Droplets,
   Tag
 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { LoadingScreen } from '../components/LoadingScreen.jsx';
+import { ProductRatingsAndReviews } from '../components/ProductRatingsAndReviews.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
@@ -53,7 +54,8 @@ export const ProductDetailPage = () => {
   const { addItem } = useCart();
   const navigate = useNavigate();
 
-  const { data: product, isLoading, isError } = useQuery({
+  const queryClient = useQueryClient();
+  const { data: product, isLoading, isError, refetch } = useQuery({
     queryKey: ['product', slugOrId],
     queryFn: async () => {
       const { data } = await api.get(`/products/${slugOrId}`);
@@ -291,34 +293,13 @@ export const ProductDetailPage = () => {
         </div>
       </div>
 
-      <section className="reviews-section" id="reviews">
-        <div className="section-heading compact">
-          <div>
-            <p className="eyebrow">Reviews</p>
-            <h2>Customer notes</h2>
-          </div>
-          <span className="review-count">{product.ratingsCount || 0} verified review(s)</span>
-        </div>
-        <div className="review-list">
-          {product.reviews?.length ? (
-            product.reviews.map((item) => (
-              <article className="review-item" key={item._id}>
-                <div className="review-item-header">
-                  <div>
-                    <h3>{item.name}</h3>
-                    {item.createdAt ? <span>{dateShort(item.createdAt)}</span> : null}
-                  </div>
-                  <ReviewStars rating={item.rating} />
-                </div>
-                <p>{item.comment}</p>
-                {item.verifiedPurchase ? <span className="verified-review">Verified purchase</span> : null}
-              </article>
-            ))
-          ) : (
-            <p className="muted">No written customer reviews yet.</p>
-          )}
-        </div>
-      </section>
+      <ProductRatingsAndReviews
+        product={product}
+        onReviewAdded={() => {
+          refetch();
+          queryClient.invalidateQueries(['product', slugOrId]);
+        }}
+      />
 
       {similarProducts.length ? (
         <section className="similar-section">
