@@ -2935,7 +2935,10 @@ textarea:focus {
   align-items: start;
 }
 
-.account-page {
+.account-page,
+.order-detail-page,
+.cart-page,
+.checkout-page {
   width: min(1180px, calc(100% - 36px));
   min-width: 0;
   margin: 0 auto;
@@ -2950,8 +2953,12 @@ textarea:focus {
 }
 
 .account-page .section-heading,
+.order-detail-page .section-heading,
+.cart-page .section-heading,
+.checkout-page .section-heading,
 .admin-page .section-heading,
 .account-page .panel,
+.order-detail-page .detail-card,
 .admin-page .panel,
 .account-page .form-panel,
 .admin-page .form-panel,
@@ -3774,6 +3781,11 @@ textarea:focus {
   border-radius: var(--radius);
 }
 
+.order-item-detail > strong {
+  text-align: right;
+  white-space: nowrap;
+}
+
 .order-item-detail img {
   width: 72px;
   height: 64px;
@@ -4501,7 +4513,10 @@ textarea:focus {
     grid-template-columns: 1fr;
   }
 
-  .account-page {
+  .account-page,
+  .order-detail-page,
+  .cart-page,
+  .checkout-page {
     width: min(100% - 28px, 1180px);
     padding: 34px 0;
   }
@@ -5032,7 +5047,10 @@ textarea:focus {
     line-height: 1.1;
   }
 
-  .account-page {
+  .account-page,
+  .order-detail-page,
+  .cart-page,
+  .checkout-page {
     width: min(100% - 24px, 1180px);
     padding: 24px 0 34px;
   }
@@ -5042,7 +5060,10 @@ textarea:focus {
     padding: 24px 0 34px;
   }
 
-  .account-page .section-heading.compact {
+  .account-page .section-heading.compact,
+  .order-detail-page .section-heading.compact,
+  .cart-page .section-heading.compact,
+  .checkout-page .section-heading.compact {
     align-items: stretch;
     gap: 12px;
   }
@@ -5450,6 +5471,7 @@ textarea:focus {
   .order-item-detail > span,
   .order-item-detail > strong {
     grid-column: 2;
+    text-align: left;
   }
 
   .order-review-grid {
@@ -5599,7 +5621,10 @@ textarea:focus {
     font-size: 1.7rem;
   }
 
-  .account-page {
+  .account-page,
+  .order-detail-page,
+  .cart-page,
+  .checkout-page {
     width: min(100% - 20px, 1180px);
     padding: 20px 0 30px;
   }
@@ -5617,11 +5642,17 @@ textarea:focus {
   }
 
   .account-page .section-heading,
+  .order-detail-page .section-heading,
+  .cart-page .section-heading,
+  .checkout-page .section-heading,
   .admin-page .section-heading {
     margin-bottom: 14px;
   }
 
   .account-page .section-heading h1,
+  .order-detail-page .section-heading h1,
+  .cart-page .section-heading h1,
+  .checkout-page .section-heading h1,
   .admin-page .section-heading h1 {
     font-size: 1.55rem;
   }
