@@ -2,8 +2,8 @@ import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, Sparkles, UserRound } from
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AppleLogo, FacebookLogo, GoogleLogo } from '../components/SocialLogos.jsx';
-import { SocialAuthModal } from '../components/SocialAuthModal.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useSocialAuth } from '../hooks/useSocialAuth.js';
 import { apiErrorMessage } from '../services/api.js';
 
 const registerSlides = [
@@ -27,16 +27,33 @@ const registerSlides = [
 export const RegisterPage = () => {
   const [form, setForm] = useState({ name: '', email: '', password: '' });
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [activeSocial, setActiveSocial] = useState(null);
-  const { register, socialLogin } = useAuth();
+  const [socialLoading, setSocialLoading] = useState(null);
+  const { register } = useAuth();
   const navigate = useNavigate();
+
+  const handleAuthSuccess = () => navigate('/account');
+
+  const { signInWithGoogle, signInWithFacebook } = useSocialAuth({
+    onSuccess: handleAuthSuccess,
+    onError: (msg) => { setError(msg); setSocialLoading(null); }
+  });
+
+  const handleGoogleClick = () => {
+    setError('');
+    setSocialLoading('google');
+    signInWithGoogle().finally(() => setSocialLoading(null));
+  };
+
+  const handleFacebookClick = () => {
+    setError('');
+    setSocialLoading('facebook');
+    signInWithFacebook().finally(() => setSocialLoading(null));
+  };
 
   const submit = async (event) => {
     event.preventDefault();
     setError('');
-    setNotice('');
     try {
       await register(form);
       navigate('/account');
@@ -45,24 +62,8 @@ export const RegisterPage = () => {
     }
   };
 
-  const handleSocialAuth = async (socialData) => {
-    setError('');
-    setNotice('');
-    await socialLogin(socialData);
-    setActiveSocial(null);
-    navigate('/account');
-  };
-
   return (
     <section className="auth-page login-page register-page">
-      {activeSocial ? (
-        <SocialAuthModal
-          provider={activeSocial}
-          onClose={() => setActiveSocial(null)}
-          onSuccess={handleSocialAuth}
-        />
-      ) : null}
-
       <div className="login-hero-panel register-hero-panel" aria-label="Create a LahVenture account">
         <div className="login-hero-copy">
           <p className="eyebrow">Create profile</p>
@@ -102,21 +103,46 @@ export const RegisterPage = () => {
         <div className="login-card-heading">
           <p className="eyebrow">Join LahVenture</p>
           <h2>Create account</h2>
-          <span>Use your email to create a customer profile.</span>
+          <span>Register with a social account or use your email below.</span>
         </div>
 
         <div className="social-login-grid" aria-label="Social registration options">
-          <button type="button" className="social-login-button" onClick={() => setActiveSocial('google')}>
+          {/* Google */}
+          <button
+            type="button"
+            className={`social-login-button${socialLoading === 'google' ? ' social-loading' : ''}`}
+            onClick={handleGoogleClick}
+            disabled={!!socialLoading}
+            aria-label="Register with Google"
+          >
             <GoogleLogo size={18} />
-            Google
+            {socialLoading === 'google' ? 'Loading…' : 'Google'}
           </button>
-          <button type="button" className="social-login-button" onClick={() => setActiveSocial('apple')}>
-            <AppleLogo size={18} />
-            Apple
-          </button>
-          <button type="button" className="social-login-button" onClick={() => setActiveSocial('facebook')}>
+
+          {/* Apple — not available yet */}
+          <div className="social-btn-wrapper">
+            <button
+              type="button"
+              className="social-login-button social-coming-soon"
+              aria-label="Apple register (coming soon)"
+              disabled
+            >
+              <AppleLogo size={18} />
+              Apple
+            </button>
+            <span className="social-badge-soon">Soon</span>
+          </div>
+
+          {/* Facebook */}
+          <button
+            type="button"
+            className={`social-login-button${socialLoading === 'facebook' ? ' social-loading' : ''}`}
+            onClick={handleFacebookClick}
+            disabled={!!socialLoading}
+            aria-label="Register with Facebook"
+          >
             <FacebookLogo size={18} />
-            Facebook
+            {socialLoading === 'facebook' ? 'Loading…' : 'Facebook'}
           </button>
         </div>
 
@@ -154,7 +180,6 @@ export const RegisterPage = () => {
             </button>
           </span>
         </label>
-        {notice ? <p className="form-note login-social-note">{notice}</p> : null}
         {error ? <p className="form-error">{error}</p> : null}
         <button className="button primary full login-submit-button" type="submit">
           Create secure account

@@ -45,10 +45,16 @@ export const loginSchema = z.object({
 });
 
 export const socialAuthSchema = z.object({
-  provider: z.enum(['google', 'apple', 'facebook']),
-  email: z.string().email(),
-  name: z.string().min(1).optional()
-});
+  provider: z.enum(['google', 'facebook']),
+  // Google sends an ID token (JWT signed by Google)
+  idToken: z.string().optional(),
+  // Facebook sends an access token
+  accessToken: z.string().optional()
+}).refine(
+  (data) => data.idToken || data.accessToken,
+  { message: 'Provide idToken (Google) or accessToken (Facebook)' }
+);
+
 
 export const updateProfileSchema = z.object({
   name: z.string().min(2).optional(),

@@ -41,18 +41,81 @@ export const login = asyncHandler(async (req, res) => {
 });
 
 export const socialLogin = asyncHandler(async (req, res) => {
-  const { email, name } = req.body;
+  const { provider, idToken, accessToken } = req.body;
+  let email, name;
 
+  if (provider === 'google') {
+    // ── Verify Google ID token ──────────────────────────────────
+    if (!idToken) throw new ApiError(400, 'Google idToken is required');
+
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (!clientId || clientId === 'PASTE_YOUR_GOOGLE_CLIENT_ID_HERE') {
+      throw new ApiError(503, 'Google sign-in is not configured on this server');
+    }
+
+    const { OAuth2Client } = await import('google-auth-library');
+    const googleClient = new OAuth2Client(clientId);
+
+    let ticket;
+    try {
+      ticket = await googleClient.verifyIdToken({ idToken, audience: clientId });
+    } catch {
+      throw new ApiError(401, 'Invalid Google token — please try signing in again');
+    }
+
+    const payload = ticket.getPayload();
+    if (!payload?.email_verified) {
+      throw new ApiError(401, 'Google account email is not verified');
+    }
+
+    email = payload.email;
+    name  = payload.name || payload.given_name || email.split('@')[0];
+
+  } else if (provider === 'facebook') {
+    // ── Verify Facebook access token via Graph API ──────────────
+    if (!accessToken) throw new ApiError(400, 'Facebook accessToken is required');
+
+    const appId     = process.env.FACEBOOK_APP_ID;
+    const appSecret = process.env.FACEBOOK_APP_SECRET;
+    if (
+      !appId || appId === 'PASTE_YOUR_FACEBOOK_APP_ID_HERE' ||
+      !appSecret || appSecret === 'PASTE_YOUR_FACEBOOK_APP_SECRET_HERE'
+    ) {
+      throw new ApiError(503, 'Facebook sign-in is not configured on this server');
+    }
+
+    // Verify token authenticity with Facebook's debug_token endpoint
+    const appToken = `${appId}|${appSecret}`;
+    const debugUrl = `https://graph.facebook.com/debug_token?input_token=${accessToken}&access_token=${encodeURIComponent(appToken)}`;
+    const debugRes = await fetch(debugUrl);
+    const debugJson = await debugRes.json();
+
+    if (!debugJson?.data?.is_valid || debugJson.data.app_id !== appId) {
+      throw new ApiError(401, 'Invalid Facebook token — please try signing in again');
+    }
+
+    // Fetch user email and name from Graph API
+    const meUrl = `https://graph.facebook.com/me?fields=id,name,email&access_token=${accessToken}`;
+    const meRes = await fetch(meUrl);
+    const me = await meRes.json();
+
+    if (!me.email) {
+      throw new ApiError(400, 'Facebook account does not share an email address. Please use email/password registration.');
+    }
+
+    email = me.email;
+    name  = me.name || email.split('@')[0];
+
+  } else {
+    throw new ApiError(400, 'Unsupported social provider');
+  }
+
+  // ── Find or create user ─────────────────────────────────────
   let user = await User.findOne({ email });
 
   if (!user) {
     const randomPassword = crypto.randomBytes(16).toString('hex') + 'Aa1!';
-    const displayName = name || email.split('@')[0];
-    user = await User.create({
-      name: displayName,
-      email,
-      password: randomPassword
-    });
+    user = await User.create({ name, email, password: randomPassword });
   } else {
     if (user.status !== 'active') {
       throw new ApiError(403, 'This account has been blocked');
@@ -63,6 +126,7 @@ export const socialLogin = asyncHandler(async (req, res) => {
 
   sendAuthResponse(res, user);
 });
+
 
 export const logout = asyncHandler(async (_req, res) => {
   clearAuthCookie(res);

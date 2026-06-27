@@ -2,8 +2,8 @@ import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-re
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AppleLogo, FacebookLogo, GoogleLogo } from '../components/SocialLogos.jsx';
-import { SocialAuthModal } from '../components/SocialAuthModal.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useSocialAuth } from '../hooks/useSocialAuth.js';
 import { apiErrorMessage } from '../services/api.js';
 
 const loginSlides = [
@@ -27,10 +27,9 @@ const loginSlides = [
 export const LoginPage = () => {
   const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
+  const [socialLoading, setSocialLoading] = useState(null); // 'google' | 'facebook' | null
   const [showPassword, setShowPassword] = useState(false);
-  const [activeSocial, setActiveSocial] = useState(null);
-  const { login, socialLogin } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -42,10 +41,27 @@ export const LoginPage = () => {
     navigate(redirectTo, { replace: true });
   };
 
+  const { signInWithGoogle, signInWithFacebook } = useSocialAuth({
+    onSuccess: handleAuthSuccess,
+    onError: (msg) => { setError(msg); setSocialLoading(null); }
+  });
+
+  const handleGoogleClick = () => {
+    setError('');
+    setSocialLoading('google');
+    // signInWithGoogle resolves via callback — loading cleared in onSuccess/onError
+    signInWithGoogle().finally(() => setSocialLoading(null));
+  };
+
+  const handleFacebookClick = () => {
+    setError('');
+    setSocialLoading('facebook');
+    signInWithFacebook().finally(() => setSocialLoading(null));
+  };
+
   const submit = async (event) => {
     event.preventDefault();
     setError('');
-    setNotice('');
     try {
       const user = await login(form);
       handleAuthSuccess(user);
@@ -54,24 +70,8 @@ export const LoginPage = () => {
     }
   };
 
-  const handleSocialAuth = async (socialData) => {
-    setError('');
-    setNotice('');
-    const user = await socialLogin(socialData);
-    setActiveSocial(null);
-    handleAuthSuccess(user);
-  };
-
   return (
     <section className="auth-page login-page">
-      {activeSocial ? (
-        <SocialAuthModal
-          provider={activeSocial}
-          onClose={() => setActiveSocial(null)}
-          onSuccess={handleSocialAuth}
-        />
-      ) : null}
-
       <div className="login-hero-panel" aria-label="LahVenture account access">
         <div className="login-hero-copy">
           <p className="eyebrow">Member access</p>
@@ -111,21 +111,47 @@ export const LoginPage = () => {
         <div className="login-card-heading">
           <p className="eyebrow">Welcome back</p>
           <h2>Sign in</h2>
-          <span>Use your account email to continue.</span>
+          <span>Use your account email or a social provider to continue.</span>
         </div>
 
         <div className="social-login-grid" aria-label="Social sign in options">
-          <button type="button" className="social-login-button" onClick={() => setActiveSocial('google')}>
+          {/* Google */}
+          <button
+            type="button"
+            className={`social-login-button${socialLoading === 'google' ? ' social-loading' : ''}`}
+            onClick={handleGoogleClick}
+            disabled={!!socialLoading}
+            aria-label="Sign in with Google"
+          >
             <GoogleLogo size={18} />
-            Google
+            {socialLoading === 'google' ? 'Loading…' : 'Google'}
           </button>
-          <button type="button" className="social-login-button" onClick={() => setActiveSocial('apple')}>
-            <AppleLogo size={18} />
-            Apple
-          </button>
-          <button type="button" className="social-login-button" onClick={() => setActiveSocial('facebook')}>
+
+          {/* Apple — not available yet */}
+          <div className="social-btn-wrapper">
+            <button
+              type="button"
+              className="social-login-button social-coming-soon"
+              onMouseEnter={() => {}}
+              aria-label="Apple sign in (coming soon)"
+              disabled
+            >
+              <AppleLogo size={18} />
+              Apple
+            </button>
+            <span className="social-badge-soon">Soon</span>
+          </div>
+
+          {/* Facebook */}
+          <button
+            type="button"
+            className={`social-login-button${socialLoading === 'facebook' ? ' social-loading' : ''}`}
+            onClick={handleFacebookClick}
+            disabled={!!socialLoading}
+            aria-label="Sign in with Facebook"
+          >
             <FacebookLogo size={18} />
-            Facebook
+            {socialLoading === 'facebook' ? 'Loading…' : 'Facebook'}
           </button>
         </div>
 
@@ -155,7 +181,6 @@ export const LoginPage = () => {
             </button>
           </span>
         </label>
-        {notice ? <p className="form-note login-social-note">{notice}</p> : null}
         {error ? <p className="form-error">{error}</p> : null}
         <button className="button primary full login-submit-button" type="submit">
           Sign in securely

@@ -3155,6 +3155,51 @@ textarea:focus {
   box-shadow: 0 12px 24px rgba(23, 32, 38, 0.08);
 }
 
+/* Social button wrapper (Apple Soon badge) */
+.social-btn-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+/* Apple – disabled with Soon badge */
+.social-login-button.social-coming-soon {
+  width: 100%;
+  cursor: not-allowed;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.social-badge-soon {
+  position: absolute;
+  top: -8px;
+  right: -6px;
+  background: #7a0b17;
+  color: #fff;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 999px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Social button loading state */
+.social-login-button.social-loading {
+  opacity: 0.7;
+  cursor: wait;
+  position: relative;
+}
+
+.social-login-button:disabled:not(.social-coming-soon) {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+
 .social-mark {
   width: 20px;
   height: 20px;
