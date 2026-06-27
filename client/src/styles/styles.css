@@ -2336,7 +2336,8 @@ textarea:focus {
   line-height: 1.7;
 }
 
-.reviews-section {
+.reviews-section,
+.ratings-reviews-section {
   grid-column: 1 / -1;
 }
 
@@ -7509,6 +7510,8 @@ textarea:focus {
    Ratings & Reviews Reference Design Styles (Reddish Theme)
    ========================================== */
 .ratings-reviews-section {
+  grid-column: 1 / -1;
+  width: 100%;
   margin-top: 40px;
 }
 
