@@ -28,7 +28,7 @@ const addressSchema = z.object({
   line2: z.string().optional(),
   city: z.string().min(2),
   state: z.string().min(2),
-  postalCode: z.string().min(3),
+  postalCode: z.string().optional(),
   country: z.string().optional(),
   isDefault: z.boolean().optional()
 });

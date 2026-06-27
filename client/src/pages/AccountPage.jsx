@@ -22,7 +22,9 @@ const normalizeAddress = (address) => ({
   postalCode: address.postalCode || '',
   country: address.country || 'Bangladesh',
   isDefault: Boolean(address.isDefault)
+  // Note: email is intentionally excluded — not part of the address backend schema
 });
+
 
 const normalizeAddresses = (addresses = []) => {
   const normalized = addresses.map(normalizeAddress);

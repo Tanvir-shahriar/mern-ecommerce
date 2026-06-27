@@ -93,12 +93,30 @@ export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, 
     e.preventDefault();
     setError('');
 
-    if (!form.fullName.trim()) { setError('Full name is required.'); return; }
-    if (!form.phone.trim()) { setError('Phone number is required.'); return; }
-    if (!form.state) { setError('Please select a division.'); return; }
-    if (!form.city.trim()) { setError('District / city is required.'); return; }
-    if (!form.line2.trim()) { setError('Upazila / area is required.'); return; }
-    if (!form.line1.trim()) { setError('Address details are required.'); return; }
+    if (!form.fullName.trim() || form.fullName.trim().length < 2) {
+      setError('Full name must be at least 2 characters.');
+      return;
+    }
+    if (!form.phone.trim() || form.phone.trim().length < 5) {
+      setError('Phone number must be at least 5 characters.');
+      return;
+    }
+    if (!form.state) {
+      setError('Please select a division.');
+      return;
+    }
+    if (!form.city.trim() || form.city.trim().length < 2) {
+      setError('District / city must be at least 2 characters.');
+      return;
+    }
+    if (!form.line2.trim()) {
+      setError('Upazila / area is required.');
+      return;
+    }
+    if (!form.line1.trim() || form.line1.trim().length < 3) {
+      setError('Address must be at least 3 characters.');
+      return;
+    }
 
     try {
       await onSave(form);
