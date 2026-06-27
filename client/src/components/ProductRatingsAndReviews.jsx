@@ -1,19 +1,10 @@
 import { useState, useMemo } from 'react';
-import { Star, CheckCircle2, ThumbsUp, ArrowUpDown, Filter, Plus, X, ShieldAlert } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext.jsx';
-import { api, apiErrorMessage } from '../services/api.js';
+import { Star, CheckCircle2, ThumbsUp, ArrowUpDown, Filter } from 'lucide-react';
 import { dateShort } from '../utils/format.js';
 
-export const ProductRatingsAndReviews = ({ product, onReviewAdded }) => {
-  const { user } = useAuth();
+export const ProductRatingsAndReviews = ({ product }) => {
   const [sortBy, setSortBy] = useState('relevance'); // 'relevance' | 'newest' | 'highest' | 'lowest'
   const [filterStar, setFilterStar] = useState('all'); // 'all' | '5' | '4' | '3' | '2' | '1'
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [rating, setRating] = useState(5);
-  const [hoverRating, setHoverRating] = useState(0);
-  const [comment, setComment] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState('');
   const [likedReviews, setLikedReviews] = useState({});
 
   const reviews = useMemo(() => product?.reviews || [], [product]);
@@ -61,34 +52,6 @@ export const ProductRatingsAndReviews = ({ product, onReviewAdded }) => {
       [reviewId]: !prev[reviewId]
     }));
   };
-
-  const handleSubmitReview = async (e) => {
-    e.preventDefault();
-    if (!comment.trim() || comment.trim().length < 5) {
-      setError('Please write at least 5 characters for your review.');
-      return;
-    }
-
-    setSubmitting(true);
-    setError('');
-
-    try {
-      await api.post(`/products/${product._id}/reviews`, {
-        rating,
-        comment: comment.trim()
-      });
-      setShowReviewModal(false);
-      setComment('');
-      setRating(5);
-      if (onReviewAdded) onReviewAdded();
-    } catch (err) {
-      setError(apiErrorMessage(err));
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const hasAlreadyReviewed = user && reviews.some((r) => r.user?._id === user._id || r.user === user._id);
 
   return (
     <section className="ratings-reviews-section" id="ratings-and-reviews">
@@ -147,7 +110,7 @@ export const ProductRatingsAndReviews = ({ product, onReviewAdded }) => {
           </div>
         </div>
 
-        {/* Toolbar: Filters, Sorting & Write Review */}
+        {/* Toolbar: Filters & Sorting */}
         <div className="reviews-toolbar flex-between">
           <div className="toolbar-title-group">
             <h4 className="reviews-toolbar-title">Product Reviews</h4>
@@ -179,16 +142,6 @@ export const ProductRatingsAndReviews = ({ product, onReviewAdded }) => {
                 <option value="1">1 star</option>
               </select>
             </div>
-
-            {/* Write a Review Button */}
-            <button
-              type="button"
-              className="button primary write-review-btn"
-              onClick={() => setShowReviewModal(true)}
-            >
-              <Plus size={16} />
-              Write a Review
-            </button>
           </div>
         </div>
 
@@ -255,91 +208,6 @@ export const ProductRatingsAndReviews = ({ product, onReviewAdded }) => {
           )}
         </div>
       </div>
-
-      {/* Write Review Modal */}
-      {showReviewModal && (
-        <div className="modal-backdrop" onClick={() => setShowReviewModal(false)}>
-          <div className="modal-card review-modal-card" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="modal-close"
-              onClick={() => setShowReviewModal(false)}
-              aria-label="Close modal"
-            >
-              <X size={20} />
-            </button>
-
-            <div className="address-modal-header">
-              <h2>Write a Review</h2>
-              <p className="modal-subtitle">Share your experience with {product.name}</p>
-            </div>
-
-            {hasAlreadyReviewed ? (
-              <div className="already-reviewed-notice">
-                <ShieldAlert size={18} />
-                <span>You have already submitted a review for this product. Thank you!</span>
-              </div>
-            ) : !user ? (
-              <div className="already-reviewed-notice">
-                <ShieldAlert size={18} />
-                <span>Please log in to submit a review for this product.</span>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmitReview} className="review-form">
-                {error && (
-                  <div className="address-modal-error">
-                    <ShieldAlert size={16} />
-                    <span>{error}</span>
-                  </div>
-                )}
-
-                <div className="form-group-star-select">
-                  <label className="field-label">Overall Rating</label>
-                  <div className="interactive-stars-row">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <button
-                        type="button"
-                        key={s}
-                        className="star-btn"
-                        onMouseEnter={() => setHoverRating(s)}
-                        onMouseLeave={() => setHoverRating(0)}
-                        onClick={() => setRating(s)}
-                      >
-                        <Star
-                          size={28}
-                          className={s <= (hoverRating || rating) ? 'star-filled-interactive' : 'star-empty-interactive'}
-                        />
-                      </button>
-                    ))}
-                    <span className="rating-text-hint">
-                      {hoverRating || rating} out of 5 stars
-                    </span>
-                  </div>
-                </div>
-
-                <div className="form-group-comment">
-                  <label className="field-label">Your Review</label>
-                  <textarea
-                    rows={4}
-                    required
-                    placeholder="What did you like or dislike about this product? (Minimum 5 characters)"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="address-submit-btn"
-                  disabled={submitting}
-                >
-                  {submitting ? 'Submitting Review...' : 'Submit Review'}
-                </button>
-              </form>
-            )}
-          </div>
-        </div>
-      )}
     </section>
   );
 };

@@ -293,13 +293,7 @@ export const ProductDetailPage = () => {
         </div>
       </div>
 
-      <ProductRatingsAndReviews
-        product={product}
-        onReviewAdded={() => {
-          refetch();
-          queryClient.invalidateQueries(['product', slugOrId]);
-        }}
-      />
+      <ProductRatingsAndReviews product={product} />
 
       {similarProducts.length ? (
         <section className="similar-section">
