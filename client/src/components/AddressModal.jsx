@@ -16,10 +16,10 @@ const emptyForm = {
   fullName: '',
   phone: '',
   email: '',
-  state: '',   // Division
-  city: '',    // District
-  line2: '',   // Upazila
-  line1: '',   // Address details
+  state: '',
+  city: '',
+  line2: '',
+  line1: '',
   label: 'Home',
   postalCode: '',
   country: 'Bangladesh',
@@ -29,34 +29,48 @@ const emptyForm = {
 export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, saving }) => {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState('');
-  const prevOpenRef = useRef(false);
 
-  // Reset / populate form whenever the modal opens
+  // Store latest addressData/isEditing in refs so the open-effect can read them
+  const addressDataRef = useRef(addressData);
+  const isEditingRef = useRef(isEditing);
+  addressDataRef.current = addressData;
+  isEditingRef.current = isEditing;
+
+  // Every time the modal OPENS, populate or reset form
   useEffect(() => {
-    if (isOpen && !prevOpenRef.current) {
-      // Modal just opened
-      if (isEditing && addressData) {
-        setForm({
-          fullName: addressData.fullName || '',
-          phone: addressData.phone || '',
-          email: addressData.email || '',
-          state: addressData.state || '',
-          city: addressData.city || '',
-          line2: addressData.line2 || '',
-          line1: addressData.line1 || '',
-          label: addressData.label || 'Home',
-          postalCode: addressData.postalCode || '',
-          country: addressData.country || 'Bangladesh',
-          isDefault: Boolean(addressData.isDefault)
-        });
-      } else {
-        // New address – start fresh
-        setForm(emptyForm);
-      }
-      setError('');
+    if (!isOpen) return;
+    setError('');
+    if (isEditingRef.current && addressDataRef.current) {
+      const d = addressDataRef.current;
+      setForm({
+        fullName: d.fullName || '',
+        phone: d.phone || '',
+        email: d.email || '',
+        state: d.state || '',
+        city: d.city || '',
+        line2: d.line2 || '',
+        line1: d.line1 || '',
+        label: d.label || 'Home',
+        postalCode: d.postalCode || '',
+        country: d.country || 'Bangladesh',
+        isDefault: Boolean(d.isDefault)
+      });
+    } else {
+      setForm(emptyForm);
     }
-    prevOpenRef.current = isOpen;
-  }, [isOpen, isEditing, addressData]);
+  }, [isOpen]); // Only fires on open/close toggle
+
+  // Prevent body scroll when modal open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -64,16 +78,26 @@ export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, 
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
+  const handleClose = () => {
+    if (!saving) onClose();
+  };
+
+  const handleBackdropClick = (e) => {
+    // Only close if the click was directly on the backdrop, not the card
+    if (e.target === e.currentTarget) {
+      handleClose();
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
-    // Basic validation
     if (!form.fullName.trim()) { setError('Full name is required.'); return; }
     if (!form.phone.trim()) { setError('Phone number is required.'); return; }
     if (!form.state) { setError('Please select a division.'); return; }
-    if (!form.city.trim()) { setError('District is required.'); return; }
-    if (!form.line2.trim()) { setError('Upazila is required.'); return; }
+    if (!form.city.trim()) { setError('District / city is required.'); return; }
+    if (!form.line2.trim()) { setError('Upazila / area is required.'); return; }
     if (!form.line1.trim()) { setError('Address details are required.'); return; }
 
     try {
@@ -88,9 +112,22 @@ export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, 
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-card address-modal-card" onClick={(e) => e.stopPropagation()}>
-        <button type="button" className="modal-close" onClick={onClose} aria-label="Close">
+    <div
+      className="modal-backdrop"
+      onClick={handleBackdropClick}
+      role="dialog"
+      aria-modal="true"
+      aria-label={isEditing ? 'Edit Address' : 'Add New Address'}
+    >
+      <div className="modal-card address-modal-card">
+        {/* Close button */}
+        <button
+          type="button"
+          className="modal-close"
+          onClick={handleClose}
+          aria-label="Close modal"
+          disabled={saving}
+        >
           <X size={20} />
         </button>
 
@@ -106,11 +143,8 @@ export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, 
         ) : null}
 
         <form className="address-modal-form" onSubmit={handleSubmit} noValidate>
-          {/* Full Name */}
           <label className="address-modal-field">
-            <span>
-              Full Name <span className="req-star">*</span>
-            </span>
+            <span>Full Name <span className="req-star">*</span></span>
             <input
               type="text"
               placeholder="Enter full name"
@@ -120,20 +154,16 @@ export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, 
             />
           </label>
 
-          {/* Phone Number */}
           <label className="address-modal-field">
-            <span>
-              Phone Number <span className="req-star">*</span>
-            </span>
+            <span>Phone Number <span className="req-star">*</span></span>
             <input
               type="tel"
-              placeholder="Enter phone number (e.g. 01700000000)"
+              placeholder="e.g. 01700000000"
               value={form.phone}
               onChange={(e) => handleChange('phone', e.target.value)}
             />
           </label>
 
-          {/* Email (optional) */}
           <label className="address-modal-field">
             <span>Email <span className="address-optional-tag">(optional)</span></span>
             <input
@@ -144,11 +174,8 @@ export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, 
             />
           </label>
 
-          {/* Division */}
           <label className="address-modal-field">
-            <span>
-              Division <span className="req-star">*</span>
-            </span>
+            <span>Division <span className="req-star">*</span></span>
             <div className="address-select-wrapper">
               <select
                 value={form.state}
@@ -156,19 +183,14 @@ export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, 
               >
                 <option value="">Select your division</option>
                 {divisions.map((div) => (
-                  <option value={div} key={div}>
-                    {div}
-                  </option>
+                  <option value={div} key={div}>{div}</option>
                 ))}
               </select>
             </div>
           </label>
 
-          {/* District */}
           <label className="address-modal-field">
-            <span>
-              District <span className="req-star">*</span>
-            </span>
+            <span>District <span className="req-star">*</span></span>
             <input
               type="text"
               placeholder="Enter your district / city"
@@ -177,11 +199,8 @@ export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, 
             />
           </label>
 
-          {/* Upazila */}
           <label className="address-modal-field">
-            <span>
-              Upazila <span className="req-star">*</span>
-            </span>
+            <span>Upazila <span className="req-star">*</span></span>
             <input
               type="text"
               placeholder="Enter your upazila / area"
@@ -190,11 +209,8 @@ export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, 
             />
           </label>
 
-          {/* Address */}
           <label className="address-modal-field">
-            <span>
-              Address <span className="req-star">*</span>
-            </span>
+            <span>Address <span className="req-star">*</span></span>
             <input
               type="text"
               placeholder="For ex: House: 23, Road: 24, Block: B"
@@ -203,7 +219,6 @@ export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, 
             />
           </label>
 
-          {/* Default checkbox */}
           <label className="checkbox-row address-default-checkbox">
             <input
               type="checkbox"
@@ -215,7 +230,7 @@ export const AddressModal = ({ isOpen, onClose, onSave, addressData, isEditing, 
 
           <button
             type="submit"
-            className="button primary full address-submit-btn"
+            className="address-submit-btn"
             disabled={saving}
           >
             {saving ? 'Saving...' : isEditing ? 'Update Address' : 'Add New Address'}

@@ -8,20 +8,8 @@ import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
 import { orderCustomerName, orderDetailPath, orderIdentifier } from '../utils/orders.js';
 
-const emptyAddress = (user) => ({
-  label: 'Home',
-  fullName: user?.name || '',
-  phone: user?.phone || '',
-  line1: '',
-  line2: '',
-  city: '',
-  state: '',
-  postalCode: '',
-  country: 'Bangladesh',
-  isDefault: false
-});
-
 const addressKey = (address, index) => address._id || `${address.label}-${address.line1}-${index}`;
+
 
 const normalizeAddress = (address) => ({
   label: address.label || 'Home',
@@ -210,7 +198,7 @@ export const AccountPage = () => {
             <button
               type="button"
               className={`account-nav-item ${activeTab === 'account-details' ? 'active' : ''}`}
-              onClick={() => setActiveTab('account-details')}
+              onClick={() => { setActiveTab('account-details'); setShowAddressForm(false); }}
             >
               <UserRound size={18} />
               <span>Account Details</span>
@@ -219,7 +207,7 @@ export const AccountPage = () => {
             <button
               type="button"
               className={`account-nav-item ${activeTab === 'orders' ? 'active' : ''}`}
-              onClick={() => setActiveTab('orders')}
+              onClick={() => { setActiveTab('orders'); setShowAddressForm(false); }}
             >
               <Package size={18} />
               <span>Order</span>
@@ -237,7 +225,7 @@ export const AccountPage = () => {
             <button
               type="button"
               className={`account-nav-item ${activeTab === 'wishlist' ? 'active' : ''}`}
-              onClick={() => setActiveTab('wishlist')}
+              onClick={() => { setActiveTab('wishlist'); setShowAddressForm(false); }}
             >
               <Heart size={18} />
               <span>Wishlist</span>
@@ -478,15 +466,6 @@ export const AccountPage = () => {
           {/* TAB 3: ADDRESSES */}
           {activeTab === 'addresses' && (
             <div className="account-tab-content">
-              <AddressModal
-                isOpen={showAddressForm}
-                onClose={cancelAddressEdit}
-                onSave={handleSaveAddressModal}
-                addressData={editingAddressIndex >= 0 ? addresses[editingAddressIndex] : emptyAddress(user)}
-                isEditing={editingAddressIndex >= 0}
-                saving={savingAddress}
-              />
-
               <div className="account-tab-header-flex">
                 <h1 className="account-tab-title">Address</h1>
                 <button
@@ -582,6 +561,16 @@ export const AccountPage = () => {
           )}
         </main>
       </div>
+
+      {/* Address Modal — always in tree, controlled by isOpen */}
+      <AddressModal
+        isOpen={showAddressForm}
+        onClose={cancelAddressEdit}
+        onSave={handleSaveAddressModal}
+        addressData={editingAddressIndex >= 0 ? addresses[editingAddressIndex] : null}
+        isEditing={editingAddressIndex >= 0}
+        saving={savingAddress}
+      />
     </section>
   );
 };
