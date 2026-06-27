@@ -74,7 +74,6 @@ export const AccountPage = () => {
 
   // Address states
   const [addresses, setAddresses] = useState(() => normalizeAddresses(user?.addresses || []));
-  const [addressForm, setAddressForm] = useState(() => emptyAddress(user));
   const [editingAddressIndex, setEditingAddressIndex] = useState(-1);
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [addressMessage, setAddressMessage] = useState('');
@@ -85,10 +84,6 @@ export const AccountPage = () => {
     setNameInput(user?.name || '');
     setPhoneInput(user?.phone || '');
     setAddresses(normalizedAddresses);
-    setAddressForm((current) => ({
-      ...emptyAddress(user),
-      label: current.label || 'Home'
-    }));
     setEditingAddressIndex(-1);
     setShowAddressForm(false);
   }, [user]);
@@ -145,7 +140,6 @@ export const AccountPage = () => {
       await updateProfile({ addresses: normalized });
       setAddresses(normalized);
       setAddressMessage(successMessage);
-      setAddressForm(emptyAddress(user));
       setEditingAddressIndex(-1);
       setShowAddressForm(false);
     } catch (error) {
@@ -174,12 +168,7 @@ export const AccountPage = () => {
     );
   };
 
-  const editAddress = (index) => {
-    setEditingAddressIndex(index);
-    setAddressForm(normalizeAddress(addresses[index]));
-    setAddressMessage('');
-    setShowAddressForm(true);
-  };
+
 
   const removeAddress = async (index) => {
     const nextAddresses = addresses.filter((_address, itemIndex) => itemIndex !== index);
@@ -196,18 +185,18 @@ export const AccountPage = () => {
 
   const cancelAddressEdit = () => {
     setEditingAddressIndex(-1);
-    setAddressForm(emptyAddress(user));
     setAddressMessage('');
-    setShowAddressForm(!addresses.length);
-  };
-
-  const updateAddressForm = (key, value) => {
-    setAddressForm((current) => ({ ...current, [key]: value }));
+    setShowAddressForm(false);
   };
 
   const startAddressAdd = () => {
     setEditingAddressIndex(-1);
-    setAddressForm(emptyAddress(user));
+    setAddressMessage('');
+    setShowAddressForm(true);
+  };
+
+  const openEditAddress = (index) => {
+    setEditingAddressIndex(index);
     setAddressMessage('');
     setShowAddressForm(true);
   };
@@ -543,7 +532,7 @@ export const AccountPage = () => {
                         </div>
                         <AddressSummary address={address} />
                         <div className="address-actions">
-                          <button type="button" onClick={() => editAddress(index)}>
+                          <button type="button" onClick={() => openEditAddress(index)}>
                             Edit
                           </button>
                           <button
