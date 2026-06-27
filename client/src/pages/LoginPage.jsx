@@ -1,7 +1,6 @@
 import { Apple, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import lahventureLogo from '../assets/images/Lahventure Logo.png';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { apiErrorMessage } from '../services/api.js';
 
@@ -57,7 +56,6 @@ export const LoginPage = () => {
     <section className="auth-page login-page">
       <div className="login-hero-panel" aria-label="LahVenture account access">
         <div className="login-hero-copy">
-          <img className="login-brand-logo" src={lahventureLogo} alt="LahVenture" />
           <p className="eyebrow">Member access</p>
           <h1>Enter your LahVenture watch account</h1>
           <p>
