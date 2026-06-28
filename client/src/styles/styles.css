@@ -3755,6 +3755,17 @@ textarea:focus {
   border-bottom: 1px solid var(--line);
 }
 
+.admin-product-name-link {
+  color: inherit;
+  text-decoration: none;
+  transition: color 150ms ease;
+}
+
+.admin-product-name-link:hover {
+  color: #7a0b17;
+  text-decoration: underline;
+}
+
 .admin-product-actions {
   display: flex;
   justify-content: flex-end;

@@ -118,7 +118,9 @@ export const AdminProductsPage = () => {
                 <article className="admin-product-row" key={product._id}>
                   <img src={mediaUrl(product.images?.[0]?.url)} alt={product.name} />
                   <div>
-                    <strong>{product.name}</strong>
+                    <Link to={`/products/${product.slug || product._id}`} className="admin-product-name-link">
+                      <strong>{product.name}</strong>
+                    </Link>
                     <span>{product.sku}</span>
                     <span className={`inventory-status ${product.status}`}>{product.status}</span>
                   </div>
