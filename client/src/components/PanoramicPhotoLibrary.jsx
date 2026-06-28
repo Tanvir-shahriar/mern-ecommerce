@@ -231,9 +231,6 @@ export const PanoramicPhotoLibrary = () => {
         </defs>
       </svg>
 
-      <div className="panoramic-library-header">
-        <p className="panoramic-header-text">Interactions, Layout, &amp; Custom Code</p>
-      </div>
 
       <div
         className="panoramic-viewport exact-panoramic-screen"

@@ -8213,18 +8213,6 @@ textarea:focus {
   overflow: hidden;
 }
 
-.panoramic-library-header {
-  text-align: center;
-  margin-bottom: clamp(26px, 3.4vw, 40px);
-}
-
-.panoramic-header-text {
-  margin: 0;
-  font-size: clamp(1rem, 1.1vw, 1.28rem);
-  font-weight: 600;
-  color: rgba(58, 29, 63, 0.84);
-  letter-spacing: 0.01em;
-}
 
 /* Curved Viewport Container */
 .panoramic-viewport {
