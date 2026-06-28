@@ -12,43 +12,58 @@ const image = (id, alt) => ({
   alt
 });
 
+const shouldReset = process.argv.includes('--reset') || process.env.SEED_RESET === 'true';
+
+const upsertOne = async (Model, filter, payload) => {
+  const existing = await Model.findOne(filter);
+  if (!existing) return Model.create(payload);
+
+  Object.assign(existing, payload);
+  await existing.save();
+  return existing;
+};
+
 const run = async () => {
   await connectDB();
 
-  await Promise.all([
-    Cart.deleteMany(),
-    Order.deleteMany(),
-    Product.deleteMany(),
-    Category.deleteMany(),
-    Coupon.deleteMany(),
-    User.deleteMany()
-  ]);
+  if (shouldReset) {
+    await Promise.all([
+      Cart.deleteMany(),
+      Order.deleteMany(),
+      Product.deleteMany(),
+      Category.deleteMany(),
+      Coupon.deleteMany(),
+      User.deleteMany()
+    ]);
+  }
 
-  const [smartwatches, automatics, chronographs, accessories] = await Category.create([
-    {
-      name: 'Smartwatches',
-      description: 'Connected watches for health, activity, notifications, and daily planning.',
-      isFeatured: true,
-      order: 1
-    },
-    {
-      name: 'Automatic Watches',
-      description: 'Mechanical watches with classic cases, exhibition backs, and premium finishing.',
-      isFeatured: true,
-      order: 2
-    },
-    {
-      name: 'Chronographs',
-      description: 'Sport and dress chronographs with precise timing and bold dial layouts.',
-      isFeatured: true,
-      order: 3
-    },
-    {
-      name: 'Straps & Accessories',
-      description: 'Leather, steel, silicone, chargers, and watch-care essentials.',
-      order: 4
-    }
-  ]);
+  const [smartwatches, automatics, chronographs, accessories] = await Promise.all(
+    [
+      {
+        name: 'Smartwatches',
+        description: 'Connected watches for health, activity, notifications, and daily planning.',
+        isFeatured: true,
+        order: 1
+      },
+      {
+        name: 'Automatic Watches',
+        description: 'Mechanical watches with classic cases, exhibition backs, and premium finishing.',
+        isFeatured: true,
+        order: 2
+      },
+      {
+        name: 'Chronographs',
+        description: 'Sport and dress chronographs with precise timing and bold dial layouts.',
+        isFeatured: true,
+        order: 3
+      },
+      {
+        name: 'Straps & Accessories',
+        description: 'Leather, steel, silicone, chargers, and watch-care essentials.',
+        order: 4
+      }
+    ].map((category) => upsertOne(Category, { name: category.name }, category))
+  );
 
   const categories = {
     smartwatches: smartwatches._id,
@@ -57,7 +72,7 @@ const run = async () => {
     accessories: accessories._id
   };
 
-  await Product.create([
+  const productSeeds = [
     {
       name: 'lahVenture Apex S9 Smartwatch',
       shortDescription: 'AMOLED smartwatch with GPS, calls, and seven-day battery.',
@@ -190,9 +205,13 @@ const run = async () => {
       ratingsAverage: 4.6,
       ratingsCount: 20
     }
-  ]);
+  ];
 
-  await Coupon.create([
+  for (const product of productSeeds) {
+    await upsertOne(Product, { sku: product.sku }, product);
+  }
+
+  const couponSeeds = [
     {
       code: 'WELCOME10',
       description: '10% off first orders over BDT 5,000.',
@@ -210,9 +229,13 @@ const run = async () => {
       minOrderAmount: 7500,
       usageLimit: 300
     }
-  ]);
+  ];
 
-  await User.create([
+  for (const coupon of couponSeeds) {
+    await upsertOne(Coupon, { code: coupon.code }, coupon);
+  }
+
+  const userSeeds = [
     {
       name: 'Store Admin',
       email: env.seedAdminEmail,
@@ -240,9 +263,13 @@ const run = async () => {
         }
       ]
     }
-  ]);
+  ];
 
-  console.log('Database seeded successfully');
+  for (const user of userSeeds) {
+    await upsertOne(User, { email: user.email }, user);
+  }
+
+  console.log(`Database seeded successfully${shouldReset ? ' with reset' : ' without deleting existing records'}`);
   console.log(`Admin: ${env.seedAdminEmail} / ${env.seedAdminPassword}`);
   console.log('Customer: customer@example.com / Customer123!');
 };
