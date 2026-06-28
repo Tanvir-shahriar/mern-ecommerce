@@ -8207,21 +8207,22 @@ textarea:focus {
    ========================================== */
 .panoramic-library-section {
   position: relative;
-  padding: 36px 0 40px;
-  background: #faeff6;
+  min-height: min(980px, 100vh);
+  padding: 8px 0 94px;
+  background: #fde8fb;
   overflow: hidden;
 }
 
 .panoramic-library-header {
   text-align: center;
-  margin-bottom: 24px;
+  margin-bottom: clamp(26px, 3.4vw, 40px);
 }
 
 .panoramic-header-text {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: clamp(1rem, 1.1vw, 1.28rem);
   font-weight: 600;
-  color: #4a154b;
+  color: rgba(58, 29, 63, 0.84);
   letter-spacing: 0.01em;
 }
 
@@ -8229,7 +8230,7 @@ textarea:focus {
 .panoramic-viewport {
   position: relative;
   width: 100%;
-  height: 460px;
+  height: clamp(520px, 76vh, 800px);
   overflow: hidden;
   clip-path: url(#exact-panoramic-mask);
   -webkit-clip-path: url(#exact-panoramic-mask);
@@ -8249,12 +8250,12 @@ textarea:focus {
   left: 0;
   pointer-events: none;
   z-index: 100;
-  width: 48px;
-  height: 48px;
+  width: 82px;
+  height: 82px;
   border-radius: 50%;
-  border: 1.5px solid #3d123e;
-  background: rgba(250, 239, 246, 0.25);
-  backdrop-filter: blur(2px);
+  border: 2px solid rgba(22, 8, 58, 0.84);
+  background: rgba(253, 232, 251, 0.08);
+  backdrop-filter: blur(1px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -8262,31 +8263,32 @@ textarea:focus {
 }
 
 .panoramic-custom-cursor .cursor-dot {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
-  background: #3d123e;
+  background: #16083a;
 }
 
 /* Horizontal Track */
 .panoramic-track {
   display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 10px 40px;
+  align-items: stretch;
+  gap: clamp(16px, 1.05vw, 22px);
+  height: 100%;
+  padding: 0;
   width: max-content;
   will-change: transform;
 }
 
 /* Individual Clean Photography Card matching reference image */
 .panoramic-card {
-  flex: 0 0 340px;
-  height: 430px;
-  border-radius: 12px;
+  flex: 0 0 clamp(300px, 29.55vw, 610px);
+  height: 100%;
+  border-radius: 0;
   overflow: hidden;
   position: relative;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  background: #ffffff;
+  box-shadow: none;
+  background: #161616;
 }
 
 .panoramic-card-media {
@@ -8308,17 +8310,19 @@ textarea:focus {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
-  margin-top: 24px;
+  gap: 16px;
+  margin-top: -38px;
+  position: relative;
+  z-index: 2;
 }
 
 .panoramic-arrow-btn {
-  width: 44px;
-  height: 44px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   background: transparent;
-  border: 1.5px solid #4a154b;
-  color: #4a154b;
+  border: 2px solid rgba(43, 18, 50, 0.88);
+  color: rgba(43, 18, 50, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -8327,8 +8331,8 @@ textarea:focus {
 }
 
 .panoramic-arrow-btn:hover {
-  background: #4a154b;
-  color: #ffffff;
+  background: rgba(43, 18, 50, 0.88);
+  color: #fde8fb;
   transform: scale(1.05);
 }
 
@@ -8337,18 +8341,36 @@ textarea:focus {
 }
 
 @media (max-width: 768px) {
+  .panoramic-library-section {
+    min-height: auto;
+    padding: 10px 0 70px;
+  }
+
+  .panoramic-library-header {
+    margin-bottom: 22px;
+  }
+
   .panoramic-viewport {
-    height: 360px;
+    height: 460px;
   }
+
   .panoramic-card {
-    flex: 0 0 260px;
-    height: 330px;
+    flex-basis: min(76vw, 330px);
   }
+
   .panoramic-custom-cursor {
     display: none;
   }
-}
 
+  .panoramic-controls-row {
+    margin-top: -26px;
+  }
+
+  .panoramic-arrow-btn {
+    width: 54px;
+    height: 54px;
+  }
+}
 
 
 

@@ -53,6 +53,7 @@ export const PanoramicPhotoLibrary = () => {
   const lastXRef = useRef(0);
   const lastTimeRef = useRef(0);
   const animFrameRef = useRef(null);
+  const hasInitialOffsetRef = useRef(false);
 
   // Custom follower cursor state
   const mousePosRef = useRef({ x: 0, y: 0 });
@@ -65,9 +66,45 @@ export const PanoramicPhotoLibrary = () => {
     if (!containerRef.current || !trackRef.current) return { min: 0, max: 0 };
     const containerWidth = containerRef.current.offsetWidth;
     const trackWidth = trackRef.current.scrollWidth;
-    const min = Math.min(0, containerWidth - trackWidth - 60);
+    const min = Math.min(0, containerWidth - trackWidth);
     return { min, max: 0 };
   }, []);
+
+  const getCardStep = useCallback(() => {
+    if (!trackRef.current) return 360;
+    const card = trackRef.current.querySelector('.panoramic-card');
+    const cardWidth = card?.getBoundingClientRect().width || 340;
+    const trackStyle = window.getComputedStyle(trackRef.current);
+    const gap = Number.parseFloat(trackStyle.columnGap || trackStyle.gap || '0') || 0;
+    return cardWidth + gap;
+  }, []);
+
+  const setInitialOffset = useCallback(() => {
+    if (!containerRef.current || !trackRef.current) return;
+    const step = getCardStep();
+    const sidePeek = Math.min(96, Math.max(58, containerRef.current.offsetWidth * 0.045));
+    const { min, max } = getBounds();
+    positionRef.current = Math.max(min, Math.min(max, -(step - sidePeek)));
+    velocityRef.current = 0;
+    trackRef.current.style.transform = `translate3d(${positionRef.current}px, 0, 0)`;
+  }, [getBounds, getCardStep]);
+
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      setInitialOffset();
+      hasInitialOffsetRef.current = true;
+    });
+
+    const handleResize = () => {
+      setInitialOffset();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [setInitialOffset]);
 
   // Smooth 60fps animation loop for smooth drag physics + follower cursor
   useEffect(() => {
@@ -110,6 +147,7 @@ export const PanoramicPhotoLibrary = () => {
 
       // 3. Apply smooth linear translation to track
       if (trackRef.current) {
+        if (!hasInitialOffsetRef.current) setInitialOffset();
         trackRef.current.style.transform = `translate3d(${positionRef.current}px, 0, 0)`;
       }
 
@@ -121,7 +159,7 @@ export const PanoramicPhotoLibrary = () => {
       active = false;
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
     };
-  }, [getBounds, isHovered, isMouseDown]);
+  }, [getBounds, isHovered, isMouseDown, setInitialOffset]);
 
   // Pointer Events (Mouse + Touch)
   const handlePointerDown = (e) => {
@@ -175,7 +213,7 @@ export const PanoramicPhotoLibrary = () => {
 
   // Arrow Navigation
   const scrollStep = (direction) => {
-    const cardWidth = 360;
+    const cardWidth = getCardStep();
     const { min, max } = getBounds();
     let target = positionRef.current + (direction === 'left' ? cardWidth : -cardWidth);
     target = Math.max(min, Math.min(max, target));
@@ -185,22 +223,18 @@ export const PanoramicPhotoLibrary = () => {
 
   return (
     <section className="panoramic-library-section" aria-label="Watch Photography Gallery">
-      {/* SVG Definition for Panoramic Mask matching reference image (clipPathUnits="objectBoundingBox") */}
       <svg className="panoramic-svg-defs" aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
         <defs>
           <clipPath id="exact-panoramic-mask" clipPathUnits="objectBoundingBox">
-            {/* Top dips down 14% in middle, bottom dips up 14% in middle */}
             <path d="M 0,0 Q 0.5,0.14 1,0 L 1,1 Q 0.5,0.86 0,1 Z" />
           </clipPath>
         </defs>
       </svg>
 
-      {/* Header matching reference image: "Interactions, Layout, & Custom Code" */}
       <div className="panoramic-library-header">
         <p className="panoramic-header-text">Interactions, Layout, &amp; Custom Code</p>
       </div>
 
-      {/* Panoramic Screen Viewport Container with Exact Mask */}
       <div
         className="panoramic-viewport exact-panoramic-screen"
         ref={containerRef}
@@ -216,12 +250,10 @@ export const PanoramicPhotoLibrary = () => {
         onTouchMove={handlePointerMove}
         onTouchEnd={handlePointerUp}
       >
-        {/* Custom Circular Ring Follower Cursor */}
         <div className="panoramic-custom-cursor" ref={cursorRef} aria-hidden="true">
           <div className="cursor-dot" />
         </div>
 
-        {/* Horizontal Drag Track holding clean photography cards */}
         <div className="panoramic-track" ref={trackRef}>
           {WATCH_GALLERY_IMAGES.map((img) => (
             <article className="panoramic-card" key={img.id}>
@@ -233,7 +265,6 @@ export const PanoramicPhotoLibrary = () => {
         </div>
       </div>
 
-      {/* Minimalist Circular Arrow Navigation Controls Centered Underneath */}
       <div className="panoramic-controls-row">
         <button
           type="button"
@@ -241,7 +272,7 @@ export const PanoramicPhotoLibrary = () => {
           onClick={() => scrollStep('left')}
           aria-label="Previous gallery image"
         >
-          <ArrowLeft size={18} />
+          <ArrowLeft size={32} strokeWidth={1.75} />
         </button>
         <button
           type="button"
@@ -249,7 +280,7 @@ export const PanoramicPhotoLibrary = () => {
           onClick={() => scrollStep('right')}
           aria-label="Next gallery image"
         >
-          <ArrowRight size={18} />
+          <ArrowRight size={32} strokeWidth={1.75} />
         </button>
       </div>
     </section>
