@@ -2557,6 +2557,30 @@ textarea:focus {
   font-size: 0.82rem;
 }
 
+/* Similar products card action row — matches main product detail buttons */
+.similar-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 8px;
+  background: #f8fafc;
+}
+
+.similar-actions-row .button-buy-now,
+.similar-actions-row .button-add-to-cart {
+  flex: 1;
+  min-height: 42px;
+  font-size: 0.85rem;
+  border-radius: 4px;
+}
+
+.similar-actions-row .button-wishlist {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border-radius: 4px;
+}
+
 .cart-layout,
 .checkout-layout {
   grid-template-columns: minmax(0, 1fr) 360px;

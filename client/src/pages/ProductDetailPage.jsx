@@ -311,46 +311,49 @@ export const ProductDetailPage = () => {
               const itemInStock = !item.inventory?.trackQuantity || item.inventory.stock > 0;
               const isAddingSimilar = similarActionId === `cart-${item._id}`;
 
+              const isItemWishlisted = user?.wishlist?.some(
+                (w) => (typeof w === 'string' ? w : w?._id) === item._id
+              );
+
+              const toggleSimilarWishlist = async () => {
+                if (!user) return navigate('/login');
+                await api.post(`/users/wishlist/${item._id}`);
+                setMessage('Wishlist updated');
+              };
+
               return (
-                <article className="similar-product-card" key={item._id}>
-                  <Link className="similar-product-media" to={itemTo}>
-                    <img src={mediaUrl(item.images?.[0]?.url)} alt={item.images?.[0]?.alt || item.name} />
-                  </Link>
-                  <div className="similar-product-body">
-                    <p className="eyebrow">{item.brand || item.category?.name || 'lahVenture'}</p>
-                    <Link className="similar-product-title" to={itemTo}>
-                      {item.name}
-                    </Link>
-                    <p className="similar-product-description">
-                      {item.shortDescription || item.description}
-                    </p>
-                    <div className="similar-product-meta">
-                      <div>
-                        <strong>{formatMoney(item.price)}</strong>
-                        {item.compareAtPrice ? <span>{formatMoney(item.compareAtPrice)}</span> : null}
-                      </div>
-                    </div>
-                    <div className="similar-product-actions">
-                      <button
-                        className="button primary compact similar-cart-button"
-                        type="button"
-                        onClick={() => addSimilarToCart(item)}
-                        disabled={!itemInStock || isAddingSimilar}
-                        aria-label={`Add ${item.name} to cart`}
-                        title="Add to cart"
-                      >
-                        {isAddingSimilar ? <span className="spinner tiny" /> : <ShoppingBag size={16} />}
+                <article className="product-card" key={item._id}>
+                  <div className="product-card__content-box">
+                    <div className="product-card__media">
+                      <Link to={itemTo}>
+                        <img src={mediaUrl(item.images?.[0]?.url)} alt={item.images?.[0]?.alt || item.name} />
+                      </Link>
+                      <button type="button" className="product-card__wishlist" onClick={toggleSimilarWishlist} aria-label="Wishlist">
+                        <Heart size={20} fill={isItemWishlisted ? '#66000c' : 'none'} color="#66000c" />
                       </button>
-                      <button
-                        className="button purchase-now-button compact similar-purchase-button"
-                        type="button"
-                        onClick={() => purchaseSimilarNow(item)}
-                        disabled={!itemInStock}
-                      >
-                        <CreditCard size={16} />
-                        Purchase now
-                      </button>
+                      {item.compareAtPrice ? <span className="badge sale">Sale</span> : null}
                     </div>
+                    <div className="product-card__info-row">
+                      <Link to={itemTo} className="product-card__title">
+                        {item.name}
+                      </Link>
+                      <span className="product-card__price">
+                        {formatMoney(item.price)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="product-actions-row similar-actions-row">
+                    <button className="button-buy-now" type="button" onClick={() => purchaseSimilarNow(item)} disabled={!itemInStock}>
+                      <Star size={16} fill="white" color="white" />
+                      Buy Now
+                    </button>
+                    <button className="button-add-to-cart" type="button" onClick={() => addSimilarToCart(item)} disabled={!itemInStock || isAddingSimilar}>
+                      {isAddingSimilar ? <span className="spinner tiny" /> : <ShoppingBag size={16} color="white" />}
+                      Add To Cart
+                    </button>
+                    <button className="button-wishlist" type="button" onClick={toggleSimilarWishlist} aria-label="Wishlist">
+                      <Heart size={16} fill={isItemWishlisted ? '#66000c' : 'none'} color="#66000c" />
+                    </button>
                   </div>
                 </article>
               );
