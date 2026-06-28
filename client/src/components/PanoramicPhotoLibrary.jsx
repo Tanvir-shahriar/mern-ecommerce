@@ -44,7 +44,7 @@ export const PanoramicPhotoLibrary = () => {
   const trackRef = useRef(null);
   const cursorRef = useRef(null);
 
-  // Drag & Inertia state maintained in refs for 60fps performance
+  // Drag & Inertia physics state
   const positionRef = useRef(0);
   const isDraggingRef = useRef(false);
   const startXRef = useRef(0);
@@ -54,7 +54,7 @@ export const PanoramicPhotoLibrary = () => {
   const lastTimeRef = useRef(0);
   const animFrameRef = useRef(null);
 
-  // Custom cursor position state
+  // Custom follower cursor state
   const mousePosRef = useRef({ x: 0, y: 0 });
   const cursorPosRef = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
@@ -69,14 +69,14 @@ export const PanoramicPhotoLibrary = () => {
     return { min, max: 0 };
   }, []);
 
-  // Smooth animation loop for physics inertia + follower cursor
+  // Smooth 60fps animation loop for smooth drag physics + follower cursor
   useEffect(() => {
     let active = true;
 
     const renderLoop = () => {
       if (!active) return;
 
-      // 1. Smooth custom cursor follow effect
+      // 1. Smooth custom ring cursor lag follow effect
       cursorPosRef.current.x += (mousePosRef.current.x - cursorPosRef.current.x) * 0.18;
       cursorPosRef.current.y += (mousePosRef.current.y - cursorPosRef.current.y) * 0.18;
 
@@ -87,14 +87,13 @@ export const PanoramicPhotoLibrary = () => {
         cursorRef.current.style.opacity = isHovered ? '1' : '0';
       }
 
-      // 2. Drag physics and smooth inertia decay
+      // 2. Momentum drag physics & deceleration decay
       if (!isDraggingRef.current) {
         if (Math.abs(velocityRef.current) > 0.05) {
           positionRef.current += velocityRef.current;
-          velocityRef.current *= 0.93; // Friction deceleration
+          velocityRef.current *= 0.93;
 
           const { min, max } = getBounds();
-          // Bounce/clamp at edges
           if (positionRef.current > max) {
             positionRef.current += (max - positionRef.current) * 0.2;
             velocityRef.current *= 0.5;
@@ -103,14 +102,13 @@ export const PanoramicPhotoLibrary = () => {
             velocityRef.current *= 0.5;
           }
         } else {
-          // Clamp smoothly when stopping
           const { min, max } = getBounds();
           if (positionRef.current > max) positionRef.current += (max - positionRef.current) * 0.2;
           if (positionRef.current < min) positionRef.current += (min - positionRef.current) * 0.2;
         }
       }
 
-      // Apply transform to track
+      // 3. Apply smooth linear translation to track
       if (trackRef.current) {
         trackRef.current.style.transform = `translate3d(${positionRef.current}px, 0, 0)`;
       }
@@ -155,12 +153,10 @@ export const PanoramicPhotoLibrary = () => {
     const dt = Math.max(now - lastTimeRef.current, 1);
     const deltaX = clientX - startXRef.current;
     
-    // Calculate instantaneous velocity for inertia
     velocityRef.current = ((clientX - lastXRef.current) / dt) * 16;
     lastXRef.current = clientX;
     lastTimeRef.current = now;
 
-    // Apply drag movement with elastic resistance at bounds
     const { min, max } = getBounds();
     let nextPos = startPosRef.current + deltaX;
     if (nextPos > max) {
@@ -179,7 +175,7 @@ export const PanoramicPhotoLibrary = () => {
 
   // Arrow Navigation
   const scrollStep = (direction) => {
-    const cardWidth = 360; // Card width + gap
+    const cardWidth = 360;
     const { min, max } = getBounds();
     let target = positionRef.current + (direction === 'left' ? cardWidth : -cardWidth);
     target = Math.max(min, Math.min(max, target));
@@ -189,12 +185,12 @@ export const PanoramicPhotoLibrary = () => {
 
   return (
     <section className="panoramic-library-section" aria-label="Watch Photography Gallery">
-      {/* SVG Definition for Curved Monitor Screen Mask (clipPathUnits="objectBoundingBox") */}
+      {/* SVG Definition for Panoramic Mask matching reference image (clipPathUnits="objectBoundingBox") */}
       <svg className="panoramic-svg-defs" aria-hidden="true" style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
         <defs>
-          <clipPath id="curved-monitor-mask" clipPathUnits="objectBoundingBox">
-            {/* Concave Curved Monitor path: Top dips down in middle, bottom dips up in middle */}
-            <path d="M 0,0 Q 0.5,0.07 1,0 L 1,1 Q 0.5,0.93 0,1 Z" />
+          <clipPath id="exact-panoramic-mask" clipPathUnits="objectBoundingBox">
+            {/* Top dips down 14% in middle, bottom dips up 14% in middle */}
+            <path d="M 0,0 Q 0.5,0.14 1,0 L 1,1 Q 0.5,0.86 0,1 Z" />
           </clipPath>
         </defs>
       </svg>
@@ -204,9 +200,9 @@ export const PanoramicPhotoLibrary = () => {
         <p className="panoramic-header-text">Interactions, Layout, &amp; Custom Code</p>
       </div>
 
-      {/* Curved Monitor Screen Viewport Container */}
+      {/* Panoramic Screen Viewport Container with Exact Mask */}
       <div
-        className="panoramic-viewport curved-monitor-screen"
+        className="panoramic-viewport exact-panoramic-screen"
         ref={containerRef}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => {

@@ -8225,14 +8225,14 @@ textarea:focus {
   letter-spacing: 0.01em;
 }
 
-/* Curved Monitor Viewport Container */
+/* Curved Viewport Container */
 .panoramic-viewport {
   position: relative;
   width: 100%;
-  height: 450px;
+  height: 460px;
   overflow: hidden;
-  clip-path: url(#curved-monitor-mask);
-  -webkit-clip-path: url(#curved-monitor-mask);
+  clip-path: url(#exact-panoramic-mask);
+  -webkit-clip-path: url(#exact-panoramic-mask);
   cursor: none;
   user-select: none;
   touch-action: pan-y;
@@ -8278,16 +8278,15 @@ textarea:focus {
   will-change: transform;
 }
 
-/* Individual Clean Photography Card */
+/* Individual Clean Photography Card matching reference image */
 .panoramic-card {
-  flex: 0 0 330px;
-  height: 420px;
+  flex: 0 0 340px;
+  height: 430px;
   border-radius: 12px;
   overflow: hidden;
   position: relative;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   background: #ffffff;
-  transition: transform 300ms ease;
 }
 
 .panoramic-card-media {
