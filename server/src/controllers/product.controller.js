@@ -300,6 +300,10 @@ export const addReview = asyncHandler(async (req, res) => {
       .lean();
   }
 
+  if (!deliveredOrder) {
+    throw new ApiError(403, 'You can review this product after it has been delivered to you');
+  }
+
   const existingReview = product.reviews.find(
     (review) => review.user.toString() === req.user._id.toString()
   );

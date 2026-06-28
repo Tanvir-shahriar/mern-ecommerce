@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const serverRoot = path.resolve(__dirname, '..', '..');
 const projectRoot = path.resolve(serverRoot, '..');
+const runtimeNodeEnv = process.env.NODE_ENV;
 
 dotenv.config({ path: path.join(projectRoot, '.env') });
 dotenv.config({ path: path.join(serverRoot, '.env'), override: true });
@@ -20,7 +21,8 @@ if (vercelClientUrl && !clientUrls.includes(vercelClientUrl)) {
   clientUrls.push(vercelClientUrl);
 }
 
-const isProduction = process.env.NODE_ENV === 'production';
+const nodeEnv = runtimeNodeEnv || process.env.NODE_ENV || 'development';
+const isProduction = nodeEnv === 'production';
 const positiveNumber = (value, fallback) => {
   const number = Number(value);
   return Number.isFinite(number) && number > 0 ? number : fallback;
@@ -31,10 +33,12 @@ if (isProduction && !process.env.JWT_SECRET) {
 }
 
 export const env = {
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
   isProduction,
   port: Number(process.env.PORT || 5001),
-  databaseProvider: (process.env.DATABASE_PROVIDER || process.env.DB_PROVIDER || 'mongodb').toLowerCase(),
+  databaseProvider: nodeEnv === 'test'
+    ? 'mongodb'
+    : (process.env.DATABASE_PROVIDER || process.env.DB_PROVIDER || 'mongodb').toLowerCase(),
   clientUrl,
   clientUrls,
   mongoUri: process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/mern_ecommerce',
