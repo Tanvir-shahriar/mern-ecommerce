@@ -544,7 +544,8 @@ export class JsonModel {
       Category: ['slug', 'name'],
       Coupon: ['code'],
       Order: ['orderNumber'],
-      Cart: ['user']
+      Cart: ['user'],
+      CurrencySetting: ['key']
     };
 
     for (const field of uniqueByModel[this.name] || []) {

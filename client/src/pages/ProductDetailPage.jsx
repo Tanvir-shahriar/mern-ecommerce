@@ -26,8 +26,9 @@ import { LoadingScreen } from '../components/LoadingScreen.jsx';
 import { ProductRatingsAndReviews } from '../components/ProductRatingsAndReviews.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
-import { dateShort, money } from '../utils/format.js';
+import { dateShort } from '../utils/format.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
 
 const ReviewStars = ({ rating = 0 }) => (
@@ -46,6 +47,7 @@ export const ProductDetailPage = () => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('specifications');
   const { user, isAdmin, refreshUser } = useAuth();
+  const { formatMoney } = useCurrency();
 
   useEffect(() => {
     setActiveImageIndex(0);
@@ -236,7 +238,7 @@ export const ProductDetailPage = () => {
             <strong>In Stock:</strong> <span className={inStock ? 'status-available' : 'status-unavailable'}>{inStock ? 'AVAILABLE' : 'OUT OF STOCK'}</span>
           </p>
           <p className="spec-price-row">
-            <strong>Price:</strong> <span className="spec-price-val">{money(product.price)}</span>
+            <strong>Price:</strong> <span className="spec-price-val">{formatMoney(product.price)}</span>
           </p>
         </div>
 
@@ -324,8 +326,8 @@ export const ProductDetailPage = () => {
                     </p>
                     <div className="similar-product-meta">
                       <div>
-                        <strong>{money(item.price)}</strong>
-                        {item.compareAtPrice ? <span>{money(item.compareAtPrice)}</span> : null}
+                        <strong>{formatMoney(item.price)}</strong>
+                        {item.compareAtPrice ? <span>{formatMoney(item.compareAtPrice)}</span> : null}
                       </div>
                     </div>
                     <div className="similar-product-actions">

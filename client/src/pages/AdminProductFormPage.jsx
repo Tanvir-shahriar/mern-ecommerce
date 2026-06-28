@@ -491,7 +491,7 @@ export const AdminProductFormPage = () => {
             <div className="product-editor-preview-meta">
               <span>Product code</span>
               <strong>{form.sku || 'SKU'}</strong>
-              <span>Price</span>
+              <span>Base price</span>
               <strong>{form.price ? money(Number(form.price)) : money(0)}</strong>
               <span>Stock</span>
               <strong>{form.trackQuantity ? `${form.stock || 0} unit(s)` : 'Not tracked'}</strong>
@@ -508,11 +508,11 @@ export const AdminProductFormPage = () => {
             </div>
             <div className="form-grid product-editor-side-grid">
               <label>
-                Price
+                Price (BDT)
                 <input required type="number" min="0" value={form.price} onChange={(event) => updateField('price', event.target.value)} />
               </label>
               <label>
-                Compare at
+                Compare at (BDT)
                 <input type="number" min="0" value={form.compareAtPrice} onChange={(event) => updateField('compareAtPrice', event.target.value)} />
               </label>
               <label>

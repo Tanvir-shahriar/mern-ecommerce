@@ -1,10 +1,12 @@
-export const money = (value = 0) =>
-  new Intl.NumberFormat('en-BD', {
+export const formatCurrencyAmount = (value = 0, currency = 'BDT', locale = 'en-BD', maximumFractionDigits) =>
+  new Intl.NumberFormat(locale, {
     style: 'currency',
-    currency: 'BDT',
+    currency,
     currencyDisplay: 'narrowSymbol',
-    maximumFractionDigits: 0
+    maximumFractionDigits: maximumFractionDigits ?? (currency === 'BDT' ? 0 : 2)
   }).format(value);
+
+export const money = (value = 0) => formatCurrencyAmount(value, 'BDT', 'en-BD', 0);
 
 export const dateShort = (value) =>
   value

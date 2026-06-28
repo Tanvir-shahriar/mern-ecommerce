@@ -4,12 +4,13 @@ import { Link } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { mediaUrl } from '../services/api.js';
-import { money } from '../utils/format.js';
 
 export const CartPage = () => {
   const { user } = useAuth();
   const { cart, updateItem, removeItem, applyCoupon } = useCart();
+  const { formatMoney } = useCurrency();
   const [coupon, setCoupon] = useState('');
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
@@ -91,7 +92,7 @@ export const CartPage = () => {
                 <img src={mediaUrl(item.image)} alt={item.name} />
                 <div className="cart-item-info">
                   <h2>{item.name}</h2>
-                  <p>{money(item.price)}</p>
+                  <p>{formatMoney(item.price)}</p>
                 </div>
                 <div className="cart-quantity-control" aria-label={`Quantity for ${item.name}`}>
                   <button
@@ -114,7 +115,7 @@ export const CartPage = () => {
                     <Plus size={14} />
                   </button>
                 </div>
-                <strong className="cart-line-total">{money(item.price * item.quantity)}</strong>
+                <strong className="cart-line-total">{formatMoney(item.price * item.quantity)}</strong>
                 <button
                   type="button"
                   className="icon-button"
@@ -133,15 +134,15 @@ export const CartPage = () => {
           <h2>Order summary</h2>
           <div className="summary-row">
             <span>Subtotal</span>
-            <strong>{money(cart.totals?.subtotal)}</strong>
+            <strong>{formatMoney(cart.totals?.subtotal)}</strong>
           </div>
           <div className="summary-row">
             <span>Discount</span>
-            <strong>-{money(cart.totals?.discount)}</strong>
+            <strong>-{formatMoney(cart.totals?.discount)}</strong>
           </div>
           <div className="summary-row total">
             <span>Total</span>
-            <strong>{money(cart.totals?.total)}</strong>
+            <strong>{formatMoney(cart.totals?.total)}</strong>
           </div>
 
           <form className="coupon-form" onSubmit={submitCoupon}>

@@ -2,12 +2,13 @@ import { Heart, ShoppingBag, Star } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
-import { money } from '../utils/format.js';
 
 export const ProductCard = ({ product, onChanged }) => {
   const { user, refreshUser } = useAuth();
   const { addItem } = useCart();
+  const { formatMoney } = useCurrency();
   const navigate = useNavigate();
 
   const handleCart = async () => {
@@ -49,7 +50,7 @@ export const ProductCard = ({ product, onChanged }) => {
             {product.name}
           </Link>
           <span className="product-card__price">
-            {money(product.price)}
+            {formatMoney(product.price)}
           </span>
         </div>
       </div>
@@ -59,4 +60,3 @@ export const ProductCard = ({ product, onChanged }) => {
     </article>
   );
 };
-

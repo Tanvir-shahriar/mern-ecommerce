@@ -1,6 +1,7 @@
 import {
   ArrowUpRight,
   Clock3,
+  Globe2,
   Heart,
   Mail,
   MapPin,
@@ -16,6 +17,7 @@ import { useState, useEffect } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import lahventureLogo from '../assets/images/Lahventure Logo.png';
 
 const navClass = ({ isActive }) => (isActive ? 'nav-link active' : 'nav-link');
@@ -27,6 +29,7 @@ export const Layout = () => {
   const navigate = useNavigate();
   const { user, isAdmin, logout } = useAuth();
   const { itemCount } = useCart();
+  const { currency, currencies, setCurrency } = useCurrency();
   const [activeCategory, setActiveCategory] = useState(null);
 
   useEffect(() => {
@@ -230,6 +233,18 @@ export const Layout = () => {
           ) : null}
 
           <div className="header-actions">
+            {currencies?.length > 1 ? (
+              <label className="currency-switcher" aria-label="Display currency">
+                <Globe2 size={16} />
+                <select value={currency} onChange={(event) => setCurrency(event.target.value)}>
+                  {currencies.map((item) => (
+                    <option value={item.code} key={item.code}>
+                      {item.code}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
             {!showSearch && (
               <button
                 type="button"

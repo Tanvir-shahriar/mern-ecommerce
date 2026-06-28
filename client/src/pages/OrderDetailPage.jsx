@@ -4,8 +4,9 @@ import { Link, useParams } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { LoadingScreen } from '../components/LoadingScreen.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
-import { dateShort, money, statusLabel } from '../utils/format.js';
+import { dateShort, statusLabel } from '../utils/format.js';
 import { orderCustomerEmail, orderCustomerName, orderCustomerPhone, orderIdentifier } from '../utils/orders.js';
 import { useState } from 'react';
 
@@ -38,6 +39,7 @@ const AddressBlock = ({ title, address }) => {
 export const OrderDetailPage = () => {
   const { id } = useParams();
   const { isAdmin } = useAuth();
+  const { formatMoney, formatBaseMoney } = useCurrency();
   const queryClient = useQueryClient();
   const [message, setMessage] = useState({ text: '', type: 'success' });
   const [reviewDrafts, setReviewDrafts] = useState({});
@@ -164,7 +166,7 @@ export const OrderDetailPage = () => {
                       {item.variant ? <span>{Object.entries(item.variant).map(([key, value]) => `${key}: ${value}`).join(', ')}</span> : null}
                     </div>
                     <span>Qty {item.quantity}</span>
-                    <strong>{money(item.price * item.quantity)}</strong>
+                    <strong>{isAdmin ? formatBaseMoney(item.price * item.quantity) : formatMoney(item.price * item.quantity)}</strong>
 
                     {canReviewItem ? (
                       <form className="order-review-form" onSubmit={(event) => submitReview(event, item)}>
@@ -278,23 +280,23 @@ export const OrderDetailPage = () => {
             <h2>Pricing</h2>
             <div className="summary-row">
               <span>Subtotal</span>
-              <strong>{money(order.pricing.subtotal)}</strong>
+              <strong>{isAdmin ? formatBaseMoney(order.pricing.subtotal) : formatMoney(order.pricing.subtotal)}</strong>
             </div>
             <div className="summary-row">
               <span>Discount</span>
-              <strong>-{money(order.pricing.discount)}</strong>
+              <strong>-{isAdmin ? formatBaseMoney(order.pricing.discount) : formatMoney(order.pricing.discount)}</strong>
             </div>
             <div className="summary-row">
               <span>Tax</span>
-              <strong>{money(order.pricing.tax)}</strong>
+              <strong>{isAdmin ? formatBaseMoney(order.pricing.tax) : formatMoney(order.pricing.tax)}</strong>
             </div>
             <div className="summary-row">
               <span>Shipping</span>
-              <strong>{money(order.pricing.shipping)}</strong>
+              <strong>{isAdmin ? formatBaseMoney(order.pricing.shipping) : formatMoney(order.pricing.shipping)}</strong>
             </div>
             <div className="summary-row total">
               <span>Total</span>
-              <strong>{money(order.pricing.total)}</strong>
+              <strong>{isAdmin ? formatBaseMoney(order.pricing.total) : formatMoney(order.pricing.total)}</strong>
             </div>
           </article>
 

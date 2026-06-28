@@ -26,6 +26,7 @@ import orderRoutes from './routes/order.routes.js';
 import userRoutes from './routes/user.routes.js';
 import adminRoutes from './routes/admin.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
+import currencyRoutes from './routes/currency.routes.js';
 
 export const app = express();
 
@@ -102,6 +103,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/uploads', uploadRoutes);
+app.use('/api/currency', currencyRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

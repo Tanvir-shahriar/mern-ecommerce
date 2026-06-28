@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { ProductCard } from '../components/ProductCard.jsx';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
 import { api } from '../services/api.js';
 
@@ -14,6 +15,13 @@ export const ProductsPage = () => {
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const debouncedSearch = useDebouncedValue(search);
   const params = useMemo(() => toParamsObject(searchParams), [searchParams]);
+  const { currency, convertToBase } = useCurrency();
+  const apiParams = useMemo(() => {
+    const next = { ...params };
+    if (params.minPrice) next.minPrice = convertToBase(params.minPrice);
+    if (params.maxPrice) next.maxPrice = convertToBase(params.maxPrice);
+    return next;
+  }, [convertToBase, params]);
 
   useEffect(() => {
     const next = new URLSearchParams(searchParams);
@@ -34,9 +42,9 @@ export const ProductsPage = () => {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ['products', params],
+    queryKey: ['products', apiParams],
     queryFn: async () => {
-      const { data } = await api.get('/products', { params });
+      const { data } = await api.get('/products', { params: apiParams });
       return data.data;
     }
   });
@@ -84,12 +92,12 @@ export const ProductsPage = () => {
         </label>
         <div className="price-row">
           <label>
-            Min
-            <input type="number" min="0" value={searchParams.get('minPrice') || ''} onChange={(event) => updateFilter('minPrice', event.target.value)} />
+          Min
+            <input type="number" min="0" value={searchParams.get('minPrice') || ''} onChange={(event) => updateFilter('minPrice', event.target.value)} placeholder={currency} />
           </label>
           <label>
             Max
-            <input type="number" min="0" value={searchParams.get('maxPrice') || ''} onChange={(event) => updateFilter('maxPrice', event.target.value)} />
+            <input type="number" min="0" value={searchParams.get('maxPrice') || ''} onChange={(event) => updateFilter('maxPrice', event.target.value)} placeholder={currency} />
           </label>
         </div>
         <label className="checkbox-row">

@@ -4,8 +4,9 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AddressModal } from '../components/AddressModal.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
-import { dateShort, money, statusLabel } from '../utils/format.js';
+import { dateShort, statusLabel } from '../utils/format.js';
 import { orderCustomerName, orderDetailPath, orderIdentifier } from '../utils/orders.js';
 
 const addressKey = (address, index) => address._id || `${address.label}-${address.line1}-${index}`;
@@ -51,6 +52,7 @@ const AddressSummary = ({ address }) => (
 
 export const AccountPage = () => {
   const { user, updateProfile, logout } = useAuth();
+  const { formatMoney } = useCurrency();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('account-details');
 
@@ -455,7 +457,7 @@ export const AccountPage = () => {
                       <span className={`status-pill ${order.status}`}>
                         {statusLabel(order.status)}
                       </span>
-                      <strong>{money(order.pricing.total)}</strong>
+                      <strong>{formatMoney(order.pricing.total)}</strong>
                     </Link>
                   ))
                 ) : (
@@ -552,7 +554,7 @@ export const AccountPage = () => {
                     <Link className="wishlist-item" key={product._id} to={`/products/${product.slug}`}>
                       <img src={mediaUrl(product.images?.[0]?.url)} alt={product.name} />
                       <span>{product.name}</span>
-                      <strong>{money(product.price)}</strong>
+                      <strong>{formatMoney(product.price)}</strong>
                     </Link>
                   ))
                 ) : (

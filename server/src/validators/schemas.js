@@ -189,3 +189,30 @@ export const roleUpdateSchema = z
   .refine((value) => value.role !== undefined || value.status !== undefined, {
     message: 'Provide role or status'
   });
+
+const currencyCodeSchema = z.string().trim().regex(/^[A-Za-z]{3}$/, 'Currency code must use 3 letters').transform((value) => value.toUpperCase());
+
+export const currencySettingsSchema = z
+  .object({
+    autoDetect: z.boolean().optional(),
+    autoUpdateRates: z.boolean().optional(),
+    fallbackCurrency: currencyCodeSchema.optional(),
+    currencies: z
+      .array(
+        z.object({
+          code: currencyCodeSchema,
+          enabled: z.boolean().optional(),
+          bdtPerUnit: z.coerce.number().positive().optional(),
+          manualRate: z.boolean().optional()
+        })
+      )
+      .optional()
+  })
+  .refine(
+    (value) =>
+      value.autoDetect !== undefined ||
+      value.autoUpdateRates !== undefined ||
+      value.fallbackCurrency !== undefined ||
+      value.currencies !== undefined,
+    { message: 'Provide at least one currency setting to update' }
+  );

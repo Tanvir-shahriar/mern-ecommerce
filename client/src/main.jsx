@@ -5,6 +5,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { CartProvider } from './contexts/CartContext.jsx';
+import { CurrencyProvider } from './contexts/CurrencyContext.jsx';
 import { App } from './app/App.jsx';
 import './styles/styles.css';
 
@@ -27,9 +28,11 @@ createRoot(document.getElementById('root')).render(
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <AuthProvider>
-            <CartProvider>
-              <App />
-            </CartProvider>
+            <CurrencyProvider>
+              <CartProvider>
+                <App />
+              </CartProvider>
+            </CurrencyProvider>
           </AuthProvider>
         </BrowserRouter>
       </QueryClientProvider>

@@ -8,5 +8,6 @@ registry.Product = new JsonModel('Product', 'products', { registry });
 registry.Coupon = new JsonModel('Coupon', 'coupons', { registry });
 registry.Cart = new JsonModel('Cart', 'carts', { registry });
 registry.Order = new JsonModel('Order', 'orders', { registry });
+registry.CurrencySetting = new JsonModel('CurrencySetting', 'currency_settings', { registry });
 
 export const mysqlModels = registry;

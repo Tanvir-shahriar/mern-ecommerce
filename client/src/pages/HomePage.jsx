@@ -23,7 +23,6 @@ import longinesLogo from '../assets/brands/longines.svg';
 import hamiltonLogo from '../assets/brands/hamilton.svg';
 import { api, mediaUrl } from '../services/api.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
-import { money } from '../utils/format.js';
 
 const perks = [
   {

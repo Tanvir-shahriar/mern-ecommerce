@@ -6,9 +6,9 @@ import { EmptyState } from '../components/EmptyState.jsx';
 import { LoadingScreen } from '../components/LoadingScreen.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { clearDirectCheckout, readDirectCheckout } from '../utils/directCheckout.js';
-import { money } from '../utils/format.js';
 import { orderDetailPath } from '../utils/orders.js';
 
 const TAX_RATE = 0.08;
@@ -71,6 +71,7 @@ export const CheckoutPage = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { cart, fetchCart } = useCart();
+  const { formatMoney } = useCurrency();
   const isDirectCheckout = new URLSearchParams(location.search).get('mode') === 'buy-now';
   const [directItem] = useState(() => (isDirectCheckout ? readDirectCheckout() : null));
   const [address, setAddress] = useState(initialAddress);
@@ -331,19 +332,19 @@ export const CheckoutPage = () => {
               </div>
               <div className="summary-row">
                 <span>Subtotal</span>
-                <strong>{money(directTotals.subtotal)}</strong>
+                <strong>{formatMoney(directTotals.subtotal)}</strong>
               </div>
               <div className="summary-row">
                 <span>Tax</span>
-                <strong>{money(directTotals.tax)}</strong>
+                <strong>{formatMoney(directTotals.tax)}</strong>
               </div>
               <div className="summary-row">
                 <span>Shipping</span>
-                <strong>{directTotals.shipping ? money(directTotals.shipping) : 'Free'}</strong>
+                <strong>{directTotals.shipping ? formatMoney(directTotals.shipping) : 'Free'}</strong>
               </div>
               <div className="summary-row total">
                 <span>Total</span>
-                <strong>{money(directTotals.total)}</strong>
+                <strong>{formatMoney(directTotals.total)}</strong>
               </div>
               <p className="muted">Only this product will be ordered. Your cart will not be changed.</p>
             </>
@@ -355,7 +356,7 @@ export const CheckoutPage = () => {
               </div>
               <div className="summary-row">
                 <span>Cart total</span>
-                <strong>{money(cart.totals?.total)}</strong>
+                <strong>{formatMoney(cart.totals?.total)}</strong>
               </div>
               <p className="muted">Tax and shipping are finalized after order submission.</p>
             </>

@@ -3,6 +3,7 @@ import { Layout } from '../components/Layout.jsx';
 import { ProtectedRoute } from '../routes/ProtectedRoute.jsx';
 import { AccountPage } from '../pages/AccountPage.jsx';
 import { AdminDashboardPage } from '../pages/AdminDashboardPage.jsx';
+import { AdminCurrencyPage } from '../pages/AdminCurrencyPage.jsx';
 import { AdminProductFormPage } from '../pages/AdminProductFormPage.jsx';
 import { AdminOrdersPage } from '../pages/AdminOrdersPage.jsx';
 import { AdminProductsPage } from '../pages/AdminProductsPage.jsx';
@@ -61,6 +62,14 @@ export const App = () => (
         element={
           <ProtectedRoute adminOnly>
             <AdminProductFormPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="admin/currency"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminCurrencyPage />
           </ProtectedRoute>
         }
       />
