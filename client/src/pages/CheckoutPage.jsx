@@ -5,6 +5,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { LoadingScreen } from '../components/LoadingScreen.jsx';
 import { OrderSuccessAnimation } from '../components/OrderSuccessAnimation.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
@@ -198,6 +199,7 @@ export const CheckoutPage = () => {
 
   return (
     <section className="checkout-page section">
+      <Seo title="Checkout" noIndex />
       <div className="section-heading compact">
         <div>
           <p className="eyebrow">Checkout</p>

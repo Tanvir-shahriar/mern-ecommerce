@@ -24,6 +24,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { LoadingScreen } from '../components/LoadingScreen.jsx';
 import { ProductRatingsAndReviews } from '../components/ProductRatingsAndReviews.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
@@ -198,8 +199,81 @@ export const ProductDetailPage = () => {
     ];
   };
 
+  const mainImageUrl = mediaUrl(product.images?.[0]?.url);
+  const brandName = product.brand || 'LahVenture';
+
+  const productSchema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Product',
+        '@id': `${window.location.origin}/products/${product.slug || product._id}#product`,
+        'name': product.name,
+        'image': [mainImageUrl],
+        'description': product.description || `Buy authentic ${product.name} luxury watch at LahVenture Bangladesh.`,
+        'sku': product.sku || product.name,
+        'brand': {
+          '@type': 'Brand',
+          'name': brandName
+        },
+        'offers': {
+          '@type': 'Offer',
+          'url': window.location.href,
+          'priceCurrency': 'BDT',
+          'price': product.price,
+          'priceValidUntil': new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          'itemCondition': 'https://schema.org/NewCondition',
+          'availability': inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+          'seller': {
+            '@type': 'Organization',
+            'name': 'LahVenture Watches'
+          }
+        },
+        ...(product.ratingsAverage > 0 && product.ratingsCount > 0
+          ? {
+              'aggregateRating': {
+                '@type': 'AggregateRating',
+                'ratingValue': product.ratingsAverage,
+                'reviewCount': product.ratingsCount
+              }
+            }
+          : {})
+      },
+      {
+        '@type': 'BreadcrumbList',
+        'itemListElement': [
+          {
+            '@type': 'ListItem',
+            'position': 1,
+            'name': 'Home',
+            'item': window.location.origin
+          },
+          {
+            '@type': 'ListItem',
+            'position': 2,
+            'name': 'Products',
+            'item': `${window.location.origin}/products`
+          },
+          {
+            '@type': 'ListItem',
+            'position': 3,
+            'name': product.name,
+            'item': window.location.href
+          }
+        ]
+      }
+    ]
+  };
+
   return (
     <section className="product-detail">
+      <Seo
+        title={`${product.name} | Luxury Watch`}
+        description={product.description?.slice(0, 155) || `Buy authentic ${product.name} luxury timepiece online with guaranteed delivery.`}
+        ogImage={mainImageUrl}
+        ogType="product"
+        schemaJson={productSchema}
+      />
       <div className="product-detail-left">
         <div className="product-gallery-container">
           <div className="product-gallery__main-frame">

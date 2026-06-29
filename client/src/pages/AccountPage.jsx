@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AddressModal } from '../components/AddressModal.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
@@ -203,6 +204,7 @@ export const AccountPage = () => {
 
   return (
     <section className="account-page section">
+      <Seo title="My Account" noIndex />
       <div className="account-layout-container">
         {/* Left Navigation Sidebar Card */}
         <aside className="account-sidebar-card">

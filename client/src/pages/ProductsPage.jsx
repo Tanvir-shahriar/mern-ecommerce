@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { ProductCard } from '../components/ProductCard.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
 import { api } from '../services/api.js';
@@ -60,8 +61,41 @@ export const ProductsPage = () => {
   const products = data?.products || [];
   const pagination = data?.pagination || { page: 1, pages: 1 };
 
+  const currentCategorySlug = searchParams.get('category');
+  const activeCategoryObj = categories.find((c) => c.slug === currentCategorySlug);
+  const categoryName = activeCategoryObj?.name || (currentCategorySlug ? currentCategorySlug.toUpperCase() : '');
+
+  let pageTitle = 'Luxury Watches & Smartwatches Collection';
+  if (search) {
+    pageTitle = `Search results for "${search}"`;
+  } else if (categoryName) {
+    pageTitle = `${categoryName} Collection`;
+  }
+
+  const catalogSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    'name': pageTitle,
+    'description': `Browse authentic ${categoryName || 'luxury'} timepieces and smartwatches at LahVenture.`,
+    'url': window.location.href,
+    'mainEntity': {
+      '@type': 'ItemList',
+      'numberOfItems': products.length,
+      'itemListElement': products.map((prod, index) => ({
+        '@type': 'ListItem',
+        'position': index + 1,
+        'url': `${window.location.origin}/products/${prod.slug || prod._id}`
+      }))
+    }
+  };
+
   return (
     <section className="catalog-page">
+      <Seo
+        title={pageTitle}
+        description={`Explore our curated collection of ${categoryName || 'luxury mechanical and smartwatch'} timepieces with guaranteed authenticity and fast delivery.`}
+        schemaJson={catalogSchema}
+      />
       <aside className="filters-panel">
         <div className="panel-title">
           <SlidersHorizontal size={18} />

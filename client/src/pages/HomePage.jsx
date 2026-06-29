@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard.jsx';
 import { PanoramicPhotoLibrary } from '../components/PanoramicPhotoLibrary.jsx';
 import { SpiderClock } from '../components/SpiderClock.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import rolexLogo from '../assets/brands/rolex.svg';
 import patekLogo from '../assets/brands/patek.svg';
@@ -330,8 +331,40 @@ export const HomePage = () => {
     navigate(directCheckoutUrl);
   };
 
+  const homeSchema = {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': `${window.location.origin}/#organization`,
+        'name': 'LahVenture Watches',
+        'url': window.location.origin,
+        'logo': `${window.location.origin}/Lahventure%20Logo.png`,
+        'description': "Bangladesh's premier luxury watch and smartwatch destination featuring curated mechanical timepieces and Haute Horlogerie."
+      },
+      {
+        '@type': 'WebSite',
+        '@id': `${window.location.origin}/#website`,
+        'url': window.location.origin,
+        'name': 'LahVenture Watches',
+        'publisher': { '@id': `${window.location.origin}/#organization` },
+        'potentialAction': {
+          '@type': 'SearchAction',
+          'target': `${window.location.origin}/products?search={search_term_string}`,
+          'query-input': 'required name=search_term_string'
+        }
+      }
+    ]
+  };
+
   return (
     <>
+      <Seo
+        title="LahVenture Watches | Luxury Timepieces & Smartwatches in Bangladesh"
+        description="Explore curated luxury mechanical watches, chronograph timepieces, and premium smartwatches with guaranteed authenticity and delivery across Bangladesh."
+        keywords="luxury watches bangladesh, rolex bangladesh, mechanical watches, patek philippe dhaka, smartwatch online"
+        schemaJson={homeSchema}
+      />
       <section className="hero-section">
         <div className="hero-content-custom">
           <span className="hero-badge-pill">LIMITED TO 50 PIECES</span>

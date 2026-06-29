@@ -28,6 +28,7 @@ import adminRoutes from './routes/admin.routes.js';
 import uploadRoutes from './routes/upload.routes.js';
 import galleryRoutes from './routes/gallery.routes.js';
 import currencyRoutes from './routes/currency.routes.js';
+import sitemapRoutes from './routes/sitemap.routes.js';
 
 export const app = express();
 
@@ -106,6 +107,8 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/gallery', galleryRoutes);
 app.use('/api/currency', currencyRoutes);
+app.use('/', sitemapRoutes);
+app.use('/api', sitemapRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

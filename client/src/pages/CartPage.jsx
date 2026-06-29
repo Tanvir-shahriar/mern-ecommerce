@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
@@ -71,6 +72,7 @@ export const CartPage = () => {
 
   return (
     <section className="cart-page section">
+      <Seo title="Shopping Cart" noIndex />
       <div className="section-heading compact">
         <div>
           <p className="eyebrow">Cart</p>
