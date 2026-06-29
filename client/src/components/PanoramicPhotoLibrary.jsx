@@ -63,14 +63,15 @@ export const PanoramicPhotoLibrary = () => {
   const [isHovered, setIsHovered] = useState(false);
   const [isMouseDown, setIsMouseDown] = useState(false);
 
-  // Fetch gallery images from API
-  const { data: galleryImages, isLoading } = useQuery({
+  // Fetch gallery images from API (staleTime 10 mins, initialData fallback for instant render)
+  const { data: galleryImages } = useQuery({
     queryKey: ['gallery-images'],
     queryFn: async () => {
       const { data } = await api.get('/gallery');
       return data.data.images;
     },
-    staleTime: 2 * 60 * 1000
+    staleTime: 10 * 60 * 1000,
+    gcTime: 30 * 60 * 1000
   });
 
   // Use API images if available, otherwise fall back to defaults
@@ -261,11 +262,7 @@ export const PanoramicPhotoLibrary = () => {
         </defs>
       </svg>
 
-      {isLoading ? (
-        <div className="panoramic-loading">
-          <span className="spinner" /> Loading gallery…
-        </div>
-      ) : images.length === 0 ? (
+      {images.length === 0 ? (
         <div className="panoramic-empty">
           <ImageOff size={40} />
           <span>No gallery images yet</span>

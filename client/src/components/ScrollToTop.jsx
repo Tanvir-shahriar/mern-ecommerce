@@ -10,6 +10,12 @@ export const ScrollToTop = () => {
   const { pathname } = useLocation();
 
   useEffect(() => {
+    if ('scrollRestoration' in window.history) {
+      window.history.scrollRestoration = 'manual';
+    }
+  }, []);
+
+  useEffect(() => {
     // Save the current CSS scroll behavior
     const originalStyle = document.documentElement.style.scrollBehavior;
     // Set to auto temporarily to snap to the top instantly
