@@ -6,6 +6,7 @@ import {
   Mail,
   MapPin,
   Menu,
+  Package,
   Search,
   ShieldCheck,
   ShoppingBag,
@@ -263,6 +264,10 @@ export const Layout = () => {
                 <div className="profile-dropdown">
                   <div className="profile-dropdown-inner">
                     <Link to="/account" className="dropdown-item">My Account</Link>
+                    <Link to="/account?tab=orders" className="dropdown-item">
+                      <Package size={15} style={{ verticalAlign: 'middle', marginRight: 6 }} />
+                      My Orders
+                    </Link>
                     <button type="button" className="dropdown-item signout-btn" onClick={handleLogout}>
                       Sign out
                     </button>

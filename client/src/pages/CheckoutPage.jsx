@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { LoadingScreen } from '../components/LoadingScreen.jsx';
+import { OrderSuccessAnimation } from '../components/OrderSuccessAnimation.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
@@ -123,16 +124,7 @@ export const CheckoutPage = () => {
   }, [defaultAddress, user]);
 
   if (order) {
-    return (
-      <section className="success-page section">
-        <CheckCircle2 size={48} />
-        <h1>Order placed</h1>
-        <p>{order.orderNumber}</p>
-        <Link className="button primary" to={orderDetailPath(order)}>
-          View order details
-        </Link>
-      </section>
-    );
+    return <OrderSuccessAnimation order={order} />;
   }
 
   if (isDirectCheckout && !directItem?.productId) {

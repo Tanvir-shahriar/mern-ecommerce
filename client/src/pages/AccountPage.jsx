@@ -1,7 +1,7 @@
 import { CheckCircle2, Heart, LogOut, MapPin, Package, Plus, Save, Trash2, UserRound } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { AddressModal } from '../components/AddressModal.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
@@ -54,7 +54,9 @@ export const AccountPage = () => {
   const { user, updateProfile, logout } = useAuth();
   const { formatMoney } = useCurrency();
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState('account-details');
+  const location = useLocation();
+  const tabParam = new URLSearchParams(location.search).get('tab');
+  const [activeTab, setActiveTab] = useState(() => (tabParam === 'orders' ? 'orders' : 'account-details'));
 
   // Inline editing states for Account Details
   const [editingField, setEditingField] = useState(null); // 'name' | 'phone' | 'password' | null
@@ -79,6 +81,12 @@ export const AccountPage = () => {
     setEditingAddressIndex(-1);
     setShowAddressForm(false);
   }, [user]);
+
+  useEffect(() => {
+    if (tabParam === 'orders') {
+      setActiveTab('orders');
+    }
+  }, [tabParam]);
 
   const { data: orders = [] } = useQuery({
     queryKey: ['my-orders'],
