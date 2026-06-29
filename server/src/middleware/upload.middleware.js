@@ -50,3 +50,12 @@ export const upload = multer({
     files: env.uploadMaxFiles
   }
 });
+
+export const galleryUpload = multer({
+  storage,
+  fileFilter,
+  limits: {
+    fileSize: 100 * 1024 * 1024, // 100MB per image (unconstrained high-res support)
+    files: 50 // Up to 50 images per upload action
+  }
+});
