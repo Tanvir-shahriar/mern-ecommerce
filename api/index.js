@@ -15,6 +15,10 @@ const ensureDatabase = async () => {
 };
 
 export default async function handler(req, res) {
-  await ensureDatabase();
+  try {
+    await ensureDatabase();
+  } catch (error) {
+    console.error('Vercel DB Connection Error:', error);
+  }
   return app(req, res);
 }

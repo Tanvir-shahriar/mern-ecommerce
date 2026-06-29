@@ -19,6 +19,7 @@ export const getMysqlPool = () => {
       database: env.mysql.database,
       waitForConnections: true,
       connectionLimit: 10,
+      connectTimeout: 5000,
       charset: 'utf8mb4',
       dateStrings: true
     });
