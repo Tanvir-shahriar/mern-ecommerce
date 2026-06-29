@@ -2,12 +2,14 @@ import { Gallery } from '../models/gallery.model.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 export const getGallery = asyncHandler(async (_req, res) => {
-  const gallery = await Gallery.findOne({ key: 'panoramic-library' }).lean();
+  const query = Gallery.findOne({ key: 'panoramic-library' });
+  const gallery = typeof query.lean === 'function' ? await query.lean() : await query;
+  const imageList = gallery?.images || [];
 
   res.json({
     status: 'success',
     data: {
-      images: gallery?.images?.sort((a, b) => a.order - b.order) || []
+      images: [...imageList].sort((a, b) => a.order - b.order)
     }
   });
 });
@@ -22,16 +24,29 @@ export const updateGallery = asyncHandler(async (req, res) => {
     order: index
   }));
 
-  const gallery = await Gallery.findOneAndUpdate(
-    { key: 'panoramic-library' },
-    { images: ordered },
-    { upsert: true, new: true, runValidators: true }
-  ).lean();
+  let gallery = await Gallery.findOne({ key: 'panoramic-library' });
+
+  if (!gallery) {
+    gallery = await Gallery.create({
+      key: 'panoramic-library',
+      images: ordered
+    });
+  } else {
+    gallery.images = ordered;
+    if (typeof gallery.save === 'function') {
+      await gallery.save();
+    } else {
+      await Gallery.findByIdAndUpdate(gallery._id || gallery.id, { images: ordered }, { new: true });
+    }
+  }
+
+  const galleryDoc = typeof gallery.toObject === 'function' ? gallery.toObject() : gallery;
+  const imageList = galleryDoc.images || [];
 
   res.json({
     status: 'success',
     data: {
-      images: gallery.images.sort((a, b) => a.order - b.order)
+      images: imageList.sort((a, b) => a.order - b.order)
     }
   });
 });

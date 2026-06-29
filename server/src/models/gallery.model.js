@@ -1,4 +1,6 @@
 import mongoose from 'mongoose';
+import { env } from '../config/env.js';
+import { mysqlModels } from './mysql/models.js';
 
 const galleryImageSchema = new mongoose.Schema(
   {
@@ -36,4 +38,7 @@ const gallerySchema = new mongoose.Schema(
   }
 );
 
-export const Gallery = mongoose.model('Gallery', gallerySchema);
+export const Gallery =
+  env.databaseProvider === 'mysql'
+    ? mysqlModels.Gallery
+    : mongoose.model('Gallery', gallerySchema);
