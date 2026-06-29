@@ -6,6 +6,7 @@ import { Coupon } from '../models/coupon.model.js';
 import { Order } from '../models/order.model.js';
 import { Product } from '../models/product.model.js';
 import { User } from '../models/user.model.js';
+import { Gallery } from '../models/gallery.model.js';
 
 const image = (id, alt) => ({
   url: `https://images.unsplash.com/${id}?auto=format&fit=crop&w=1200&q=80`,
@@ -268,6 +269,18 @@ const run = async () => {
   for (const user of userSeeds) {
     await upsertOne(User, { email: user.email }, user);
   }
+
+  const galleryImages = [
+    { url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80', alt: 'Gold Aero Chronograph Watch', order: 0 },
+    { url: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1200&q=80', alt: 'LahVenture Steel Minimalist Watch', order: 1 },
+    { url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80', alt: 'Classic Heritage White Dial Watch', order: 2 },
+    { url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=1200&q=80', alt: 'Dark Edition Chrono Timepiece', order: 3 },
+    { url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=1200&q=80', alt: 'Vintage Leather Explorer Watch', order: 4 },
+    { url: 'https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=1200&q=80', alt: 'Apex Diver Rose Gold Watch', order: 5 },
+    { url: 'https://images.unsplash.com/photo-1533139502658-0198f920d8e8?auto=format&fit=crop&w=1200&q=80', alt: 'Ocean Master Blue Chronometer', order: 6 },
+    { url: 'https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?auto=format&fit=crop&w=1200&q=80', alt: 'Executive Black Leather Automatic', order: 7 }
+  ];
+  await upsertOne(Gallery, { key: 'panoramic-library' }, { key: 'panoramic-library', images: galleryImages });
 
   console.log(`Database seeded successfully${shouldReset ? ' with reset' : ' without deleting existing records'}`);
   console.log(`Admin: ${env.seedAdminEmail} / ${env.seedAdminPassword}`);
