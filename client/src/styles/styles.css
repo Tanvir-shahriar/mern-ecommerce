@@ -8608,3 +8608,182 @@ textarea:focus {
   }
 }
 
+/* ==========================================
+   Order Progress Tracker Bar Styles (Reference Match)
+   ========================================== */
+.order-progress-container {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 28px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.admin-progress-hint {
+  font-size: 0.82rem;
+  color: rgba(140, 30, 30, 0.85);
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+.order-progress-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.progress-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  z-index: 2;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.step-circle {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: #808388;
+  color: #ffffff;
+  transition: all 250ms ease;
+  padding: 0;
+  cursor: default;
+  outline: none;
+}
+
+.progress-step-item.completed .step-circle {
+  background: #e11d48;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.25);
+}
+
+.step-circle.clickable {
+  cursor: pointer;
+}
+
+.step-circle.clickable:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(225, 29, 72, 0.4);
+}
+
+.step-circle.clickable:active {
+  transform: scale(0.95);
+}
+
+.step-label {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #808388;
+  text-align: center;
+  white-space: nowrap;
+  transition: color 200ms ease;
+}
+
+.progress-step-item.completed .step-label {
+  color: #e11d48;
+}
+
+/* Connector Lines */
+.progress-line {
+  flex: 1 1 0%;
+  height: 6px;
+  margin: 0 -8px;
+  position: relative;
+  top: -15px; /* Alignment with circle centers */
+  z-index: 1;
+}
+
+.progress-line.completed {
+  background: #e11d48;
+  border-radius: 3px;
+}
+
+.progress-line.pending {
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dotted-pattern {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 100%;
+}
+
+.dotted-pattern span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9ca3af;
+}
+
+/* Cancelled / Refunded Banner */
+.cancelled-container {
+  padding: 16px 24px;
+}
+
+.order-status-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-size: 0.95rem;
+  color: #dc2626;
+  padding: 12px;
+  background: rgba(220, 38, 38, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(220, 38, 38, 0.2);
+}
+
+.order-status-banner.refunded {
+  color: #d97706;
+  background: rgba(217, 119, 6, 0.08);
+  border-color: rgba(217, 119, 6, 0.2);
+}
+
+@media (max-width: 640px) {
+  .order-progress-container {
+    padding: 20px 12px;
+  }
+
+  .step-circle {
+    width: 50px;
+    height: 50px;
+  }
+
+  .step-circle svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .step-label {
+    font-size: 0.78rem;
+  }
+
+  .progress-line {
+    top: -12px;
+    height: 4px;
+  }
+
+  .dotted-pattern span {
+    width: 4px;
+    height: 4px;
+  }
+}
+

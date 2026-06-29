@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { LoadingScreen } from '../components/LoadingScreen.jsx';
+import { OrderProgressBar } from '../components/OrderProgressBar.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
@@ -140,6 +141,8 @@ export const OrderDetailPage = () => {
       </div>
 
       {message.text ? <p className={message.type === 'error' ? 'form-error' : 'form-note'}>{message.text}</p> : null}
+
+      <OrderProgressBar status={order.status} onUpdateStatus={updateStatus} isAdmin={isAdmin} />
 
       <div className="order-detail-layout">
         <div className="order-detail-main">
