@@ -1,0 +1,15 @@
+{
+  "short_name": "LahVenture",
+  "name": "LahVenture Watches Bangladesh",
+  "icons": [
+    {
+      "src": "/lahventure.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "display": "standalone"
+}

@@ -335,24 +335,57 @@ export const HomePage = () => {
     '@context': 'https://schema.org',
     '@graph': [
       {
-        '@type': 'Organization',
-        '@id': `${window.location.origin}/#organization`,
-        'name': 'LahVenture Watches',
+        '@type': 'Store',
+        '@id': `${window.location.origin}/#store`,
+        'name': 'LahVenture Watches Bangladesh',
         'url': window.location.origin,
         'logo': `${window.location.origin}/Lahventure%20Logo.png`,
-        'description': "Bangladesh's premier luxury watch and smartwatch destination featuring curated mechanical timepieces and Haute Horlogerie."
+        'description': "Bangladesh's #1 luxury watch and smartwatch e-commerce shop featuring original mechanical timepieces and authentic smartwatches.",
+        'currenciesAccepted': 'BDT',
+        'paymentAccepted': 'Cash on Delivery, BKash, Card, Stripe',
+        'priceRange': '৳৳৳',
+        'address': {
+          '@type': 'PostalAddress',
+          'addressLocality': 'Dhaka',
+          'addressCountry': 'BD'
+        },
+        'areaServed': {
+          '@type': 'Country',
+          'name': 'Bangladesh'
+        }
       },
       {
         '@type': 'WebSite',
         '@id': `${window.location.origin}/#website`,
         'url': window.location.origin,
-        'name': 'LahVenture Watches',
-        'publisher': { '@id': `${window.location.origin}/#organization` },
+        'name': 'LahVenture Watches Bangladesh',
+        'publisher': { '@id': `${window.location.origin}/#store` },
         'potentialAction': {
           '@type': 'SearchAction',
           'target': `${window.location.origin}/products?search={search_term_string}`,
           'query-input': 'required name=search_term_string'
         }
+      },
+      {
+        '@type': 'FAQPage',
+        'mainEntity': [
+          {
+            '@type': 'Question',
+            'name': 'Is Cash on Delivery available across Bangladesh?',
+            'acceptedAnswer': {
+              '@type': 'Answer',
+              'text': 'Yes, LahVenture provides Cash on Delivery (COD) for luxury watches and smartwatches across Dhaka and all districts in Bangladesh.'
+            }
+          },
+          {
+            '@type': 'Question',
+            'name': 'Are all luxury watches at LahVenture 100% authentic?',
+            'acceptedAnswer': {
+              '@type': 'Answer',
+              'text': 'All mechanical timepieces, luxury chronographs, and smartwatches sold by LahVenture come with 100% authenticity guarantee and brand warranty.'
+            }
+          }
+        ]
       }
     ]
   };
@@ -360,9 +393,9 @@ export const HomePage = () => {
   return (
     <>
       <Seo
-        title="LahVenture Watches | Luxury Timepieces & Smartwatches in Bangladesh"
-        description="Explore curated luxury mechanical watches, chronograph timepieces, and premium smartwatches with guaranteed authenticity and delivery across Bangladesh."
-        keywords="luxury watches bangladesh, rolex bangladesh, mechanical watches, patek philippe dhaka, smartwatch online"
+        title="LahVenture Watches | #1 Luxury Timepiece & Smartwatch Shop in Bangladesh"
+        description="Bangladesh's #1 luxury watch and smartwatch e-commerce shop featuring original mechanical timepieces, Haute Horlogerie, and authentic smartwatches with cash on delivery."
+        keywords="online shopping bangladesh, best e-commerce in bangladesh, luxury watches bangladesh, buy watch online dhaka, smartwatch price in bangladesh, original watches bd"
         schemaJson={homeSchema}
       />
       <section className="hero-section">
