@@ -1,39 +1,41 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ImageOff } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { api, mediaUrl } from '../services/api.js';
 
-const WATCH_GALLERY_IMAGES = [
+const FALLBACK_IMAGES = [
   {
-    id: 1,
+    _id: 'fb-1',
     title: 'Aero Chronograph Gold',
     url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=800&q=80'
   },
   {
-    id: 2,
+    _id: 'fb-2',
     title: 'LahVenture Minimalist Steel',
     url: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80'
   },
   {
-    id: 3,
+    _id: 'fb-3',
     title: 'Classic Heritage White',
     url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80'
   },
   {
-    id: 4,
+    _id: 'fb-4',
     title: 'Dark Edition Chrono',
     url: 'https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=800&q=80'
   },
   {
-    id: 5,
+    _id: 'fb-5',
     title: 'Vintage Leather Explorer',
     url: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=800&q=80'
   },
   {
-    id: 6,
+    _id: 'fb-6',
     title: 'Apex Diver Rose Gold',
     url: 'https://images.unsplash.com/photo-1547996160-81dfa63595aa?auto=format&fit=crop&w=800&q=80'
   },
   {
-    id: 7,
+    _id: 'fb-7',
     title: 'Ocean Master Blue',
     url: 'https://images.unsplash.com/photo-1533139502658-0198f920d8e8?auto=format&fit=crop&w=800&q=80'
   }
@@ -60,6 +62,25 @@ export const PanoramicPhotoLibrary = () => {
   const cursorPosRef = useRef({ x: 0, y: 0 });
   const [isHovered, setIsHovered] = useState(false);
   const [isMouseDown, setIsMouseDown] = useState(false);
+
+  // Fetch gallery images from API
+  const { data: galleryImages, isLoading } = useQuery({
+    queryKey: ['gallery-images'],
+    queryFn: async () => {
+      const { data } = await api.get('/gallery');
+      return data.data.images;
+    },
+    staleTime: 2 * 60 * 1000
+  });
+
+  // Use API images if available, otherwise fall back to defaults
+  const images = galleryImages?.length
+    ? galleryImages.map((img) => ({
+        _id: img._id,
+        title: img.alt || 'Gallery image',
+        url: img.url
+      }))
+    : FALLBACK_IMAGES;
 
   // Boundaries calculation
   const getBounds = useCallback(() => {
@@ -105,6 +126,15 @@ export const PanoramicPhotoLibrary = () => {
       window.removeEventListener('resize', handleResize);
     };
   }, [setInitialOffset]);
+
+  // Reset position when images change
+  useEffect(() => {
+    hasInitialOffsetRef.current = false;
+    requestAnimationFrame(() => {
+      setInitialOffset();
+      hasInitialOffsetRef.current = true;
+    });
+  }, [images.length, setInitialOffset]);
 
   // Smooth 60fps animation loop for smooth drag physics + follower cursor
   useEffect(() => {
@@ -231,55 +261,67 @@ export const PanoramicPhotoLibrary = () => {
         </defs>
       </svg>
 
-
-      <div
-        className="panoramic-viewport exact-panoramic-screen"
-        ref={containerRef}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => {
-          setIsHovered(false);
-          handlePointerUp();
-        }}
-        onMouseMove={handlePointerMove}
-        onMouseDown={handlePointerDown}
-        onMouseUp={handlePointerUp}
-        onTouchStart={handlePointerDown}
-        onTouchMove={handlePointerMove}
-        onTouchEnd={handlePointerUp}
-      >
-        <div className="panoramic-custom-cursor" ref={cursorRef} aria-hidden="true">
-          <div className="cursor-dot" />
+      {isLoading ? (
+        <div className="panoramic-loading">
+          <span className="spinner" /> Loading gallery…
         </div>
-
-        <div className="panoramic-track" ref={trackRef}>
-          {WATCH_GALLERY_IMAGES.map((img) => (
-            <article className="panoramic-card" key={img.id}>
-              <div className="panoramic-card-media">
-                <img src={img.url} alt={img.title} loading="lazy" draggable="false" />
-              </div>
-            </article>
-          ))}
+      ) : images.length === 0 ? (
+        <div className="panoramic-empty">
+          <ImageOff size={40} />
+          <span>No gallery images yet</span>
         </div>
-      </div>
+      ) : (
+        <>
+          <div
+            className="panoramic-viewport exact-panoramic-screen"
+            ref={containerRef}
+            onMouseEnter={() => setIsHovered(true)}
+            onMouseLeave={() => {
+              setIsHovered(false);
+              handlePointerUp();
+            }}
+            onMouseMove={handlePointerMove}
+            onMouseDown={handlePointerDown}
+            onMouseUp={handlePointerUp}
+            onTouchStart={handlePointerDown}
+            onTouchMove={handlePointerMove}
+            onTouchEnd={handlePointerUp}
+          >
+            <div className="panoramic-custom-cursor" ref={cursorRef} aria-hidden="true">
+              <div className="cursor-dot" />
+            </div>
 
-      <div className="panoramic-controls-row">
-        <button
-          type="button"
-          className="panoramic-arrow-btn"
-          onClick={() => scrollStep('left')}
-          aria-label="Previous gallery image"
-        >
-          <ArrowLeft size={32} strokeWidth={1.75} />
-        </button>
-        <button
-          type="button"
-          className="panoramic-arrow-btn"
-          onClick={() => scrollStep('right')}
-          aria-label="Next gallery image"
-        >
-          <ArrowRight size={32} strokeWidth={1.75} />
-        </button>
-      </div>
+            <div className="panoramic-track" ref={trackRef}>
+              {images.map((img) => (
+                <article className="panoramic-card" key={img._id}>
+                  <div className="panoramic-card-media">
+                    <img src={mediaUrl(img.url)} alt={img.title} loading="lazy" draggable="false" />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="panoramic-controls-row">
+            <button
+              type="button"
+              className="panoramic-arrow-btn"
+              onClick={() => scrollStep('left')}
+              aria-label="Previous gallery image"
+            >
+              <ArrowLeft size={32} strokeWidth={1.75} />
+            </button>
+            <button
+              type="button"
+              className="panoramic-arrow-btn"
+              onClick={() => scrollStep('right')}
+              aria-label="Next gallery image"
+            >
+              <ArrowRight size={32} strokeWidth={1.75} />
+            </button>
+          </div>
+        </>
+      )}
     </section>
   );
 };

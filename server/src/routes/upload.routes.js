@@ -8,5 +8,6 @@ const router = express.Router();
 router.use(protect, restrictTo('admin'));
 router.post('/products', setUploadFolder('products'), upload.array('images', 8), uploadImages);
 router.post('/users', setUploadFolder('users'), upload.single('image'), uploadImages);
+router.post('/gallery', setUploadFolder('gallery'), upload.array('images', 10), uploadImages);
 
 export default router;

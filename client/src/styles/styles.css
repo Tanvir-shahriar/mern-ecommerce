@@ -8209,7 +8209,7 @@ textarea:focus {
   position: relative;
   min-height: min(980px, 100vh);
   padding: 8px 0 94px;
-  background: #fde8fb;
+  background: #f9d6d6;
   overflow: hidden;
 }
 
@@ -8231,7 +8231,7 @@ textarea:focus {
   cursor: grabbing;
 }
 
-/* Custom Circular Ring Follower Cursor matching reference image */
+/* Custom Circular Ring Follower Cursor */
 .panoramic-custom-cursor {
   position: absolute;
   top: 0;
@@ -8241,8 +8241,8 @@ textarea:focus {
   width: 82px;
   height: 82px;
   border-radius: 50%;
-  border: 2px solid rgba(22, 8, 58, 0.84);
-  background: rgba(253, 232, 251, 0.08);
+  border: 2px solid rgba(140, 30, 30, 0.84);
+  background: rgba(249, 214, 214, 0.08);
   backdrop-filter: blur(1px);
   display: flex;
   align-items: center;
@@ -8254,7 +8254,7 @@ textarea:focus {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #16083a;
+  background: #6b1a1a;
 }
 
 /* Horizontal Track */
@@ -8268,7 +8268,7 @@ textarea:focus {
   will-change: transform;
 }
 
-/* Individual Clean Photography Card matching reference image */
+/* Individual Clean Photography Card */
 .panoramic-card {
   flex: 0 0 clamp(300px, 29.55vw, 610px);
   height: 100%;
@@ -8309,8 +8309,8 @@ textarea:focus {
   height: 70px;
   border-radius: 50%;
   background: transparent;
-  border: 2px solid rgba(43, 18, 50, 0.88);
-  color: rgba(43, 18, 50, 0.88);
+  border: 2px solid rgba(140, 30, 30, 0.88);
+  color: rgba(140, 30, 30, 0.88);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -8319,8 +8319,8 @@ textarea:focus {
 }
 
 .panoramic-arrow-btn:hover {
-  background: rgba(43, 18, 50, 0.88);
-  color: #fde8fb;
+  background: rgba(140, 30, 30, 0.88);
+  color: #fde8e8;
   transform: scale(1.05);
 }
 
@@ -8328,14 +8328,33 @@ textarea:focus {
   transform: scale(0.95);
 }
 
+/* Panoramic loading state */
+.panoramic-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: clamp(520px, 76vh, 800px);
+  color: rgba(140, 30, 30, 0.6);
+  font-size: 1rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+}
+
+.panoramic-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  height: clamp(520px, 76vh, 800px);
+  color: rgba(140, 30, 30, 0.5);
+  font-size: 0.95rem;
+}
+
 @media (max-width: 768px) {
   .panoramic-library-section {
     min-height: auto;
     padding: 10px 0 70px;
-  }
-
-  .panoramic-library-header {
-    margin-bottom: 22px;
   }
 
   .panoramic-viewport {
@@ -8358,7 +8377,234 @@ textarea:focus {
     width: 54px;
     height: 54px;
   }
+
+  .panoramic-loading,
+  .panoramic-empty {
+    height: 460px;
+  }
 }
 
 
+/* ==========================================
+   Admin Gallery Management Styles
+   ========================================== */
+.admin-gallery-page .section-heading {
+  margin-bottom: 24px;
+}
+
+.admin-gallery-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+
+.admin-gallery-toolbar .button {
+  min-width: 120px;
+}
+
+.admin-gallery-upload-zone {
+  position: relative;
+  border: 2px dashed rgba(140, 30, 30, 0.3);
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 200ms ease;
+  background: rgba(249, 214, 214, 0.15);
+  margin-bottom: 32px;
+}
+
+.admin-gallery-upload-zone:hover,
+.admin-gallery-upload-zone.dragover {
+  border-color: rgba(140, 30, 30, 0.6);
+  background: rgba(249, 214, 214, 0.3);
+}
+
+.admin-gallery-upload-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.admin-gallery-upload-zone .upload-icon {
+  color: rgba(140, 30, 30, 0.5);
+  margin-bottom: 8px;
+}
+
+.admin-gallery-upload-zone p {
+  margin: 0;
+  color: rgba(140, 30, 30, 0.7);
+  font-size: 0.92rem;
+}
+
+.admin-gallery-upload-zone p strong {
+  color: rgba(140, 30, 30, 0.9);
+}
+
+.admin-gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.admin-gallery-card {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: #1a1a1a;
+  cursor: grab;
+  transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+  border: 2px solid transparent;
+}
+
+.admin-gallery-card:active {
+  cursor: grabbing;
+}
+
+.admin-gallery-card.dragging {
+  opacity: 0.4;
+  transform: scale(0.95);
+}
+
+.admin-gallery-card.drag-over {
+  border-color: rgba(140, 30, 30, 0.7);
+  transform: scale(1.02);
+  box-shadow: 0 4px 20px rgba(140, 30, 30, 0.15);
+}
+
+.admin-gallery-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+.admin-gallery-card-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.55) 0%, transparent 50%);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 10px;
+  opacity: 0;
+  transition: opacity 180ms ease;
+}
+
+.admin-gallery-card:hover .admin-gallery-card-overlay {
+  opacity: 1;
+}
+
+.admin-gallery-card-order {
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: rgba(140, 30, 30, 0.7);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.admin-gallery-card-delete {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(220, 38, 38, 0.85);
+  border: none;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.admin-gallery-card-delete:hover {
+  background: rgba(220, 38, 38, 1);
+  transform: scale(1.1);
+}
+
+.admin-gallery-empty {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-muted, #888);
+  font-size: 0.95rem;
+}
+
+.admin-gallery-empty svg {
+  margin-bottom: 12px;
+  opacity: 0.4;
+}
+
+.admin-gallery-save-bar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(140, 30, 30, 0.1);
+}
+
+.admin-gallery-save-bar .button.save-btn {
+  background: rgba(140, 30, 30, 0.88);
+  color: #fff;
+  border: none;
+  padding: 10px 28px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease, transform 150ms ease;
+}
+
+.admin-gallery-save-bar .button.save-btn:hover {
+  background: rgba(140, 30, 30, 1);
+  transform: translateY(-1px);
+}
+
+.admin-gallery-save-bar .button.save-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.admin-gallery-status {
+  font-size: 0.85rem;
+  color: var(--text-muted, #888);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-gallery-status.success {
+  color: #16a34a;
+}
+
+.admin-gallery-status.error {
+  color: #dc2626;
+}
+
+@media (max-width: 768px) {
+  .admin-gallery-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+
+  .admin-gallery-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-gallery-save-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
 
