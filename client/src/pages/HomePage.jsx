@@ -23,8 +23,139 @@ import tagheuerLogo from '../assets/brands/tagheuer.svg';
 import tissotLogo from '../assets/brands/tissot.svg';
 import longinesLogo from '../assets/brands/longines.svg';
 import hamiltonLogo from '../assets/brands/hamilton.svg';
+import watch1 from '../assets/watches/1.png';
+import watch2 from '../assets/watches/2.png';
+import watch3 from '../assets/watches/3.png';
+import watch4 from '../assets/watches/4.png';
+import watch5 from '../assets/watches/5.png';
+import watch6 from '../assets/watches/6.png';
+import watch7 from '../assets/watches/7.png';
+import watch8 from '../assets/watches/8.png';
 import { api, mediaUrl } from '../services/api.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
+
+const watchSlides = [
+  {
+    image: watch1,
+    badge: "JUBILEE LUXURY",
+    sku: "DJ-41-YGSS",
+    title: ["CHRONOS", "EXECUTIVE", "GOLDEN"],
+    slogan: "Prestige on the Wrist",
+    subtext: "Experience the timeless harmony of 18ct yellow gold and Oystersteel, crafted for the modern visionary.",
+    gradient: "radial-gradient(circle at 60% 50%, #2f251b 0%, #0d0a08 60%, #050404 100%)",
+    accentColor: "#d4af37", // Gold
+    accentColorRgb: "212, 175, 55",
+    badgeBg: "#3c3226",
+    badgeColor: "#dfc8ad",
+    badgeBgTrans: "rgba(212, 175, 55, 0.1)",
+    badgeBorderTrans: "rgba(212, 175, 55, 0.3)"
+  },
+  {
+    image: watch2,
+    badge: "RACING HERITAGE",
+    sku: "SP-321-CH",
+    title: ["SPEED", "MASTER", "CHRONO"],
+    slogan: "Beyond the Horizon",
+    subtext: "A legendary racing chronograph celebrating precision, high-speed performance, and classic mechanical heritage.",
+    gradient: "radial-gradient(circle at 60% 50%, #2c2d30 0%, #111215 60%, #08090a 100%)",
+    accentColor: "#a6a9ad", // Steel/Silver
+    accentColorRgb: "166, 169, 173",
+    badgeBg: "#22252a",
+    badgeColor: "#cccccc",
+    badgeBgTrans: "rgba(166, 169, 173, 0.1)",
+    badgeBorderTrans: "rgba(166, 169, 173, 0.3)"
+  },
+  {
+    image: watch3,
+    badge: "MODERN CLASSIC",
+    sku: "RG-790-BL",
+    title: ["ROYAL", "OCEAN", "BLUE"],
+    slogan: "Elegance Reimagined",
+    subtext: "The perfect contrast of a deep sunburst blue dial and warm hand-polished rose gold casing.",
+    gradient: "radial-gradient(circle at 60% 50%, #151e2b 0%, #080c14 60%, #030509 100%)",
+    accentColor: "#e0b0ff", // Rose Gold / Lilac
+    accentColorRgb: "224, 176, 255",
+    badgeBg: "#0f1622",
+    badgeColor: "#a3c2f0",
+    badgeBgTrans: "rgba(224, 176, 255, 0.1)",
+    badgeBorderTrans: "rgba(224, 176, 255, 0.3)"
+  },
+  {
+    image: watch4,
+    badge: "SKELETON CRAFT",
+    sku: "SK-908-MECH",
+    title: ["AVANT", "GARDE", "GEARS"],
+    slogan: "Art of Movement",
+    subtext: "Peer into the soul of timekeeping with our fully exposed, hand-wound skeleton mechanical masterpiece.",
+    gradient: "radial-gradient(circle at 60% 50%, #2d2417 0%, #120e0a 60%, #060504 100%)",
+    accentColor: "#d4af37", // Warm Gold
+    accentColorRgb: "212, 175, 55",
+    badgeBg: "#2a1c0d",
+    badgeColor: "#dfc8ad",
+    badgeBgTrans: "rgba(212, 175, 55, 0.1)",
+    badgeBorderTrans: "rgba(212, 175, 55, 0.3)"
+  },
+  {
+    image: watch5,
+    badge: "MINIMALIST DRESS",
+    sku: "CL-1950-BR",
+    title: ["VINTAGE", "CALATRAVA", "SILVER"],
+    slogan: "Understated Grace",
+    subtext: "Clean white dial meets rich brown calfskin leather. An authentic tribute to mid-century horology.",
+    gradient: "radial-gradient(circle at 60% 50%, #291e17 0%, #0f0b09 60%, #080605 100%)",
+    accentColor: "#8b5a2b", // Brown
+    accentColorRgb: "139, 90, 43",
+    badgeBg: "#281b12",
+    badgeColor: "#dfbe9b",
+    badgeBgTrans: "rgba(139, 90, 43, 0.1)",
+    badgeBorderTrans: "rgba(139, 90, 43, 0.3)"
+  },
+  {
+    image: watch6,
+    badge: "DEEP DIVER",
+    sku: "SUB-300-GR",
+    title: ["EMERALD", "OCEAN", "HULK"],
+    slogan: "Conquer the Depths",
+    subtext: "Robust 300m water resistant case with a vibrant green ceramic bezel and matching sunburst green dial.",
+    gradient: "radial-gradient(circle at 60% 50%, #12281a 0%, #07120c 60%, #030805 100%)",
+    accentColor: "#10b981", // Emerald Green
+    accentColorRgb: "16, 185, 129",
+    badgeBg: "#0f2015",
+    badgeColor: "#a7f3d0",
+    badgeBgTrans: "rgba(16, 185, 129, 0.1)",
+    badgeBorderTrans: "rgba(16, 185, 129, 0.3)"
+  },
+  {
+    image: watch7,
+    badge: "HERITAGE TRADITION",
+    sku: "CELL-90-YG",
+    title: ["PRESTIGE", "CELLINI", "GOLD"],
+    slogan: "Timeless Tradition",
+    subtext: "A classic dress watch featuring a clean white dial, delicate gold markers, and a premium black alligator strap.",
+    gradient: "radial-gradient(circle at 60% 50%, #2f271a 0%, #120e0a 60%, #070503 100%)",
+    accentColor: "#eab308", // Yellow Gold
+    accentColorRgb: "234, 179, 8",
+    badgeBg: "#2e210f",
+    badgeColor: "#fef08a",
+    badgeBgTrans: "rgba(234, 179, 8, 0.1)",
+    badgeBorderTrans: "rgba(234, 179, 8, 0.3)"
+  },
+  {
+    image: watch8,
+    badge: "ATHLETIC SPORT",
+    sku: "SP-X9-RED",
+    title: ["CARBON", "ATHLETE", "RED"],
+    slogan: "Engineered for Action",
+    subtext: "High-grade matte black carbon case with racing red highlights and a sweat-proof heavy-duty silicone strap.",
+    gradient: "radial-gradient(circle at 60% 50%, #2a0b0d 0%, #100405 60%, #050102 100%)",
+    accentColor: "#ef4444", // Red
+    accentColorRgb: "239, 68, 68",
+    badgeBg: "#2d0b0f",
+    badgeColor: "#fca5a5",
+    badgeBgTrans: "rgba(239, 68, 68, 0.1)",
+    badgeBorderTrans: "rgba(239, 68, 68, 0.3)"
+  }
+];
 
 const perks = [
   {
@@ -298,26 +429,16 @@ export const HomePage = () => {
     }
   });
 
-  const heroProducts = useMemo(
-    () => (featuredData || []).filter((product) => product.images?.[0]?.url).slice(0, 6),
-    [featuredData]
-  );
-  const activeHeroIndex = heroProducts.length ? heroIndex % heroProducts.length : 0;
-  const activeHeroProduct = heroProducts[activeHeroIndex];
+  const activeWatchIndex = watchSlides.length ? heroIndex % watchSlides.length : 0;
+  const activeWatch = watchSlides[activeWatchIndex];
 
   useEffect(() => {
-    setHeroIndex(0);
-  }, [heroProducts.length]);
-
-  useEffect(() => {
-    if (heroProducts.length < 2) return undefined;
-
     const interval = window.setInterval(() => {
-      setHeroIndex((index) => (index + 1) % heroProducts.length);
-    }, 4800);
+      setHeroIndex((index) => (index + 1) % watchSlides.length);
+    }, 5500);
 
     return () => window.clearInterval(interval);
-  }, [heroProducts.length]);
+  }, []);
 
   const purchaseNow = (product) => {
     setPurchaseId(product._id);
@@ -398,22 +519,34 @@ export const HomePage = () => {
         keywords="online shopping bangladesh, best e-commerce in bangladesh, luxury watches bangladesh, buy watch online dhaka, smartwatch price in bangladesh, original watches bd"
         schemaJson={homeSchema}
       />
-      <section className="hero-section">
-        <div className="hero-content-custom">
-          <span className="hero-badge-pill">LIMITED TO 50 PIECES</span>
-          <span className="hero-sku">CH-9343.2-CUBK</span>
+      <section 
+        className="hero-section" 
+        style={{ background: activeWatch.gradient }}
+      >
+        <div 
+          key={activeWatchIndex} 
+          className="hero-content-custom animate-slide-up"
+          style={{
+            '--accent-color': activeWatch.accentColor,
+            '--accent-color-rgb': activeWatch.accentColorRgb,
+            '--badge-color': activeWatch.badgeColor,
+            '--badge-bg': activeWatch.badgeBg,
+            '--badge-bg-trans': activeWatch.badgeBgTrans,
+            '--badge-border-trans': activeWatch.badgeBorderTrans
+          }}
+        >
+          <span className="hero-badge-pill">{activeWatch.badge}</span>
+          <span className="hero-sku">{activeWatch.sku}</span>
           <h1 className="hero-title-custom">
-            <span>SPACE</span>
-            <span>TIMER</span>
-            <span>JUPITER</span>
+            {activeWatch.title.map((line, idx) => (
+              <span key={idx}>{line}</span>
+            ))}
           </h1>
-          <h2 className="hero-slogan-custom">The Time Is Yours</h2>
+          <h2 className="hero-slogan-custom">{activeWatch.slogan}</h2>
           
           <div className="hero-subtext-container">
             <span className="find-out-more-badge">FIND OUT MORE</span>
-            <p className="hero-subtext-custom">
-              Shop our exquisite collection of luxury watches and elevate your style today
-            </p>
+            <p className="hero-subtext-custom">{activeWatch.subtext}</p>
           </div>
           
           <Link to="/products" className="hero-shop-btn">
@@ -424,8 +557,12 @@ export const HomePage = () => {
         <div className="hero-visual-custom">
           <span className="hero-available-label">AVAILABLE</span>
           
-          <div className="hero-watch-container">
-            <img src="/jupiter_watch.png" alt="Space Timer Jupiter luxury skeleton mechanical watch" className="hero-watch-image" />
+          <div key={activeWatchIndex} className="hero-watch-container animate-fade-in-scale">
+            <img 
+              src={activeWatch.image} 
+              alt={activeWatch.title.join(' ')} 
+              className="hero-watch-image" 
+            />
           </div>
 
           <div className="hero-video-widget">
@@ -434,6 +571,20 @@ export const HomePage = () => {
               <span className="play-icon-circle"></span>
             </button>
           </div>
+        </div>
+
+        <div className="hero-dots-container">
+          {watchSlides.map((slide, idx) => (
+            <button
+              key={idx}
+              onClick={() => setHeroIndex(idx)}
+              className={`hero-dot-btn ${idx === activeWatchIndex ? 'active' : ''}`}
+              style={{
+                '--dot-accent': activeWatch.accentColor
+              }}
+              aria-label={`Go to slide ${idx + 1}`}
+            />
+          ))}
         </div>
       </section>
 
