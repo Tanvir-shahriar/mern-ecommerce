@@ -36,12 +36,27 @@ import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.
 
 const watchSlides = [
   {
-    image: watch1,
-    badge: "JUBILEE LUXURY",
+    image: watch4, // cowboy watch (4.png)
+    badge: "LIMITED TO 30 PIECES",
+    sku: "CH-67255-BKGO",
+    title: ["FLYING GRAND", "REGULATOR", "SKELETON", "COWBOY"],
+    slogan: "The Time Is Yours",
+    subtext: "Shop our exquisite collection of luxury watches and elevate your style today",
+    gradient: "radial-gradient(circle at 60% 50%, #2a1f15 0%, #0c0906 60%, #040302 100%)",
+    accentColor: "#7a0b17", // Maroon / Cowboy Red
+    accentColorRgb: "122, 11, 23",
+    badgeBg: "rgba(255, 255, 255, 0.08)",
+    badgeColor: "#dfc8ad",
+    badgeBgTrans: "rgba(223, 200, 173, 0.1)",
+    badgeBorderTrans: "rgba(223, 200, 173, 0.3)"
+  },
+  {
+    image: watch1, // jubilee watch (1.png)
+    badge: "LIMITED TO 50 PIECES",
     sku: "DJ-41-YGSS",
-    title: ["CHRONOS", "EXECUTIVE", "GOLDEN"],
-    slogan: "Prestige on the Wrist",
-    subtext: "Experience the timeless harmony of 18ct yellow gold and Oystersteel, crafted for the modern visionary.",
+    title: ["OYSTER", "PERPETUAL", "DATEJUST"],
+    slogan: "A Tribute to Elegance",
+    subtext: "The classic timepiece of reference, featuring a distinct fluted bezel and gold-steel Jubilee bracelet.",
     gradient: "radial-gradient(circle at 60% 50%, #2f251b 0%, #0d0a08 60%, #050404 100%)",
     accentColor: "#d4af37", // Gold
     accentColorRgb: "212, 175, 55",
@@ -51,10 +66,10 @@ const watchSlides = [
     badgeBorderTrans: "rgba(212, 175, 55, 0.3)"
   },
   {
-    image: watch2,
+    image: watch2, // speedmaster (2.png)
     badge: "RACING HERITAGE",
     sku: "SP-321-CH",
-    title: ["SPEED", "MASTER", "CHRONO"],
+    title: ["SPEEDMASTER", "RACING", "CHRONOGRAPH"],
     slogan: "Beyond the Horizon",
     subtext: "A legendary racing chronograph celebrating precision, high-speed performance, and classic mechanical heritage.",
     gradient: "radial-gradient(circle at 60% 50%, #2c2d30 0%, #111215 60%, #08090a 100%)",
@@ -66,7 +81,7 @@ const watchSlides = [
     badgeBorderTrans: "rgba(166, 169, 173, 0.3)"
   },
   {
-    image: watch3,
+    image: watch3, // blue watch (3.png)
     badge: "MODERN CLASSIC",
     sku: "RG-790-BL",
     title: ["ROYAL", "OCEAN", "BLUE"],
@@ -81,22 +96,7 @@ const watchSlides = [
     badgeBorderTrans: "rgba(224, 176, 255, 0.3)"
   },
   {
-    image: watch4,
-    badge: "SKELETON CRAFT",
-    sku: "SK-908-MECH",
-    title: ["AVANT", "GARDE", "GEARS"],
-    slogan: "Art of Movement",
-    subtext: "Peer into the soul of timekeeping with our fully exposed, hand-wound skeleton mechanical masterpiece.",
-    gradient: "radial-gradient(circle at 60% 50%, #2d2417 0%, #120e0a 60%, #060504 100%)",
-    accentColor: "#d4af37", // Warm Gold
-    accentColorRgb: "212, 175, 55",
-    badgeBg: "#2a1c0d",
-    badgeColor: "#dfc8ad",
-    badgeBgTrans: "rgba(212, 175, 55, 0.1)",
-    badgeBorderTrans: "rgba(212, 175, 55, 0.3)"
-  },
-  {
-    image: watch5,
+    image: watch5, // calatrava brown (5.png)
     badge: "MINIMALIST DRESS",
     sku: "CL-1950-BR",
     title: ["VINTAGE", "CALATRAVA", "SILVER"],
@@ -111,7 +111,7 @@ const watchSlides = [
     badgeBorderTrans: "rgba(139, 90, 43, 0.3)"
   },
   {
-    image: watch6,
+    image: watch6, // emerald diver (6.png)
     badge: "DEEP DIVER",
     sku: "SUB-300-GR",
     title: ["EMERALD", "OCEAN", "HULK"],
@@ -126,7 +126,7 @@ const watchSlides = [
     badgeBorderTrans: "rgba(16, 185, 129, 0.3)"
   },
   {
-    image: watch7,
+    image: watch7, // gold cellini (7.png)
     badge: "HERITAGE TRADITION",
     sku: "CELL-90-YG",
     title: ["PRESTIGE", "CELLINI", "GOLD"],
@@ -141,7 +141,7 @@ const watchSlides = [
     badgeBorderTrans: "rgba(234, 179, 8, 0.3)"
   },
   {
-    image: watch8,
+    image: watch8, // black/red sport (8.png)
     badge: "ATHLETIC SPORT",
     sku: "SP-X9-RED",
     title: ["CARBON", "ATHLETE", "RED"],
