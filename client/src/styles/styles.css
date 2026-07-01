@@ -6963,7 +6963,11 @@ textarea:focus {
 
 .hero-watch-container {
   width: 100%;
+  height: clamp(320px, 50vh, 520px);
   max-width: 480px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   filter: drop-shadow(0 20px 45px rgba(0, 0, 0, 0.8));
 }
 
@@ -6972,9 +6976,12 @@ textarea:focus {
 }
 
 .hero-watch-image {
-  width: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
   height: auto;
   object-fit: contain;
+  object-position: center;
   animation: floatWatch 6s ease-in-out infinite;
 }
 
@@ -7068,6 +7075,7 @@ textarea:focus {
   }
   .hero-watch-container {
     max-width: min(360px, 82vw);
+    height: clamp(260px, 40vh, 360px) !important;
   }
   .hero-video-widget {
     position: relative;
