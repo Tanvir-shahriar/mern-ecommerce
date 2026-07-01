@@ -10,7 +10,7 @@ const registerSlides = [
   {
     image: '/jupiter_watch.png',
     title: 'Start your watch profile',
-    text: 'Save delivery details, wishlist pieces, and account preferences before your next Success Way order.'
+    text: 'Save delivery details, wishlist pieces, and account preferences before your next LahVenture order.'
   },
   {
     image: '/watch_video_thumbnail.png',
@@ -18,7 +18,7 @@ const registerSlides = [
     text: 'Create once, then return to faster cart, purchase-now, and order tracking workflows.'
   },
   {
-    image: '/successway_logo.jpg',
+    image: '/lahventure.png',
     title: 'Built for collectors',
     text: 'Keep your watch journey organized with secure customer access and updated order history.'
   }
@@ -64,10 +64,10 @@ export const RegisterPage = () => {
 
   return (
     <section className="auth-page login-page register-page">
-      <div className="login-hero-panel register-hero-panel" aria-label="Create a Success Way account">
+      <div className="login-hero-panel register-hero-panel" aria-label="Create a LahVenture account">
         <div className="login-hero-copy">
           <p className="eyebrow">Create profile</p>
-          <h1>Begin your Success Way account</h1>
+          <h1>Begin your LahVenture account</h1>
           <p>
             Save your customer details once, keep delivery information ready, and manage watch orders from a secure profile.
           </p>
@@ -101,7 +101,7 @@ export const RegisterPage = () => {
 
       <form className="auth-card login-card register-card" onSubmit={submit}>
         <div className="login-card-heading">
-          <p className="eyebrow">Join Success Way</p>
+          <p className="eyebrow">Join LahVenture</p>
           <h2>Create account</h2>
           <span>Register with a social account or use your email below.</span>
         </div>

@@ -19,10 +19,10 @@ import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
-import successWayLogo from '../assets/Logo/Success way logo.jpg';
+import lahventureLogo from '../assets/images/Lahventure Logo.png';
 
 const navClass = ({ isActive }) => (isActive ? 'nav-link active' : 'nav-link');
-const logoPath = successWayLogo;
+const logoPath = lahventureLogo;
 
 export const Layout = () => {
   const [open, setOpen] = useState(false);
@@ -68,7 +68,7 @@ export const Layout = () => {
             >
               {open ? <X size={20} /> : <Menu size={20} />}
             </button>
-            <Link to="/" className="brand" aria-label="Success Way">
+            <Link to="/" className="brand" aria-label="lahVenture">
               <img className="brand-logo" src={logoPath} alt="" />
             </Link>
 
@@ -314,7 +314,7 @@ export const Layout = () => {
       <footer className="site-footer">
         <div className="footer-inner">
           <div className="footer-brand-panel">
-            <Link to="/" className="footer-brand" aria-label="Success Way home">
+            <Link to="/" className="footer-brand" aria-label="lahVenture home">
               <img className="footer-logo" src={logoPath} alt="" />
             </Link>
             <p>
@@ -322,7 +322,7 @@ export const Layout = () => {
               secure checkout, saved delivery profiles, and order tracking.
             </p>
 
-            <div className="footer-service-strip" aria-label="Success Way service highlights">
+            <div className="footer-service-strip" aria-label="LahVenture service highlights">
               <span>
                 <ShieldCheck size={17} />
                 Verified listings
@@ -403,7 +403,7 @@ export const Layout = () => {
           </div>
 
           <div className="footer-bottom">
-            <span>© 2026 Success Way. Time well lived.</span>
+            <span>© 2026 LahVenture. Time well lived.</span>
             <div className="footer-legal">
               <span>Secure checkout</span>
               <span>Bangladesh delivery</span>

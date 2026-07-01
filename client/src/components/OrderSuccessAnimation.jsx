@@ -73,7 +73,7 @@ export const OrderSuccessAnimation = ({ order }) => {
 
         <h1 className="success-title">Order Placed Successfully!</h1>
         <p className="success-subtitle">
-          Thank you for shopping with Success Way. Your order <strong>{order.orderNumber}</strong> has been received and is being processed.
+          Thank you for shopping with LahVenture. Your order <strong>{order.orderNumber}</strong> has been received and is being processed.
         </p>
 
         {/* Live Order Progress Bar */}

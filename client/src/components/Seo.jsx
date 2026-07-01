@@ -12,8 +12,8 @@ export const Seo = ({
 }) => {
   useEffect(() => {
     // 1. Dynamic Page Title
-    const defaultTitle = 'Success Way Watches | Luxury Timepieces & Smartwatches';
-    document.title = title ? `${title} | Success Way` : defaultTitle;
+    const defaultTitle = 'LahVenture Watches | Luxury Timepieces & Smartwatches';
+    document.title = title ? `${title} | LahVenture` : defaultTitle;
 
     // Helper to update meta tag by name or property
     const updateMeta = (selector, content) => {
@@ -34,7 +34,7 @@ export const Seo = ({
     };
 
     // 2. Meta Description & Keywords
-    const defaultDescription = "Success Way is Bangladesh's premier luxury watch and smartwatch destination featuring curated mechanical timepieces, Haute Horlogerie, and authentic smartwatches.";
+    const defaultDescription = "LahVenture is Bangladesh's premier luxury watch and smartwatch destination featuring curated mechanical timepieces, Haute Horlogerie, and authentic smartwatches.";
     updateMeta('meta[name="description"]', description || defaultDescription);
 
     if (keywords) {

@@ -14,6 +14,7 @@ import radoLogo from '../assets/Logo/rado-logo-png_seeklogo-115398.png';
 import fossilLogo from '../assets/Logo/png-clipart-fossil-group-watch-business-logo-watch.png';
 import maxlordLogo from '../assets/Logo/images (2).jpg';
 import soberLogo from '../assets/Logo/Gemini_Generated_Image_4hnyq84hnyq84hny.png';
+import successWayBrandLogo from '../assets/Logo/Success way logo.jpg';
 import watch1 from '../assets/watches/1.png';
 import watch2 from '../assets/watches/2.png';
 import watch3 from '../assets/watches/3.png';
@@ -182,7 +183,8 @@ const topWatchBrands = [
   { name: 'Rado', logo: radoLogo, type: 'Swiss Master of Materials' },
   { name: 'Fossil', logo: fossilLogo, type: 'Contemporary Fashion' },
   { name: 'Maxlord', logo: maxlordLogo, type: 'Distinctive Design' },
-  { name: 'Sober', logo: soberLogo, type: 'Modern Minimalist' }
+  { name: 'Sober', logo: soberLogo, type: 'Modern Minimalist' },
+  { name: 'Success Way', logo: successWayBrandLogo, type: 'Curated Heritage' }
 ];
 
 const patekSlides = [
@@ -440,9 +442,9 @@ export const HomePage = () => {
       {
         '@type': 'Store',
         '@id': `${window.location.origin}/#store`,
-        'name': 'Success Way Watches Bangladesh',
+        'name': 'LahVenture Watches Bangladesh',
         'url': window.location.origin,
-        'logo': `${window.location.origin}/successway_logo.jpg`,
+        'logo': `${window.location.origin}/Lahventure%20Logo.png`,
         'description': "Bangladesh's #1 luxury watch and smartwatch e-commerce shop featuring original mechanical timepieces and authentic smartwatches.",
         'currenciesAccepted': 'BDT',
         'paymentAccepted': 'Cash on Delivery, BKash, Card, Stripe',
@@ -461,7 +463,7 @@ export const HomePage = () => {
         '@type': 'WebSite',
         '@id': `${window.location.origin}/#website`,
         'url': window.location.origin,
-        'name': 'Success Way Watches Bangladesh',
+        'name': 'LahVenture Watches Bangladesh',
         'publisher': { '@id': `${window.location.origin}/#store` },
         'potentialAction': {
           '@type': 'SearchAction',
@@ -477,15 +479,15 @@ export const HomePage = () => {
             'name': 'Is Cash on Delivery available across Bangladesh?',
             'acceptedAnswer': {
               '@type': 'Answer',
-              'text': 'Yes, Success Way provides Cash on Delivery (COD) for luxury watches and smartwatches across Dhaka and all districts in Bangladesh.'
+              'text': 'Yes, LahVenture provides Cash on Delivery (COD) for luxury watches and smartwatches across Dhaka and all districts in Bangladesh.'
             }
           },
           {
             '@type': 'Question',
-            'name': 'Are all luxury watches at Success Way 100% authentic?',
+            'name': 'Are all luxury watches at LahVenture 100% authentic?',
             'acceptedAnswer': {
               '@type': 'Answer',
-              'text': 'All mechanical timepieces, luxury chronographs, and smartwatches sold by Success Way come with 100% authenticity guarantee and brand warranty.'
+              'text': 'All mechanical timepieces, luxury chronographs, and smartwatches sold by LahVenture come with 100% authenticity guarantee and brand warranty.'
             }
           }
         ]
@@ -496,7 +498,7 @@ export const HomePage = () => {
   return (
     <>
       <Seo
-        title="Success Way Watches | #1 Luxury Timepiece & Smartwatch Shop in Bangladesh"
+        title="LahVenture Watches | #1 Luxury Timepiece & Smartwatch Shop in Bangladesh"
         description="Bangladesh's #1 luxury watch and smartwatch e-commerce shop featuring original mechanical timepieces, Haute Horlogerie, and authentic smartwatches with cash on delivery."
         keywords="online shopping bangladesh, best e-commerce in bangladesh, luxury watches bangladesh, buy watch online dhaka, smartwatch price in bangladesh, original watches bd"
         schemaJson={homeSchema}
@@ -694,7 +696,7 @@ export const HomePage = () => {
       <section className="lahv-signature-section" aria-labelledby="lahv-signature-title">
         <div className="lahv-signature-inner">
           <div className="lahv-signature-copy">
-            <p className="eyebrow signature-eyebrow">Success Way standard</p>
+            <p className="eyebrow signature-eyebrow">LahVenture standard</p>
             <h2 id="lahv-signature-title">A refined watch experience, built for everyday confidence.</h2>
             <p>
               Curated mechanical watches and smartwatches with clear sourcing, reliable delivery,
@@ -748,9 +750,9 @@ export const HomePage = () => {
 
       <SpiderClock />
 
-      <section className="perks-bar" aria-label="Success Way service promises">
+      <section className="perks-bar" aria-label="LahVenture service promises">
         <div className="perks-bar-header">
-          <p className="eyebrow">Success Way promise</p>
+          <p className="eyebrow">LahVenture promise</p>
         </div>
 
         <div className="perks-grid">

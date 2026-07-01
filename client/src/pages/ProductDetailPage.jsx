@@ -144,7 +144,7 @@ export const ProductDetailPage = () => {
       {
         icon: <Award size={16} />,
         label: 'Family',
-        value: prod.brand || 'Success Way'
+        value: prod.brand || 'lahVenture'
       },
       {
         icon: <Settings size={16} />,
@@ -200,7 +200,7 @@ export const ProductDetailPage = () => {
   };
 
   const mainImageUrl = mediaUrl(product.images?.[0]?.url);
-  const brandName = product.brand || 'Success Way';
+  const brandName = product.brand || 'LahVenture';
 
   const productSchema = {
     '@context': 'https://schema.org',
@@ -210,7 +210,7 @@ export const ProductDetailPage = () => {
         '@id': `${window.location.origin}/products/${product.slug || product._id}#product`,
         'name': product.name,
         'image': [mainImageUrl],
-        'description': product.description || `Buy authentic ${product.name} luxury watch at Success Way Bangladesh.`,
+        'description': product.description || `Buy authentic ${product.name} luxury watch at LahVenture Bangladesh.`,
         'sku': product.sku || product.name,
         'brand': {
           '@type': 'Brand',
@@ -226,7 +226,7 @@ export const ProductDetailPage = () => {
           'availability': inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
           'seller': {
             '@type': 'Organization',
-            'name': 'Success Way Watches'
+            'name': 'LahVenture Watches'
           }
         },
         ...(product.ratingsAverage > 0 && product.ratingsCount > 0
