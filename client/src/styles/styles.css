@@ -7169,16 +7169,27 @@ textarea:focus {
 
 .hero-content-custom {
   position: absolute;
-  left: clamp(40px, 3.9vw, 66px);
-  top: 30px;
-  bottom: 16px;
+  left: clamp(38px, 4.1vw, 72px);
+  top: clamp(58px, 8.2vh, 82px);
   z-index: 10;
-  width: min(440px, 34vw);
-  display: flex;
-  flex-direction: column;
+  width: clamp(330px, 31.5vw, 456px);
+  display: grid;
+  row-gap: 9px;
   align-items: flex-start;
+  justify-items: start;
   color: white;
   text-align: left;
+}
+
+.hero-content-custom::before {
+  content: "";
+  position: absolute;
+  top: 110px;
+  bottom: 10px;
+  left: -18px;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.42) 16%, rgba(var(--accent-color-rgb, 122, 11, 23), 0.78) 76%, transparent);
+  opacity: 0.55;
 }
 
 /* Animations for slide transition */
@@ -7199,7 +7210,7 @@ textarea:focus {
 
 .hero-badge-pill {
   font-family: Inter, sans-serif;
-  font-size: clamp(0.62rem, 0.66vw, 0.72rem);
+  font-size: clamp(0.62rem, 0.68vw, 0.72rem);
   font-weight: 800;
   letter-spacing: 1px;
   color: var(--badge-color, #dcdcd8);
@@ -7207,7 +7218,7 @@ textarea:focus {
   padding: 6px 15px;
   border-radius: 999px;
   text-transform: uppercase;
-  margin-bottom: 112px;
+  margin: 0 0 clamp(34px, 5vh, 44px);
   box-shadow: 0 0 18px rgba(var(--accent-color-rgb, 122, 11, 23), 0.28);
   transition: all 0.5s ease;
   backdrop-filter: blur(10px);
@@ -7219,21 +7230,21 @@ textarea:focus {
   font-weight: 600;
   letter-spacing: 0.65px;
   color: rgba(255, 255, 255, 0.34);
-  margin-bottom: 16px;
+  margin: 0;
 }
 
 .hero-title-custom {
   font-family: Inter, sans-serif;
-  font-size: clamp(2.7rem, 3.05vw, 3.35rem);
-  font-weight: 400;
-  line-height: 1.02;
-  letter-spacing: 0;
+  font-size: clamp(2.85rem, 3.18vw, 4rem);
+  font-weight: 500;
+  line-height: 0.98;
+  letter-spacing: 0.01em;
   color: white;
-  margin: 0 0 4px 0;
+  margin: 0;
   display: flex;
   flex-direction: column;
   text-transform: uppercase;
-  opacity: 0.82;
+  opacity: 0.88;
 }
 
 .hero-title-custom span {
@@ -7242,10 +7253,10 @@ textarea:focus {
 
 .hero-slogan-custom {
   font-family: Georgia, serif;
-  font-size: clamp(2.3rem, 3vw, 3.15rem);
+  font-size: clamp(2.18rem, 2.82vw, 3.12rem);
   font-weight: 400;
   color: white;
-  margin: 6px 0 10px clamp(-24px, -1.45vw, -18px);
+  margin: 4px 0 0;
   letter-spacing: 0;
   line-height: 1.02;
   text-shadow: 0 8px 24px rgba(0, 0, 0, 0.46);
@@ -7254,9 +7265,9 @@ textarea:focus {
 .hero-subtext-container {
   display: grid;
   align-items: start;
-  gap: 5px;
-  max-width: 510px;
-  margin-left: clamp(-24px, -1.45vw, -18px);
+  gap: 7px;
+  max-width: 430px;
+  margin: 0;
 }
 
 .find-out-more-badge {
@@ -7276,9 +7287,9 @@ textarea:focus {
 
 .hero-subtext-custom {
   font-family: Inter, sans-serif;
-  font-size: clamp(1.18rem, 1.45vw, 1.55rem);
-  line-height: 1.16;
-  color: rgba(255, 255, 255, 0.9);
+  font-size: clamp(1.06rem, 1.26vw, 1.34rem);
+  line-height: 1.28;
+  color: rgba(255, 255, 255, 0.84);
   margin: 0;
   text-align: left;
 }
@@ -7287,17 +7298,17 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 236px;
-  min-height: 72px;
-  margin: 16px 0 0 clamp(-24px, -1.45vw, -18px);
+  min-width: 224px;
+  min-height: 66px;
+  margin: 12px 0 0;
   background: white;
   color: var(--accent-color, #7a0b17);
   font-family: Inter, sans-serif;
-  font-size: 1.43rem;
+  font-size: 1.24rem;
   font-weight: 800;
-  letter-spacing: 4px;
-  padding: 18px 42px;
-  border: 5px solid var(--accent-color, #7a0b17);
+  letter-spacing: 0.22em;
+  padding: 16px 40px;
+  border: 4px solid var(--accent-color, #7a0b17);
   border-radius: 0px;
   text-transform: uppercase;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
@@ -7365,10 +7376,10 @@ textarea:focus {
 
 .hero-watch-container {
   position: absolute;
-  left: 33.2%;
-  top: -8%;
-  width: min(50vw, 840px);
-  height: 118%;
+  left: 35.6%;
+  top: -7.5%;
+  width: min(49vw, 820px);
+  height: 117%;
   --watch-base-transform: translate3d(0, 0, 0);
   display: flex;
   justify-content: center;
@@ -7405,10 +7416,10 @@ textarea:focus {
 
 .hero-video-widget {
   position: absolute;
-  top: 53.5%;
-  right: 5.2%;
-  width: min(14vw, 236px);
-  height: min(9.8vw, 158px);
+  top: 52.8%;
+  right: clamp(42px, 5.4vw, 92px);
+  width: min(14.2vw, 236px);
+  height: min(9.9vw, 158px);
   min-width: 156px;
   min-height: 96px;
   border-radius: 11px;
@@ -7470,9 +7481,9 @@ textarea:focus {
     min-height: 0;
     display: grid;
     grid-template-columns: 1fr;
-    gap: 20px;
+    gap: 16px;
     text-align: center;
-    padding: 22px 18px 34px;
+    padding: 20px 18px 34px;
   }
 
   .hero-section::after {
@@ -7486,7 +7497,8 @@ textarea:focus {
     left: auto;
     top: auto;
     bottom: auto;
-    width: min(100%, 620px);
+    width: min(100%, 560px);
+    row-gap: 8px;
     justify-self: center;
     align-items: flex-start;
     order: 2;
@@ -7494,20 +7506,24 @@ textarea:focus {
     text-align: left;
   }
 
-  .hero-badge-pill {
-    margin-bottom: 22px;
+  .hero-content-custom::before {
+    display: none;
   }
 
-  .hero-sku {
+  .hero-badge-pill {
     margin-bottom: 10px;
   }
 
+  .hero-sku {
+    margin-bottom: 6px;
+  }
+
   .hero-title-custom {
-    font-size: clamp(2.6rem, 9vw, 4.25rem);
+    font-size: clamp(2.45rem, 6.4vw, 3.7rem);
   }
 
   .hero-slogan-custom {
-    font-size: clamp(2.2rem, 7.8vw, 3.6rem);
+    font-size: clamp(2rem, 4.6vw, 2.85rem);
   }
 
   .hero-subtext-container {
@@ -7525,7 +7541,7 @@ textarea:focus {
     inset: auto;
     order: 1;
     width: 100%;
-    min-height: clamp(300px, 54vw, 420px);
+    min-height: clamp(276px, 44vw, 390px);
     overflow: hidden;
   }
 
@@ -7538,7 +7554,7 @@ textarea:focus {
   .hero-watch-container {
     left: 50%;
     top: 50%;
-    width: min(70vw, 520px);
+    width: min(64vw, 500px);
     height: 110%;
     --watch-base-transform: translate(-50%, -50%);
   }
@@ -7551,8 +7567,8 @@ textarea:focus {
 
   .hero-video-widget {
     top: auto;
-    right: 8px;
-    bottom: 18px;
+    right: clamp(8px, 3vw, 22px);
+    bottom: 16px;
     width: min(34vw, 180px);
     height: min(22vw, 116px);
     min-width: 126px;
@@ -7566,16 +7582,18 @@ textarea:focus {
 
 @media (max-width: 680px) {
   .hero-section {
-    gap: 16px;
-    padding: 14px 18px 28px;
+    gap: 10px;
+    padding: 14px 18px 30px;
   }
 
   .hero-content-custom {
     width: 100%;
+    max-width: 390px;
+    justify-self: start;
   }
 
   .hero-visual-custom {
-    min-height: clamp(238px, 68vw, 286px);
+    min-height: clamp(230px, 63vw, 274px);
   }
 
   .hero-watch-container {
@@ -7585,7 +7603,7 @@ textarea:focus {
 
   .hero-video-widget {
     right: 8px;
-    bottom: 12px;
+    bottom: 10px;
     width: min(34vw, 132px);
     height: min(22vw, 86px);
     min-width: 118px;
@@ -7599,7 +7617,7 @@ textarea:focus {
   }
 
   .hero-badge-pill {
-    margin-bottom: 18px;
+    margin-bottom: 8px;
     padding: 6px 14px;
   }
 
@@ -7609,13 +7627,13 @@ textarea:focus {
   }
 
   .hero-title-custom {
-    font-size: clamp(2rem, 10.5vw, 2.75rem);
+    font-size: clamp(1.96rem, 10vw, 2.65rem);
     line-height: 1.03;
   }
 
   .hero-slogan-custom {
-    margin-top: 10px;
-    font-size: clamp(1.75rem, 7.4vw, 2.25rem);
+    margin-top: 8px;
+    font-size: clamp(1.72rem, 7.2vw, 2.18rem);
   }
 
   .hero-subtext-container {
@@ -7631,8 +7649,8 @@ textarea:focus {
     width: min(100%, 270px);
     min-width: 0;
     min-height: 62px;
-    padding: 15px 30px;
-    font-size: 1.22rem;
+    padding: 15px 28px;
+    font-size: 1.18rem;
     letter-spacing: 3.2px;
     border-width: 4px;
   }
@@ -7644,11 +7662,11 @@ textarea:focus {
   }
 
   .hero-visual-custom {
-    min-height: 238px;
+    min-height: 210px;
   }
 
   .hero-watch-container {
-    width: 252px;
+    width: 244px;
     height: 106%;
   }
 
@@ -7665,7 +7683,14 @@ textarea:focus {
   }
 
   .hero-title-custom {
-    font-size: clamp(1.92rem, 10vw, 2.45rem);
+    font-size: clamp(1.86rem, 9.8vw, 2.36rem);
+  }
+
+  .hero-shop-btn {
+    width: min(100%, 260px);
+    min-height: 58px;
+    padding: 13px 26px;
+    font-size: 1.1rem;
   }
 
   .hero-available-label {
