@@ -7144,25 +7144,40 @@ textarea:focus {
 /* Custom Redesigned Hero Section Styling */
 .hero-section {
   position: relative;
-  min-height: 600px;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: center;
-  gap: clamp(30px, 5vw, 80px);
-  padding: clamp(60px, 8vw, 100px) clamp(20px, 5vw, 60px) clamp(40px, 6vw, 70px);
+  min-height: 656px;
+  height: min(656px, calc(100vh - 74px));
+  display: block;
   overflow: hidden;
-  background: radial-gradient(circle at 60% 50%, #221b16 0%, #0d0a08 60%, #050404 100%);
+  background:
+    radial-gradient(circle at 51% 24%, rgba(255, 255, 255, 0.08), transparent 22%),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.12) 0%, rgba(28, 22, 28, 0.5) 24%, rgba(4, 4, 4, 0.98) 72%),
+    radial-gradient(circle at 60% 50%, #221b16 0%, #0d0a08 60%, #050404 100%);
   isolation: isolate;
   transition: background 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.hero-section::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.28) 0%, transparent 36%, rgba(0, 0, 0, 0.72) 78%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.12) 0%, transparent 52%, rgba(0, 0, 0, 0.42) 100%);
+}
+
 .hero-content-custom {
+  position: absolute;
+  left: clamp(40px, 3.9vw, 66px);
+  top: 30px;
+  bottom: 16px;
+  z-index: 10;
+  width: min(440px, 34vw);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   color: white;
-  z-index: 10;
-  max-width: 600px;
   text-align: left;
 }
 
@@ -7184,38 +7199,41 @@ textarea:focus {
 
 .hero-badge-pill {
   font-family: Inter, sans-serif;
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 1.2px;
+  font-size: clamp(0.62rem, 0.66vw, 0.72rem);
+  font-weight: 800;
+  letter-spacing: 1px;
   color: var(--badge-color, #dcdcd8);
   background: var(--badge-bg, #3c3226);
-  padding: 5px 14px;
+  padding: 6px 15px;
   border-radius: 999px;
   text-transform: uppercase;
-  margin-bottom: 18px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  margin-bottom: 112px;
+  box-shadow: 0 0 18px rgba(var(--accent-color-rgb, 122, 11, 23), 0.28);
   transition: all 0.5s ease;
+  backdrop-filter: blur(10px);
 }
 
 .hero-sku {
   font-family: Inter, sans-serif;
-  font-size: 0.85rem;
+  font-size: clamp(0.8rem, 0.82vw, 0.9rem);
   font-weight: 600;
-  letter-spacing: 0.5px;
-  color: rgba(255, 255, 255, 0.35);
-  margin-bottom: 14px;
+  letter-spacing: 0.65px;
+  color: rgba(255, 255, 255, 0.34);
+  margin-bottom: 16px;
 }
 
 .hero-title-custom {
   font-family: Inter, sans-serif;
-  font-size: clamp(3.2rem, 5.8vw, 5.8rem);
-  font-weight: 900;
-  line-height: 0.92;
-  letter-spacing: -1.2px;
+  font-size: clamp(2.7rem, 3.05vw, 3.35rem);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: 0;
   color: white;
-  margin: 0 0 16px 0;
+  margin: 0 0 4px 0;
   display: flex;
   flex-direction: column;
+  text-transform: uppercase;
+  opacity: 0.82;
 }
 
 .hero-title-custom span {
@@ -7224,31 +7242,33 @@ textarea:focus {
 
 .hero-slogan-custom {
   font-family: Georgia, serif;
-  font-size: clamp(1.8rem, 3.2vw, 3.2rem);
+  font-size: clamp(2.3rem, 3vw, 3.15rem);
   font-weight: 400;
-  font-style: italic;
   color: white;
-  margin: 0 0 24px 0;
-  letter-spacing: 0.5px;
+  margin: 6px 0 10px clamp(-24px, -1.45vw, -18px);
+  letter-spacing: 0;
+  line-height: 1.02;
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.46);
 }
 
 .hero-subtext-container {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 30px;
-  max-width: 500px;
+  display: grid;
+  align-items: start;
+  gap: 5px;
+  max-width: 510px;
+  margin-left: clamp(-24px, -1.45vw, -18px);
 }
 
 .find-out-more-badge {
   font-family: Inter, sans-serif;
-  font-size: 0.72rem;
+  width: fit-content;
+  font-size: clamp(0.58rem, 0.64vw, 0.7rem);
   font-weight: 700;
   letter-spacing: 0.5px;
   color: var(--badge-color, #dfc8ad);
   background: var(--badge-bg-trans, rgba(223, 200, 173, 0.1));
   border: 1px solid var(--badge-border-trans, rgba(223, 200, 173, 0.3));
-  padding: 5px 12px;
+  padding: 5px 13px;
   border-radius: 999px;
   white-space: nowrap;
   transition: all 0.5s ease;
@@ -7256,9 +7276,9 @@ textarea:focus {
 
 .hero-subtext-custom {
   font-family: Inter, sans-serif;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: clamp(1.18rem, 1.45vw, 1.55rem);
+  line-height: 1.16;
+  color: rgba(255, 255, 255, 0.9);
   margin: 0;
   text-align: left;
 }
@@ -7267,15 +7287,19 @@ textarea:focus {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  min-width: 236px;
+  min-height: 72px;
+  margin: 16px 0 0 clamp(-24px, -1.45vw, -18px);
   background: white;
   color: var(--accent-color, #7a0b17);
   font-family: Inter, sans-serif;
-  font-size: 0.95rem;
+  font-size: 1.43rem;
   font-weight: 800;
-  letter-spacing: 1px;
-  padding: 12px 42px;
-  border: 3px solid var(--accent-color, #7a0b17);
+  letter-spacing: 4px;
+  padding: 18px 42px;
+  border: 5px solid var(--accent-color, #7a0b17);
   border-radius: 0px;
+  text-transform: uppercase;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   transition: all 0.2s ease;
 }
@@ -7291,16 +7315,17 @@ textarea:focus {
 /* Hero Slider Dots */
 .hero-dots-container {
   position: absolute;
-  bottom: 28px;
-  left: clamp(20px, 5vw, 60px);
-  display: flex;
-  gap: 10px;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  gap: 8px;
   z-index: 20;
 }
 
 .hero-dot-btn {
-  width: 24px;
-  height: 5px;
+  width: 18px;
+  height: 3px;
   border: none;
   background: rgba(255, 255, 255, 0.25);
   cursor: pointer;
@@ -7310,7 +7335,7 @@ textarea:focus {
 }
 
 .hero-dot-btn.active {
-  width: 48px;
+  width: 38px;
   background: var(--dot-accent, white);
 }
 
@@ -7319,31 +7344,31 @@ textarea:focus {
 }
 
 .hero-visual-custom {
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  width: 100%;
+  position: absolute;
+  inset: 0;
   z-index: 5;
+  pointer-events: none;
 }
 
 .hero-available-label {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 38px;
+  right: clamp(44px, 5vw, 78px);
+  z-index: 8;
   font-family: Inter, sans-serif;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: clamp(0.62rem, 0.68vw, 0.72rem);
+  font-weight: 800;
   letter-spacing: 1.5px;
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.54);
   text-transform: uppercase;
 }
 
 .hero-watch-container {
-  width: 100%;
-  height: clamp(320px, 50vh, 520px);
-  max-width: 480px;
+  position: absolute;
+  left: 33.2%;
+  top: -8%;
+  width: min(50vw, 840px);
+  height: 118%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -7355,13 +7380,14 @@ textarea:focus {
 }
 
 .hero-watch-image {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: none;
+  max-height: none;
   width: auto;
-  height: auto;
+  height: 118%;
   object-fit: contain;
   object-position: center;
   animation: floatWatch 6s ease-in-out infinite;
+  transform-origin: center;
 }
 
 @keyframes watchFadeIn {
@@ -7377,16 +7403,19 @@ textarea:focus {
 
 .hero-video-widget {
   position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 140px;
-  height: 84px;
-  border-radius: 12px;
+  top: 53.5%;
+  right: 5.2%;
+  width: min(14vw, 236px);
+  height: min(9.8vw, 158px);
+  min-width: 156px;
+  min-height: 96px;
+  border-radius: 11px;
   overflow: hidden;
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(255, 255, 255, 0.15);
   cursor: pointer;
   transition: transform 0.2s;
+  pointer-events: auto;
 }
 
 .hero-video-widget:hover {
@@ -7435,37 +7464,98 @@ textarea:focus {
 
 @media (max-width: 991px) {
   .hero-section {
+    height: auto;
+    min-height: 0;
+    display: grid;
     grid-template-columns: 1fr;
-    gap: 40px;
+    gap: 20px;
     text-align: center;
-    padding-top: 50px;
+    padding: 22px 18px 34px;
   }
+
+  .hero-section::after {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.06) 0%, rgba(0, 0, 0, 0.18) 44%, rgba(0, 0, 0, 0.68) 100%),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.38), transparent 52%, rgba(0, 0, 0, 0.38));
+  }
+
   .hero-content-custom {
-    align-items: center;
-    max-width: 100%;
-  }
-  .hero-subtext-container {
-    flex-direction: column;
-    gap: 8px;
-  }
-  .hero-visual-custom {
-    flex-direction: column;
-    gap: 16px;
-  }
-  .hero-watch-container {
-    max-width: min(360px, 82vw);
-    height: clamp(260px, 40vh, 360px) !important;
-  }
-  .hero-video-widget {
     position: relative;
-    margin-top: 10px;
-    right: auto;
+    left: auto;
+    top: auto;
     bottom: auto;
+    width: min(100%, 620px);
+    justify-self: center;
+    align-items: flex-start;
+    order: 2;
+    min-height: auto;
+    text-align: left;
   }
+
+  .hero-badge-pill {
+    margin-bottom: 22px;
+  }
+
+  .hero-sku {
+    margin-bottom: 10px;
+  }
+
+  .hero-title-custom {
+    font-size: clamp(2.6rem, 9vw, 4.25rem);
+  }
+
+  .hero-slogan-custom {
+    font-size: clamp(2.2rem, 7.8vw, 3.6rem);
+  }
+
+  .hero-subtext-container {
+    max-width: min(100%, 500px);
+    margin-left: 0;
+  }
+
+  .hero-slogan-custom,
+  .hero-shop-btn {
+    margin-left: 0;
+  }
+
+  .hero-visual-custom {
+    position: relative;
+    inset: auto;
+    order: 1;
+    width: 100%;
+    min-height: clamp(320px, 60vw, 480px);
+  }
+
+  .hero-available-label {
+    top: 8px;
+    right: auto;
+    left: 8px;
+  }
+
+  .hero-watch-container {
+    left: 50%;
+    top: -10%;
+    width: min(78vw, 560px);
+    height: 118%;
+    transform: translateX(-50%);
+  }
+
+  .hero-watch-image {
+    height: 108%;
+  }
+
+  .hero-video-widget {
+    top: auto;
+    right: 8px;
+    bottom: 18px;
+    width: min(34vw, 180px);
+    height: min(22vw, 116px);
+    min-width: 126px;
+    min-height: 78px;
+  }
+
   .hero-dots-container {
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    bottom: 16px !important;
+    bottom: 14px;
   }
 }
 
