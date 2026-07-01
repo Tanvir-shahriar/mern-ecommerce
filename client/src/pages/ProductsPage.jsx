@@ -76,7 +76,7 @@ export const ProductsPage = () => {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     'name': pageTitle,
-    'description': `Browse authentic ${categoryName || 'luxury'} timepieces and smartwatches at LahVenture.`,
+    'description': `Browse authentic ${categoryName || 'luxury'} timepieces and smartwatches at Success Way.`,
     'url': window.location.href,
     'mainEntity': {
       '@type': 'ItemList',

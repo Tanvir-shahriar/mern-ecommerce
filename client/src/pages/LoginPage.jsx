@@ -15,10 +15,10 @@ const loginSlides = [
   {
     image: '/watch_video_thumbnail.png',
     title: 'Curated watch drops',
-    text: 'Return to your cart and checkout faster when new LahVenture pieces arrive.'
+    text: 'Return to your cart and checkout faster when new Success Way pieces arrive.'
   },
   {
-    image: '/lahventure.png',
+    image: '/successway_logo.jpg',
     title: 'Time well lived',
     text: 'Keep your customer profile ready for Bangladesh delivery and order updates.'
   }
@@ -72,10 +72,10 @@ export const LoginPage = () => {
 
   return (
     <section className="auth-page login-page">
-      <div className="login-hero-panel" aria-label="LahVenture account access">
+      <div className="login-hero-panel" aria-label="Success Way account access">
         <div className="login-hero-copy">
           <p className="eyebrow">Member access</p>
-          <h1>Enter your LahVenture watch account</h1>
+          <h1>Enter your Success Way watch account</h1>
           <p>
             Review orders, saved delivery addresses, wishlist pieces, and checkout progress in a secure customer profile.
           </p>

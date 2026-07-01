@@ -7,22 +7,13 @@ import { PanoramicPhotoLibrary } from '../components/PanoramicPhotoLibrary.jsx';
 import { SpiderClock } from '../components/SpiderClock.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
-import rolexLogo from '../assets/brands/rolex.svg';
-import patekLogo from '../assets/brands/patek.svg';
-import apLogo from '../assets/brands/ap.svg';
-import vacheronLogo from '../assets/brands/vacheron.svg';
-import omegaLogo from '../assets/brands/omega.svg';
-import cartierLogo from '../assets/brands/cartier.svg';
-import tudorLogo from '../assets/brands/tudor.svg';
-import iwcLogo from '../assets/brands/iwc.svg';
-import jlcLogo from '../assets/brands/jlc.svg';
-import grandseikoLogo from '../assets/brands/grandseiko.svg';
-import seikoLogo from '../assets/brands/seiko.svg';
-import breitlingLogo from '../assets/brands/breitling.svg';
-import tagheuerLogo from '../assets/brands/tagheuer.svg';
-import tissotLogo from '../assets/brands/tissot.svg';
-import longinesLogo from '../assets/brands/longines.svg';
-import hamiltonLogo from '../assets/brands/hamilton.svg';
+import patekLogoNew from '../assets/Logo/Patek-Philippe-Logo-1920s.png';
+import seikoLogoNew from '../assets/Logo/png-transparent-seiko-hd-logo.png';
+import omegaLogoNew from '../assets/Logo/0x0.png';
+import radoLogo from '../assets/Logo/rado-logo-png_seeklogo-115398.png';
+import fossilLogo from '../assets/Logo/png-clipart-fossil-group-watch-business-logo-watch.png';
+import maxlordLogo from '../assets/Logo/images (2).jpg';
+import soberLogo from '../assets/Logo/Gemini_Generated_Image_4hnyq84hnyq84hny.png';
 import watch1 from '../assets/watches/1.png';
 import watch2 from '../assets/watches/2.png';
 import watch3 from '../assets/watches/3.png';
@@ -185,22 +176,13 @@ const perks = [
 ];
 
 const topWatchBrands = [
-  { name: 'Rolex', logo: rolexLogo, type: 'Swiss Luxury Icon' },
-  { name: 'Patek Philippe', logo: patekLogo, type: 'Haute Horlogerie' },
-  { name: 'Audemars Piguet', logo: apLogo, type: 'Contemporary Prestige' },
-  { name: 'Vacheron Constantin', logo: vacheronLogo, type: 'Traditional Craft' },
-  { name: 'Omega', logo: omegaLogo, type: 'Precision & Heritage' },
-  { name: 'Cartier', logo: cartierLogo, type: 'Elegant Design' },
-  { name: 'Tudor', logo: tudorLogo, type: 'Robust Tool Watches' },
-  { name: 'IWC Schaffhausen', logo: iwcLogo, type: 'Swiss Engineering' },
-  { name: 'Jaeger-LeCoultre', logo: jlcLogo, type: 'Atelier Masterpieces' },
-  { name: 'Grand Seiko', logo: grandseikoLogo, type: 'Artisan Polishing' },
-  { name: 'Seiko', logo: seikoLogo, type: 'Pioneering Innovation' },
-  { name: 'Breitling', logo: breitlingLogo, type: 'Aviation Chronographs' },
-  { name: 'TAG Heuer', logo: tagheuerLogo, type: 'Avant-Garde Racing' },
-  { name: 'Tissot', logo: tissotLogo, type: 'Accessible Swiss Heritage' },
-  { name: 'Longines', logo: longinesLogo, type: 'Traditional Elegance' },
-  { name: 'Hamilton', logo: hamiltonLogo, type: 'American Spirit' }
+  { name: 'Patek Philippe', logo: patekLogoNew, type: 'Haute Horlogerie' },
+  { name: 'Seiko', logo: seikoLogoNew, type: 'Pioneering Innovation' },
+  { name: 'Omega', logo: omegaLogoNew, type: 'Precision & Heritage' },
+  { name: 'Rado', logo: radoLogo, type: 'Swiss Master of Materials' },
+  { name: 'Fossil', logo: fossilLogo, type: 'Contemporary Fashion' },
+  { name: 'Maxlord', logo: maxlordLogo, type: 'Distinctive Design' },
+  { name: 'Sober', logo: soberLogo, type: 'Modern Minimalist' }
 ];
 
 const patekSlides = [
@@ -458,9 +440,9 @@ export const HomePage = () => {
       {
         '@type': 'Store',
         '@id': `${window.location.origin}/#store`,
-        'name': 'LahVenture Watches Bangladesh',
+        'name': 'Success Way Watches Bangladesh',
         'url': window.location.origin,
-        'logo': `${window.location.origin}/Lahventure%20Logo.png`,
+        'logo': `${window.location.origin}/successway_logo.jpg`,
         'description': "Bangladesh's #1 luxury watch and smartwatch e-commerce shop featuring original mechanical timepieces and authentic smartwatches.",
         'currenciesAccepted': 'BDT',
         'paymentAccepted': 'Cash on Delivery, BKash, Card, Stripe',
@@ -479,7 +461,7 @@ export const HomePage = () => {
         '@type': 'WebSite',
         '@id': `${window.location.origin}/#website`,
         'url': window.location.origin,
-        'name': 'LahVenture Watches Bangladesh',
+        'name': 'Success Way Watches Bangladesh',
         'publisher': { '@id': `${window.location.origin}/#store` },
         'potentialAction': {
           '@type': 'SearchAction',
@@ -495,15 +477,15 @@ export const HomePage = () => {
             'name': 'Is Cash on Delivery available across Bangladesh?',
             'acceptedAnswer': {
               '@type': 'Answer',
-              'text': 'Yes, LahVenture provides Cash on Delivery (COD) for luxury watches and smartwatches across Dhaka and all districts in Bangladesh.'
+              'text': 'Yes, Success Way provides Cash on Delivery (COD) for luxury watches and smartwatches across Dhaka and all districts in Bangladesh.'
             }
           },
           {
             '@type': 'Question',
-            'name': 'Are all luxury watches at LahVenture 100% authentic?',
+            'name': 'Are all luxury watches at Success Way 100% authentic?',
             'acceptedAnswer': {
               '@type': 'Answer',
-              'text': 'All mechanical timepieces, luxury chronographs, and smartwatches sold by LahVenture come with 100% authenticity guarantee and brand warranty.'
+              'text': 'All mechanical timepieces, luxury chronographs, and smartwatches sold by Success Way come with 100% authenticity guarantee and brand warranty.'
             }
           }
         ]
@@ -514,7 +496,7 @@ export const HomePage = () => {
   return (
     <>
       <Seo
-        title="LahVenture Watches | #1 Luxury Timepiece & Smartwatch Shop in Bangladesh"
+        title="Success Way Watches | #1 Luxury Timepiece & Smartwatch Shop in Bangladesh"
         description="Bangladesh's #1 luxury watch and smartwatch e-commerce shop featuring original mechanical timepieces, Haute Horlogerie, and authentic smartwatches with cash on delivery."
         keywords="online shopping bangladesh, best e-commerce in bangladesh, luxury watches bangladesh, buy watch online dhaka, smartwatch price in bangladesh, original watches bd"
         schemaJson={homeSchema}
@@ -712,7 +694,7 @@ export const HomePage = () => {
       <section className="lahv-signature-section" aria-labelledby="lahv-signature-title">
         <div className="lahv-signature-inner">
           <div className="lahv-signature-copy">
-            <p className="eyebrow signature-eyebrow">LahVenture standard</p>
+            <p className="eyebrow signature-eyebrow">Success Way standard</p>
             <h2 id="lahv-signature-title">A refined watch experience, built for everyday confidence.</h2>
             <p>
               Curated mechanical watches and smartwatches with clear sourcing, reliable delivery,
@@ -766,9 +748,9 @@ export const HomePage = () => {
 
       <SpiderClock />
 
-      <section className="perks-bar" aria-label="LahVenture service promises">
+      <section className="perks-bar" aria-label="Success Way service promises">
         <div className="perks-bar-header">
-          <p className="eyebrow">LahVenture promise</p>
+          <p className="eyebrow">Success Way promise</p>
         </div>
 
         <div className="perks-grid">
