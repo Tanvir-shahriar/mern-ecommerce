@@ -303,6 +303,11 @@ export const ProductDetailPage = () => {
         </div>
       </div>
       <div className="product-detail-right">
+        <div className="product-info">
+          <span className="product-brand-badge">{brandName}</span>
+          <h1>{product.name}</h1>
+        </div>
+
         <div className="product-specs-list">
           <p className="spec-item"><strong>Model:</strong> {product.sku || 'CR4007ZA RG BL LT'}</p>
           <p className="spec-item"><strong>Barcode:</strong> {parseInt(product._id.slice(-6), 16) || '7037306'}</p>

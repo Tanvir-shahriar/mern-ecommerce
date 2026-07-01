@@ -5,6 +5,7 @@ import { AppleLogo, FacebookLogo, GoogleLogo } from '../components/SocialLogos.j
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSocialAuth } from '../hooks/useSocialAuth.js';
 import { apiErrorMessage } from '../services/api.js';
+import { Seo } from '../components/Seo.jsx';
 
 const loginSlides = [
   {
@@ -72,6 +73,7 @@ export const LoginPage = () => {
 
   return (
     <section className="auth-page login-page">
+      <Seo title="Member Login" noIndex />
       <div className="login-hero-panel" aria-label="LahVenture account access">
         <div className="login-hero-copy">
           <p className="eyebrow">Member access</p>

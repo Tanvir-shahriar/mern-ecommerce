@@ -148,7 +148,7 @@ export const ProductsPage = () => {
         <div className="section-heading compact">
           <div>
             <p className="eyebrow">Catalog</p>
-            <h1>Shop watches</h1>
+            <h1>{pageTitle || 'Shop watches'}</h1>
             {params.search ? <span className="search-meta">{data?.pagination?.total || 0} result(s) for "{params.search}"</span> : null}
           </div>
           <select value={searchParams.get('sort') || 'newest'} onChange={(event) => updateFilter('sort', event.target.value)} aria-label="Sort products">

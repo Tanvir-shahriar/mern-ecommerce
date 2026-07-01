@@ -5,6 +5,7 @@ import { AppleLogo, FacebookLogo, GoogleLogo } from '../components/SocialLogos.j
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSocialAuth } from '../hooks/useSocialAuth.js';
 import { apiErrorMessage } from '../services/api.js';
+import { Seo } from '../components/Seo.jsx';
 
 const registerSlides = [
   {
@@ -64,6 +65,7 @@ export const RegisterPage = () => {
 
   return (
     <section className="auth-page login-page register-page">
+      <Seo title="Create Account" noIndex />
       <div className="login-hero-panel register-hero-panel" aria-label="Create a LahVenture account">
         <div className="login-hero-copy">
           <p className="eyebrow">Create profile</p>

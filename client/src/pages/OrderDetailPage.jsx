@@ -10,6 +10,7 @@ import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { dateShort, statusLabel } from '../utils/format.js';
 import { orderCustomerEmail, orderCustomerName, orderCustomerPhone, orderIdentifier } from '../utils/orders.js';
 import { useState } from 'react';
+import { Seo } from '../components/Seo.jsx';
 
 const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
 const emptyReview = { rating: 5, comment: '' };
@@ -127,6 +128,7 @@ export const OrderDetailPage = () => {
 
   return (
     <section className="order-detail-page section">
+      <Seo title={`Order #${order.orderNumber}`} noIndex />
       <Link className="text-link back-link" to={backTo}>
         <ArrowLeft size={17} />
         Back
