@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Minus, Plus, Trash2 } from 'lucide-react';
+import { ArrowRight, Clock3, Heart, Minus, PackageCheck, Plus, ShieldCheck, ShoppingBag, Trash2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
 import { Seo } from '../components/Seo.jsx';
@@ -7,6 +7,58 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { mediaUrl } from '../services/api.js';
+
+const EmptyCartExperience = () => (
+  <section className="empty-cart-experience" aria-labelledby="empty-cart-title">
+    <div className="empty-cart-copy">
+      <p className="eyebrow">Cart</p>
+      <h1 id="empty-cart-title">Your cart is ready for something exceptional</h1>
+      <p>
+        Build a shortlist from our curated watches, save favorites, and return when the right piece finds you.
+      </p>
+      <div className="empty-cart-actions">
+        <Link className="button primary" to="/products">
+          <ShoppingBag size={17} />
+          Shop watches
+          <ArrowRight size={16} />
+        </Link>
+        <Link className="button dark" to="/account?tab=orders">
+          View orders
+        </Link>
+      </div>
+      <div className="empty-cart-perks" aria-label="Shopping benefits">
+        <span>
+          <ShieldCheck size={16} />
+          Secure checkout
+        </span>
+        <span>
+          <PackageCheck size={16} />
+          Order tracking
+        </span>
+        <span>
+          <Clock3 size={16} />
+          Fast support
+        </span>
+      </div>
+    </div>
+
+    <div className="empty-cart-scene" aria-hidden="true">
+      <div className="empty-cart-orbit">
+        <span className="empty-cart-tile tile-one">Automatic</span>
+        <span className="empty-cart-tile tile-two">Diver</span>
+        <span className="empty-cart-tile tile-three">Chrono</span>
+        <div className="empty-cart-bag">
+          <ShoppingBag size={74} strokeWidth={1.6} />
+          <span className="empty-cart-bag-dot" />
+        </div>
+        <span className="empty-cart-heart">
+          <Heart size={18} fill="currentColor" />
+        </span>
+      </div>
+      <div className="empty-cart-shelf" />
+    </div>
+  </section>
+);
 
 export const CartPage = () => {
   const { user } = useAuth();
@@ -24,7 +76,12 @@ export const CartPage = () => {
   }
 
   if (!cart?.items?.length) {
-    return <EmptyState title="Your cart is empty" message="Add a watch before checkout." actionLabel="Shop watches" actionTo="/products" />;
+    return (
+      <section className="cart-page section">
+        <Seo title="Shopping Cart" noIndex />
+        <EmptyCartExperience />
+      </section>
+    );
   }
 
   const submitCoupon = async (event) => {
