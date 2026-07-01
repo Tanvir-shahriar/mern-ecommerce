@@ -8,6 +8,7 @@ import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { presentOrder, presentOrders } from '../utils/orderPresenter.js';
 import { emitOrderEvent } from '../sockets/socket.js';
+import { sendOrderCreatedEmails, sendOrderStatusEmail } from '../services/email.service.js';
 
 const TAX_RATE = 0.08;
 const FREE_SHIPPING_THRESHOLD = 10000;
@@ -170,6 +171,8 @@ export const createOrder = asyncHandler(async (req, res) => {
     user: req.user._id.toString()
   });
 
+  await sendOrderCreatedEmails(order);
+
   res.status(201).json({
     status: 'success',
     data: { order: presentOrder(order) }
@@ -302,6 +305,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
   if (!order) throw new ApiError(404, 'Order not found');
 
+  const previousStatus = order.status;
   order.status = req.body.status;
   if (req.body.paymentStatus) order.payment.status = req.body.paymentStatus;
   if (req.body.status === 'delivered' && !order.deliveredAt) order.deliveredAt = new Date();
@@ -318,6 +322,10 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     status: order.status,
     user: order.user.toString()
   });
+
+  if (previousStatus !== order.status) {
+    await sendOrderStatusEmail(order, { note: req.body.note });
+  }
 
   res.json({
     status: 'success',

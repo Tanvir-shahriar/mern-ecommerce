@@ -49,6 +49,23 @@ Demo admin: `admin@example.com` / `Admin123!`
 
 Demo customer: `customer@example.com` / `Customer123!`
 
+## Email Notifications with Resend
+
+The backend sends customer order confirmations, admin new-order notifications, and customer order status updates through Resend. Email delivery is skipped safely until the Resend environment variables are configured.
+
+1. In Resend, verify the domain you want to send from and create an API key.
+2. Add these values to `.env`, `server/.env`, or your deployment environment:
+
+   ```env
+   RESEND_API_KEY=re_xxxxxxxxx
+   EMAIL_FROM=lahVenture <orders@your-domain.com>
+   EMAIL_REPLY_TO=support@your-domain.com
+   EMAIL_ADMIN_TO=owner@your-domain.com,orders@your-domain.com
+   EMAIL_STORE_NAME=lahVenture
+   ```
+
+`EMAIL_FROM` must use a sender address from your verified Resend domain. `EMAIL_ADMIN_TO` accepts one or more comma-separated recipients.
+
 ## MongoDB Atlas
 
 The app reads MongoDB from `MONGO_URI` in `.env` or `server/.env`. For Atlas, use a URI with a database name in the path, for example:
@@ -123,6 +140,11 @@ COOKIE_EXPIRES_DAYS=7
 UPLOAD_DIR=uploads
 SEED_ADMIN_EMAIL=admin@example.com
 SEED_ADMIN_PASSWORD=<secure admin password>
+RESEND_API_KEY=<your Resend API key>
+EMAIL_FROM=lahVenture <orders@your-domain.com>
+EMAIL_REPLY_TO=support@your-domain.com
+EMAIL_ADMIN_TO=owner@your-domain.com,orders@your-domain.com
+EMAIL_STORE_NAME=lahVenture
 ```
 
 For Hostinger MySQL deployment, replace `MONGO_URI`/`DATABASE_PROVIDER=mongodb` with:
