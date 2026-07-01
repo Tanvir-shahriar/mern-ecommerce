@@ -81,8 +81,8 @@ main {
   top: 0;
   z-index: 100;
   padding: 14px 0;
-  background: rgba(12, 12, 12, 0.76);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(90deg, #6b000b 0%, #4a0006 100%) !important;
+  border-bottom: 3px solid #006f8a;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(20px);
   color: white;
@@ -5136,7 +5136,7 @@ textarea:focus {
   .order-detail-layout,
   .address-manager,
   .reviews-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .account-page,
@@ -5163,7 +5163,7 @@ textarea:focus {
 
   .login-page {
     width: min(100% - 28px, 1180px);
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
     padding: 34px 0;
   }
 
@@ -5204,6 +5204,53 @@ textarea:focus {
 
   .header-actions {
     gap: 6px;
+  }
+
+  .currency-switcher {
+    display: none !important;
+  }
+
+  .brand-logo {
+    width: 120px !important;
+    height: 36px !important;
+    flex-basis: 120px !important;
+  }
+
+  .mobile-currency-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: default !important;
+  }
+
+  .mobile-currency-container:hover {
+    transform: none !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12) !important;
+    background: #66000c !important;
+  }
+
+  .mobile-currency-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .hamburger-currency-select {
+    background: rgba(255, 255, 255, 0.12) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    color: #ffffff !important;
+    font-weight: 700;
+    outline: none;
+    cursor: pointer;
+    font-size: 0.88rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-family: Inter, sans-serif;
+  }
+
+  .hamburger-currency-select option {
+    color: #000000;
+    background: #ffffff;
   }
 
   .icon-button {
@@ -5665,6 +5712,7 @@ textarea:focus {
 
   .login-page {
     width: min(100% - 24px, 1180px);
+    grid-template-columns: 1fr !important;
     padding: 24px 0 34px;
     gap: 16px;
   }
@@ -6058,7 +6106,7 @@ textarea:focus {
   .metric-grid,
   .wishlist-grid,
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr !important;
   }
 
   .uploaded-image-grid {
@@ -7014,14 +7062,23 @@ textarea:focus {
     flex-direction: column;
     gap: 8px;
   }
+  .hero-visual-custom {
+    flex-direction: column;
+    gap: 16px;
+  }
   .hero-watch-container {
-    max-width: 360px;
+    max-width: min(360px, 82vw);
   }
   .hero-video-widget {
     position: relative;
-    margin-top: 20px;
+    margin-top: 10px;
     right: auto;
     bottom: auto;
+  }
+  .hero-dots-container {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    bottom: 16px !important;
   }
 }
 
@@ -9114,6 +9171,50 @@ textarea:focus {
   .track-now-btn {
     justify-content: center;
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-actions-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    width: 100% !important;
+    gap: 10px !important;
+  }
+
+  .button-buy-now,
+  .button-add-to-cart {
+    width: 100% !important;
+    flex: none !important;
+  }
+
+  .button-wishlist {
+    width: 100% !important;
+    justify-content: center !important;
+    display: inline-flex !important;
+    align-items: center !important;
+  }
+
+  .tab-btn {
+    padding: 10px 14px !important;
+    font-size: 0.8rem !important;
+    flex: 1 !important;
+    text-align: center !important;
+  }
+}
+
+@media (max-width: 420px) {
+  .header-action-btn {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .header-menu-toggle {
+    padding: 6px !important;
+  }
+
+  .header-inner {
+    gap: 4px !important;
   }
 }
 

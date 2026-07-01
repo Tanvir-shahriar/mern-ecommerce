@@ -187,6 +187,26 @@ export const Layout = () => {
                     Admin Panel
                   </Link>
                 ) : null}
+
+                {currencies?.length > 1 ? (
+                  <div className="hamburger-item mobile-currency-container">
+                    <span className="mobile-currency-label">
+                      <Globe2 size={16} />
+                      Currency
+                    </span>
+                    <select
+                      value={currency}
+                      onChange={(event) => setCurrency(event.target.value)}
+                      className="hamburger-currency-select"
+                    >
+                      {currencies.map((item) => (
+                        <option value={item.code} key={item.code}>
+                          {item.code}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
