@@ -70,7 +70,8 @@ export const env = {
     from: process.env.EMAIL_FROM || '',
     replyTo: process.env.EMAIL_REPLY_TO || '',
     adminTo: commaSeparatedList(process.env.EMAIL_ADMIN_TO || process.env.ADMIN_EMAILS),
-    storeName: process.env.EMAIL_STORE_NAME || 'lahVenture'
+    storeName: process.env.EMAIL_STORE_NAME || 'lahVenture',
+    logoUrl: process.env.EMAIL_LOGO_URL || ''
   },
   seedAdminEmail: process.env.SEED_ADMIN_EMAIL || 'admin@example.com',
   seedAdminPassword: process.env.SEED_ADMIN_PASSWORD || 'Admin123!'

@@ -62,9 +62,10 @@ The backend sends customer order confirmations, admin new-order notifications, a
    EMAIL_REPLY_TO=support@your-domain.com
    EMAIL_ADMIN_TO=owner@your-domain.com,orders@your-domain.com
    EMAIL_STORE_NAME=lahVenture
+   EMAIL_LOGO_URL=https://your-domain.com/lahventure.png
    ```
 
-`EMAIL_FROM` must use a sender address from your verified Resend domain. `EMAIL_ADMIN_TO` accepts one or more comma-separated recipients.
+`EMAIL_FROM` must use a sender address from your verified Resend domain. `EMAIL_ADMIN_TO` accepts one or more comma-separated recipients. `EMAIL_LOGO_URL` is optional; when it is omitted, emails use `${CLIENT_URL}/lahventure.png`.
 
 ## MongoDB Atlas
 
@@ -145,6 +146,7 @@ EMAIL_FROM=lahVenture <orders@your-domain.com>
 EMAIL_REPLY_TO=support@your-domain.com
 EMAIL_ADMIN_TO=owner@your-domain.com,orders@your-domain.com
 EMAIL_STORE_NAME=lahVenture
+EMAIL_LOGO_URL=https://your-domain.com/lahventure.png
 ```
 
 For Hostinger MySQL deployment, replace `MONGO_URI`/`DATABASE_PROVIDER=mongodb` with:

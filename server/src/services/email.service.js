@@ -80,6 +80,8 @@ const getOrderNumber = (order) => order?.orderNumber || order?._id?.toString?.()
 
 const getBaseUrl = () => env.clientUrl.replace(/\/+$/, '');
 
+const getLogoUrl = () => env.email.logoUrl || `${getBaseUrl()}/lahventure.png`;
+
 const getOrderUrl = (order) => `${getBaseUrl()}/orders/${encodeURIComponent(getOrderNumber(order))}`;
 
 const getAdminOrdersUrl = () => `${getBaseUrl()}/admin/orders`;
@@ -200,6 +202,7 @@ const emailLayout = ({ title, preview, content }) => `
           <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;border-collapse:collapse;background:#ffffff;border:1px solid #e5e7eb;">
             <tr>
               <td style="padding:24px;background:#111827;color:#ffffff;">
+                <img src="${escapeHtml(getLogoUrl())}" width="72" height="72" alt="${escapeHtml(env.email.storeName)}" style="display:block;width:72px;height:72px;object-fit:contain;margin:0 0 14px;" />
                 <div style="font-size:13px;letter-spacing:0;text-transform:uppercase;color:#d1d5db;">${escapeHtml(env.email.storeName)}</div>
                 <h1 style="margin:8px 0 0;font-size:24px;line-height:1.3;">${escapeHtml(title)}</h1>
               </td>
