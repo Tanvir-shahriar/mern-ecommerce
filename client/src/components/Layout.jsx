@@ -14,11 +14,14 @@ import {
   User,
   X
 } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
+import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
+import { api, mediaUrl } from '../services/api.js';
 import lahventureLogo from '../assets/images/Lahventure Logo.png';
 
 const navClass = ({ isActive }) => (isActive ? 'nav-link active' : 'nav-link');
@@ -30,8 +33,70 @@ export const Layout = () => {
   const navigate = useNavigate();
   const { user, isAdmin, logout } = useAuth();
   const { itemCount } = useCart();
-  const { currency, currencies, setCurrency } = useCurrency();
+  const { currency, currencies, setCurrency, formatMoney } = useCurrency();
   const [activeCategory, setActiveCategory] = useState(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
+  const [recentSearches, setRecentSearches] = useState([]);
+
+  const searchContainerRef = useRef(null);
+  const debouncedSearch = useDebouncedValue(search, 300);
+
+  // Autocomplete Suggestions Query
+  const { data: suggestions = [], isLoading: isSuggestionsLoading } = useQuery({
+    queryKey: ['search-suggestions', debouncedSearch],
+    queryFn: async () => {
+      const queryStr = debouncedSearch.trim();
+      if (queryStr.length < 2) return [];
+      try {
+        const { data } = await api.get('/search/suggestions', {
+          params: { q: queryStr }
+        });
+        return data.data.suggestions || [];
+      } catch (err) {
+        console.error('Error fetching search suggestions:', err);
+        return [];
+      }
+    },
+    enabled: debouncedSearch.trim().length >= 2
+  });
+
+  // Popular Trending Searches Query
+  const { data: popularQueries = [] } = useQuery({
+    queryKey: ['popular-searches'],
+    queryFn: async () => {
+      try {
+        const { data } = await api.get('/search/popular');
+        return data.data.queries || [];
+      } catch (e) {
+        console.error('Error fetching popular searches:', e);
+        return [];
+      }
+    },
+    enabled: showSearch
+  });
+
+  // Load recent searches from localStorage on focus
+  useEffect(() => {
+    if (showSearch) {
+      const recents = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+      setRecentSearches(recents);
+    }
+  }, [showSearch]);
+
+  const saveRecentSearch = (queryStr) => {
+    const q = queryStr.trim();
+    if (!q) return;
+    const recents = JSON.parse(localStorage.getItem('recentSearches') || '[]');
+    const filtered = [q, ...recents.filter(x => x.toLowerCase() !== q.toLowerCase())].slice(0, 5);
+    localStorage.setItem('recentSearches', JSON.stringify(filtered));
+    setRecentSearches(filtered);
+  };
+
+  const clearRecentSearches = () => {
+    localStorage.removeItem('recentSearches');
+    setRecentSearches([]);
+  };
 
   useEffect(() => {
     if (!open) {
@@ -39,10 +104,91 @@ export const Layout = () => {
     }
   }, [open]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target)) {
+        setShowSearch(false);
+        setActiveSuggestionIndex(-1);
+      }
+    };
+    if (showSearch) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showSearch]);
+
+  useEffect(() => {
+    setActiveSuggestionIndex(-1);
+  }, [suggestions]);
+
+  const highlightMatch = (text, query) => {
+    if (!query || !text) return text;
+    const cleanQuery = query.trim();
+    if (!cleanQuery) return text;
+
+    const terms = cleanQuery.split(/\s+/).filter(Boolean);
+    if (terms.length === 0) return text;
+
+    const escapeRegexStr = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const regexStr = `(${terms.map(escapeRegexStr).join('|')})`;
+    const parts = text.split(new RegExp(regexStr, 'gi'));
+
+    return (
+      <span>
+        {parts.map((part, index) =>
+          terms.some((term) => term.toLowerCase() === part.toLowerCase()) ? (
+            <mark key={index} className="search-highlight">
+              {part}
+            </mark>
+          ) : (
+            part
+          )
+        )}
+      </span>
+    );
+  };
+
+  const handleKeyDown = (e) => {
+    if (!showSearch) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveSuggestionIndex((prev) =>
+        prev < suggestions.length - 1 ? prev + 1 : prev
+      );
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveSuggestionIndex((prev) => (prev > -1 ? prev - 1 : -1));
+    } else if (e.key === 'Escape') {
+      setShowSearch(false);
+      setActiveSuggestionIndex(-1);
+    } else if (e.key === 'Enter') {
+      if (activeSuggestionIndex >= 0 && activeSuggestionIndex < suggestions.length) {
+        e.preventDefault();
+        const selectedProduct = suggestions[activeSuggestionIndex];
+        saveRecentSearch(selectedProduct.name);
+        navigate(`/products/${selectedProduct.slug || selectedProduct._id}`);
+        setShowSearch(false);
+        setActiveSuggestionIndex(-1);
+      } else {
+        e.preventDefault();
+        submitSearch(e);
+      }
+    }
+  };
+
   const submitSearch = (event) => {
-    event.preventDefault();
+    event?.preventDefault();
     const query = search.trim();
-    navigate(query ? `/products?search=${encodeURIComponent(query)}` : '/products');
+    if (query) {
+      saveRecentSearch(query);
+      navigate(`/products?search=${encodeURIComponent(query)}`);
+    } else {
+      navigate('/products');
+    }
+    setShowSearch(false);
     setOpen(false);
   };
 
@@ -51,8 +197,6 @@ export const Layout = () => {
     setOpen(false);
     navigate('/');
   };
-
-  const [showSearch, setShowSearch] = useState(false);
 
   return (
     <div className="site-shell">
@@ -235,22 +379,139 @@ export const Layout = () => {
           </nav>
 
           {showSearch ? (
-            <form className="header-search-active" onSubmit={submitSearch}>
-              <input
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search watches..."
-                autoFocus
-                onBlur={() => {
-                  if (!search) {
-                    setTimeout(() => setShowSearch(false), 200);
-                  }
-                }}
-              />
-              <button type="submit" className="search-active-submit" aria-label="Submit search">
-                <Search size={18} />
-              </button>
-            </form>
+            <div className="header-search-container" ref={searchContainerRef}>
+              <form className="header-search-active" onSubmit={submitSearch} onKeyDown={handleKeyDown}>
+                <input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search watches, brands, categories..."
+                  autoFocus
+                />
+                <button type="submit" className="search-active-submit" aria-label="Submit search">
+                  <Search size={18} />
+                </button>
+              </form>
+
+              <div className="search-dropdown">
+                {search.trim().length < 2 ? (
+                  <div className="search-dropdown-meta-sections">
+                    {recentSearches.length > 0 && (
+                      <div className="search-meta-section">
+                        <div className="search-meta-section-header">
+                          <span>Recent Searches</span>
+                          <button
+                            type="button"
+                            className="search-meta-clear-btn"
+                            onClick={clearRecentSearches}
+                          >
+                            Clear
+                          </button>
+                        </div>
+                        <div className="search-meta-list">
+                          {recentSearches.map((item, idx) => (
+                            <div
+                              key={idx}
+                              className="search-meta-item"
+                              onClick={() => {
+                                setSearch(item);
+                                navigate(`/products?search=${encodeURIComponent(item)}`);
+                                saveRecentSearch(item);
+                                setShowSearch(false);
+                              }}
+                            >
+                              <Clock3 size={13} className="search-meta-icon" />
+                              <span className="search-meta-text">{item}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="search-meta-section">
+                      <div className="search-meta-section-header">
+                        <span>Trending Searches</span>
+                      </div>
+                      <div className="search-trending-tags">
+                        {popularQueries.length > 0 ? (
+                          popularQueries.map((item, idx) => (
+                            <button
+                              key={idx}
+                              type="button"
+                              className="search-trending-tag"
+                              onClick={() => {
+                                setSearch(item);
+                                navigate(`/products?search=${encodeURIComponent(item)}`);
+                                saveRecentSearch(item);
+                                setShowSearch(false);
+                              }}
+                            >
+                              {item}
+                            </button>
+                          ))
+                        ) : (
+                          <span className="search-meta-empty">No trending searches yet</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {isSuggestionsLoading ? (
+                      <div className="search-dropdown-loading">Searching timepieces...</div>
+                    ) : suggestions.length > 0 ? (
+                      <div className="search-dropdown-results">
+                        {suggestions.map((product, index) => (
+                          <Link
+                            to={`/products/${product.slug || product._id}`}
+                            key={product._id}
+                            className={`search-dropdown-item ${index === activeSuggestionIndex ? 'active' : ''}`}
+                            onClick={() => {
+                              saveRecentSearch(product.name);
+                              setShowSearch(false);
+                              setActiveSuggestionIndex(-1);
+                            }}
+                          >
+                            <img
+                              src={mediaUrl(product.images?.[0]?.url)}
+                              alt={product.images?.[0]?.alt || product.name}
+                              className="search-dropdown-item-img"
+                            />
+                            <div className="search-dropdown-item-info">
+                              <span className="search-dropdown-item-brand">
+                                {highlightMatch(product.brand, search)}
+                              </span>
+                              <span className="search-dropdown-item-name">
+                                {highlightMatch(product.name, search)}
+                              </span>
+                              <span className="search-dropdown-item-price">
+                                {formatMoney(product.price)}
+                              </span>
+                            </div>
+                          </Link>
+                        ))}
+                        <div className="search-dropdown-footer">
+                          <Link
+                            to={`/products?search=${encodeURIComponent(search.trim())}`}
+                            onClick={() => {
+                              saveRecentSearch(search);
+                              setShowSearch(false);
+                              setActiveSuggestionIndex(-1);
+                            }}
+                            className="search-dropdown-view-all"
+                          >
+                            View all results for "{search.trim()}"
+                          </Link>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="search-dropdown-empty">
+                        No products found for "{search.trim()}"
+                      </div>
+                    )}
+                  </>
+                )}
+              </div>
+            </div>
           ) : null}
 
           <div className="header-actions">

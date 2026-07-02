@@ -29,8 +29,10 @@ import uploadRoutes from './routes/upload.routes.js';
 import galleryRoutes from './routes/gallery.routes.js';
 import currencyRoutes from './routes/currency.routes.js';
 import sitemapRoutes from './routes/sitemap.routes.js';
+import searchRoutes from './routes/search.routes.js';
 
 export const app = express();
+// ... [rest unchanged up to line 100] ...
 
 app.set('trust proxy', 1);
 
@@ -99,6 +101,7 @@ app.use(['/api/cart', '/api/orders', '/api/users', '/api/admin', '/api/products'
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/search', searchRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);

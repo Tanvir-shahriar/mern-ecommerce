@@ -10,5 +10,6 @@ registry.Cart = new JsonModel('Cart', 'carts', { registry });
 registry.Order = new JsonModel('Order', 'orders', { registry });
 registry.CurrencySetting = new JsonModel('CurrencySetting', 'currency_settings', { registry });
 registry.Gallery = new JsonModel('Gallery', 'galleries', { registry });
+registry.SearchLog = new JsonModel('SearchLog', 'search_logs', { registry });
 
 export const mysqlModels = registry;

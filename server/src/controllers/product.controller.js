@@ -4,6 +4,13 @@ import { Order } from '../models/order.model.js';
 import { Product } from '../models/product.model.js';
 import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import {
+  extractPriceFilters,
+  tokenizeAndExpand,
+  resolveIntentCategoriesAndBrands,
+  calculateRelevanceScore,
+  isFuzzyMatch
+} from '../utils/searchEngine.js';
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -65,16 +72,14 @@ const buildProductFilter = async (query, includeInactive = false) => {
     filter.status = query.status;
   }
 
+  // Price intent extraction
   if (query.search) {
-    const search = String(query.search).trim();
-    const regex = new RegExp(escapeRegex(search), 'i');
-    filter.$or = [
-      { name: regex },
-      { sku: regex },
-      { description: regex },
-      { brand: regex },
-      { tags: regex }
-    ];
+    const { minPrice, maxPrice } = extractPriceFilters(String(query.search));
+    if (minPrice !== null || maxPrice !== null) {
+      filter.price = {};
+      if (minPrice !== null) filter.price.$gte = minPrice;
+      if (maxPrice !== null) filter.price.$lte = maxPrice;
+    }
   }
 
   if (query.category && query.category !== 'all') {
@@ -87,9 +92,11 @@ const buildProductFilter = async (query, includeInactive = false) => {
   }
 
   if (query.minPrice || query.maxPrice) {
-    filter.price = {};
-    if (query.minPrice) filter.price.$gte = Number(query.minPrice);
-    if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
+    if (!filter.price) {
+      filter.price = {};
+      if (query.minPrice) filter.price.$gte = Number(query.minPrice);
+      if (query.maxPrice) filter.price.$lte = Number(query.maxPrice);
+    }
   }
 
   if (query.rating) filter.ratingsAverage = { $gte: Number(query.rating) };
@@ -107,16 +114,82 @@ export const getProducts = asyncHandler(async (req, res) => {
   const skip = (page - 1) * limit;
   const sort = sortOptions[req.query.sort] || sortOptions.newest;
 
-  const [products, total, brands] = await Promise.all([
-    Product.find(filter)
-      .populate('category', 'name slug')
-      .sort(sort)
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    Product.countDocuments(filter),
+  const isSearchQuery = Boolean(req.query.search);
+  const isRelevanceSort = isSearchQuery && (!req.query.sort || req.query.sort === 'newest');
+
+  // Fetch all matching candidates from DB.
+  // If isSearchQuery, we query all candidates to execute in-memory fuzzy matching and relevance sorting.
+  // If NOT a search query, we do standard pagination in DB for performance.
+  const [productsRaw, totalCount, brands] = await Promise.all([
+    isSearchQuery
+      ? Product.find(filter).populate('category', 'name slug').lean()
+      : Product.find(filter)
+          .populate('category', 'name slug')
+          .sort(sort)
+          .skip(skip)
+          .limit(limit)
+          .lean(),
+    isSearchQuery ? null : Product.countDocuments(filter),
     Product.distinct('brand', { status: 'active', brand: { $ne: null } })
   ]);
+
+  let products = productsRaw;
+  let total = totalCount;
+
+  if (isSearchQuery) {
+    const searchStr = String(req.query.search);
+    const { cleanQuery } = extractPriceFilters(searchStr);
+    const queryTokens = tokenizeAndExpand(cleanQuery);
+
+    // Apply in-memory typo tolerance/fuzzy matching
+    if (queryTokens.length > 0) {
+      products = productsRaw.filter((product) => {
+        const catName = product.category?.name || '';
+        return queryTokens.every((token) => {
+          return (
+            isFuzzyMatch(product.name, token) ||
+            isFuzzyMatch(product.brand, token) ||
+            isFuzzyMatch(product.sku, token) ||
+            isFuzzyMatch(product.description, token) ||
+            isFuzzyMatch(product.shortDescription, token) ||
+            isFuzzyMatch(catName, token) ||
+            (product.tags || []).some((tag) => isFuzzyMatch(tag, token)) ||
+            (product.attributes || []).some((attr) => isFuzzyMatch(attr.value, token))
+          );
+        });
+      });
+    }
+
+    total = products.length;
+
+    // Apply relevance scoring
+    if (queryTokens.length > 0) {
+      products = products.map((product) => {
+        product.relevanceScore = calculateRelevanceScore(product, queryTokens, cleanQuery);
+        return product;
+      });
+      // Sort by score if relevance sort is active
+      if (isRelevanceSort) {
+        products.sort((a, b) => b.relevanceScore - a.relevanceScore);
+      }
+    }
+
+    // Apply other sorts in-memory if needed
+    if (!isRelevanceSort && sort !== 'newest') {
+      if (sort === 'price-asc') {
+        products.sort((a, b) => a.price - b.price);
+      } else if (sort === 'price-desc') {
+        products.sort((a, b) => b.price - a.price);
+      } else if (sort === 'rating') {
+        products.sort((a, b) => (b.ratingsAverage || 0) - (a.ratingsAverage || 0));
+      } else if (sort === 'popular') {
+        products.sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0));
+      }
+    }
+
+    // Paginate in memory
+    products = products.slice(skip, skip + limit);
+  }
 
   res.json({
     status: 'success',

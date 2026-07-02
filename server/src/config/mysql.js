@@ -3,7 +3,7 @@ import { env } from './env.js';
 
 let pool;
 
-const tables = ['users', 'categories', 'products', 'coupons', 'carts', 'orders', 'currency_settings', 'galleries'];
+const tables = ['users', 'categories', 'products', 'coupons', 'carts', 'orders', 'currency_settings', 'galleries', 'search_logs'];
 
 export const getMysqlPool = () => {
   if (!pool) {
