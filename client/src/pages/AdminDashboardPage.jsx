@@ -62,7 +62,12 @@ export const AdminDashboardPage = () => {
           ) : (
             <div className="order-list">
               {data?.recentOrders?.map((order) => (
-                <article className="order-row dashboard-order-row" key={orderIdentifier(order)}>
+                <Link
+                  className="order-row dashboard-order-row dashboard-order-link"
+                  key={orderIdentifier(order)}
+                  to={orderDetailPath(order)}
+                  aria-label={`View order ${order.orderNumber}`}
+                >
                   <div>
                     <strong>{order.orderNumber}</strong>
                     <span>{orderCustomerName(order) || dateShort(order.createdAt)}</span>
@@ -71,12 +76,12 @@ export const AdminDashboardPage = () => {
                   <div className="dashboard-order-meta">
                     <span className={`status-pill ${order.status}`}>{statusLabel(order.status)}</span>
                     <strong>{money(order.pricing.total)}</strong>
-                    <Link className="button compact" to={orderDetailPath(order)}>
+                    <span className="button compact">
                       <Eye size={16} />
                       View
-                    </Link>
+                    </span>
                   </div>
-                </article>
+                </Link>
               ))}
             </div>
           )}

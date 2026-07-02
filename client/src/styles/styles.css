@@ -3925,6 +3925,22 @@ textarea:focus {
   align-items: center;
 }
 
+.dashboard-order-link {
+  margin: 0 -10px;
+  padding: 12px 10px;
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: background var(--transition), border-color var(--transition), transform var(--transition);
+}
+
+.dashboard-order-link:hover,
+.dashboard-order-link:focus-visible {
+  background: rgba(107, 0, 11, 0.06);
+  border-bottom-color: transparent;
+  outline: none;
+  transform: translateY(-1px);
+}
+
 .dashboard-order-meta {
   display: grid;
   justify-items: end;
@@ -10145,5 +10161,4 @@ textarea:focus {
   color: var(--text);
   margin: 0;
 }
-
 
