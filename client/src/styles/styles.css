@@ -4666,6 +4666,35 @@ textarea:focus {
   gap: 12px;
 }
 
+.user-detail-empty {
+  display: grid;
+  gap: 14px;
+}
+
+.admin-user-address-list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-user-address {
+  display: grid;
+  gap: 3px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--wash);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.admin-user-address > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--ink);
+}
+
 .mini-product-list {
   display: grid;
   gap: 10px;

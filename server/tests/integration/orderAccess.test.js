@@ -103,6 +103,21 @@ describe('order access', () => {
     expect(response.body.data.order.customer.email).toBe(customer.email);
   });
 
+  it('lets an admin view selected user details', async () => {
+    const customer = await createUser({ name: 'Detail Customer', email: 'detail-customer@example.com' });
+    const admin = await createUser({ email: 'user-admin@example.com', role: 'admin' });
+    await createOrder(customer);
+
+    const response = await request(app)
+      .get(`/api/users/${customer._id}`)
+      .set('Authorization', `Bearer ${signToken(admin._id)}`)
+      .expect(200);
+
+    expect(response.body.data.user.email).toBe(customer.email);
+    expect(response.body.data.stats.ordersCount).toBe(1);
+    expect(response.body.data.orders).toHaveLength(1);
+  });
+
   it('lets the owner and admins view an order by order number', async () => {
     const customer = await createUser({ email: 'number-owner@example.com' });
     const superAdmin = await createUser({ email: 'number-admin@example.com', role: 'super_admin' });

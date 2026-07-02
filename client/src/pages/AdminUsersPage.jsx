@@ -10,6 +10,25 @@ import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
 import { orderDetailPath, orderIdentifier } from '../utils/orders.js';
 
+const userIdentifier = (user) => user?._id || user?.id || '';
+
+const AddressSummary = ({ address }) => (
+  <article className="admin-user-address">
+    <div>
+      <strong>{address.label || 'Address'}</strong>
+      {address.isDefault ? <span className="status-pill active">Default</span> : null}
+    </div>
+    <span>{address.fullName}</span>
+    <span>{address.phone}</span>
+    <span>{address.line1}</span>
+    {address.line2 ? <span>{address.line2}</span> : null}
+    <span>
+      {[address.city, address.state, address.postalCode].filter(Boolean).join(', ')}
+    </span>
+    <span>{address.country || 'Bangladesh'}</span>
+  </article>
+);
+
 export const AdminUsersPage = () => {
   const [search, setSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState('');
@@ -33,7 +52,8 @@ export const AdminUsersPage = () => {
   });
 
   const users = data?.users || [];
-  const selectedId = selectedUserId || users[0]?._id;
+  const selectedId = selectedUserId || userIdentifier(users[0]);
+  const selectedListUser = users.find((user) => userIdentifier(user) === selectedId);
 
   const accessMutation = useMutation({
     mutationFn: async ({ userId, payload }) => {
@@ -53,7 +73,7 @@ export const AdminUsersPage = () => {
     }
   });
 
-  const { data: selectedUserData, isLoading: detailLoading, isFetching: detailFetching } = useQuery({
+  const { data: selectedUserData, isLoading: detailLoading, isFetching: detailFetching, isError: detailError, error: detailRequestError } = useQuery({
     queryKey: ['admin-user', selectedId],
     enabled: Boolean(selectedId),
     queryFn: async () => {
@@ -63,7 +83,7 @@ export const AdminUsersPage = () => {
   });
 
   const detail = selectedUserData;
-  const selectedIsSelf = Boolean(detail?.user?._id && detail.user._id === currentUser?._id);
+  const selectedIsSelf = Boolean(userIdentifier(detail?.user) && userIdentifier(detail.user) === userIdentifier(currentUser));
   const selectedIsSuperAdmin = detail?.user?.role === 'super_admin';
   const canEditAccess = Boolean(isSuperAdmin && detail?.user && !selectedIsSelf && !selectedIsSuperAdmin);
 
@@ -71,6 +91,17 @@ export const AdminUsersPage = () => {
     setAccessMessage('');
     setAccessError('');
   }, [selectedId]);
+
+  useEffect(() => {
+    if (!users.length) {
+      setSelectedUserId('');
+      return;
+    }
+
+    if (!selectedUserId || !users.some((user) => userIdentifier(user) === selectedUserId)) {
+      setSelectedUserId(userIdentifier(users[0]));
+    }
+  }, [selectedUserId, users]);
 
   const updateAccess = (payload) => {
     if (!selectedId || accessMutation.isPending) return;
@@ -106,9 +137,9 @@ export const AdminUsersPage = () => {
               {users.map((user) => (
                 <button
                   type="button"
-                  className={selectedId === user._id ? 'user-row active' : 'user-row'}
-                  key={user._id}
-                  onClick={() => setSelectedUserId(user._id)}
+                  className={selectedId === userIdentifier(user) ? 'user-row active' : 'user-row'}
+                  key={userIdentifier(user)}
+                  onClick={() => setSelectedUserId(userIdentifier(user))}
                 >
                   <span className="user-avatar">
                     <UserRound size={18} />
@@ -128,8 +159,24 @@ export const AdminUsersPage = () => {
         </div>
 
         <aside className="panel user-detail-panel">
-          {detailLoading || detailFetching ? (
+          {detailLoading || (detailFetching && !detail) ? (
             <AdminLoadingState label="Loading user details" />
+          ) : detailError ? (
+            <div className="user-detail-empty">
+              <p className="form-error">{apiErrorMessage(detailRequestError)}</p>
+              {selectedListUser ? (
+                <div className="info-list">
+                  <span>
+                    <Mail size={15} />
+                    {selectedListUser.email}
+                  </span>
+                  <span>
+                    <Shield size={15} />
+                    {statusLabel(selectedListUser.role)} / {statusLabel(selectedListUser.status)}
+                  </span>
+                </div>
+              ) : null}
+            </div>
           ) : detail ? (
             <>
               <div className="detail-card-heading">
@@ -154,6 +201,7 @@ export const AdminUsersPage = () => {
                 <span>Phone: {detail.user.phone || 'Not provided'}</span>
                 <span>Joined: {dateShort(detail.user.createdAt)}</span>
                 <span>Last login: {dateShort(detail.user.lastLoginAt)}</span>
+                <span>User ID: {userIdentifier(detail.user)}</span>
               </div>
 
               <div className="metric-grid compact">
@@ -212,6 +260,17 @@ export const AdminUsersPage = () => {
                 ) : null}
                 {accessMessage ? <p className="form-note">{accessMessage}</p> : null}
                 {accessError ? <p className="form-error">{accessError}</p> : null}
+              </div>
+
+              <h3>Addresses</h3>
+              <div className="admin-user-address-list">
+                {detail.user.addresses?.length ? (
+                  detail.user.addresses.map((address) => (
+                    <AddressSummary address={address} key={address._id || `${address.label}-${address.line1}`} />
+                  ))
+                ) : (
+                  <p className="muted">No saved addresses.</p>
+                )}
               </div>
 
               <h3>Recent orders</h3>
