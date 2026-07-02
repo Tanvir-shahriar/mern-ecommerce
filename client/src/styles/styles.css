@@ -7144,8 +7144,8 @@ textarea:focus {
 /* Custom Redesigned Hero Section Styling */
 .hero-section {
   position: relative;
-  min-height: 656px;
-  height: min(656px, calc(100vh - 74px));
+  min-height: 720px;
+  height: clamp(720px, calc(100vh - 74px), 820px);
   display: block;
   overflow: hidden;
   background:
@@ -7377,9 +7377,9 @@ textarea:focus {
 .hero-watch-container {
   position: absolute;
   left: 35.6%;
-  top: -7.5%;
+  top: 0;
   width: min(49vw, 820px);
-  height: 117%;
+  height: 100%;
   --watch-base-transform: translate3d(0, 0, 0);
   display: flex;
   justify-content: center;
@@ -7396,7 +7396,7 @@ textarea:focus {
   max-width: none;
   max-height: none;
   width: auto;
-  height: 118%;
+  height: calc(100% - 24px);
   object-fit: contain;
   object-position: center;
   animation: floatWatch 6s ease-in-out infinite;
@@ -7472,6 +7472,22 @@ textarea:focus {
   }
   50% {
     transform: translateY(-10px);
+  }
+}
+
+@media (min-width: 992px) and (max-width: 1199px) {
+  .hero-content-custom {
+    top: clamp(60px, 8.5vh, 76px);
+    width: clamp(318px, 34vw, 390px);
+  }
+
+  .hero-watch-container {
+    left: 38%;
+    width: min(46vw, 560px);
+  }
+
+  .hero-video-widget {
+    right: clamp(30px, 4.5vw, 54px);
   }
 }
 
