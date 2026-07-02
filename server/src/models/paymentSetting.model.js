@@ -12,9 +12,11 @@ const paymentMethodSchema = new mongoose.Schema(
     accountName: String,
     accountNumber: String,
     bankName: String,
+    district: String,
     branchName: String,
     routingNumber: String,
     providerName: String,
+    paymentType: String,
     instructions: String
   },
   { _id: false }

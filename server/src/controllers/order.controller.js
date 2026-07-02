@@ -75,9 +75,11 @@ const buildInstructionsSnapshot = (method = {}) => ({
   accountName: method.accountName || '',
   accountNumber: method.accountNumber || '',
   bankName: method.bankName || '',
+  district: method.district || '',
   branchName: method.branchName || '',
   routingNumber: method.routingNumber || '',
   providerName: method.providerName || '',
+  paymentType: method.paymentType || '',
   instructions: method.instructions || ''
 });
 

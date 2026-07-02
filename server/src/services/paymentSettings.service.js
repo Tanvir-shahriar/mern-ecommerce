@@ -27,6 +27,7 @@ const defaultSettings = () => ({
       accountName: 'lahVenture',
       accountNumber: '',
       bankName: '',
+      district: '',
       branchName: '',
       routingNumber: '',
       instructions: 'Transfer the order total to the bank account, then submit your sender account number and transaction ID if available.'
@@ -35,6 +36,7 @@ const defaultSettings = () => ({
       enabled: true,
       label: 'Mobile banking',
       providerName: '',
+      paymentType: '',
       accountName: 'lahVenture',
       accountNumber: '',
       instructions: 'Send the order total to the mobile banking number, then submit your sender account number and transaction ID if available.'
@@ -53,9 +55,11 @@ const normalizeMethod = (key, method = {}) => {
     accountName: String(method.accountName || '').trim(),
     accountNumber: String(method.accountNumber || '').trim(),
     bankName: String(method.bankName || '').trim(),
+    district: String(method.district || '').trim(),
     branchName: String(method.branchName || '').trim(),
     routingNumber: String(method.routingNumber || '').trim(),
     providerName: String(method.providerName || '').trim(),
+    paymentType: String(method.paymentType || '').trim(),
     instructions: String(method.instructions || fallback.instructions || '').trim()
   };
 };

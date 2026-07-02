@@ -27,7 +27,9 @@ export const requiresManualPaymentDetails = (method) => manualPaymentMethods.has
 export const paymentMethodSummary = (method = {}) =>
   [
     method.providerName,
+    method.paymentType,
     method.bankName,
+    method.district,
     method.accountName,
     method.accountNumber ? `Account: ${method.accountNumber}` : ''
   ]

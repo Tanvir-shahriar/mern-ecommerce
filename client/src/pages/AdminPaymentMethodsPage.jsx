@@ -31,9 +31,11 @@ const emptyMethod = {
   accountName: '',
   accountNumber: '',
   bankName: '',
+  district: '',
   branchName: '',
   routingNumber: '',
   providerName: '',
+  paymentType: '',
   instructions: ''
 };
 
@@ -182,6 +184,10 @@ export const AdminPaymentMethodsPage = () => {
                       <input value={method.bankName} onChange={(event) => updateMethod(key, { bankName: event.target.value })} />
                     </label>
                     <label>
+                      District
+                      <input value={method.district} onChange={(event) => updateMethod(key, { district: event.target.value })} />
+                    </label>
+                    <label>
                       Branch
                       <input value={method.branchName} onChange={(event) => updateMethod(key, { branchName: event.target.value })} />
                     </label>
@@ -193,10 +199,16 @@ export const AdminPaymentMethodsPage = () => {
                 ) : null}
 
                 {key === 'mobile_banking' ? (
-                  <label>
-                    Provider
-                    <input value={method.providerName} onChange={(event) => updateMethod(key, { providerName: event.target.value })} placeholder="bKash, Nagad, Rocket..." />
-                  </label>
+                  <>
+                    <label>
+                      Provider
+                      <input value={method.providerName} onChange={(event) => updateMethod(key, { providerName: event.target.value })} placeholder="bKash, Nagad, Rocket..." />
+                    </label>
+                    <label>
+                      Payment type
+                      <input value={method.paymentType} onChange={(event) => updateMethod(key, { paymentType: event.target.value })} placeholder="Personal, merchant, agent..." />
+                    </label>
+                  </>
                 ) : null}
 
                 {key !== 'cash_on_delivery' ? (

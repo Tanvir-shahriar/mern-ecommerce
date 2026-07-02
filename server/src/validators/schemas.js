@@ -238,9 +238,11 @@ const paymentMethodSettingsSchema = z.object({
   accountName: z.string().trim().optional(),
   accountNumber: z.string().trim().optional(),
   bankName: z.string().trim().optional(),
+  district: z.string().trim().optional(),
   branchName: z.string().trim().optional(),
   routingNumber: z.string().trim().optional(),
   providerName: z.string().trim().optional(),
+  paymentType: z.string().trim().optional(),
   instructions: z.string().trim().optional()
 });
 

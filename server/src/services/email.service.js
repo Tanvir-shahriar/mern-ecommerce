@@ -267,7 +267,9 @@ const paymentInstructionRows = (payment = {}) => {
   return [
     ['Method', paymentSummary(payment)],
     ['Provider', instructions.providerName],
+    ['Payment type', instructions.paymentType],
     ['Bank', instructions.bankName],
+    ['District', instructions.district],
     ['Branch', instructions.branchName],
     ['Pay to', instructions.accountName],
     ['Account number', instructions.accountNumber],
