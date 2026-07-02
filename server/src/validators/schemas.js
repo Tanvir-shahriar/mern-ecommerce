@@ -20,6 +20,14 @@ const imageSchema = z.object({
   publicId: z.string().optional()
 });
 
+const manualPaymentMethodSchema = z.enum(['cash_on_delivery', 'bank_transfer', 'mobile_banking']);
+
+const paymentProofSchema = z.object({
+  accountNumber: z.string().trim().optional(),
+  transactionId: z.string().trim().optional(),
+  proofImages: z.array(imageSchema).max(5).optional()
+});
+
 const addressSchema = z.object({
   label: z.string().optional(),
   fullName: z.string().min(2),
@@ -159,7 +167,8 @@ export const couponApplySchema = z.object({
 export const checkoutSchema = z.object({
   shippingAddress: addressSchema,
   billingAddress: addressSchema.optional(),
-  paymentMethod: z.enum(['card', 'cash_on_delivery', 'paypal', 'stripe']).default('cash_on_delivery'),
+  paymentMethod: manualPaymentMethodSchema.default('cash_on_delivery'),
+  paymentDetails: paymentProofSchema.optional(),
   customerNote: z.string().optional(),
   directItem: addCartItemSchema.optional()
 });
@@ -167,7 +176,13 @@ export const checkoutSchema = z.object({
 export const orderStatusSchema = z.object({
   status: z.enum(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded']),
   note: z.string().optional(),
-  paymentStatus: z.enum(['pending', 'authorized', 'paid', 'failed', 'refunded']).optional()
+  paymentStatus: z.enum(['pending', 'submitted', 'authorized', 'paid', 'failed', 'refunded']).optional()
+});
+
+export const orderPaymentSubmissionSchema = z.object({
+  accountNumber: z.string().trim().min(3, 'Account number is required'),
+  transactionId: z.string().trim().optional(),
+  proofImages: z.array(imageSchema).max(5).optional()
 });
 
 export const stockUpdateSchema = z
@@ -216,3 +231,29 @@ export const currencySettingsSchema = z
       value.currencies !== undefined,
     { message: 'Provide at least one currency setting to update' }
   );
+
+const paymentMethodSettingsSchema = z.object({
+  enabled: z.boolean().optional(),
+  label: z.string().trim().min(1).optional(),
+  accountName: z.string().trim().optional(),
+  accountNumber: z.string().trim().optional(),
+  bankName: z.string().trim().optional(),
+  branchName: z.string().trim().optional(),
+  routingNumber: z.string().trim().optional(),
+  providerName: z.string().trim().optional(),
+  instructions: z.string().trim().optional()
+});
+
+export const paymentSettingsSchema = z
+  .object({
+    methods: z
+      .object({
+        cash_on_delivery: paymentMethodSettingsSchema.optional(),
+        bank_transfer: paymentMethodSettingsSchema.optional(),
+        mobile_banking: paymentMethodSettingsSchema.optional()
+      })
+      .optional()
+  })
+  .refine((value) => value.methods !== undefined, {
+    message: 'Provide payment methods to update'
+  });

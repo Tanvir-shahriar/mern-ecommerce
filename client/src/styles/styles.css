@@ -3952,6 +3952,127 @@ textarea:focus {
   text-align: right;
 }
 
+.payment-method-panel,
+.manual-payment-form {
+  display: grid;
+  gap: 14px;
+}
+
+.payment-method-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.payment-method-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
+  cursor: pointer;
+  transition: border-color var(--transition), background var(--transition), color var(--transition);
+}
+
+.payment-method-option.active,
+.payment-method-option:hover,
+.payment-method-option:focus-visible {
+  border-color: var(--brand);
+  background: rgba(107, 0, 11, 0.08);
+  color: var(--brand);
+  outline: none;
+}
+
+.manual-payment-instructions {
+  display: grid;
+  gap: 4px;
+  padding: 13px 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(0, 0, 0, 0.025);
+}
+
+.manual-payment-instructions span,
+.manual-payment-instructions p,
+.manual-payment-form small {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.payment-proof-upload {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px dashed var(--brand);
+  border-radius: var(--radius);
+  color: var(--brand);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.payment-proof-upload input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.payment-proof-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.payment-proof-list img {
+  width: 68px;
+  height: 68px;
+  object-fit: cover;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+}
+
+.order-payment-form {
+  margin-top: 16px;
+}
+
+.order-payment-proof-list {
+  margin-top: 14px;
+}
+
+.admin-payment-method-layout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.admin-payment-method-card {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+}
+
+.payment-method-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.payment-method-settings-grid .span-2 {
+  grid-column: 1 / -1;
+}
+
 .order-row div {
   min-width: 0;
   display: grid;
@@ -6265,6 +6386,12 @@ textarea:focus {
   .admin-page .admin-toolbar .search-meta {
     flex: none;
     width: 100%;
+  }
+
+  .payment-method-grid,
+  .admin-payment-method-layout,
+  .payment-method-settings-grid {
+    grid-template-columns: 1fr;
   }
 
   .admin-page .dashboard-order-row {
@@ -10161,4 +10288,3 @@ textarea:focus {
   color: var(--text);
   margin: 0;
 }
-

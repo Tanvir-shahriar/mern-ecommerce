@@ -169,6 +169,7 @@ const PAYMENT_METHOD_LABELS = {
 
 const PAYMENT_STATUS_LABELS = {
   pending: 'Pending',
+  submitted: 'Submitted',
   authorized: 'Authorized',
   paid: 'Paid',
   failed: 'Failed',
@@ -254,6 +255,59 @@ const deliveryDetailsHtml = (order, expectedDate) => `
     </tr>
   </table>
 `;
+
+const paymentSubmissionRows = (payment = {}) => [
+  ['Sender account number', payment.accountNumber],
+  ['Transaction ID', payment.transactionId],
+  ['Proof images', payment.proofImages?.length ? `${payment.proofImages.length} attached` : 'None attached']
+];
+
+const paymentInstructionRows = (payment = {}) => {
+  const instructions = payment.instructionsSnapshot || {};
+  return [
+    ['Method', paymentSummary(payment)],
+    ['Provider', instructions.providerName],
+    ['Bank', instructions.bankName],
+    ['Branch', instructions.branchName],
+    ['Pay to', instructions.accountName],
+    ['Account number', instructions.accountNumber],
+    ['Routing number', instructions.routingNumber]
+  ];
+};
+
+const paymentInstructionsHtml = (order) => {
+  const payment = order?.payment || {};
+  if (!['bank_transfer', 'mobile_banking'].includes(payment.method)) return '';
+  const instructions = payment.instructionsSnapshot || {};
+
+  return `
+    ${sectionTitle('Payment instructions')}
+    ${summaryPanelHtml(paymentInstructionRows(payment))}
+    ${instructions.instructions ? `<p style="margin:8px 0 0;color:${MUTED_COLOR};font-size:14px;line-height:1.5;">${escapeHtml(instructions.instructions)}</p>` : ''}
+  `;
+};
+
+const paymentInstructionsText = (payment = {}) => {
+  if (!['bank_transfer', 'mobile_banking'].includes(payment.method)) return '';
+  const instructions = payment.instructionsSnapshot || {};
+  const rows = paymentInstructionRows(payment)
+    .filter(([, value]) => value)
+    .map(([label, value]) => `${label}: ${value}`)
+    .join('\n');
+
+  return ['Payment instructions:', rows, instructions.instructions].filter(Boolean).join('\n');
+};
+
+const paymentSubmissionHtml = (order) => {
+  const payment = order?.payment || {};
+  if (!['bank_transfer', 'mobile_banking'].includes(payment.method)) return '';
+  if (!payment.accountNumber && !payment.transactionId && !payment.proofImages?.length) return '';
+
+  return `
+    ${sectionTitle('Payment submission')}
+    ${summaryPanelHtml(paymentSubmissionRows(payment))}
+  `;
+};
 
 const orderItemsHtml = (order) => {
   const rows = (order?.items || [])
@@ -419,6 +473,7 @@ const buildCustomerOrderEmail = (order) => {
           ? notePanelHtml('Payment note', 'This is a cash on delivery order. Payment will be collected when your order arrives.')
           : ''
       }
+      ${paymentInstructionsHtml(order)}
       ${orderProgressHtml(order.status || 'pending')}
       ${orderItemsHtml(order)}
       ${deliveryDetailsHtml(order, expectedDate)}
@@ -435,6 +490,7 @@ const buildCustomerOrderEmail = (order) => {
     `Payment: ${payment}`,
     `Total: ${formatMoney(order.pricing?.total)}`,
     isCashOnDelivery ? 'Payment note: This is a cash on delivery order. Payment will be collected when your order arrives.' : '',
+    paymentInstructionsText(order.payment),
     orderProgressText(order.status || 'pending'),
     orderItemsText(order),
     `Expected arrival: ${expectedDate || 'Within 7 days'}`,
@@ -479,6 +535,7 @@ const buildAdminOrderEmail = (order) => {
         ['Email', customer.email || 'Unavailable'],
         ['Phone', customer.phone || 'Unavailable']
       ])}
+      ${paymentSubmissionHtml(order)}
       ${orderItemsHtml(order)}
       ${deliveryDetailsHtml(order, expectedDate)}
       ${notePanelHtml('Customer note', customerNote)}
@@ -493,6 +550,9 @@ const buildAdminOrderEmail = (order) => {
     `Phone: ${customer.phone || 'Unavailable'}`,
     `Total: ${formatMoney(order.pricing?.total)}`,
     `Payment: ${paymentSummary(order.payment)}`,
+    order.payment?.accountNumber ? `Sender account number: ${order.payment.accountNumber}` : '',
+    order.payment?.transactionId ? `Transaction ID: ${order.payment.transactionId}` : '',
+    order.payment?.proofImages?.length ? `Proof images: ${order.payment.proofImages.length} attached` : '',
     `Status: ${humanize(order.status || 'pending')}`,
     createdAt ? `Placed: ${createdAt}` : '',
     `Expected arrival: ${expectedDate || 'Within 7 days'}`,
@@ -507,6 +567,51 @@ const buildAdminOrderEmail = (order) => {
   return {
     to: env.email.adminTo,
     subject: `New order ${orderNumber}: ${formatMoney(order.pricing?.total)}`,
+    html,
+    text,
+    replyTo: customer.email || env.email.replyTo || undefined
+  };
+};
+
+const buildPaymentSubmittedEmail = (order) => {
+  const orderNumber = getOrderNumber(order);
+  const customer = getCustomer(order);
+  const orderUrl = getOrderUrl(order);
+
+  const html = emailLayout({
+    title: `Payment submitted for ${orderNumber}`,
+    preview: `${customer.name} submitted manual payment details for order ${orderNumber}.`,
+    content: `
+      <p style="margin:0 0 16px;">A customer submitted manual payment details. Review the account number, transaction ID, and proof images before marking the payment as paid.</p>
+      ${summaryPanelHtml([
+        ['Order number', orderNumber],
+        ['Customer', customer.name],
+        ['Email', customer.email || 'Unavailable'],
+        ['Payment', paymentSummary(order.payment)],
+        ['Order total', formatMoney(order.pricing?.total)]
+      ])}
+      ${paymentSubmissionHtml(order)}
+      ${actionButton(orderUrl, 'Review order', TEXT_COLOR)}
+    `
+  });
+
+  const text = [
+    `Payment submitted for ${orderNumber}`,
+    `Customer: ${customer.name}`,
+    `Email: ${customer.email || 'Unavailable'}`,
+    `Payment: ${paymentSummary(order.payment)}`,
+    `Order total: ${formatMoney(order.pricing?.total)}`,
+    `Sender account number: ${order.payment?.accountNumber || 'Unavailable'}`,
+    order.payment?.transactionId ? `Transaction ID: ${order.payment.transactionId}` : '',
+    order.payment?.proofImages?.length ? `Proof images: ${order.payment.proofImages.length} attached` : 'Proof images: none attached',
+    `Review order: ${orderUrl}`
+  ]
+    .filter(Boolean)
+    .join('\n\n');
+
+  return {
+    to: env.email.adminTo,
+    subject: `Payment submitted for ${orderNumber}`,
     html,
     text,
     replyTo: customer.email || env.email.replyTo || undefined
@@ -837,4 +942,13 @@ export const sendOrderCreatedEmails = async (order) => {
 
 export const sendOrderStatusEmail = async (order, options = {}) => {
   await sendTransactionalEmail(buildCustomerStatusEmail(order, options));
+};
+
+export const sendPaymentSubmittedEmail = async (order) => {
+  if (!env.email.adminTo.length) {
+    warnOnce('Payment submission admin email skipped. Configure EMAIL_ADMIN_TO with one or more admin email addresses.', 'admin');
+    return;
+  }
+
+  await sendTransactionalEmail(buildPaymentSubmittedEmail(order));
 };

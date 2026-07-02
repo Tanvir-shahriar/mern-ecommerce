@@ -5,9 +5,13 @@ import {
   refreshAdminCurrencyRates,
   updateAdminCurrencySettings
 } from '../controllers/currency.controller.js';
+import {
+  getAdminPaymentSettings,
+  updateAdminPaymentSettings
+} from '../controllers/payment.controller.js';
 import { protect, restrictTo } from '../middleware/auth.middleware.js';
 import { validate } from '../middleware/validate.middleware.js';
-import { currencySettingsSchema } from '../validators/schemas.js';
+import { currencySettingsSchema, paymentSettingsSchema } from '../validators/schemas.js';
 
 const router = express.Router();
 
@@ -16,5 +20,7 @@ router.get('/dashboard', getDashboard);
 router.get('/currency', getAdminCurrencySettings);
 router.patch('/currency', validate({ body: currencySettingsSchema }), updateAdminCurrencySettings);
 router.post('/currency/refresh', refreshAdminCurrencyRates);
+router.get('/payment-methods', getAdminPaymentSettings);
+router.patch('/payment-methods', validate({ body: paymentSettingsSchema }), updateAdminPaymentSettings);
 
 export default router;

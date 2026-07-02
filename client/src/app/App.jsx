@@ -5,6 +5,7 @@ import { AccountPage } from '../pages/AccountPage.jsx';
 import { AdminDashboardPage } from '../pages/AdminDashboardPage.jsx';
 import { AdminGalleryPage } from '../pages/AdminGalleryPage.jsx';
 import { AdminCurrencyPage } from '../pages/AdminCurrencyPage.jsx';
+import { AdminPaymentMethodsPage } from '../pages/AdminPaymentMethodsPage.jsx';
 import { AdminProductFormPage } from '../pages/AdminProductFormPage.jsx';
 import { AdminOrdersPage } from '../pages/AdminOrdersPage.jsx';
 import { AdminProductsPage } from '../pages/AdminProductsPage.jsx';
@@ -73,6 +74,14 @@ export const App = () => (
         element={
           <ProtectedRoute adminOnly>
             <AdminCurrencyPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="admin/payment-methods"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminPaymentMethodsPage />
           </ProtectedRoute>
         }
       />

@@ -1,4 +1,4 @@
-import { ArrowLeft, PackageCheck, Star, Truck, UserRound } from 'lucide-react';
+import { ArrowLeft, CreditCard, PackageCheck, Star, Truck, Upload, UserRound } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
@@ -11,9 +11,12 @@ import { dateShort, statusLabel } from '../utils/format.js';
 import { orderCustomerEmail, orderCustomerName, orderCustomerPhone, orderIdentifier } from '../utils/orders.js';
 import { useState, useEffect } from 'react';
 import { Seo } from '../components/Seo.jsx';
+import { paymentMethodLabel, paymentMethodSummary, paymentStatusLabel, requiresManualPaymentDetails } from '../utils/payments.js';
 
 const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
+const paymentStatuses = ['pending', 'submitted', 'paid', 'failed', 'refunded'];
 const emptyReview = { rating: 5, comment: '' };
+const emptyPaymentDraft = { accountNumber: '', transactionId: '', proofImages: [] };
 
 const orderItemProductId = (item) => (typeof item.product === 'object' ? item.product?._id : item.product);
 const productReviewPath = (item) => `/products/${orderItemProductId(item)}#reviews`;
@@ -51,8 +54,12 @@ export const OrderDetailPage = () => {
 
   // Admin order detail adjustment states
   const [adminStatus, setAdminStatus] = useState('');
+  const [adminPaymentStatus, setAdminPaymentStatus] = useState('pending');
   const [adminExpectedDate, setAdminExpectedDate] = useState('');
   const [adminAddress, setAdminAddress] = useState({});
+  const [paymentDraft, setPaymentDraft] = useState(emptyPaymentDraft);
+  const [uploadingPaymentProof, setUploadingPaymentProof] = useState(false);
+  const [submittingPayment, setSubmittingPayment] = useState(false);
 
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ['order', id],
@@ -65,11 +72,17 @@ export const OrderDetailPage = () => {
   useEffect(() => {
     if (order) {
       setAdminStatus(order.status || 'pending');
+      setAdminPaymentStatus(order.payment?.status || 'pending');
       const dateVal = order.expectedDeliveryDate
         ? new Date(order.expectedDeliveryDate).toISOString().split('T')[0]
         : '';
       setAdminExpectedDate(dateVal);
       setAdminAddress(order.shippingAddress || {});
+      setPaymentDraft({
+        accountNumber: order.payment?.accountNumber || '',
+        transactionId: order.payment?.transactionId || '',
+        proofImages: order.payment?.proofImages || []
+      });
     }
   }, [order]);
 
@@ -96,6 +109,7 @@ export const OrderDetailPage = () => {
       const statusOrderId = order?._id || order?.id || id;
       const { data } = await api.patch(`/orders/${statusOrderId}/status`, {
         status: adminStatus,
+        paymentStatus: adminPaymentStatus,
         expectedDeliveryDate: adminExpectedDate || undefined,
         shippingAddress: adminAddress
       });
@@ -106,6 +120,59 @@ export const OrderDetailPage = () => {
       setMessage({ text: 'Order details updated successfully', type: 'success' });
     } catch (error) {
       setMessage({ text: apiErrorMessage(error), type: 'error' });
+    }
+  };
+
+  const updatePaymentDraft = (key, value) => {
+    setPaymentDraft((current) => ({ ...current, [key]: value }));
+  };
+
+  const uploadOrderPaymentProof = async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    setUploadingPaymentProof(true);
+    setMessage({ text: '', type: 'success' });
+
+    try {
+      const formData = new FormData();
+      files.slice(0, 5).forEach((file) => formData.append('images', file));
+      const { data } = await api.post('/uploads/payments', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setPaymentDraft((current) => ({
+        ...current,
+        proofImages: [...current.proofImages, ...(data.data.images || [])].slice(0, 5)
+      }));
+    } catch (error) {
+      setMessage({ text: apiErrorMessage(error), type: 'error' });
+    } finally {
+      setUploadingPaymentProof(false);
+      event.target.value = '';
+    }
+  };
+
+  const submitPaymentDetails = async (event) => {
+    event.preventDefault();
+    setSubmittingPayment(true);
+    setMessage({ text: '', type: 'success' });
+
+    try {
+      const orderLookup = orderIdentifier(order);
+      const { data } = await api.patch(`/orders/${orderLookup}/payment`, {
+        accountNumber: paymentDraft.accountNumber.trim(),
+        transactionId: paymentDraft.transactionId.trim(),
+        proofImages: paymentDraft.proofImages
+      });
+      queryClient.setQueryData(['order', id], data.data.order);
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] });
+      setMessage({ text: data.message || 'Payment details submitted', type: 'success' });
+    } catch (error) {
+      setMessage({ text: apiErrorMessage(error), type: 'error' });
+    } finally {
+      setSubmittingPayment(false);
     }
   };
 
@@ -162,6 +229,13 @@ export const OrderDetailPage = () => {
   const customerPhone = orderCustomerPhone(order);
   const accountName = order.customer?.accountName;
   const accountEmail = order.customer?.accountEmail;
+  const isManualPayment = requiresManualPaymentDetails(order.payment?.method);
+  const paymentInstructions = order.payment?.instructionsSnapshot || {};
+  const canSubmitPayment =
+    !isAdmin &&
+    isManualPayment &&
+    !['paid', 'refunded'].includes(order.payment?.status) &&
+    !['cancelled', 'refunded'].includes(order.status);
 
   return (
     <section className="order-detail-page section">
@@ -308,9 +382,72 @@ export const OrderDetailPage = () => {
               <span>Account: {accountName || customerName}</span>
               {accountEmail && accountEmail !== customerEmail ? <span>Account email: {accountEmail}</span> : null}
               <span>Placed {dateShort(order.createdAt)}</span>
-              <span>Payment: {statusLabel(order.payment?.method || '')}</span>
-              <span>Payment status: {statusLabel(order.payment?.status || '')}</span>
             </div>
+          </article>
+
+          <article className="detail-card">
+            <div className="detail-card-heading">
+              <div>
+                <p className="eyebrow">Payment</p>
+                <h2>{paymentMethodLabel(order.payment?.method)}</h2>
+              </div>
+              <CreditCard size={22} />
+            </div>
+            <div className="info-list">
+              <span>Status: {paymentStatusLabel(order.payment?.status)}</span>
+              <span>Amount: {isAdmin ? formatBaseMoney(order.payment?.amount || order.pricing.total) : formatMoney(order.payment?.amount || order.pricing.total)}</span>
+              {isManualPayment && paymentMethodSummary(paymentInstructions) ? <span>Pay to: {paymentMethodSummary(paymentInstructions)}</span> : null}
+              {isManualPayment && paymentInstructions.instructions ? <span>{paymentInstructions.instructions}</span> : null}
+              {isManualPayment && order.payment?.accountNumber ? <span>Sender account: {order.payment.accountNumber}</span> : null}
+              {isManualPayment && order.payment?.transactionId ? <span>Transaction ID: {order.payment.transactionId}</span> : null}
+            </div>
+
+            {isManualPayment && order.payment?.proofImages?.length ? (
+              <div className="payment-proof-list order-payment-proof-list">
+                {order.payment.proofImages.map((image) => (
+                  <a href={mediaUrl(image.url)} target="_blank" rel="noreferrer" key={image.publicId || image.url}>
+                    <img src={mediaUrl(image.url)} alt={image.alt || 'Payment proof'} />
+                  </a>
+                ))}
+              </div>
+            ) : null}
+
+            {canSubmitPayment ? (
+              <form className="manual-payment-form order-payment-form" onSubmit={submitPaymentDetails}>
+                <label>
+                  Sender account number
+                  <input
+                    required
+                    value={paymentDraft.accountNumber}
+                    onChange={(event) => updatePaymentDraft('accountNumber', event.target.value)}
+                    placeholder="Your bank account or mobile wallet number"
+                  />
+                </label>
+                <label>
+                  Transaction ID
+                  <input
+                    value={paymentDraft.transactionId}
+                    onChange={(event) => updatePaymentDraft('transactionId', event.target.value)}
+                    placeholder="Optional"
+                  />
+                </label>
+                <label className="payment-proof-upload">
+                  <Upload size={17} />
+                  <span>{uploadingPaymentProof ? 'Uploading proof...' : 'Upload payment proof'}</span>
+                  <input type="file" accept="image/*" multiple onChange={uploadOrderPaymentProof} disabled={uploadingPaymentProof} />
+                </label>
+                {paymentDraft.proofImages.length ? (
+                  <div className="payment-proof-list">
+                    {paymentDraft.proofImages.map((image) => (
+                      <img src={mediaUrl(image.url)} alt={image.alt || 'Payment proof'} key={image.publicId || image.url} />
+                    ))}
+                  </div>
+                ) : null}
+                <button className="button primary compact" type="submit" disabled={submittingPayment || uploadingPaymentProof}>
+                  {submittingPayment ? 'Submitting...' : order.payment?.accountNumber ? 'Update payment details' : 'Submit payment details'}
+                </button>
+              </form>
+            ) : null}
           </article>
 
           {isAdmin ? (
@@ -323,6 +460,17 @@ export const OrderDetailPage = () => {
                     {statuses.map((status) => (
                       <option value={status} key={status}>
                         {statusLabel(status)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px', fontWeight: '600' }}>
+                  Payment Status
+                  <select value={adminPaymentStatus} onChange={(event) => setAdminPaymentStatus(event.target.value)} style={{ padding: '6px 8px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)' }}>
+                    {paymentStatuses.map((status) => (
+                      <option value={status} key={status}>
+                        {paymentStatusLabel(status)}
                       </option>
                     ))}
                   </select>

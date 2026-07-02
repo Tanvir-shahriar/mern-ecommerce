@@ -546,6 +546,7 @@ export class JsonModel {
       Order: ['orderNumber'],
       Cart: ['user'],
       CurrencySetting: ['key'],
+      PaymentSetting: ['key'],
       Gallery: ['key']
     };
 

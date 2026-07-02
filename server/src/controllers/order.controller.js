@@ -8,7 +8,8 @@ import { ApiError } from '../utils/ApiError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { presentOrder, presentOrders } from '../utils/orderPresenter.js';
 import { emitOrderEvent } from '../sockets/socket.js';
-import { sendOrderCreatedEmails, sendOrderStatusEmail } from '../services/email.service.js';
+import { sendOrderCreatedEmails, sendOrderStatusEmail, sendPaymentSubmittedEmail } from '../services/email.service.js';
+import { getPaymentMethod, MANUAL_PAYMENT_METHODS } from '../services/paymentSettings.service.js';
 
 const TAX_RATE = 0.08;
 const FREE_SHIPPING_THRESHOLD = 10000;
@@ -17,6 +18,7 @@ const ADMIN_ROLES = new Set(['admin', 'super_admin']);
 
 const money = (value) => Math.round(value * 100) / 100;
 const canViewAllOrders = (user) => ADMIN_ROLES.has(user?.role);
+const PAYMENT_DETAIL_METHODS = new Set(['bank_transfer', 'mobile_banking']);
 
 const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -46,6 +48,38 @@ const createOrderItem = (product, quantity, variant) => {
     variant
   };
 };
+
+const trimPaymentValue = (value) => String(value || '').trim();
+
+const sanitizeProofImages = (images = []) =>
+  (Array.isArray(images) ? images : [])
+    .filter((image) => image?.url)
+    .slice(0, 5)
+    .map((image) => ({
+      url: image.url,
+      alt: image.alt || '',
+      publicId: image.publicId || ''
+    }));
+
+const sanitizePaymentDetails = (details = {}) => ({
+  accountNumber: trimPaymentValue(details.accountNumber),
+  transactionId: trimPaymentValue(details.transactionId),
+  proofImages: sanitizeProofImages(details.proofImages)
+});
+
+const hasPaymentSubmission = (details) =>
+  Boolean(details.accountNumber || details.transactionId || details.proofImages.length);
+
+const buildInstructionsSnapshot = (method = {}) => ({
+  label: method.label || '',
+  accountName: method.accountName || '',
+  accountNumber: method.accountNumber || '',
+  bankName: method.bankName || '',
+  branchName: method.branchName || '',
+  routingNumber: method.routingNumber || '',
+  providerName: method.providerName || '',
+  instructions: method.instructions || ''
+});
 
 const buildOrderFilter = async (query) => {
   const filter = {};
@@ -121,6 +155,23 @@ export const createOrder = asyncHandler(async (req, res) => {
   const shipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING;
   const total = money(discountedSubtotal + tax + shipping);
   const shippingAddress = req.body.shippingAddress;
+  const paymentMethod = req.body.paymentMethod || 'cash_on_delivery';
+  const paymentSettings = await getPaymentMethod(paymentMethod);
+
+  if (!MANUAL_PAYMENT_METHODS.includes(paymentMethod) || !paymentSettings?.enabled) {
+    throw new ApiError(400, 'Selected payment method is not available');
+  }
+
+  const paymentDetails = sanitizePaymentDetails(req.body.paymentDetails);
+  const isManualPayment = PAYMENT_DETAIL_METHODS.has(paymentMethod);
+
+  if (!isManualPayment && hasPaymentSubmission(paymentDetails)) {
+    throw new ApiError(400, 'Payment details can only be submitted for bank or mobile banking payments');
+  }
+
+  if (isManualPayment && hasPaymentSubmission(paymentDetails) && !paymentDetails.accountNumber) {
+    throw new ApiError(400, 'Account number is required when submitting payment details');
+  }
 
   const order = await Order.create({
     user: req.user._id,
@@ -133,8 +184,14 @@ export const createOrder = asyncHandler(async (req, res) => {
       phone: shippingAddress.phone || req.user.phone
     },
     payment: {
-      method: req.body.paymentMethod,
-      status: req.body.paymentMethod === 'cash_on_delivery' ? 'pending' : 'authorized',
+      method: paymentMethod,
+      status: isManualPayment && paymentDetails.accountNumber ? 'submitted' : 'pending',
+      accountNumber: isManualPayment ? paymentDetails.accountNumber : '',
+      transactionId: isManualPayment ? paymentDetails.transactionId : '',
+      proofImages: isManualPayment ? paymentDetails.proofImages : [],
+      instructionsSnapshot: buildInstructionsSnapshot(paymentSettings),
+      submittedAt: isManualPayment && paymentDetails.accountNumber ? new Date() : undefined,
+      updatedAt: isManualPayment && paymentDetails.accountNumber ? new Date() : undefined,
       amount: total
     },
     pricing: {
@@ -374,6 +431,55 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
 
   res.json({
     status: 'success',
+    data: { order: presentOrder(order) }
+  });
+});
+
+export const submitOrderPayment = asyncHandler(async (req, res) => {
+  const filter = buildOrderLookupFilter(req.params.id);
+  if (!canViewAllOrders(req.user)) filter.user = req.user._id;
+
+  const order = await Order.findOne(filter);
+  if (!order) throw new ApiError(404, 'Order not found');
+
+  if (!PAYMENT_DETAIL_METHODS.has(order.payment?.method)) {
+    throw new ApiError(400, 'This order does not require manual payment details');
+  }
+
+  if (['cancelled', 'refunded'].includes(order.status)) {
+    throw new ApiError(400, 'Payment details cannot be submitted for this order status');
+  }
+
+  const paymentDetails = sanitizePaymentDetails(req.body);
+  if (!paymentDetails.accountNumber) {
+    throw new ApiError(400, 'Account number is required');
+  }
+
+  order.payment.accountNumber = paymentDetails.accountNumber;
+  order.payment.transactionId = paymentDetails.transactionId;
+  order.payment.proofImages = paymentDetails.proofImages;
+  order.payment.status = 'submitted';
+  order.payment.submittedAt = new Date();
+  order.payment.updatedAt = new Date();
+  order.timeline.push({
+    status: order.status,
+    note: 'Payment details submitted'
+  });
+
+  await order.save();
+
+  emitOrderEvent('order:updated', {
+    orderId: order._id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    user: order.user.toString()
+  });
+
+  await sendPaymentSubmittedEmail(order);
+
+  res.json({
+    status: 'success',
+    message: 'Payment details submitted',
     data: { order: presentOrder(order) }
   });
 });

@@ -77,6 +77,29 @@ const customerSnapshotSchema = new mongoose.Schema(
   { _id: false }
 );
 
+const paymentProofImageSchema = new mongoose.Schema(
+  {
+    url: String,
+    alt: String,
+    publicId: String
+  },
+  { _id: false }
+);
+
+const paymentInstructionsSnapshotSchema = new mongoose.Schema(
+  {
+    label: String,
+    accountName: String,
+    accountNumber: String,
+    bankName: String,
+    branchName: String,
+    routingNumber: String,
+    providerName: String,
+    instructions: String
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema(
   {
     orderNumber: {
@@ -108,15 +131,20 @@ const orderSchema = new mongoose.Schema(
     payment: {
       method: {
         type: String,
-        enum: ['card', 'cash_on_delivery', 'paypal', 'stripe'],
+        enum: ['cash_on_delivery', 'bank_transfer', 'mobile_banking', 'card', 'paypal', 'stripe'],
         default: 'cash_on_delivery'
       },
       status: {
         type: String,
-        enum: ['pending', 'authorized', 'paid', 'failed', 'refunded'],
+        enum: ['pending', 'submitted', 'authorized', 'paid', 'failed', 'refunded'],
         default: 'pending'
       },
       transactionId: String,
+      accountNumber: String,
+      proofImages: [paymentProofImageSchema],
+      instructionsSnapshot: paymentInstructionsSnapshotSchema,
+      submittedAt: Date,
+      updatedAt: Date,
       amount: Number
     },
     pricing: {

@@ -1,4 +1,4 @@
-import { CheckCircle2, MapPin, Plus } from 'lucide-react';
+import { Banknote, Building2, MapPin, Plus, Smartphone, Upload } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -12,6 +12,7 @@ import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { clearDirectCheckout, readDirectCheckout } from '../utils/directCheckout.js';
 import { orderDetailPath } from '../utils/orders.js';
+import { paymentMethodSummary, requiresManualPaymentDetails } from '../utils/payments.js';
 
 const TAX_RATE = 0.08;
 const FREE_SHIPPING_THRESHOLD = 10000;
@@ -38,6 +39,36 @@ const checkoutAddress = (savedAddress, user) => ({
   postalCode: savedAddress?.postalCode || '',
   country: savedAddress?.country || 'Bangladesh'
 });
+
+const fallbackPaymentMethods = [
+  {
+    key: 'cash_on_delivery',
+    label: 'Cash on delivery',
+    instructions: 'Place the order now and pay in cash when your order arrives.'
+  },
+  {
+    key: 'bank_transfer',
+    label: 'Bank transfer',
+    instructions: 'Transfer the order total to the configured bank account, then submit your sender account number and transaction ID if available.'
+  },
+  {
+    key: 'mobile_banking',
+    label: 'Mobile banking',
+    instructions: 'Send the order total to the configured mobile banking number, then submit your sender account number and transaction ID if available.'
+  }
+];
+
+const paymentIcon = {
+  cash_on_delivery: Banknote,
+  bank_transfer: Building2,
+  mobile_banking: Smartphone
+};
+
+const emptyPaymentDetails = {
+  accountNumber: '',
+  transactionId: '',
+  proofImages: []
+};
 
 const CheckoutAddressSummary = ({ address }) => (
   <div className="checkout-address-summary">
@@ -78,6 +109,8 @@ export const CheckoutPage = () => {
   const [directItem] = useState(() => (isDirectCheckout ? readDirectCheckout() : null));
   const [address, setAddress] = useState(initialAddress);
   const [paymentMethod, setPaymentMethod] = useState('cash_on_delivery');
+  const [paymentDetails, setPaymentDetails] = useState(emptyPaymentDetails);
+  const [uploadingPaymentProof, setUploadingPaymentProof] = useState(false);
   const [customerNote, setCustomerNote] = useState('');
   const [order, setOrder] = useState(null);
   const [error, setError] = useState('');
@@ -102,6 +135,16 @@ export const CheckoutPage = () => {
       return data.data.product;
     }
   });
+  const { data: paymentMethodsData } = useQuery({
+    queryKey: ['payment-methods'],
+    queryFn: async () => {
+      const { data } = await api.get('/payment-methods');
+      return data.data.methods;
+    }
+  });
+  const paymentMethods = paymentMethodsData?.length ? paymentMethodsData : fallbackPaymentMethods;
+  const selectedPaymentMethod = paymentMethods.find((method) => method.key === paymentMethod) || paymentMethods[0];
+  const isManualPayment = requiresManualPaymentDetails(paymentMethod);
   const directQuantity = directItem?.quantity || 1;
   const directTotals = useMemo(
     () => (directProduct ? directPurchaseTotals(directProduct, directQuantity) : null),
@@ -123,6 +166,12 @@ export const CheckoutPage = () => {
     }
     setShowAddressChoices(false);
   }, [defaultAddress, user]);
+
+  useEffect(() => {
+    if (paymentMethods.length && !paymentMethods.some((method) => method.key === paymentMethod)) {
+      setPaymentMethod(paymentMethods[0].key);
+    }
+  }, [paymentMethod, paymentMethods]);
 
   if (order) {
     return <OrderSuccessAnimation order={order} />;
@@ -170,9 +219,27 @@ export const CheckoutPage = () => {
     setError('');
 
     try {
+      const cleanedPaymentDetails = {
+        accountNumber: paymentDetails.accountNumber.trim(),
+        transactionId: paymentDetails.transactionId.trim(),
+        proofImages: paymentDetails.proofImages
+      };
+      const hasPaymentSubmission = Boolean(
+        cleanedPaymentDetails.accountNumber ||
+          cleanedPaymentDetails.transactionId ||
+          cleanedPaymentDetails.proofImages.length
+      );
+
+      if (isManualPayment && hasPaymentSubmission && !cleanedPaymentDetails.accountNumber) {
+        setError('Account number is required when submitting bank or mobile banking payment details.');
+        setSubmitting(false);
+        return;
+      }
+
       const { data } = await api.post('/orders', {
         shippingAddress: address,
         paymentMethod,
+        paymentDetails: isManualPayment && hasPaymentSubmission ? cleanedPaymentDetails : undefined,
         customerNote,
         directItem: isDirectCheckout
           ? {
@@ -192,6 +259,35 @@ export const CheckoutPage = () => {
       setError(apiErrorMessage(requestError));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const updatePaymentDetails = (key, value) => {
+    setPaymentDetails((current) => ({ ...current, [key]: value }));
+  };
+
+  const uploadPaymentProof = async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+
+    setUploadingPaymentProof(true);
+    setError('');
+
+    try {
+      const formData = new FormData();
+      files.slice(0, 5).forEach((file) => formData.append('images', file));
+      const { data } = await api.post('/uploads/payments', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      setPaymentDetails((current) => ({
+        ...current,
+        proofImages: [...current.proofImages, ...(data.data.images || [])].slice(0, 5)
+      }));
+    } catch (requestError) {
+      setError(apiErrorMessage(requestError));
+    } finally {
+      setUploadingPaymentProof(false);
+      event.target.value = '';
     }
   };
 
@@ -286,21 +382,71 @@ export const CheckoutPage = () => {
             </div>
           ) : null}
 
-          <div className="segmented">
-            {[
-              ['cash_on_delivery', 'Cash'],
-              ['card', 'Card'],
-              ['paypal', 'PayPal']
-            ].map(([value, label]) => (
-              <button
-                type="button"
-                className={paymentMethod === value ? 'active' : ''}
-                key={value}
-                onClick={() => setPaymentMethod(value)}
-              >
-                {label}
-              </button>
-            ))}
+          <div className="payment-method-panel">
+            <span className="form-section-label">Payment method</span>
+            <div className="payment-method-grid">
+              {paymentMethods.map((method) => {
+                const Icon = paymentIcon[method.key] || Banknote;
+                return (
+                  <button
+                    type="button"
+                    className={paymentMethod === method.key ? 'payment-method-option active' : 'payment-method-option'}
+                    key={method.key}
+                    onClick={() => {
+                      setPaymentMethod(method.key);
+                      setPaymentDetails(emptyPaymentDetails);
+                    }}
+                  >
+                    <Icon size={18} />
+                    <span>{method.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {selectedPaymentMethod ? (
+              <div className="manual-payment-instructions">
+                <strong>{selectedPaymentMethod.label}</strong>
+                {paymentMethodSummary(selectedPaymentMethod) ? <span>{paymentMethodSummary(selectedPaymentMethod)}</span> : null}
+                {selectedPaymentMethod.instructions ? <p>{selectedPaymentMethod.instructions}</p> : null}
+              </div>
+            ) : null}
+
+            {isManualPayment ? (
+              <div className="manual-payment-form">
+                <div className="form-grid">
+                  <label>
+                    Sender account number
+                    <input
+                      value={paymentDetails.accountNumber}
+                      onChange={(event) => updatePaymentDetails('accountNumber', event.target.value)}
+                      placeholder="Your bank account or mobile wallet number"
+                    />
+                    <small>Required if you submit payment details now. You can also submit it from the order page later.</small>
+                  </label>
+                  <label>
+                    Transaction ID
+                    <input
+                      value={paymentDetails.transactionId}
+                      onChange={(event) => updatePaymentDetails('transactionId', event.target.value)}
+                      placeholder="Optional"
+                    />
+                  </label>
+                </div>
+                <label className="payment-proof-upload">
+                  <Upload size={17} />
+                  <span>{uploadingPaymentProof ? 'Uploading proof...' : 'Upload payment proof'}</span>
+                  <input type="file" accept="image/*" multiple onChange={uploadPaymentProof} disabled={uploadingPaymentProof} />
+                </label>
+                {paymentDetails.proofImages.length ? (
+                  <div className="payment-proof-list">
+                    {paymentDetails.proofImages.map((image) => (
+                      <img src={mediaUrl(image.url)} alt={image.alt || 'Payment proof'} key={image.publicId || image.url} />
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
           </div>
 
           <label>
