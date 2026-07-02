@@ -163,6 +163,7 @@ export const AdminOrdersPage = () => {
                     <div className="admin-inline-tracker" style={{ padding: '12px 16px 4px', background: 'rgba(0,0,0,0.02)', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
                       <OrderProgressBar
                         status={order.status}
+                        expectedDeliveryDate={order.expectedDeliveryDate}
                         onUpdateStatus={(newStatus) => updateStatus(orderId, newStatus)}
                         isAdmin
                       />

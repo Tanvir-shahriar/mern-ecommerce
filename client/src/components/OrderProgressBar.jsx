@@ -32,7 +32,7 @@ const STEPS = [
   }
 ];
 
-export const OrderProgressBar = ({ status = 'pending', onUpdateStatus, isAdmin = false }) => {
+export const OrderProgressBar = ({ status = 'pending', expectedDeliveryDate, onUpdateStatus, isAdmin = false }) => {
   const isCancelled = status === 'cancelled';
   const isRefunded = status === 'refunded';
 
@@ -59,8 +59,18 @@ export const OrderProgressBar = ({ status = 'pending', onUpdateStatus, isAdmin =
     activeIndex = 0;
   }
 
+  const dateStr = expectedDeliveryDate
+    ? new Intl.DateTimeFormat('en-BD', { dateStyle: 'medium', timeZone: 'Asia/Dhaka' }).format(new Date(expectedDeliveryDate))
+    : '';
+
   return (
     <div className="order-progress-container">
+      {dateStr && (
+        <div className="progress-bar-header" style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px', fontSize: '13px', color: 'var(--muted)', fontWeight: 'bold', borderBottom: '1px solid rgba(0,0,0,0.06)', paddingBottom: '8px' }}>
+          <span>ORDER TRACKING</span>
+          <span>Expected Arrival: <strong style={{ color: 'var(--red, #c74132)' }}>{dateStr}</strong></span>
+        </div>
+      )}
       {isAdmin && <p className="admin-progress-hint">Admin: Click any step icon below to update order status instantly</p>}
       <div className="order-progress-bar">
         {STEPS.map((step, index) => {

@@ -9,7 +9,7 @@ import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { dateShort, statusLabel } from '../utils/format.js';
 import { orderCustomerEmail, orderCustomerName, orderCustomerPhone, orderIdentifier } from '../utils/orders.js';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Seo } from '../components/Seo.jsx';
 
 const statuses = ['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'];
@@ -49,6 +49,11 @@ export const OrderDetailPage = () => {
   const [reviewedProducts, setReviewedProducts] = useState({});
   const backTo = isAdmin ? '/admin/orders' : '/account';
 
+  // Admin order detail adjustment states
+  const [adminStatus, setAdminStatus] = useState('');
+  const [adminExpectedDate, setAdminExpectedDate] = useState('');
+  const [adminAddress, setAdminAddress] = useState({});
+
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ['order', id],
     queryFn: async () => {
@@ -56,6 +61,17 @@ export const OrderDetailPage = () => {
       return data.data.order;
     }
   });
+
+  useEffect(() => {
+    if (order) {
+      setAdminStatus(order.status || 'pending');
+      const dateVal = order.expectedDeliveryDate
+        ? new Date(order.expectedDeliveryDate).toISOString().split('T')[0]
+        : '';
+      setAdminExpectedDate(dateVal);
+      setAdminAddress(order.shippingAddress || {});
+    }
+  }, [order]);
 
   const updateStatus = async (status) => {
     setMessage({ text: '', type: 'success' });
@@ -66,7 +82,28 @@ export const OrderDetailPage = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['my-orders'] });
+      setAdminStatus(status);
       setMessage({ text: 'Order status updated', type: 'success' });
+    } catch (error) {
+      setMessage({ text: apiErrorMessage(error), type: 'error' });
+    }
+  };
+
+  const handleAdminUpdateOrder = async (e) => {
+    e.preventDefault();
+    setMessage({ text: '', type: 'success' });
+    try {
+      const statusOrderId = order?._id || order?.id || id;
+      const { data } = await api.patch(`/orders/${statusOrderId}/status`, {
+        status: adminStatus,
+        expectedDeliveryDate: adminExpectedDate || undefined,
+        shippingAddress: adminAddress
+      });
+      queryClient.setQueryData(['order', id], data.data.order);
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] });
+      setMessage({ text: 'Order details updated successfully', type: 'success' });
     } catch (error) {
       setMessage({ text: apiErrorMessage(error), type: 'error' });
     }
@@ -144,7 +181,7 @@ export const OrderDetailPage = () => {
 
       {message.text ? <p className={message.type === 'error' ? 'form-error' : 'form-note'}>{message.text}</p> : null}
 
-      <OrderProgressBar status={order.status} onUpdateStatus={updateStatus} isAdmin={isAdmin} />
+      <OrderProgressBar status={order.status} expectedDeliveryDate={order.expectedDeliveryDate} onUpdateStatus={updateStatus} isAdmin={isAdmin} />
 
       <div className="order-detail-layout">
         <div className="order-detail-main">
@@ -246,6 +283,17 @@ export const OrderDetailPage = () => {
         </div>
 
         <aside className="order-detail-side">
+          {/* Estimated Delivery Card for Customers */}
+          <article className="detail-card text-card reddish-accent-card" style={{ borderLeft: '4px solid var(--red, #c74132)' }}>
+            <h3 style={{ margin: 0, fontSize: '13px', textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: '0.5px' }}>Estimated Delivery</h3>
+            <p style={{ margin: '8px 0 0', fontSize: '18px', fontWeight: 'bold', color: 'var(--red, #c74132)' }}>
+              {order.expectedDeliveryDate ? dateShort(order.expectedDeliveryDate) : 'Within 7 Days'}
+            </p>
+            <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
+              Updates are sent automatically via email. Standard shipping window is 7 days.
+            </p>
+          </article>
+
           <article className="detail-card">
             <div className="detail-card-heading">
               <div>
@@ -267,17 +315,119 @@ export const OrderDetailPage = () => {
 
           {isAdmin ? (
             <article className="detail-card">
-              <h2>Admin status</h2>
-              <label>
-                Fulfillment status
-                <select value={order.status} onChange={(event) => updateStatus(event.target.value)}>
-                  {statuses.map((status) => (
-                    <option value={status} key={status}>
-                      {statusLabel(status)}
-                    </option>
-                  ))}
-                </select>
-              </label>
+              <h2 style={{ marginBottom: '12px' }}>Fulfillment & Delivery Settings</h2>
+              <form onSubmit={handleAdminUpdateOrder} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px', fontWeight: '600' }}>
+                  Fulfillment Status
+                  <select value={adminStatus} onChange={(event) => setAdminStatus(event.target.value)} style={{ padding: '6px 8px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)' }}>
+                    {statuses.map((status) => (
+                      <option value={status} key={status}>
+                        {statusLabel(status)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '13px', fontWeight: '600' }}>
+                  Expected Arrival Date
+                  <input
+                    type="date"
+                    value={adminExpectedDate}
+                    onChange={(event) => setAdminExpectedDate(event.target.value)}
+                    style={{ padding: '6px 8px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)' }}
+                  />
+                </label>
+
+                <fieldset style={{ border: '1px solid rgba(0,0,0,0.1)', borderRadius: '6px', padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px', margin: 0 }}>
+                  <legend style={{ padding: '0 6px', fontSize: '12px', fontWeight: '700', color: '#555' }}>Expected Delivery Address</legend>
+                  
+                  <label style={{ fontSize: '11px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    Recipient Full Name
+                    <input
+                      type="text"
+                      value={adminAddress.fullName || ''}
+                      onChange={(event) => setAdminAddress(prev => ({ ...prev, fullName: event.target.value }))}
+                      style={{ padding: '4px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)' }}
+                    />
+                  </label>
+
+                  <label style={{ fontSize: '11px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    Recipient Phone
+                    <input
+                      type="text"
+                      value={adminAddress.phone || ''}
+                      onChange={(event) => setAdminAddress(prev => ({ ...prev, phone: event.target.value }))}
+                      style={{ padding: '4px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)' }}
+                    />
+                  </label>
+
+                  <label style={{ fontSize: '11px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    Address Line 1
+                    <input
+                      type="text"
+                      value={adminAddress.line1 || ''}
+                      onChange={(event) => setAdminAddress(prev => ({ ...prev, line1: event.target.value }))}
+                      style={{ padding: '4px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)' }}
+                    />
+                  </label>
+
+                  <label style={{ fontSize: '11px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    Address Line 2
+                    <input
+                      type="text"
+                      value={adminAddress.line2 || ''}
+                      onChange={(event) => setAdminAddress(prev => ({ ...prev, line2: event.target.value }))}
+                      style={{ padding: '4px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)' }}
+                    />
+                  </label>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      City
+                      <input
+                        type="text"
+                        value={adminAddress.city || ''}
+                        onChange={(event) => setAdminAddress(prev => ({ ...prev, city: event.target.value }))}
+                        style={{ padding: '4px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)', width: '100%' }}
+                      />
+                    </label>
+                    <label style={{ fontSize: '11px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      State / Division
+                      <input
+                        type="text"
+                        value={adminAddress.state || ''}
+                        onChange={(event) => setAdminAddress(prev => ({ ...prev, state: event.target.value }))}
+                        style={{ padding: '4px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)', width: '100%' }}
+                      />
+                    </label>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <label style={{ fontSize: '11px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      Postal Code
+                      <input
+                        type="text"
+                        value={adminAddress.postalCode || ''}
+                        onChange={(event) => setAdminAddress(prev => ({ ...prev, postalCode: event.target.value }))}
+                        style={{ padding: '4px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)', width: '100%' }}
+                      />
+                    </label>
+                    <label style={{ fontSize: '11px', fontWeight: '600', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      Country
+                      <input
+                        type="text"
+                        value={adminAddress.country || ''}
+                        onChange={(event) => setAdminAddress(prev => ({ ...prev, country: event.target.value }))}
+                        style={{ padding: '4px 6px', borderRadius: '4px', border: '1px solid rgba(0,0,0,0.15)', width: '100%' }}
+                      />
+                    </label>
+                  </div>
+                </fieldset>
+
+                <button className="button primary compact" type="submit" style={{ marginTop: '8px', cursor: 'pointer' }}>
+                  Update Order Details
+                </button>
+              </form>
             </article>
           ) : null}
 

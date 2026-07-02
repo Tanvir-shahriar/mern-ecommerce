@@ -163,7 +163,11 @@ const orderSchema = new mongoose.Schema(
     ],
     customerNote: String,
     adminNote: String,
-    deliveredAt: Date
+    deliveredAt: Date,
+    expectedDeliveryDate: {
+      type: Date,
+      default: () => new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    }
   },
   {
     timestamps: true
@@ -176,6 +180,10 @@ orderSchema.pre('validate', function assignOrderNumber() {
     const datePart = date.toISOString().slice(0, 10).replace(/-/g, '');
     const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
     this.orderNumber = `ORD-${datePart}-${randomPart}`;
+  }
+
+  if (!this.expectedDeliveryDate) {
+    this.expectedDeliveryDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
   }
 
   if (!this.timeline?.length) {

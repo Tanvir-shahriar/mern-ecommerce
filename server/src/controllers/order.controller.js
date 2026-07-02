@@ -306,13 +306,54 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   if (!order) throw new ApiError(404, 'Order not found');
 
   const previousStatus = order.status;
-  order.status = req.body.status;
-  if (req.body.paymentStatus) order.payment.status = req.body.paymentStatus;
-  if (req.body.status === 'delivered' && !order.deliveredAt) order.deliveredAt = new Date();
-  order.timeline.push({
-    status: req.body.status,
-    note: req.body.note || `Status changed to ${req.body.status}`
-  });
+  const previousExpectedDeliveryDate = order.expectedDeliveryDate ? new Date(order.expectedDeliveryDate).getTime() : 0;
+
+  let detailsChanged = false;
+
+  if (req.body.status) {
+    order.status = req.body.status;
+    if (req.body.status === 'delivered' && !order.deliveredAt) order.deliveredAt = new Date();
+  }
+
+  if (req.body.paymentStatus) {
+    order.payment.status = req.body.paymentStatus;
+  }
+
+  if (req.body.expectedDeliveryDate) {
+    const newDate = new Date(req.body.expectedDeliveryDate);
+    if (!isNaN(newDate.getTime()) && newDate.getTime() !== previousExpectedDeliveryDate) {
+      order.expectedDeliveryDate = newDate;
+      detailsChanged = true;
+    }
+  }
+
+  if (req.body.shippingAddress) {
+    const prevStr = JSON.stringify(order.shippingAddress);
+    order.shippingAddress = {
+      ...order.shippingAddress,
+      ...req.body.shippingAddress
+    };
+    if (JSON.stringify(order.shippingAddress) !== prevStr) {
+      detailsChanged = true;
+    }
+  }
+
+  if (req.body.status || detailsChanged) {
+    let note = req.body.note;
+    if (!note) {
+      if (req.body.status && previousStatus !== order.status) {
+        note = `Status changed to ${req.body.status}`;
+      } else if (detailsChanged) {
+        note = `Order delivery details updated by administrator`;
+      } else {
+        note = `Order details updated`;
+      }
+    }
+    order.timeline.push({
+      status: order.status,
+      note
+    });
+  }
 
   await order.save();
 
@@ -323,7 +364,7 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
     user: order.user.toString()
   });
 
-  if (previousStatus !== order.status) {
+  if (previousStatus !== order.status || detailsChanged) {
     await sendOrderStatusEmail(order, { note: req.body.note });
   }
 
