@@ -55,7 +55,7 @@ export const AdminPaymentMethodsPage = () => {
   const [saving, setSaving] = useState(false);
   const queryClient = useQueryClient();
 
-  const { data: settings, isLoading, isFetching } = useQuery({
+  const { data: settings, isLoading, isFetching, isError, error } = useQuery({
     queryKey: ['admin-payment-methods'],
     queryFn: async () => {
       const { data } = await api.get('/admin/payment-methods');
@@ -97,11 +97,25 @@ export const AdminPaymentMethodsPage = () => {
     }
   };
 
-  if (isLoading || !form) {
+  if (isLoading) {
     return (
       <section className="admin-page section">
         <AdminNav />
         <AdminLoadingState label="Loading payment methods" />
+      </section>
+    );
+  }
+
+  if (isError || !form) {
+    return (
+      <section className="admin-page section">
+        <AdminNav />
+        <div className="panel">
+          <p className="form-error">
+            <AlertTriangle size={16} />
+            {apiErrorMessage(error)}
+          </p>
+        </div>
       </section>
     );
   }
