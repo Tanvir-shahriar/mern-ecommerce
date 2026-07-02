@@ -1,4 +1,4 @@
-import { AlertTriangle, Banknote, Building2, CheckCircle2, Save, Smartphone } from 'lucide-react';
+import { AlertTriangle, Banknote, Building2, CheckCircle2, Pencil, Plus, Save, Smartphone } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
@@ -24,6 +24,7 @@ const methodMeta = {
 };
 
 const methodOrder = ['cash_on_delivery', 'bank_transfer', 'mobile_banking'];
+const paymentSystemOrder = ['bank_transfer', 'mobile_banking'];
 
 const emptyMethod = {
   enabled: true,
@@ -50,6 +51,31 @@ const normalizeForm = (settings) => ({
     ])
   )
 });
+
+const paymentSystemFields = (key, method = {}) => {
+  if (key === 'bank_transfer') {
+    return [
+      ['Bank', method.bankName],
+      ['District', method.district],
+      ['Branch', method.branchName],
+      ['Account name', method.accountName],
+      ['Account number', method.accountNumber],
+      ['Routing number', method.routingNumber]
+    ].filter(([, value]) => value);
+  }
+
+  return [
+    ['Provider', method.providerName],
+    ['Payment type', method.paymentType],
+    ['Account name', method.accountName],
+    ['Wallet number', method.accountNumber]
+  ].filter(([, value]) => value);
+};
+
+const paymentSystemTitle = (key, method = {}) => {
+  if (key === 'bank_transfer') return method.bankName || method.label || methodMeta[key].title;
+  return method.providerName || method.label || methodMeta[key].title;
+};
 
 export const AdminPaymentMethodsPage = () => {
   const [form, setForm] = useState(null);
@@ -80,6 +106,16 @@ export const AdminPaymentMethodsPage = () => {
         }
       }
     }));
+  };
+
+  const editPaymentSystem = (key) => {
+    const section = document.getElementById(`payment-method-${key}`);
+    if (!section) return;
+
+    section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    window.setTimeout(() => {
+      section.querySelector('input:not([type="checkbox"]), textarea')?.focus({ preventScroll: true });
+    }, 250);
   };
 
   const saveSettings = async (event) => {
@@ -122,6 +158,19 @@ export const AdminPaymentMethodsPage = () => {
     );
   }
 
+  const configuredPaymentSystems = paymentSystemOrder
+    .map((key) => {
+      const method = form.methods[key];
+      return {
+        key,
+        method,
+        fields: paymentSystemFields(key, method),
+        meta: methodMeta[key],
+        title: paymentSystemTitle(key, method)
+      };
+    })
+    .filter((system) => system.fields.length > 0);
+
   return (
     <section className="admin-page section">
       <AdminNav />
@@ -146,6 +195,70 @@ export const AdminPaymentMethodsPage = () => {
         </p>
       ) : null}
 
+      <section className="panel saved-payment-systems-panel">
+        <div className="editor-card-heading">
+          <div>
+            <p className="eyebrow">Saved systems</p>
+            <h2>Bank and mobile accounts</h2>
+          </div>
+          <span>{configuredPaymentSystems.length} added</span>
+        </div>
+
+        {configuredPaymentSystems.length ? (
+          <div className="saved-payment-system-list">
+            {configuredPaymentSystems.map((system) => {
+              const Icon = system.meta.icon;
+
+              return (
+                <article className="saved-payment-system-row" key={system.key}>
+                  <span className="saved-payment-system-icon">
+                    <Icon size={21} />
+                  </span>
+                  <div className="saved-payment-system-content">
+                    <div className="saved-payment-system-heading">
+                      <h3>{system.title}</h3>
+                      <span className={system.method.enabled ? 'status-pill active' : 'status-pill blocked'}>
+                        {system.method.enabled ? 'Enabled' : 'Disabled'}
+                      </span>
+                      <span>{system.meta.title}</span>
+                    </div>
+                    <dl className="saved-payment-system-fields">
+                      {system.fields.map(([label, value]) => (
+                        <div key={label}>
+                          <dt>{label}</dt>
+                          <dd>{value}</dd>
+                        </div>
+                      ))}
+                    </dl>
+                  </div>
+                  <button className="button compact" type="button" onClick={() => editPaymentSystem(system.key)}>
+                    <Pencil size={15} />
+                    Edit
+                  </button>
+                </article>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="saved-payment-system-empty">
+            <div>
+              <strong>No bank or mobile banking system has been added yet.</strong>
+              <span>Add account details below to show them here.</span>
+            </div>
+            <div className="saved-payment-system-empty-actions">
+              <button className="button compact" type="button" onClick={() => editPaymentSystem('bank_transfer')}>
+                <Plus size={15} />
+                Add bank
+              </button>
+              <button className="button compact" type="button" onClick={() => editPaymentSystem('mobile_banking')}>
+                <Plus size={15} />
+                Add mobile
+              </button>
+            </div>
+          </div>
+        )}
+      </section>
+
       <form id="payment-methods-form" className="admin-payment-method-layout" onSubmit={saveSettings}>
         {methodOrder.map((key) => {
           const method = form.methods[key];
@@ -153,7 +266,7 @@ export const AdminPaymentMethodsPage = () => {
           const Icon = meta.icon;
 
           return (
-            <article className="panel admin-payment-method-card" key={key}>
+            <article className="panel admin-payment-method-card" id={`payment-method-${key}`} key={key}>
               <div className="editor-card-heading">
                 <div>
                   <p className="eyebrow">{meta.eyebrow}</p>

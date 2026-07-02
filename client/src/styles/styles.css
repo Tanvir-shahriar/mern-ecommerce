@@ -4051,6 +4051,127 @@ textarea:focus {
   margin-top: 14px;
 }
 
+.saved-payment-systems-panel {
+  display: grid;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.saved-payment-system-list {
+  display: grid;
+  gap: 10px;
+}
+
+.saved-payment-system-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8fafc;
+}
+
+.saved-payment-system-icon {
+  width: 42px;
+  height: 42px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: var(--radius);
+  background: #eef4ff;
+  color: var(--blue);
+}
+
+.saved-payment-system-content {
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.saved-payment-system-heading {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.saved-payment-system-heading h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.saved-payment-system-heading > span:last-child {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.saved-payment-system-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 14px;
+  margin: 0;
+}
+
+.saved-payment-system-fields div {
+  min-width: 0;
+}
+
+.saved-payment-system-fields dt {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.saved-payment-system-fields dd {
+  margin: 2px 0 0;
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.saved-payment-system-empty {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: #f8fafc;
+}
+
+.saved-payment-system-empty div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.saved-payment-system-empty span {
+  color: var(--muted);
+}
+
+.saved-payment-system-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.saved-payment-system-row .button,
+.saved-payment-system-empty .button {
+  border-color: var(--line);
+  background: #fff;
+  color: var(--ink);
+}
+
+.saved-payment-system-row .button:hover,
+.saved-payment-system-empty .button:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
 .admin-payment-method-layout {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -6421,6 +6542,29 @@ textarea:focus {
   .admin-payment-method-layout,
   .payment-method-settings-grid {
     grid-template-columns: 1fr;
+  }
+
+  .saved-payment-system-row {
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .saved-payment-system-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .saved-payment-system-empty {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .saved-payment-system-empty-actions,
+  .saved-payment-system-row .button {
+    width: 100%;
+  }
+
+  .saved-payment-system-empty-actions .button {
+    flex: 1 1 140px;
   }
 
   .admin-page .dashboard-order-row {
