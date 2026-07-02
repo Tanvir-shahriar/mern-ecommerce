@@ -109,6 +109,8 @@ const TEXT_COLOR = '#111827';
 const MUTED_COLOR = '#6b7280';
 const BORDER_COLOR = '#e5e7eb';
 const PANEL_BG = '#f9fafb';
+const PROGRESS_COLOR = '#e9292f';
+const PROGRESS_INACTIVE = '#8f9399';
 
 const getCustomer = (order) => ({
   name: order?.customerSnapshot?.name || order?.shippingAddress?.fullName || order?.user?.name || 'Customer',
@@ -329,6 +331,36 @@ const orderItemsText = (order) => {
 const emailLayout = ({ title, preview, content }) => `
   <!doctype html>
   <html>
+    <head>
+      <style>
+        @keyframes lvProgressPulse {
+          0% { box-shadow: 0 0 0 0 rgba(233, 41, 47, 0.34); }
+          70% { box-shadow: 0 0 0 10px rgba(233, 41, 47, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(233, 41, 47, 0); }
+        }
+
+        @keyframes lvProgressFill {
+          from { transform: scaleX(0.25); opacity: 0.55; }
+          to { transform: scaleX(1); opacity: 1; }
+        }
+
+        .lv-progress-current {
+          animation: lvProgressPulse 1.8s ease-out infinite;
+        }
+
+        .lv-progress-line-active {
+          animation: lvProgressFill 850ms ease-out both;
+          transform-origin: left center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .lv-progress-current,
+          .lv-progress-line-active {
+            animation: none !important;
+          }
+        }
+      </style>
+    </head>
     <body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:${TEXT_COLOR};">
       <span style="display:none;visibility:hidden;opacity:0;height:0;width:0;overflow:hidden;">${escapeHtml(preview)}</span>
       <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#f3f4f6;">
@@ -387,6 +419,7 @@ const buildCustomerOrderEmail = (order) => {
           ? notePanelHtml('Payment note', 'This is a cash on delivery order. Payment will be collected when your order arrives.')
           : ''
       }
+      ${orderProgressHtml(order.status || 'pending')}
       ${orderItemsHtml(order)}
       ${deliveryDetailsHtml(order, expectedDate)}
       <p style="margin:22px 0 0;color:${MUTED_COLOR};font-size:14px;">We will email you again when the order status changes.</p>
@@ -402,6 +435,7 @@ const buildCustomerOrderEmail = (order) => {
     `Payment: ${payment}`,
     `Total: ${formatMoney(order.pricing?.total)}`,
     isCashOnDelivery ? 'Payment note: This is a cash on delivery order. Payment will be collected when your order arrives.' : '',
+    orderProgressText(order.status || 'pending'),
     orderItemsText(order),
     `Expected arrival: ${expectedDate || 'Within 7 days'}`,
     `Ship to:\n${formatAddress(order.shippingAddress)}`,
@@ -479,18 +513,32 @@ const buildAdminOrderEmail = (order) => {
   };
 };
 
-const ORDER_STATUS_STEPS = [
-  ['pending', 'Placed', 'Your order is in our system.'],
-  ['confirmed', 'Confirmed', 'The order has been reviewed.'],
-  ['processing', 'Preparing', 'The items are being prepared and packed.'],
-  ['shipped', 'Shipped', 'The order is on the way.'],
-  ['delivered', 'Delivered', 'The order has arrived.']
+const ORDER_PROGRESS_STEPS = [
+  {
+    label: 'Ordered',
+    icon: 'ordered'
+  },
+  {
+    label: 'Packed',
+    icon: 'packed'
+  },
+  {
+    label: 'In Transit',
+    icon: 'transit'
+  },
+  {
+    label: 'Delivered',
+    icon: 'delivered'
+  }
 ];
 
-const STATUS_STEP_INDEX = ORDER_STATUS_STEPS.reduce((steps, [status], index) => {
-  steps[status] = index;
-  return steps;
-}, {});
+const STATUS_PROGRESS_INDEX = {
+  pending: 0,
+  confirmed: 0,
+  processing: 1,
+  shipped: 2,
+  delivered: 3
+};
 
 const getStatusCopy = (status, orderNumber) => {
   const copy = {
@@ -548,39 +596,124 @@ const getStatusCopy = (status, orderNumber) => {
   );
 };
 
-const orderProgressHtml = (status) => {
-  const activeIndex = STATUS_STEP_INDEX[status];
+const progressIconSvg = (icon) => {
+  const attrs =
+    'width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;"';
+  const stroke = 'stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
+
+  if (icon === 'packed') {
+    return `
+      <svg ${attrs} aria-hidden="true">
+        <path ${stroke} d="M11 16L24 9l13 7-13 7-13-7Z" />
+        <path ${stroke} d="M11 16v17l13 7 13-7V16" />
+        <path ${stroke} d="M24 23v17" />
+        <path ${stroke} d="M17.5 12.5L30.5 19.5" />
+      </svg>
+    `;
+  }
+
+  if (icon === 'transit') {
+    return `
+      <svg ${attrs} aria-hidden="true">
+        <path ${stroke} d="M8 18h23v17H8V18Z" />
+        <path ${stroke} d="M31 23h6l5 6v6H31V23Z" />
+        <circle ${stroke} cx="16" cy="35" r="3" />
+        <circle ${stroke} cx="36" cy="35" r="3" />
+        <path ${stroke} d="M13 23h12" />
+        <path ${stroke} d="M13 28h8" />
+      </svg>
+    `;
+  }
+
+  if (icon === 'delivered') {
+    return `
+      <svg ${attrs} aria-hidden="true">
+        <path ${stroke} d="M8 24L24 10l16 14" />
+        <path ${stroke} d="M14 22v18h20V22" />
+        <path ${stroke} d="M21 40V29h6v11" />
+        <path ${stroke} d="M32 13v8" />
+      </svg>
+    `;
+  }
+
+  return `
+    <svg ${attrs} aria-hidden="true">
+      <rect ${stroke} x="13" y="11" width="22" height="29" rx="2" />
+      <path ${stroke} d="M19 11v-2h10v2" />
+      <path ${stroke} d="M18 18h12" />
+      <path ${stroke} d="M18 24h12" />
+      <path ${stroke} d="M18 30h9" />
+      <path ${stroke} d="M16 18h0.1" />
+      <path ${stroke} d="M16 24h0.1" />
+      <path ${stroke} d="M16 30h0.1" />
+    </svg>
+  `;
+};
+
+const orderProgressText = (status) => {
+  const activeIndex = STATUS_PROGRESS_INDEX[status];
   if (activeIndex === undefined) return '';
 
-  const rows = ORDER_STATUS_STEPS.map(([, label, description], index) => {
-    const isComplete = index < activeIndex;
+  return `Progress: ${ORDER_PROGRESS_STEPS.map((step, index) =>
+    index === activeIndex ? `[${step.label}]` : step.label
+  ).join(' > ')}`;
+};
+
+const orderProgressHtml = (status) => {
+  const activeIndex = STATUS_PROGRESS_INDEX[status];
+  if (activeIndex === undefined) return '';
+
+  const nodeCells = ORDER_PROGRESS_STEPS.map((step, index) => {
+    const isActive = index <= activeIndex;
     const isCurrent = index === activeIndex;
-    const circleBackground = isComplete || isCurrent ? BRAND_COLOR : '#ffffff';
-    const circleBorder = isComplete || isCurrent ? BRAND_COLOR : '#cbd5e1';
-    const circleColor = isComplete || isCurrent ? '#ffffff' : MUTED_COLOR;
-    const state = isComplete ? 'Complete' : isCurrent ? 'Current' : 'Next';
-    const labelColor = isComplete || isCurrent ? TEXT_COLOR : MUTED_COLOR;
+    const nodeColor = isActive ? PROGRESS_COLOR : PROGRESS_INACTIVE;
+    const nodeClass = isCurrent ? 'lv-progress-current' : '';
 
     return `
-      <tr>
-        <td width="40" style="padding:10px 10px 10px 0;vertical-align:top;">
-          <div style="width:28px;height:28px;line-height:28px;border-radius:14px;background:${circleBackground};border:1px solid ${circleBorder};color:${circleColor};font-size:12px;font-weight:700;text-align:center;">${index + 1}</div>
-        </td>
-        <td style="padding:10px 0;border-bottom:1px solid ${index === ORDER_STATUS_STEPS.length - 1 ? 'transparent' : BORDER_COLOR};vertical-align:top;">
-          <p style="margin:0;color:${labelColor};font-size:14px;font-weight:700;line-height:1.4;">${escapeHtml(label)} <span style="color:${isCurrent ? BRAND_COLOR : MUTED_COLOR};font-size:12px;font-weight:700;">${escapeHtml(state)}</span></p>
-          <p style="margin:2px 0 0;color:${MUTED_COLOR};font-size:13px;line-height:1.4;">${escapeHtml(description)}</p>
-        </td>
-      </tr>
+      <td width="84" align="center" style="width:84px;padding:0 0 8px;text-align:center;vertical-align:middle;">
+        <div class="${nodeClass}" style="width:76px;height:76px;line-height:76px;border-radius:38px;background:${nodeColor};text-align:center;margin:0 auto;">
+          <span style="display:inline-block;vertical-align:middle;line-height:0;">${progressIconSvg(step.icon)}</span>
+        </div>
+      </td>
+      ${
+        index < ORDER_PROGRESS_STEPS.length - 1
+          ? `<td width="58" align="center" style="width:58px;padding:0 4px 8px;vertical-align:middle;">
+              ${
+                index < activeIndex
+                  ? `<div class="lv-progress-line-active" style="height:5px;line-height:5px;background:${PROGRESS_COLOR};border-radius:999px;font-size:1px;">&nbsp;</div>`
+                  : `<div style="height:1px;line-height:1px;border-top:7px dotted ${PROGRESS_INACTIVE};font-size:1px;">&nbsp;</div>`
+              }
+            </td>`
+          : ''
+      }
+    `;
+  }).join('');
+
+  const labelCells = ORDER_PROGRESS_STEPS.map((step, index) => {
+    const isActive = index <= activeIndex;
+    const isCurrent = index === activeIndex;
+    const labelColor = isActive ? PROGRESS_COLOR : PROGRESS_INACTIVE;
+
+    return `
+      <td width="84" align="center" style="width:84px;padding:0;text-align:center;vertical-align:top;">
+        <p style="margin:0;color:${labelColor};font-size:12px;line-height:1.35;font-weight:${isCurrent ? '700' : '600'};">${escapeHtml(step.label)}</p>
+      </td>
+      ${
+        index < ORDER_PROGRESS_STEPS.length - 1
+          ? '<td width="58" style="width:58px;padding:0;font-size:1px;line-height:1px;">&nbsp;</td>'
+          : ''
+      }
     `;
   }).join('');
 
   return `
     ${sectionTitle('Order progress')}
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:${PANEL_BG};border:1px solid ${BORDER_COLOR};border-radius:6px;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:14px 0 22px;">
       <tr>
-        <td style="padding:6px 16px;">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
-            <tbody>${rows}</tbody>
+        <td align="center" style="padding:4px 0 0;">
+          <table role="presentation" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin:0 auto;">
+            <tr>${nodeCells}</tr>
+            <tr>${labelCells}</tr>
           </table>
         </td>
       </tr>
@@ -619,11 +752,7 @@ const buildCustomerStatusEmail = (order, options = {}) => {
         ['Expected arrival', expectedDate],
         ['Payment', paymentSummary(order.payment)]
       ])}
-      ${
-        isDetailsOnlyUpdate
-          ? ''
-          : orderProgressHtml(status)
-      }
+      ${orderProgressHtml(status)}
       ${
         detailsChanged && !isDetailsOnlyUpdate
           ? notePanelHtml('Delivery details updated', 'The delivery details were also updated. Review the latest address and expected arrival below.')
@@ -643,6 +772,7 @@ const buildCustomerStatusEmail = (order, options = {}) => {
     `Current status: ${humanize(status)}`,
     `Expected arrival: ${expectedDate}`,
     `Payment: ${paymentSummary(order.payment)}`,
+    orderProgressText(status),
     detailsChanged && !isDetailsOnlyUpdate ? 'Delivery details were also updated. Review the latest address and expected arrival below.' : '',
     note ? `Note from shop: ${note}` : '',
     `Ship to:\n${formatAddress(order.shippingAddress)}`,
