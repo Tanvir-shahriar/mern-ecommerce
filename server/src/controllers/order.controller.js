@@ -365,7 +365,11 @@ export const updateOrderStatus = asyncHandler(async (req, res) => {
   });
 
   if (previousStatus !== order.status || detailsChanged) {
-    await sendOrderStatusEmail(order, { note: req.body.note });
+    await sendOrderStatusEmail(order, {
+      note: req.body.note,
+      reason: previousStatus !== order.status ? 'status' : 'details',
+      detailsChanged
+    });
   }
 
   res.json({

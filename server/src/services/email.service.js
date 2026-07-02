@@ -66,14 +66,31 @@ const formatMoney = (value = 0) => {
   }
 };
 
+const toValidDate = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
 const formatDate = (value) => {
-  if (!value) return '';
+  const date = toValidDate(value);
+  if (!date) return '';
 
   return new Intl.DateTimeFormat('en-BD', {
     dateStyle: 'medium',
     timeStyle: 'short',
     timeZone: 'Asia/Dhaka'
-  }).format(new Date(value));
+  }).format(date);
+};
+
+const formatDateOnly = (value) => {
+  const date = toValidDate(value);
+  if (!date) return '';
+
+  return new Intl.DateTimeFormat('en-BD', {
+    dateStyle: 'medium',
+    timeZone: 'Asia/Dhaka'
+  }).format(date);
 };
 
 const getOrderNumber = (order) => order?.orderNumber || order?._id?.toString?.() || order?.id || 'your order';
@@ -85,6 +102,13 @@ const getLogoUrl = () => env.email.logoUrl || `${getBaseUrl()}/lahventure.png`;
 const getOrderUrl = (order) => `${getBaseUrl()}/orders/${encodeURIComponent(getOrderNumber(order))}`;
 
 const getAdminOrdersUrl = () => `${getBaseUrl()}/admin/orders`;
+
+const BRAND_COLOR = '#6b000b';
+const BRAND_DARK = '#4a0006';
+const TEXT_COLOR = '#111827';
+const MUTED_COLOR = '#6b7280';
+const BORDER_COLOR = '#e5e7eb';
+const PANEL_BG = '#f9fafb';
 
 const getCustomer = (order) => ({
   name: order?.customerSnapshot?.name || order?.shippingAddress?.fullName || order?.user?.name || 'Customer',
@@ -101,8 +125,8 @@ const getVariantSummary = (variant) => {
     .join(', ');
 };
 
-const formatAddress = (address = {}) =>
-  [
+const formatAddress = (address = {}) => {
+  const lines = [
     address.fullName,
     address.phone,
     address.line1,
@@ -113,20 +137,121 @@ const formatAddress = (address = {}) =>
     .filter(Boolean)
     .join('\n');
 
+  return lines || 'Unavailable';
+};
+
 const htmlAddress = (address = {}) =>
   formatAddress(address)
     .split('\n')
     .map((line) => escapeHtml(line))
     .join('<br />');
 
-const pricingRows = (pricing = {}) =>
-  [
+const pricingRows = (pricing = {}) => {
+  const discount = Number(pricing.discount) || 0;
+
+  return [
     ['Subtotal', pricing.subtotal],
-    pricing.discount ? ['Discount', -Math.abs(pricing.discount)] : null,
+    discount ? ['Discount', -Math.abs(discount)] : null,
     ['Tax', pricing.tax],
     ['Shipping', pricing.shipping],
     ['Total', pricing.total]
   ].filter(Boolean);
+};
+
+const PAYMENT_METHOD_LABELS = {
+  card: 'Card',
+  cash_on_delivery: 'Cash on delivery',
+  paypal: 'PayPal',
+  stripe: 'Stripe'
+};
+
+const PAYMENT_STATUS_LABELS = {
+  pending: 'Pending',
+  authorized: 'Authorized',
+  paid: 'Paid',
+  failed: 'Failed',
+  refunded: 'Refunded'
+};
+
+const formatPaymentMethod = (method = '') => PAYMENT_METHOD_LABELS[method] || (method ? humanize(method) : 'Unavailable');
+
+const formatPaymentStatus = (status = '') => PAYMENT_STATUS_LABELS[status] || (status ? humanize(status) : 'Pending');
+
+const paymentSummary = (payment = {}) =>
+  `${formatPaymentMethod(payment.method)} (${formatPaymentStatus(payment.status)})`;
+
+const sectionTitle = (title) =>
+  `<h2 style="margin:28px 0 10px;font-size:16px;line-height:1.3;color:${TEXT_COLOR};">${escapeHtml(title)}</h2>`;
+
+const actionButton = (href, label, color = BRAND_COLOR) => `
+  <p style="margin:24px 0 0;">
+    <a href="${escapeHtml(href)}" style="display:inline-block;background:${color};color:#ffffff;text-decoration:none;padding:12px 18px;border-radius:4px;font-size:14px;font-weight:700;line-height:1.2;">${escapeHtml(label)}</a>
+  </p>
+`;
+
+const summaryPanelHtml = (rows) => {
+  const body = rows
+    .filter(([, value]) => value !== undefined && value !== null && value !== '')
+    .map(
+      ([label, value]) => `
+        <tr>
+          <td style="padding:8px 0;color:${MUTED_COLOR};font-size:13px;line-height:1.4;">${escapeHtml(label)}</td>
+          <td style="padding:8px 0;color:${TEXT_COLOR};font-size:14px;line-height:1.4;font-weight:700;text-align:right;">${escapeHtml(value)}</td>
+        </tr>
+      `
+    )
+    .join('');
+
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:${PANEL_BG};border:1px solid ${BORDER_COLOR};border-radius:6px;margin:18px 0 20px;">
+      <tbody>
+        <tr>
+          <td style="padding:10px 16px;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+              <tbody>${body}</tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  `;
+};
+
+const notePanelHtml = (title, note, tone = 'neutral') => {
+  if (!note) return '';
+
+  const isWarning = tone === 'warning';
+  const border = isWarning ? '#fecaca' : '#d1d5db';
+  const background = isWarning ? '#fef2f2' : PANEL_BG;
+  const titleColor = isWarning ? '#991b1b' : TEXT_COLOR;
+
+  return `
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:${background};border:1px solid ${border};border-radius:6px;margin:18px 0;">
+      <tr>
+        <td style="padding:14px 16px;">
+          <p style="margin:0 0 4px;color:${titleColor};font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;">${escapeHtml(title)}</p>
+          <p style="margin:0;color:#374151;font-size:14px;line-height:1.5;">${escapeHtml(note)}</p>
+        </td>
+      </tr>
+    </table>
+  `;
+};
+
+const deliveryDetailsHtml = (order, expectedDate) => `
+  ${sectionTitle('Delivery details')}
+  <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;border:1px solid ${BORDER_COLOR};border-radius:6px;">
+    <tr>
+      <td width="58%" style="padding:16px;vertical-align:top;border-right:1px solid ${BORDER_COLOR};">
+        <p style="margin:0 0 6px;color:${MUTED_COLOR};font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;">Ship to</p>
+        <p style="margin:0;color:#374151;font-size:14px;line-height:1.5;">${htmlAddress(order.shippingAddress)}</p>
+      </td>
+      <td width="42%" style="padding:16px;vertical-align:top;">
+        <p style="margin:0 0 6px;color:${MUTED_COLOR};font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;">Expected arrival</p>
+        <p style="margin:0;color:${TEXT_COLOR};font-size:14px;line-height:1.5;font-weight:700;">${escapeHtml(expectedDate || 'Within 7 days')}</p>
+      </td>
+    </tr>
+  </table>
+`;
 
 const orderItemsHtml = (order) => {
   const rows = (order?.items || [])
@@ -136,39 +261,47 @@ const orderItemsHtml = (order) => {
 
       return `
         <tr>
-          <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;">
-            <strong>${escapeHtml(item.name)}</strong>
-            ${item.sku ? `<br /><span style="color:#6b7280;font-size:13px;">SKU ${escapeHtml(item.sku)}</span>` : ''}
-            ${variant ? `<br /><span style="color:#6b7280;font-size:13px;">${escapeHtml(variant)}</span>` : ''}
+          <td style="padding:12px 8px 12px 0;border-bottom:1px solid ${BORDER_COLOR};">
+            <strong style="color:${TEXT_COLOR};">${escapeHtml(item.name)}</strong>
+            ${item.sku ? `<br /><span style="color:${MUTED_COLOR};font-size:12px;">SKU ${escapeHtml(item.sku)}</span>` : ''}
+            ${variant ? `<br /><span style="color:${MUTED_COLOR};font-size:12px;">${escapeHtml(variant)}</span>` : ''}
           </td>
-          <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;text-align:center;">${escapeHtml(item.quantity)}</td>
-          <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(formatMoney(item.price))}</td>
-          <td style="padding:12px 0;border-bottom:1px solid #e5e7eb;text-align:right;">${escapeHtml(formatMoney(lineTotal))}</td>
+          <td style="padding:12px 6px;border-bottom:1px solid ${BORDER_COLOR};text-align:center;color:#374151;">${escapeHtml(item.quantity)}</td>
+          <td style="padding:12px 6px;border-bottom:1px solid ${BORDER_COLOR};text-align:right;color:#374151;">${escapeHtml(formatMoney(item.price))}</td>
+          <td style="padding:12px 0 12px 6px;border-bottom:1px solid ${BORDER_COLOR};text-align:right;color:${TEXT_COLOR};font-weight:700;">${escapeHtml(formatMoney(lineTotal))}</td>
         </tr>
       `;
     })
     .join('');
+
+  if (!rows) {
+    return `
+      ${sectionTitle('Items')}
+      <p style="margin:0;color:${MUTED_COLOR};font-size:14px;">No order items were available for this email.</p>
+    `;
+  }
 
   const totals = pricingRows(order?.pricing)
     .map(([label, amount]) => {
       const isTotal = label === 'Total';
       return `
         <tr>
-          <td colspan="3" style="padding:6px 0;text-align:right;${isTotal ? 'font-weight:700;font-size:16px;' : 'color:#4b5563;'}">${escapeHtml(label)}</td>
-          <td style="padding:6px 0;text-align:right;${isTotal ? 'font-weight:700;font-size:16px;' : ''}">${escapeHtml(formatMoney(amount))}</td>
+          <td colspan="3" style="padding:${isTotal ? '12px' : '6px'} 8px 6px 0;text-align:right;${isTotal ? `font-weight:700;font-size:16px;color:${TEXT_COLOR};` : 'color:#4b5563;font-size:14px;'}">${escapeHtml(label)}</td>
+          <td style="padding:${isTotal ? '12px' : '6px'} 0 6px 6px;text-align:right;${isTotal ? `font-weight:700;font-size:16px;color:${TEXT_COLOR};` : 'color:#374151;font-size:14px;'}">${escapeHtml(formatMoney(amount))}</td>
         </tr>
       `;
     })
     .join('');
 
   return `
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:16px;">
+    ${sectionTitle('Items')}
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;margin-top:8px;font-size:14px;">
       <thead>
         <tr>
-          <th align="left" style="padding-bottom:8px;border-bottom:1px solid #111827;">Item</th>
-          <th align="center" style="padding-bottom:8px;border-bottom:1px solid #111827;">Qty</th>
-          <th align="right" style="padding-bottom:8px;border-bottom:1px solid #111827;">Price</th>
-          <th align="right" style="padding-bottom:8px;border-bottom:1px solid #111827;">Total</th>
+          <th align="left" style="padding:0 8px 8px 0;border-bottom:1px solid ${TEXT_COLOR};color:${TEXT_COLOR};font-size:12px;text-transform:uppercase;letter-spacing:0.4px;">Item</th>
+          <th align="center" style="padding:0 6px 8px;border-bottom:1px solid ${TEXT_COLOR};color:${TEXT_COLOR};font-size:12px;text-transform:uppercase;letter-spacing:0.4px;">Qty</th>
+          <th align="right" style="padding:0 6px 8px;border-bottom:1px solid ${TEXT_COLOR};color:${TEXT_COLOR};font-size:12px;text-transform:uppercase;letter-spacing:0.4px;">Price</th>
+          <th align="right" style="padding:0 0 8px 6px;border-bottom:1px solid ${TEXT_COLOR};color:${TEXT_COLOR};font-size:12px;text-transform:uppercase;letter-spacing:0.4px;">Total</th>
         </tr>
       </thead>
       <tbody>${rows}</tbody>
@@ -194,30 +327,38 @@ const orderItemsText = (order) => {
 };
 
 const emailLayout = ({ title, preview, content }) => `
-  <div style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:#111827;">
-    <span style="display:none;visibility:hidden;opacity:0;height:0;width:0;overflow:hidden;">${escapeHtml(preview)}</span>
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#f3f4f6;padding:24px 0;">
-      <tr>
-        <td align="center" style="padding:24px 12px;">
-          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;border-collapse:collapse;background:#ffffff;border:1px solid #e5e7eb;">
-            <tr>
-              <td style="padding:24px;background:linear-gradient(90deg, #6b000b 0%, #4a0006 100%);color:#ffffff;">
-                <img src="${escapeHtml(getLogoUrl())}" width="72" height="72" alt="${escapeHtml(env.email.storeName)}" style="display:block;width:72px;height:72px;object-fit:contain;margin:0 0 14px;border-radius:4px;" />
-                <div style="font-size:13px;letter-spacing:0.5px;text-transform:uppercase;color:rgba(255,255,255,0.7);font-weight:bold;">${escapeHtml(env.email.storeName)}</div>
-                <h1 style="margin:8px 0 0;font-size:24px;line-height:1.3;font-weight:bold;">${escapeHtml(title)}</h1>
-              </td>
-            </tr>
-            <tr>
-              <td style="padding:24px;font-size:15px;line-height:1.6;">
-                ${content}
-                <p style="margin:28px 0 0;color:#4b5563;">Thanks,<br /><strong>${escapeHtml(env.email.storeName)}</strong></p>
-              </td>
-            </tr>
-          </table>
-        </td>
-      </tr>
-    </table>
-  </div>
+  <!doctype html>
+  <html>
+    <body style="margin:0;padding:0;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;color:${TEXT_COLOR};">
+      <span style="display:none;visibility:hidden;opacity:0;height:0;width:0;overflow:hidden;">${escapeHtml(preview)}</span>
+      <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#f3f4f6;">
+        <tr>
+          <td align="center" style="padding:28px 12px;">
+            <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="width:100%;max-width:640px;border-collapse:collapse;background:#ffffff;border:1px solid ${BORDER_COLOR};border-radius:8px;overflow:hidden;">
+              <tr>
+                <td style="padding:24px;background:${BRAND_DARK};color:#ffffff;">
+                  <img src="${escapeHtml(getLogoUrl())}" width="64" height="64" alt="${escapeHtml(env.email.storeName)}" style="display:block;width:64px;height:64px;object-fit:contain;margin:0 0 14px;border-radius:4px;" />
+                  <div style="font-size:12px;letter-spacing:0.7px;text-transform:uppercase;color:#f3d8dc;font-weight:700;">${escapeHtml(env.email.storeName)}</div>
+                  <h1 style="margin:8px 0 0;font-size:24px;line-height:1.3;font-weight:700;color:#ffffff;">${escapeHtml(title)}</h1>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:26px 24px 28px;font-size:15px;line-height:1.6;color:${TEXT_COLOR};">
+                  ${content}
+                  <p style="margin:30px 0 0;color:${MUTED_COLOR};font-size:14px;line-height:1.5;">Thanks,<br /><strong style="color:${TEXT_COLOR};">${escapeHtml(env.email.storeName)}</strong></p>
+                </td>
+              </tr>
+              <tr>
+                <td style="padding:16px 24px;background:${PANEL_BG};border-top:1px solid ${BORDER_COLOR};color:${MUTED_COLOR};font-size:12px;line-height:1.5;">
+                  Keep this email for your records. For support, reply with your order number.
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+    </body>
+  </html>
 `;
 
 const buildCustomerOrderEmail = (order) => {
@@ -225,30 +366,45 @@ const buildCustomerOrderEmail = (order) => {
   const customer = getCustomer(order);
   const orderUrl = getOrderUrl(order);
   const createdAt = formatDate(order.createdAt);
+  const expectedDate = formatDateOnly(order.expectedDeliveryDate);
+  const payment = paymentSummary(order.payment);
+  const isCashOnDelivery = order.payment?.method === 'cash_on_delivery';
 
   const html = emailLayout({
-    title: `Order ${orderNumber} received`,
-    preview: `We received your ${env.email.storeName} order ${orderNumber}.`,
+    title: `We received order ${orderNumber}`,
+    preview: `Your ${env.email.storeName} order ${orderNumber} is in our queue.`,
     content: `
       <p style="margin:0 0 16px;">Hi ${escapeHtml(customer.name)},</p>
-      <p style="margin:0 0 16px;">We received your order and will let you know when it moves to the next step.</p>
-      <p style="margin:0 0 16px;"><strong>Order:</strong> ${escapeHtml(orderNumber)}${createdAt ? `<br /><strong>Placed:</strong> ${escapeHtml(createdAt)}` : ''}</p>
+      <p style="margin:0 0 16px;">Thank you for shopping with ${escapeHtml(env.email.storeName)}. Your order has been received and our team will review it before fulfillment starts.</p>
+      ${summaryPanelHtml([
+        ['Order number', orderNumber],
+        ['Placed', createdAt],
+        ['Payment', payment],
+        ['Total', formatMoney(order.pricing?.total)]
+      ])}
+      ${
+        isCashOnDelivery
+          ? notePanelHtml('Payment note', 'This is a cash on delivery order. Payment will be collected when your order arrives.')
+          : ''
+      }
       ${orderItemsHtml(order)}
-      <h2 style="margin:24px 0 8px;font-size:16px;">Shipping address</h2>
-      <p style="margin:0;color:#374151;">${htmlAddress(order.shippingAddress)}</p>
-      <p style="margin:24px 0 0;">
-        <a href="${escapeHtml(orderUrl)}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;padding:10px 16px;">View order</a>
-      </p>
+      ${deliveryDetailsHtml(order, expectedDate)}
+      <p style="margin:22px 0 0;color:${MUTED_COLOR};font-size:14px;">We will email you again when the order status changes.</p>
+      ${actionButton(orderUrl, 'View order')}
     `
   });
 
   const text = [
     `Hi ${customer.name},`,
-    `We received your ${env.email.storeName} order.`,
-    `Order: ${orderNumber}`,
+    `Thank you for shopping with ${env.email.storeName}. Your order has been received and our team will review it before fulfillment starts.`,
+    `Order number: ${orderNumber}`,
     createdAt ? `Placed: ${createdAt}` : '',
+    `Payment: ${payment}`,
+    `Total: ${formatMoney(order.pricing?.total)}`,
+    isCashOnDelivery ? 'Payment note: This is a cash on delivery order. Payment will be collected when your order arrives.' : '',
     orderItemsText(order),
-    `Shipping address:\n${formatAddress(order.shippingAddress)}`,
+    `Expected arrival: ${expectedDate || 'Within 7 days'}`,
+    `Ship to:\n${formatAddress(order.shippingAddress)}`,
     `View order: ${orderUrl}`
   ]
     .filter(Boolean)
@@ -256,7 +412,7 @@ const buildCustomerOrderEmail = (order) => {
 
   return {
     to: customer.email,
-    subject: `Order ${orderNumber} received`,
+    subject: `We received your order ${orderNumber}`,
     html,
     text
   };
@@ -267,31 +423,32 @@ const buildAdminOrderEmail = (order) => {
   const customer = getCustomer(order);
   const adminUrl = getAdminOrdersUrl();
   const createdAt = formatDate(order.createdAt);
+  const expectedDate = formatDateOnly(order.expectedDeliveryDate);
   const customerNote = order.customerNote ? String(order.customerNote).trim() : '';
 
   const html = emailLayout({
     title: `New order ${orderNumber}`,
-    preview: `New ${env.email.storeName} order from ${customer.name}.`,
+    preview: `${customer.name} placed a ${formatMoney(order.pricing?.total)} order on ${env.email.storeName}.`,
     content: `
-      <p style="margin:0 0 16px;">A new order was placed on ${escapeHtml(env.email.storeName)}.</p>
-      <p style="margin:0 0 16px;">
-        <strong>Customer:</strong> ${escapeHtml(customer.name)}<br />
-        <strong>Email:</strong> ${escapeHtml(customer.email || 'Unavailable')}<br />
-        <strong>Phone:</strong> ${escapeHtml(customer.phone || 'Unavailable')}<br />
-        <strong>Payment:</strong> ${escapeHtml(humanize(order.payment?.method || ''))} (${escapeHtml(humanize(order.payment?.status || 'pending'))})<br />
-        <strong>Status:</strong> ${escapeHtml(humanize(order.status || 'pending'))}${createdAt ? `<br /><strong>Placed:</strong> ${escapeHtml(createdAt)}` : ''}
-      </p>
+      <p style="margin:0 0 16px;">A customer placed a new order. Review payment, inventory, delivery details, and any customer note before fulfillment.</p>
+      ${summaryPanelHtml([
+        ['Order number', orderNumber],
+        ['Order total', formatMoney(order.pricing?.total)],
+        ['Status', humanize(order.status || 'pending')],
+        ['Payment', paymentSummary(order.payment)],
+        ['Placed', createdAt],
+        ['Expected arrival', expectedDate || 'Within 7 days']
+      ])}
+      ${sectionTitle('Customer')}
+      ${summaryPanelHtml([
+        ['Name', customer.name],
+        ['Email', customer.email || 'Unavailable'],
+        ['Phone', customer.phone || 'Unavailable']
+      ])}
       ${orderItemsHtml(order)}
-      <h2 style="margin:24px 0 8px;font-size:16px;">Shipping address</h2>
-      <p style="margin:0;color:#374151;">${htmlAddress(order.shippingAddress)}</p>
-      ${
-        customerNote
-          ? `<h2 style="margin:24px 0 8px;font-size:16px;">Customer note</h2><p style="margin:0;color:#374151;">${escapeHtml(customerNote)}</p>`
-          : ''
-      }
-      <p style="margin:24px 0 0;">
-        <a href="${escapeHtml(adminUrl)}" style="display:inline-block;background:#111827;color:#ffffff;text-decoration:none;padding:10px 16px;">Open admin orders</a>
-      </p>
+      ${deliveryDetailsHtml(order, expectedDate)}
+      ${notePanelHtml('Customer note', customerNote)}
+      ${actionButton(adminUrl, 'Open admin orders', TEXT_COLOR)}
     `
   });
 
@@ -300,11 +457,13 @@ const buildAdminOrderEmail = (order) => {
     `Customer: ${customer.name}`,
     `Email: ${customer.email || 'Unavailable'}`,
     `Phone: ${customer.phone || 'Unavailable'}`,
-    `Payment: ${humanize(order.payment?.method || '')} (${humanize(order.payment?.status || 'pending')})`,
+    `Total: ${formatMoney(order.pricing?.total)}`,
+    `Payment: ${paymentSummary(order.payment)}`,
     `Status: ${humanize(order.status || 'pending')}`,
     createdAt ? `Placed: ${createdAt}` : '',
+    `Expected arrival: ${expectedDate || 'Within 7 days'}`,
     orderItemsText(order),
-    `Shipping address:\n${formatAddress(order.shippingAddress)}`,
+    `Ship to:\n${formatAddress(order.shippingAddress)}`,
     customerNote ? `Customer note:\n${customerNote}` : '',
     `Admin orders: ${adminUrl}`
   ]
@@ -313,11 +472,120 @@ const buildAdminOrderEmail = (order) => {
 
   return {
     to: env.email.adminTo,
-    subject: `New order ${orderNumber} - ${formatMoney(order.pricing?.total)}`,
+    subject: `New order ${orderNumber}: ${formatMoney(order.pricing?.total)}`,
     html,
     text,
     replyTo: customer.email || env.email.replyTo || undefined
   };
+};
+
+const ORDER_STATUS_STEPS = [
+  ['pending', 'Placed', 'Your order is in our system.'],
+  ['confirmed', 'Confirmed', 'The order has been reviewed.'],
+  ['processing', 'Preparing', 'The items are being prepared and packed.'],
+  ['shipped', 'Shipped', 'The order is on the way.'],
+  ['delivered', 'Delivered', 'The order has arrived.']
+];
+
+const STATUS_STEP_INDEX = ORDER_STATUS_STEPS.reduce((steps, [status], index) => {
+  steps[status] = index;
+  return steps;
+}, {});
+
+const getStatusCopy = (status, orderNumber) => {
+  const copy = {
+    pending: {
+      title: 'Order received',
+      description: 'Your order is in our queue. We will confirm it before fulfillment starts.',
+      preview: `Order ${orderNumber} is waiting for confirmation.`,
+      subject: `Order ${orderNumber}: order received`
+    },
+    confirmed: {
+      title: 'Order confirmed',
+      description: 'Your order has been confirmed and will move into preparation next.',
+      preview: `Order ${orderNumber} has been confirmed.`,
+      subject: `Order ${orderNumber}: confirmed`
+    },
+    processing: {
+      title: 'We are preparing your order',
+      description: 'Your items are being prepared and packed for delivery.',
+      preview: `Order ${orderNumber} is being prepared.`,
+      subject: `Order ${orderNumber}: preparing for delivery`
+    },
+    shipped: {
+      title: 'Your order has shipped',
+      description: 'Your order has left our store and is on the way to your delivery address.',
+      preview: `Order ${orderNumber} has shipped.`,
+      subject: `Order ${orderNumber}: shipped`
+    },
+    delivered: {
+      title: 'Order delivered',
+      description: 'Your order has been marked as delivered. We hope everything arrived in good condition.',
+      preview: `Order ${orderNumber} has been delivered.`,
+      subject: `Order ${orderNumber}: delivered`
+    },
+    cancelled: {
+      title: 'Order cancelled',
+      description: 'Your order has been cancelled. If this does not look right, reply with your order number so we can check it.',
+      preview: `Order ${orderNumber} has been cancelled.`,
+      subject: `Order ${orderNumber}: cancelled`
+    },
+    refunded: {
+      title: 'Order refunded',
+      description: 'Your order has been refunded. The money should appear based on your payment provider or bank timeline.',
+      preview: `Order ${orderNumber} has been refunded.`,
+      subject: `Order ${orderNumber}: refunded`
+    }
+  };
+
+  return (
+    copy[status] || {
+      title: 'Order status updated',
+      description: `Your order status is now ${humanize(status || 'pending')}.`,
+      preview: `Order ${orderNumber} status was updated.`,
+      subject: `Order ${orderNumber}: status updated`
+    }
+  );
+};
+
+const orderProgressHtml = (status) => {
+  const activeIndex = STATUS_STEP_INDEX[status];
+  if (activeIndex === undefined) return '';
+
+  const rows = ORDER_STATUS_STEPS.map(([, label, description], index) => {
+    const isComplete = index < activeIndex;
+    const isCurrent = index === activeIndex;
+    const circleBackground = isComplete || isCurrent ? BRAND_COLOR : '#ffffff';
+    const circleBorder = isComplete || isCurrent ? BRAND_COLOR : '#cbd5e1';
+    const circleColor = isComplete || isCurrent ? '#ffffff' : MUTED_COLOR;
+    const state = isComplete ? 'Complete' : isCurrent ? 'Current' : 'Next';
+    const labelColor = isComplete || isCurrent ? TEXT_COLOR : MUTED_COLOR;
+
+    return `
+      <tr>
+        <td width="40" style="padding:10px 10px 10px 0;vertical-align:top;">
+          <div style="width:28px;height:28px;line-height:28px;border-radius:14px;background:${circleBackground};border:1px solid ${circleBorder};color:${circleColor};font-size:12px;font-weight:700;text-align:center;">${index + 1}</div>
+        </td>
+        <td style="padding:10px 0;border-bottom:1px solid ${index === ORDER_STATUS_STEPS.length - 1 ? 'transparent' : BORDER_COLOR};vertical-align:top;">
+          <p style="margin:0;color:${labelColor};font-size:14px;font-weight:700;line-height:1.4;">${escapeHtml(label)} <span style="color:${isCurrent ? BRAND_COLOR : MUTED_COLOR};font-size:12px;font-weight:700;">${escapeHtml(state)}</span></p>
+          <p style="margin:2px 0 0;color:${MUTED_COLOR};font-size:13px;line-height:1.4;">${escapeHtml(description)}</p>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  return `
+    ${sectionTitle('Order progress')}
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:${PANEL_BG};border:1px solid ${BORDER_COLOR};border-radius:6px;">
+      <tr>
+        <td style="padding:6px 16px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
+            <tbody>${rows}</tbody>
+          </table>
+        </td>
+      </tr>
+    </table>
+  `;
 };
 
 const buildCustomerStatusEmail = (order, options = {}) => {
@@ -326,223 +594,67 @@ const buildCustomerStatusEmail = (order, options = {}) => {
   const orderUrl = getOrderUrl(order);
   const status = order.status || 'pending';
   const note = options.note ? String(options.note).trim() : '';
-
-  // Get active step index based on status mapping
-  let activeIndex = 0; // 0: Processed, 1: Shipped, 2: En Route, 3: Arrived
-  let statusTitle = '';
-  let statusDescription = '';
-  let previewText = '';
-
-  if (status === 'delivered') {
-    activeIndex = 3;
-    statusTitle = `Order Delivered!`;
-    statusDescription = `Great news! Your order has arrived at your address. We hope you love your new timepiece.`;
-    previewText = `Your order ${orderNumber} has been delivered.`;
-  } else if (status === 'shipped') {
-    activeIndex = 2;
-    statusTitle = `Order En Route!`;
-    statusDescription = `Your order is en route! It has been dispatched and is on its way to your delivery address.`;
-    previewText = `Your order ${orderNumber} is en route.`;
-  } else if (status === 'processing') {
-    activeIndex = 1;
-    statusTitle = `Order Packed & Shipped`;
-    statusDescription = `Your order has been packed and handed over to our shipping partner. It's getting closer!`;
-    previewText = `Your order ${orderNumber} is packed and ready.`;
-  } else if (status === 'cancelled') {
-    activeIndex = -1;
-    statusTitle = `Order Cancelled`;
-    statusDescription = `We are sorry to inform you that your order has been cancelled. Please contact customer support for details.`;
-    previewText = `Your order ${orderNumber} has been cancelled.`;
-  } else if (status === 'refunded') {
-    activeIndex = -1;
-    statusTitle = `Order Refunded`;
-    statusDescription = `Your order has been refunded. The refund amount will appear in your account soon.`;
-    previewText = `Your order ${orderNumber} has been refunded.`;
-  } else {
-    // pending, confirmed
-    activeIndex = 0;
-    statusTitle = `Order Processed`;
-    statusDescription = `Your order has been processed. We are preparing the item for packaging.`;
-    previewText = `Your order ${orderNumber} has been processed.`;
-  }
-
-  // Formatting Expected Arrival Date
-  const expectedDateStr = order.expectedDeliveryDate
-    ? new Intl.DateTimeFormat('en-BD', { dateStyle: 'medium' }).format(new Date(order.expectedDeliveryDate))
-    : new Intl.DateTimeFormat('en-BD', { dateStyle: 'medium' }).format(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000));
-
-  // Build reddish-themed progress bar (HTML Table) matching the image
-  let progressBarHtml = '';
-  if (activeIndex >= 0) {
-    const activeColor = '#6b000b'; // Reddish brand color
-    const inactiveColor = '#cbd5e1';
-    const lineActiveColor = '#6b000b';
-    const lineInactiveColor = '#e2e8f0';
-
-    const node1Color = activeIndex >= 0 ? activeColor : inactiveColor;
-    const node2Color = activeIndex >= 1 ? activeColor : inactiveColor;
-    const node3Color = activeIndex >= 2 ? activeColor : inactiveColor;
-    const node4Color = activeIndex >= 3 ? activeColor : inactiveColor;
-
-    const node1Border = activeIndex >= 0 ? 'none' : `2px solid ${inactiveColor}`;
-    const node2Border = activeIndex >= 1 ? 'none' : `2px solid ${inactiveColor}`;
-    const node3Border = activeIndex >= 2 ? 'none' : `2px solid ${inactiveColor}`;
-    const node4Border = activeIndex >= 3 ? 'none' : `2px solid ${inactiveColor}`;
-
-    const line1Color = activeIndex >= 1 ? lineActiveColor : lineInactiveColor;
-    const line2Color = activeIndex >= 2 ? lineActiveColor : lineInactiveColor;
-    const line3Color = activeIndex >= 3 ? lineActiveColor : lineInactiveColor;
-
-    const checkIcon = '✓';
-    const emptyIcon = '&nbsp;';
-
-    const node1Text = activeIndex >= 0 ? checkIcon : emptyIcon;
-    const node2Text = activeIndex >= 1 ? checkIcon : emptyIcon;
-    const node3Text = activeIndex >= 2 ? checkIcon : emptyIcon;
-    const node4Text = activeIndex >= 3 ? checkIcon : emptyIcon;
-
-    const label1Color = activeIndex >= 0 ? '#6b000b' : '#6b7280';
-    const label2Color = activeIndex >= 1 ? '#6b000b' : '#6b7280';
-    const label3Color = activeIndex >= 2 ? '#6b000b' : '#6b7280';
-    const label4Color = activeIndex >= 3 ? '#6b000b' : '#6b7280';
-
-    progressBarHtml = `
-      <div style="background-color:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; padding:20px; margin:24px 0; font-family:Arial, sans-serif; box-shadow:0 1px 3px rgba(0,0,0,0.05);">
-        <!-- Order header inside progress bar -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse; margin-bottom:16px;">
-          <tr>
-            <td align="left" style="font-size:14px; font-weight:bold; color:#111827;">
-              ORDER #${escapeHtml(orderNumber)}
-            </td>
-            <td align="right" style="font-size:13px; color:#4b5563; text-align:right; font-weight:600;">
-              Expected Arrival: <span style="color:#6b000b;">${escapeHtml(expectedDateStr)}</span>
-            </td>
-          </tr>
-        </table>
-
-        <!-- Nodes and connector lines -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse; margin-bottom:12px; table-layout:fixed;">
-          <tr>
-            <!-- Node 1 -->
-            <td align="center" width="24" style="padding:0; vertical-align:middle;">
-              <div style="width:24px; height:24px; line-height:24px; border-radius:12px; background-color:${node1Color}; color:#ffffff; font-size:12px; font-weight:bold; text-align:center; border:${node1Border};">
-                ${node1Text}
-              </div>
-            </td>
-            <!-- Line 1-2 -->
-            <td style="padding:0; vertical-align:middle;">
-              <div style="height:4px; background-color:${line1Color}; font-size:1px; line-height:1px;">&nbsp;</div>
-            </td>
-            <!-- Node 2 -->
-            <td align="center" width="24" style="padding:0; vertical-align:middle;">
-              <div style="width:24px; height:24px; line-height:24px; border-radius:12px; background-color:${node2Color}; color:#ffffff; font-size:12px; font-weight:bold; text-align:center; border:${node2Border};">
-                ${node2Text}
-              </div>
-            </td>
-            <!-- Line 2-3 -->
-            <td style="padding:0; vertical-align:middle;">
-              <div style="height:4px; background-color:${line2Color}; font-size:1px; line-height:1px;">&nbsp;</div>
-            </td>
-            <!-- Node 3 -->
-            <td align="center" width="24" style="padding:0; vertical-align:middle;">
-              <div style="width:24px; height:24px; line-height:24px; border-radius:12px; background-color:${node3Color}; color:#ffffff; font-size:12px; font-weight:bold; text-align:center; border:${node3Border};">
-                ${node3Text}
-              </div>
-            </td>
-            <!-- Line 3-4 -->
-            <td style="padding:0; vertical-align:middle;">
-              <div style="height:4px; background-color:${line3Color}; font-size:1px; line-height:1px;">&nbsp;</div>
-            </td>
-            <!-- Node 4 -->
-            <td align="center" width="24" style="padding:0; vertical-align:middle;">
-              <div style="width:24px; height:24px; line-height:24px; border-radius:12px; background-color:${node4Color}; color:#ffffff; font-size:12px; font-weight:bold; text-align:center; border:${node4Border};">
-                ${node4Text}
-              </div>
-            </td>
-          </tr>
-        </table>
-
-        <!-- Node Labels & Emojis -->
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse; table-layout:fixed;">
-          <tr>
-            <td align="center" style="font-size:10px; font-weight:700; color:${label1Color}; padding-top:4px; vertical-align:top; line-height:1.2; text-transform:uppercase;">
-              <span style="font-size:16px;">📋</span><br/>Processed
-            </td>
-            <td align="center" style="font-size:10px; font-weight:700; color:${label2Color}; padding-top:4px; vertical-align:top; line-height:1.2; text-transform:uppercase;">
-              <span style="font-size:16px;">📦</span><br/>Shipped
-            </td>
-            <td align="center" style="font-size:10px; font-weight:700; color:${label3Color}; padding-top:4px; vertical-align:top; line-height:1.2; text-transform:uppercase;">
-              <span style="font-size:16px;">🚚</span><br/>En Route
-            </td>
-            <td align="center" style="font-size:10px; font-weight:700; color:${label4Color}; padding-top:4px; vertical-align:top; line-height:1.2; text-transform:uppercase;">
-              <span style="font-size:16px;">🏠</span><br/>Arrived
-            </td>
-          </tr>
-        </table>
-      </div>
-    `;
-  } else {
-    // cancelled or refunded
-    progressBarHtml = `
-      <div style="background-color:#fef2f2; border:1px solid #fecaca; border-radius:8px; padding:16px; margin:24px 0; font-family:Arial, sans-serif; text-align:center;">
-        <span style="font-size:24px;">⚠️</span>
-        <h3 style="margin:8px 0 4px; color:#991b1b;">${statusTitle}</h3>
-        <p style="margin:0; font-size:14px; color:#4b5563;">${statusDescription}</p>
-      </div>
-    `;
-  }
+  const expectedDate = formatDateOnly(order.expectedDeliveryDate) || formatDateOnly(Date.now() + 7 * 24 * 60 * 60 * 1000);
+  const detailsChanged = Boolean(options.detailsChanged);
+  const isDetailsOnlyUpdate = options.reason === 'details' || (detailsChanged && options.reason !== 'status');
+  const statusCopy = getStatusCopy(status, orderNumber);
+  const copy = isDetailsOnlyUpdate
+    ? {
+        title: 'Delivery details updated',
+        description: 'The delivery details for your order were updated. Please review the address and expected arrival below.',
+        preview: `Delivery details changed for order ${orderNumber}.`,
+        subject: `Delivery details updated for order ${orderNumber}`
+      }
+    : statusCopy;
 
   const html = emailLayout({
-    title: statusTitle,
-    preview: previewText,
+    title: copy.title,
+    preview: copy.preview,
     content: `
       <p style="margin:0 0 16px;">Hi ${escapeHtml(customer.name)},</p>
-      <p style="margin:0 0 16px;">${statusDescription}</p>
-      
-      ${progressBarHtml}
-
-      ${note ? `<p style="margin:16px 0; padding:12px; background:#f9fafb; border-left:4px solid #6b000b; color:#374151; font-style:italic;">"${escapeHtml(note)}"</p>` : ''}
-      
-      <div style="margin:24px 0; border-top:1px solid #e5e7eb; padding-top:16px; border-bottom:1px solid #e5e7eb; padding-bottom:16px;">
-        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:collapse;">
-          <tr>
-            <td style="vertical-align:top; padding-right:16px;" width="50%">
-              <h3 style="margin:0 0 8px; font-size:13px; text-transform:uppercase; color:#6b7280; letter-spacing:0.5px;">Delivery Address</h3>
-              <p style="margin:0; font-size:14px; color:#374151; line-height:1.4;">${htmlAddress(order.shippingAddress)}</p>
-            </td>
-            <td style="vertical-align:top;" width="50%">
-              <h3 style="margin:0 0 8px; font-size:13px; text-transform:uppercase; color:#6b7280; letter-spacing:0.5px;">Expected Arrival</h3>
-              <p style="margin:0; font-size:14px; color:#374151; font-weight:bold;">${escapeHtml(expectedDateStr)}</p>
-              <p style="margin:4px 0 0; font-size:12px; color:#6b7280;">Standard delivery takes up to 7 days.</p>
-            </td>
-          </tr>
-        </table>
-      </div>
-
+      <p style="margin:0 0 16px;">${escapeHtml(copy.description)}</p>
+      ${summaryPanelHtml([
+        ['Order number', orderNumber],
+        ['Current status', humanize(status)],
+        ['Expected arrival', expectedDate],
+        ['Payment', paymentSummary(order.payment)]
+      ])}
+      ${
+        isDetailsOnlyUpdate
+          ? ''
+          : orderProgressHtml(status)
+      }
+      ${
+        detailsChanged && !isDetailsOnlyUpdate
+          ? notePanelHtml('Delivery details updated', 'The delivery details were also updated. Review the latest address and expected arrival below.')
+          : ''
+      }
+      ${notePanelHtml('Note from shop', note)}
+      ${deliveryDetailsHtml(order, expectedDate)}
       ${orderItemsHtml(order)}
-
-      <p style="margin:24px 0 0;">
-        <a href="${escapeHtml(orderUrl)}" style="display:inline-block; background:#6b000b; color:#ffffff; text-decoration:none; padding:12px 20px; font-weight:bold; border-radius:4px; font-size:14px; text-transform:uppercase; letter-spacing:0.5px;">Track Order Details</a>
-      </p>
+      ${actionButton(orderUrl, 'View order')}
     `
   });
 
   const text = [
     `Hi ${customer.name},`,
-    `${statusDescription}`,
-    `Order Status: ${statusTitle}`,
-    `Expected Arrival: ${expectedDateStr}`,
-    `Delivery Address:\n${formatAddress(order.shippingAddress)}`,
-    note ? `Note from shop: "${note}"` : '',
+    copy.description,
+    `Order number: ${orderNumber}`,
+    `Current status: ${humanize(status)}`,
+    `Expected arrival: ${expectedDate}`,
+    `Payment: ${paymentSummary(order.payment)}`,
+    detailsChanged && !isDetailsOnlyUpdate ? 'Delivery details were also updated. Review the latest address and expected arrival below.' : '',
+    note ? `Note from shop: ${note}` : '',
+    `Ship to:\n${formatAddress(order.shippingAddress)}`,
     orderItemsText(order),
-    `Track Order Details: ${orderUrl}`
+    `View order: ${orderUrl}`
   ]
     .filter(Boolean)
     .join('\n\n');
 
   return {
     to: customer.email,
-    subject: `[Update] Your order #${orderNumber} is ${status.toUpperCase()}`,
+    subject: copy.subject,
     html,
     text
   };
