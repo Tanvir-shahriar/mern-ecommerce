@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { api, apiErrorMessage } from '../services/api.js';
 
 const methodMeta = {
@@ -138,6 +139,7 @@ export const AdminPaymentMethodsPage = () => {
   if (isLoading) {
     return (
       <section className="admin-page section">
+        <Seo title="Admin Payment Methods" noIndex />
         <AdminNav />
         <AdminLoadingState label="Loading payment methods" />
       </section>
@@ -147,6 +149,7 @@ export const AdminPaymentMethodsPage = () => {
   if (isError || !form) {
     return (
       <section className="admin-page section">
+        <Seo title="Admin Payment Methods" noIndex />
         <AdminNav />
         <div className="panel">
           <p className="form-error">
@@ -173,6 +176,7 @@ export const AdminPaymentMethodsPage = () => {
 
   return (
     <section className="admin-page section">
+      <Seo title="Admin Payment Methods" noIndex />
       <AdminNav />
       <div className="section-heading compact">
         <div>

@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { api, mediaUrl } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
 import { orderCustomerName, orderDetailPath, orderIdentifier } from '../utils/orders.js';
@@ -27,6 +28,7 @@ export const AdminDashboardPage = () => {
 
   return (
     <section className="admin-page section">
+      <Seo title="Admin Dashboard" noIndex />
       <AdminNav />
       <div className="section-heading compact">
         <div>

@@ -14,6 +14,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { money } from '../utils/format.js';
 
@@ -294,6 +295,7 @@ export const AdminProductFormPage = () => {
   if (isEdit && productLoading) {
     return (
       <section className="admin-page section">
+        <Seo title="Product Editor" noIndex />
         <AdminNav />
         <AdminLoadingState label="Loading product editor" />
       </section>
@@ -302,6 +304,7 @@ export const AdminProductFormPage = () => {
 
   return (
     <section className="admin-page section">
+      <Seo title={isEditing ? 'Edit Product' : 'New Product'} noIndex />
       <AdminNav />
       <Link className="back-link" to="/admin/products">
         <ArrowLeft size={17} />

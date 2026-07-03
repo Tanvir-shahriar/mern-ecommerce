@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { OrderProgressBar } from '../components/OrderProgressBar.jsx';
 import { api, apiErrorMessage } from '../services/api.js';
 import { dateShort, money, statusLabel } from '../utils/format.js';
@@ -73,6 +74,7 @@ export const AdminOrdersPage = () => {
 
   return (
     <section className="admin-page section">
+      <Seo title="Admin Orders" noIndex />
       <AdminNav />
       <div className="section-heading compact">
         <div>

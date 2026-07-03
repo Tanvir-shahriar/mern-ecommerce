@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { money } from '../utils/format.js';
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
@@ -80,6 +81,7 @@ export const AdminProductsPage = () => {
 
   return (
     <section className="admin-page section">
+      <Seo title="Admin Products" noIndex />
       <AdminNav />
       <div className="section-heading compact">
         <div>

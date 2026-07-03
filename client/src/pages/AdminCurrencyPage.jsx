@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage } from '../services/api.js';
 import { dateShort, money } from '../utils/format.js';
@@ -101,6 +102,7 @@ export const AdminCurrencyPage = () => {
   if (isLoading || !form) {
     return (
       <section className="admin-page section">
+        <Seo title="Admin Currency" noIndex />
         <AdminNav />
         <AdminLoadingState label="Loading currency controls" />
       </section>
@@ -109,6 +111,7 @@ export const AdminCurrencyPage = () => {
 
   return (
     <section className="admin-page section">
+      <Seo title="Admin Currency" noIndex />
       <AdminNav />
       <div className="section-heading compact">
         <div>

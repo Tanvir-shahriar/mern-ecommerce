@@ -2,6 +2,7 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { ImagePlus, Trash2, GripVertical, Save, CheckCircle2, AlertCircle, ImageOff, Upload } from 'lucide-react';
 import { AdminNav } from '../components/AdminNav.jsx';
+import { Seo } from '../components/Seo.jsx';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { api, mediaUrl, apiErrorMessage } from '../services/api.js';
 
@@ -149,6 +150,7 @@ export const AdminGalleryPage = () => {
 
   return (
     <section className="admin-page admin-gallery-page section">
+      <Seo title="Admin Gallery" noIndex />
       <AdminNav />
       <div className="section-heading compact">
         <div>
