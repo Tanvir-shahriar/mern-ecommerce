@@ -704,25 +704,24 @@ const getStatusCopy = (status, orderNumber) => {
 };
 
 const progressIconSvg = (icon, isActive = true) => {
-  let iconName = 'clipboard-list';
+  let iconName = 'clipboard';
   if (icon === 'packed') {
-    iconName = 'package';
+    iconName = 'box';
   } else if (icon === 'transit') {
-    iconName = 'truck';
+    iconName = 'delivery';
   } else if (icon === 'delivered') {
     iconName = 'home';
   }
 
-  // Use URL-encoded hex for white (#ffffff -> %23ffffff) or light grey (#e5e7eb -> %23e5e7eb)
-  const iconColor = isActive ? '%23ffffff' : '%23e5e7eb';
+  const iconColor = isActive ? 'ffffff' : 'e5e7eb';
 
   return `
     <img 
-      src="https://api.iconify.design/lucide/${iconName}.svg?color=${iconColor}" 
-      width="38" 
-      height="38" 
+      src="https://img.icons8.com/ios-glyphs/100/${iconColor}/${iconName}.png" 
+      width="34" 
+      height="34" 
       alt="" 
-      style="display:block;margin:0 auto;border:none;width:38px;height:38px;vertical-align:middle;" 
+      style="display:block;margin:0 auto;border:none;width:34px;height:34px;vertical-align:middle;" 
     />
   `;
 };
