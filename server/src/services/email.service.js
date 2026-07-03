@@ -703,57 +703,27 @@ const getStatusCopy = (status, orderNumber) => {
   );
 };
 
-const progressIconSvg = (icon) => {
-  const attrs =
-    'width="38" height="38" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto;"';
-  const stroke = 'stroke="#ffffff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"';
-
+const progressIconSvg = (icon, isActive = true) => {
+  let iconName = 'clipboard-list';
   if (icon === 'packed') {
-    return `
-      <svg ${attrs} aria-hidden="true">
-        <path ${stroke} d="M11 16L24 9l13 7-13 7-13-7Z" />
-        <path ${stroke} d="M11 16v17l13 7 13-7V16" />
-        <path ${stroke} d="M24 23v17" />
-        <path ${stroke} d="M17.5 12.5L30.5 19.5" />
-      </svg>
-    `;
+    iconName = 'package';
+  } else if (icon === 'transit') {
+    iconName = 'truck';
+  } else if (icon === 'delivered') {
+    iconName = 'home';
   }
 
-  if (icon === 'transit') {
-    return `
-      <svg ${attrs} aria-hidden="true">
-        <path ${stroke} d="M8 18h23v17H8V18Z" />
-        <path ${stroke} d="M31 23h6l5 6v6H31V23Z" />
-        <circle ${stroke} cx="16" cy="35" r="3" />
-        <circle ${stroke} cx="36" cy="35" r="3" />
-        <path ${stroke} d="M13 23h12" />
-        <path ${stroke} d="M13 28h8" />
-      </svg>
-    `;
-  }
-
-  if (icon === 'delivered') {
-    return `
-      <svg ${attrs} aria-hidden="true">
-        <path ${stroke} d="M8 24L24 10l16 14" />
-        <path ${stroke} d="M14 22v18h20V22" />
-        <path ${stroke} d="M21 40V29h6v11" />
-        <path ${stroke} d="M32 13v8" />
-      </svg>
-    `;
-  }
+  // Use URL-encoded hex for white (#ffffff -> %23ffffff) or light grey (#e5e7eb -> %23e5e7eb)
+  const iconColor = isActive ? '%23ffffff' : '%23e5e7eb';
 
   return `
-    <svg ${attrs} aria-hidden="true">
-      <rect ${stroke} x="13" y="11" width="22" height="29" rx="2" />
-      <path ${stroke} d="M19 11v-2h10v2" />
-      <path ${stroke} d="M18 18h12" />
-      <path ${stroke} d="M18 24h12" />
-      <path ${stroke} d="M18 30h9" />
-      <path ${stroke} d="M16 18h0.1" />
-      <path ${stroke} d="M16 24h0.1" />
-      <path ${stroke} d="M16 30h0.1" />
-    </svg>
+    <img 
+      src="https://api.iconify.design/lucide/${iconName}.svg?color=${iconColor}" 
+      width="38" 
+      height="38" 
+      alt="" 
+      style="display:block;margin:0 auto;border:none;width:38px;height:38px;vertical-align:middle;" 
+    />
   `;
 };
 
@@ -779,7 +749,7 @@ const orderProgressHtml = (status) => {
     return `
       <td width="84" align="center" style="width:84px;padding:0 0 8px;text-align:center;vertical-align:middle;">
         <div class="${nodeClass}" style="width:76px;height:76px;line-height:76px;border-radius:38px;background:${nodeColor};text-align:center;margin:0 auto;">
-          <span style="display:inline-block;vertical-align:middle;line-height:0;">${progressIconSvg(step.icon)}</span>
+          <span style="display:inline-block;vertical-align:middle;line-height:0;">${progressIconSvg(step.icon, isActive)}</span>
         </div>
       </td>
       ${
