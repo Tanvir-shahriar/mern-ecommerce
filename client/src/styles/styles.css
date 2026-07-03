@@ -6311,34 +6311,9 @@ textarea:focus {
     line-height: 1.65;
   }
 
-  .login-slideshow {
-    min-height: 360px;
-  }
-
-  .login-slide {
-    grid-template-columns: 1fr;
-    align-content: center;
-    justify-items: center;
-    text-align: center;
-  }
-
-  .login-slide-media {
-    height: 190px;
-  }
-
-  .login-slide-media img {
-    width: min(220px, 78vw);
-    height: 190px;
-    max-height: 190px;
-  }
-
+  .login-slideshow,
   .login-trust-strip {
-    display: grid;
-    grid-template-columns: 1fr;
-  }
-
-  .login-trust-strip span {
-    justify-content: center;
+    display: none;
   }
 
   .login-card.auth-card {
