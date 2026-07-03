@@ -174,9 +174,11 @@ export const checkoutSchema = z.object({
 });
 
 export const orderStatusSchema = z.object({
-  status: z.enum(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded']),
+  status: z.enum(['pending', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded']).optional(),
   note: z.string().optional(),
-  paymentStatus: z.enum(['pending', 'submitted', 'authorized', 'paid', 'failed', 'refunded']).optional()
+  paymentStatus: z.enum(['pending', 'submitted', 'authorized', 'paid', 'failed', 'refunded']).optional(),
+  expectedDeliveryDate: z.string().optional(),
+  shippingAddress: addressSchema.partial().optional()
 });
 
 export const orderPaymentSubmissionSchema = z.object({

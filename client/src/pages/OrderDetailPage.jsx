@@ -1,4 +1,4 @@
-import { ArrowLeft, CreditCard, PackageCheck, Star, Truck, Upload, UserRound } from 'lucide-react';
+import { ArrowLeft, CreditCard, PackageCheck, Pencil, Star, Truck, Upload, UserRound } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
@@ -61,6 +61,10 @@ export const OrderDetailPage = () => {
   const [uploadingPaymentProof, setUploadingPaymentProof] = useState(false);
   const [submittingPayment, setSubmittingPayment] = useState(false);
 
+  const [isEditingExpectedDate, setIsEditingExpectedDate] = useState(false);
+  const [inlineExpectedDate, setInlineExpectedDate] = useState('');
+  const [isSavingExpectedDate, setIsSavingExpectedDate] = useState(false);
+
   const { data: order, isLoading, isError } = useQuery({
     queryKey: ['order', id],
     queryFn: async () => {
@@ -77,6 +81,7 @@ export const OrderDetailPage = () => {
         ? new Date(order.expectedDeliveryDate).toISOString().split('T')[0]
         : '';
       setAdminExpectedDate(dateVal);
+      setInlineExpectedDate(dateVal);
       setAdminAddress(order.shippingAddress || {});
       setPaymentDraft({
         accountNumber: order.payment?.accountNumber || '',
@@ -117,9 +122,32 @@ export const OrderDetailPage = () => {
       queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
       queryClient.invalidateQueries({ queryKey: ['my-orders'] });
+      setInlineExpectedDate(adminExpectedDate);
       setMessage({ text: 'Order details updated successfully', type: 'success' });
     } catch (error) {
       setMessage({ text: apiErrorMessage(error), type: 'error' });
+    }
+  };
+
+  const handleSaveInlineExpectedDate = async () => {
+    setIsSavingExpectedDate(true);
+    setMessage({ text: '', type: 'success' });
+    try {
+      const statusOrderId = order?._id || order?.id || id;
+      const { data } = await api.patch(`/orders/${statusOrderId}/status`, {
+        expectedDeliveryDate: inlineExpectedDate || undefined
+      });
+      queryClient.setQueryData(['order', id], data.data.order);
+      queryClient.invalidateQueries({ queryKey: ['admin-orders'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['my-orders'] });
+      setAdminExpectedDate(inlineExpectedDate);
+      setIsEditingExpectedDate(false);
+      setMessage({ text: 'Expected delivery date updated successfully', type: 'success' });
+    } catch (error) {
+      setMessage({ text: apiErrorMessage(error), type: 'error' });
+    } finally {
+      setIsSavingExpectedDate(false);
     }
   };
 
@@ -357,12 +385,78 @@ export const OrderDetailPage = () => {
         </div>
 
         <aside className="order-detail-side">
-          {/* Estimated Delivery Card for Customers */}
           <article className="detail-card text-card reddish-accent-card" style={{ borderLeft: '4px solid var(--red, #c74132)' }}>
-            <h3 style={{ margin: 0, fontSize: '13px', textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: '0.5px' }}>Estimated Delivery</h3>
-            <p style={{ margin: '8px 0 0', fontSize: '18px', fontWeight: 'bold', color: 'var(--red, #c74132)' }}>
-              {order.expectedDeliveryDate ? dateShort(order.expectedDeliveryDate) : 'Within 7 Days'}
-            </p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ margin: 0, fontSize: '13px', textTransform: 'uppercase', color: 'var(--muted)', letterSpacing: '0.5px' }}>Estimated Delivery</h3>
+              {isAdmin && !isEditingExpectedDate && (
+                <button
+                  type="button"
+                  onClick={() => setIsEditingExpectedDate(true)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--red, #c74132)',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    padding: 0
+                  }}
+                  title="Edit delivery date"
+                >
+                  <Pencil size={12} />
+                  Edit
+                </button>
+              )}
+            </div>
+
+            {isAdmin && isEditingExpectedDate ? (
+              <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <input
+                  type="date"
+                  value={inlineExpectedDate}
+                  onChange={(event) => setInlineExpectedDate(event.target.value)}
+                  style={{
+                    padding: '6px 8px',
+                    borderRadius: '4px',
+                    border: '1px solid rgba(0,0,0,0.15)',
+                    fontSize: '14px',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}
+                />
+                <div style={{ display: 'flex', gap: '6px' }}>
+                  <button
+                    type="button"
+                    className="button primary compact"
+                    onClick={handleSaveInlineExpectedDate}
+                    disabled={isSavingExpectedDate}
+                    style={{ padding: '4px 8px', fontSize: '11px', height: 'auto', minHeight: 'unset' }}
+                  >
+                    {isSavingExpectedDate ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    type="button"
+                    className="button secondary compact"
+                    onClick={() => {
+                      setInlineExpectedDate(adminExpectedDate);
+                      setIsEditingExpectedDate(false);
+                    }}
+                    disabled={isSavingExpectedDate}
+                    style={{ padding: '4px 8px', fontSize: '11px', height: 'auto', minHeight: 'unset' }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p style={{ margin: '8px 0 0', fontSize: '18px', fontWeight: 'bold', color: 'var(--red, #c74132)' }}>
+                {order.expectedDeliveryDate ? dateShort(order.expectedDeliveryDate) : 'Within 7 Days'}
+              </p>
+            )}
+
             <p style={{ margin: '4px 0 0', fontSize: '12px', color: 'var(--muted)' }}>
               Updates are sent automatically via email. Standard shipping window is 7 days.
             </p>
