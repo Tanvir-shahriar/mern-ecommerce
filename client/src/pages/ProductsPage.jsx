@@ -16,6 +16,17 @@ export const ProductsPage = () => {
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const debouncedSearch = useDebouncedValue(search);
   const params = useMemo(() => toParamsObject(searchParams), [searchParams]);
+
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (searchParams.get('search')) count++;
+    if (searchParams.get('minPrice')) count++;
+    if (searchParams.get('maxPrice')) count++;
+    if (searchParams.get('inStock') === 'true') count++;
+    return count;
+  }, [searchParams]);
   const { currency, convertToBase } = useCurrency();
   const apiParams = useMemo(() => {
     const next = { ...params };
@@ -96,7 +107,129 @@ export const ProductsPage = () => {
         description={`Explore our curated collection of ${categoryName || 'luxury mechanical and smartwatch'} timepieces with guaranteed authenticity and fast delivery.`}
         schemaJson={catalogSchema}
       />
-      <aside className="filters-panel">
+      {/* Mobile Filters UI */}
+      <div className="mobile-filters-container mobile-only">
+        {/* Category Pills */}
+        <div className="mobile-category-pills">
+          <button
+            type="button"
+            className={`pill-button ${!currentCategorySlug ? 'active' : ''}`}
+            onClick={() => updateFilter('category', 'all')}
+          >
+            All
+          </button>
+          {categories.map((category) => (
+            <button
+              type="button"
+              className={`pill-button ${currentCategorySlug === category.slug ? 'active' : ''}`}
+              key={category._id}
+              onClick={() => updateFilter('category', category.slug)}
+            >
+              {category.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Actions Bar */}
+        <div className="mobile-filter-bar">
+          <button
+            type="button"
+            className={`mobile-filter-toggle-btn ${activeFiltersCount > 0 ? 'has-active' : ''}`}
+            onClick={() => setMobileFiltersOpen(!mobileFiltersOpen)}
+          >
+            <SlidersHorizontal size={16} />
+            <span>Filters {activeFiltersCount > 0 ? `(${activeFiltersCount})` : ''}</span>
+          </button>
+
+          <div className="mobile-sort-wrapper">
+            <select
+              value={searchParams.get('sort') || 'newest'}
+              onChange={(event) => updateFilter('sort', event.target.value)}
+              aria-label="Sort products"
+            >
+              <option value="newest">Sort: Newest</option>
+              <option value="popular">Sort: Popular</option>
+              <option value="rating">Sort: Top rated</option>
+              <option value="price-asc">Sort: Price Low-High</option>
+              <option value="price-desc">Sort: Price High-Low</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Collapsible Advanced Filters Drawer */}
+        {mobileFiltersOpen && (
+          <div className="mobile-advanced-filters-panel">
+            <label>
+              Search
+              <div className="search-field">
+                <Search size={16} />
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search watches, SKU, brand"
+                />
+                {search ? (
+                  <button type="button" onClick={() => setSearch('')} aria-label="Clear search">
+                    <X size={15} />
+                  </button>
+                ) : null}
+              </div>
+            </label>
+
+            <div className="price-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              <label>
+                Min Price
+                <input
+                  type="number"
+                  min="0"
+                  value={searchParams.get('minPrice') || ''}
+                  onChange={(event) => updateFilter('minPrice', event.target.value)}
+                  placeholder={currency}
+                />
+              </label>
+              <label>
+                Max Price
+                <input
+                  type="number"
+                  min="0"
+                  value={searchParams.get('maxPrice') || ''}
+                  onChange={(event) => updateFilter('maxPrice', event.target.value)}
+                  placeholder={currency}
+                />
+              </label>
+            </div>
+
+            <label className="checkbox-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: '4px 0' }}>
+              <input
+                type="checkbox"
+                checked={searchParams.get('inStock') === 'true'}
+                onChange={(event) => updateFilter('inStock', event.target.checked ? 'true' : '')}
+                style={{ width: 'auto', cursor: 'pointer' }}
+              />
+              <span>In stock only</span>
+            </label>
+
+            {activeFiltersCount > 0 && (
+              <button
+                type="button"
+                className="button secondary compact full"
+                onClick={() => {
+                  const next = new URLSearchParams();
+                  setSearchParams(next);
+                  setSearch('');
+                  setMobileFiltersOpen(false);
+                }}
+                style={{ marginTop: '4px' }}
+              >
+                Clear all filters
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      <aside className="filters-panel desktop-only">
         <div className="panel-title">
           <SlidersHorizontal size={18} />
           <strong>Filters</strong>
@@ -151,7 +284,7 @@ export const ProductsPage = () => {
             <h1>{pageTitle || 'Shop watches'}</h1>
             {params.search ? <span className="search-meta">{data?.pagination?.total || 0} result(s) for "{params.search}"</span> : null}
           </div>
-          <select value={searchParams.get('sort') || 'newest'} onChange={(event) => updateFilter('sort', event.target.value)} aria-label="Sort products">
+          <select value={searchParams.get('sort') || 'newest'} onChange={(event) => updateFilter('sort', event.target.value)} aria-label="Sort products" className="desktop-only">
             <option value="newest">Newest</option>
             <option value="popular">Popular</option>
             <option value="rating">Top rated</option>

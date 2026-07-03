@@ -6702,12 +6702,128 @@ textarea:focus {
     text-align: center;
   }
 
-  .product-grid,
   .category-grid,
   .metric-grid,
   .wishlist-grid,
   .form-grid {
     grid-template-columns: 1fr !important;
+  }
+
+  .product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 12px !important;
+  }
+
+  /* Mobile responsive category pills and filters */
+  .mobile-filters-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    margin-bottom: 8px;
+  }
+
+  .mobile-category-pills {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .mobile-category-pills::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mobile-category-pills .pill-button {
+    flex: 0 0 auto;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-category-pills .pill-button.active {
+    background: var(--red, #c74132);
+    border-color: var(--red, #c74132);
+    color: white;
+  }
+
+  .mobile-filter-bar {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .mobile-filter-toggle-btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper);
+    color: var(--text);
+    cursor: pointer;
+    height: 38px;
+  }
+
+  .mobile-filter-toggle-btn.has-active {
+    border-color: var(--red, #c74132);
+    color: var(--red, #c74132);
+    background: rgba(199, 65, 50, 0.05);
+  }
+
+  .mobile-sort-wrapper {
+    flex: 1;
+    position: relative;
+  }
+
+  .mobile-sort-wrapper select {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper) url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") no-repeat right 10px center;
+    background-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .mobile-advanced-filters-panel {
+    display: grid;
+    gap: 12px;
+    padding: 16px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    animation: mobileFilterSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  @keyframes mobileFilterSlideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   .uploaded-image-grid {
