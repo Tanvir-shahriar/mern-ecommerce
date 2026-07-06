@@ -97,6 +97,7 @@ const paymentInstructionsSnapshotSchema = new mongoose.Schema(
     routingNumber: String,
     providerName: String,
     paymentType: String,
+    image: paymentProofImageSchema,
     instructions: String
   },
   { _id: false }

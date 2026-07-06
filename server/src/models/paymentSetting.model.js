@@ -2,6 +2,15 @@ import mongoose from 'mongoose';
 import { env } from '../config/env.js';
 import { mysqlModels } from './mysql/models.js';
 
+const paymentMethodImageSchema = new mongoose.Schema(
+  {
+    url: String,
+    alt: String,
+    publicId: String
+  },
+  { _id: false }
+);
+
 const paymentMethodSchema = new mongoose.Schema(
   {
     enabled: {
@@ -17,7 +26,8 @@ const paymentMethodSchema = new mongoose.Schema(
     routingNumber: String,
     providerName: String,
     paymentType: String,
-    instructions: String
+    instructions: String,
+    image: paymentMethodImageSchema
   },
   { _id: false }
 );

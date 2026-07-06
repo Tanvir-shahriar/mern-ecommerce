@@ -496,6 +496,12 @@ export const OrderDetailPage = () => {
               {isManualPayment && order.payment?.transactionId ? <span>Transaction ID: {order.payment.transactionId}</span> : null}
             </div>
 
+            {isManualPayment && paymentInstructions.image?.url ? (
+              <a className="manual-payment-image order-payment-method-image" href={mediaUrl(paymentInstructions.image.url)} target="_blank" rel="noreferrer">
+                <img src={mediaUrl(paymentInstructions.image.url)} alt={paymentInstructions.image.alt || 'Payment method image'} />
+              </a>
+            ) : null}
+
             {isManualPayment && order.payment?.proofImages?.length ? (
               <div className="payment-proof-list order-payment-proof-list">
                 {order.payment.proofImages.map((image) => (

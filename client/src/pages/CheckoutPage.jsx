@@ -408,6 +408,11 @@ export const CheckoutPage = () => {
               <div className="manual-payment-instructions">
                 <strong>{selectedPaymentMethod.label}</strong>
                 {paymentMethodSummary(selectedPaymentMethod) ? <span>{paymentMethodSummary(selectedPaymentMethod)}</span> : null}
+                {selectedPaymentMethod.image?.url ? (
+                  <a className="manual-payment-image" href={mediaUrl(selectedPaymentMethod.image.url)} target="_blank" rel="noreferrer">
+                    <img src={mediaUrl(selectedPaymentMethod.image.url)} alt={selectedPaymentMethod.image.alt || `${selectedPaymentMethod.label} payment image`} />
+                  </a>
+                ) : null}
                 {selectedPaymentMethod.instructions ? <p>{selectedPaymentMethod.instructions}</p> : null}
               </div>
             ) : null}

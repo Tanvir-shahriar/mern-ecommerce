@@ -13,6 +13,16 @@ const clone = (value) => JSON.parse(JSON.stringify(value || {}));
 
 const asPlain = (doc) => (typeof doc?.toObject === 'function' ? doc.toObject() : doc);
 
+const normalizeImage = (image) => {
+  if (!image?.url) return null;
+
+  return {
+    url: String(image.url || '').trim(),
+    alt: String(image.alt || '').trim(),
+    publicId: String(image.publicId || '').trim()
+  };
+};
+
 const defaultSettings = () => ({
   key: GLOBAL_PAYMENT_KEY,
   methods: {
@@ -30,6 +40,7 @@ const defaultSettings = () => ({
       district: '',
       branchName: '',
       routingNumber: '',
+      image: null,
       instructions: 'Transfer the order total to the bank account, then submit your sender account number and transaction ID if available.'
     },
     mobile_banking: {
@@ -39,6 +50,7 @@ const defaultSettings = () => ({
       paymentType: '',
       accountName: 'lahVenture',
       accountNumber: '',
+      image: null,
       instructions: 'Send the order total to the mobile banking number, then submit your sender account number and transaction ID if available.'
     }
   }
@@ -60,6 +72,7 @@ const normalizeMethod = (key, method = {}) => {
     routingNumber: String(method.routingNumber || '').trim(),
     providerName: String(method.providerName || '').trim(),
     paymentType: String(method.paymentType || '').trim(),
+    image: normalizeImage(method.image),
     instructions: String(method.instructions || fallback.instructions || '').trim()
   };
 };

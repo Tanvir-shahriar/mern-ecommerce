@@ -80,6 +80,13 @@ const buildInstructionsSnapshot = (method = {}) => ({
   routingNumber: method.routingNumber || '',
   providerName: method.providerName || '',
   paymentType: method.paymentType || '',
+  image: method.image?.url
+    ? {
+        url: method.image.url,
+        alt: method.image.alt || '',
+        publicId: method.image.publicId || ''
+      }
+    : null,
   instructions: method.instructions || ''
 });
 

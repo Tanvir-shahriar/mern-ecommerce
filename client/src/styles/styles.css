@@ -3998,6 +3998,27 @@ textarea:focus {
   background: rgba(0, 0, 0, 0.025);
 }
 
+.manual-payment-image {
+  width: min(280px, 100%);
+  display: block;
+  overflow: hidden;
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.manual-payment-image img {
+  width: 100%;
+  max-height: 220px;
+  object-fit: contain;
+  padding: 8px;
+}
+
+.order-payment-method-image {
+  margin-top: 14px;
+}
+
 .manual-payment-instructions span,
 .manual-payment-instructions p,
 .manual-payment-form small {
@@ -4065,7 +4086,7 @@ textarea:focus {
 
 .saved-payment-system-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto 74px minmax(0, 1fr) auto;
   gap: 14px;
   align-items: center;
   padding: 14px;
@@ -4082,6 +4103,25 @@ textarea:focus {
   border-radius: var(--radius);
   background: #eef4ff;
   color: var(--blue);
+}
+
+.saved-payment-system-image {
+  width: 74px;
+  height: 58px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+  color: var(--muted);
+}
+
+.saved-payment-system-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 5px;
 }
 
 .saved-payment-system-content {
@@ -4167,6 +4207,25 @@ textarea:focus {
   color: var(--ink);
 }
 
+.saved-payment-system-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.saved-payment-system-upload {
+  position: relative;
+  overflow: hidden;
+}
+
+.saved-payment-system-upload input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
 .saved-payment-system-row .button:hover,
 .saved-payment-system-empty .button:hover {
   border-color: var(--blue);
@@ -4193,6 +4252,76 @@ textarea:focus {
 
 .payment-method-settings-grid .span-2 {
   grid-column: 1 / -1;
+}
+
+.payment-method-image-field {
+  display: grid;
+  gap: 10px;
+}
+
+.payment-method-image-preview {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8fafc;
+}
+
+.payment-method-image-preview a {
+  width: 92px;
+  height: 72px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #ffffff;
+}
+
+.payment-method-image-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+}
+
+.payment-method-image-preview div {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.payment-method-image-preview span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.payment-method-image-upload {
+  position: relative;
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: fit-content;
+  padding: 0 14px;
+  border: 1px dashed var(--blue);
+  border-radius: var(--radius);
+  background: #f8fbff;
+  color: var(--blue);
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.payment-method-image-upload input {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .order-row div {
@@ -6618,8 +6747,22 @@ textarea:focus {
     align-items: start;
   }
 
+  .saved-payment-system-image {
+    width: 100%;
+    height: 120px;
+  }
+
   .saved-payment-system-fields {
     grid-template-columns: 1fr;
+  }
+
+  .payment-method-image-preview {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-method-image-preview a {
+    width: 100%;
+    height: 150px;
   }
 
   .saved-payment-system-empty {
@@ -6630,6 +6773,12 @@ textarea:focus {
   .saved-payment-system-empty-actions,
   .saved-payment-system-row .button {
     width: 100%;
+  }
+
+  .saved-payment-system-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr;
   }
 
   .saved-payment-system-empty-actions .button {

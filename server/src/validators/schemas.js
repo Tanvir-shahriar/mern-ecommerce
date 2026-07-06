@@ -256,6 +256,7 @@ const paymentMethodSettingsSchema = z.object({
   routingNumber: z.string().trim().optional(),
   providerName: z.string().trim().optional(),
   paymentType: z.string().trim().optional(),
+  image: imageSchema.nullable().optional(),
   instructions: z.string().trim().optional()
 });
 

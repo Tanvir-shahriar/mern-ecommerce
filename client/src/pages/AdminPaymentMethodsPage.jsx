@@ -1,10 +1,10 @@
-import { AlertTriangle, Banknote, Building2, CheckCircle2, Pencil, Plus, Save, Smartphone } from 'lucide-react';
+import { AlertTriangle, Banknote, Building2, CheckCircle2, Image, Pencil, Plus, Save, Smartphone, Trash2, Upload } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
 import { Seo } from '../components/Seo.jsx';
-import { api, apiErrorMessage } from '../services/api.js';
+import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 
 const methodMeta = {
   cash_on_delivery: {
@@ -38,6 +38,7 @@ const emptyMethod = {
   routingNumber: '',
   providerName: '',
   paymentType: '',
+  image: null,
   instructions: ''
 };
 
@@ -82,6 +83,7 @@ export const AdminPaymentMethodsPage = () => {
   const [form, setForm] = useState(null);
   const [message, setMessage] = useState({ text: '', type: 'success' });
   const [saving, setSaving] = useState(false);
+  const [uploadingMethodImage, setUploadingMethodImage] = useState('');
   const queryClient = useQueryClient();
 
   const { data: settings, isLoading, isFetching, isError, error } = useQuery({
@@ -117,6 +119,37 @@ export const AdminPaymentMethodsPage = () => {
     window.setTimeout(() => {
       section.querySelector('input:not([type="checkbox"]), textarea')?.focus({ preventScroll: true });
     }, 250);
+  };
+
+  const uploadMethodImage = async (key, event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setUploadingMethodImage(key);
+    setMessage({ text: '', type: 'success' });
+
+    try {
+      const formData = new FormData();
+      formData.append('images', file);
+      const { data } = await api.post('/uploads/payments', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      const image = data.data.images?.[0];
+      if (image) {
+        updateMethod(key, {
+          image: {
+            ...image,
+            alt: image.alt || paymentSystemTitle(key, form?.methods?.[key])
+          }
+        });
+        setMessage({ text: 'Payment image uploaded. Save methods to publish it.', type: 'success' });
+      }
+    } catch (error) {
+      setMessage({ text: apiErrorMessage(error), type: 'error' });
+    } finally {
+      setUploadingMethodImage('');
+      event.target.value = '';
+    }
   };
 
   const saveSettings = async (event) => {
@@ -172,7 +205,7 @@ export const AdminPaymentMethodsPage = () => {
         title: paymentSystemTitle(key, method)
       };
     })
-    .filter((system) => system.fields.length > 0);
+    .filter((system) => system.fields.length > 0 || system.method.image?.url);
 
   return (
     <section className="admin-page section">
@@ -218,6 +251,15 @@ export const AdminPaymentMethodsPage = () => {
                   <span className="saved-payment-system-icon">
                     <Icon size={21} />
                   </span>
+                  {system.method.image?.url ? (
+                    <a className="saved-payment-system-image" href={mediaUrl(system.method.image.url)} target="_blank" rel="noreferrer">
+                      <img src={mediaUrl(system.method.image.url)} alt={system.method.image.alt || `${system.title} payment image`} />
+                    </a>
+                  ) : (
+                    <span className="saved-payment-system-image empty" aria-hidden="true">
+                      <Image size={18} />
+                    </span>
+                  )}
                   <div className="saved-payment-system-content">
                     <div className="saved-payment-system-heading">
                       <h3>{system.title}</h3>
@@ -235,10 +277,17 @@ export const AdminPaymentMethodsPage = () => {
                       ))}
                     </dl>
                   </div>
-                  <button className="button compact" type="button" onClick={() => editPaymentSystem(system.key)}>
-                    <Pencil size={15} />
-                    Edit
-                  </button>
+                  <div className="saved-payment-system-actions">
+                    <label className="button compact secondary saved-payment-system-upload">
+                      <Upload size={15} />
+                      <span>{uploadingMethodImage === system.key ? 'Uploading...' : system.method.image?.url ? 'Replace image' : 'Add image'}</span>
+                      <input type="file" accept="image/*" onChange={(event) => uploadMethodImage(system.key, event)} disabled={uploadingMethodImage === system.key} />
+                    </label>
+                    <button className="button compact" type="button" onClick={() => editPaymentSystem(system.key)}>
+                      <Pencil size={15} />
+                      Edit
+                    </button>
+                  </div>
                 </article>
               );
             })}
@@ -338,6 +387,29 @@ export const AdminPaymentMethodsPage = () => {
                       Account or wallet number
                       <input value={method.accountNumber} onChange={(event) => updateMethod(key, { accountNumber: event.target.value })} />
                     </label>
+                    <div className="payment-method-image-field span-2">
+                      <span className="form-section-label">Payment image</span>
+                      {method.image?.url ? (
+                        <div className="payment-method-image-preview">
+                          <a href={mediaUrl(method.image.url)} target="_blank" rel="noreferrer">
+                            <img src={mediaUrl(method.image.url)} alt={method.image.alt || `${meta.title} payment image`} />
+                          </a>
+                          <div>
+                            <strong>{method.image.alt || `${meta.title} payment image`}</strong>
+                            <span>Shown with this saved payment system and checkout instructions.</span>
+                            <button className="button compact secondary" type="button" onClick={() => updateMethod(key, { image: null })}>
+                              <Trash2 size={15} />
+                              Remove image
+                            </button>
+                          </div>
+                        </div>
+                      ) : null}
+                      <label className="payment-method-image-upload">
+                        <Upload size={17} />
+                        <span>{uploadingMethodImage === key ? 'Uploading image...' : method.image?.url ? 'Replace image' : 'Upload image'}</span>
+                        <input type="file" accept="image/*" onChange={(event) => uploadMethodImage(key, event)} disabled={uploadingMethodImage === key} />
+                      </label>
+                    </div>
                   </>
                 ) : null}
 
