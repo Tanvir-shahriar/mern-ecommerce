@@ -1,6 +1,6 @@
 import { ArrowRight, Cpu, CreditCard, ShieldCheck, Timer, Truck, Play, Pause } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard.jsx';
 import { PanoramicPhotoLibrary } from '../components/PanoramicPhotoLibrary.jsx';
@@ -23,6 +23,7 @@ import watch5 from '../assets/watches/5.png';
 import watch6 from '../assets/watches/6.png';
 import watch7 from '../assets/watches/7.png';
 import watch8 from '../assets/watches/8.png';
+import watchGearsVideo from '../assets/video/Watch face gears ticking.mp4';
 import { api, mediaUrl } from '../services/api.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
 
@@ -187,223 +188,38 @@ const topWatchBrands = [
   { name: 'Success Way', logo: successWayBrandLogo, type: 'Curated Heritage' }
 ];
 
-const patekSlides = [
-  {
-    title: 'Sea-Gull Mechanical Excellence',
-    description: 'Discover the legendary 1963 Chronograph and heritage mechanical movements. Tianjin watchmaking craft meets timeless design.',
-    ctaUrl: '/products?brand=Sea-Gull',
-    ctaText: 'Explore Collection',
-    desktopVideo: '/videos/seagull_desktop.webm',
-    mobileVideo: '/videos/seagull_desktop.webm'
-  },
-  {
-    title: 'San Martin Diver Specialists',
-    description: 'Engineered for the deep. Featuring robust sapphire crystals, NH35 automatic movements, and premium luminous dials.',
-    ctaUrl: '/products?brand=San%20Martin',
-    ctaText: 'Explore Divers',
-    desktopVideo: '/videos/sanmartin_desktop.webm',
-    mobileVideo: '/videos/sanmartin_desktop.webm'
-  },
-  {
-    title: 'Sugess Mechanical Chronographs',
-    description: 'Featuring genuine Seagull ST19 column wheel movements, sapphire exhibition casebacks, and classic vintage styling.',
-    ctaUrl: '/products?brand=Sugess',
-    ctaText: 'Explore Chronos',
-    desktopVideo: '/videos/sugess_desktop.webm',
-    mobileVideo: '/videos/sugess_desktop.webm'
-  }
-];
+const patekFeature = {
+  title: 'Mechanical Time in Motion',
+  description: 'A closer look at the gears, rhythm, and finishing that give every serious timepiece its character.',
+  ctaUrl: '/products',
+  ctaText: 'Explore Watches',
+  video: watchGearsVideo
+};
 
 export const HomePage = () => {
   const [heroIndex, setHeroIndex] = useState(0);
   const [purchaseId, setPurchaseId] = useState('');
-  const [activePatekSlide, setActivePatekSlide] = useState(0);
   const [isPatekPlaying, setIsPatekPlaying] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const carouselStageRef = useRef(null);
-  const carouselRef = useRef(null);
-  const patekTrackRef = useRef(null);
-  const patekVideoRefs = useRef([]);
-  const activeSlideRef = useRef(0);
-  const targetProgressRef = useRef(0);
-  const renderedProgressRef = useRef(0);
-  const pageScrollAnimationRef = useRef(null);
-  activeSlideRef.current = activePatekSlide;
+  const patekVideoRef = useRef(null);
 
-  const clampPatekProgress = useCallback(
-    (progress) => Math.max(0, Math.min(patekSlides.length - 1, progress)),
-    []
-  );
-
-  const getPatekMetrics = useCallback(() => {
-    const stage = carouselStageRef.current;
-    if (!stage) return null;
-
-    const stageTop = stage.getBoundingClientRect().top + window.scrollY;
-    const scrollDistance = Math.max(1, stage.offsetHeight - window.innerHeight);
-    return { stage, stageTop, scrollDistance };
-  }, []);
-
-  const applyPatekProgress = useCallback((progress) => {
-    const nextProgress = clampPatekProgress(progress);
-    renderedProgressRef.current = nextProgress;
-
-    if (patekTrackRef.current) {
-      patekTrackRef.current.style.transform = `translate3d(0, -${nextProgress * 100}%, 0)`;
-    }
-
-    const nextActive = Math.round(nextProgress);
-    if (nextActive !== activeSlideRef.current) {
-      activeSlideRef.current = nextActive;
-      setActivePatekSlide(nextActive);
-    }
-  }, [clampPatekProgress]);
-
-  const cancelPatekPageScroll = useCallback(() => {
-    if (pageScrollAnimationRef.current) {
-      window.cancelAnimationFrame(pageScrollAnimationRef.current);
-      pageScrollAnimationRef.current = null;
-    }
-  }, []);
-
-  const smoothPageScrollTo = useCallback((targetTop, duration = 1150) => {
-    cancelPatekPageScroll();
-
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const startTop = window.scrollY;
-    const distance = targetTop - startTop;
-    if (reduceMotion || Math.abs(distance) < 2) {
-      window.scrollTo(0, targetTop);
+  const togglePatekVideo = () => {
+    const video = patekVideoRef.current;
+    if (!video) {
+      setIsPatekPlaying((playing) => !playing);
       return;
     }
 
-    const startTime = window.performance.now();
-    const easeOutCubic = (value) => 1 - Math.pow(1 - value, 3);
-
-    const step = (timestamp) => {
-      const elapsed = timestamp - startTime;
-      const progress = Math.min(1, elapsed / duration);
-      window.scrollTo(0, startTop + distance * easeOutCubic(progress));
-
-      if (progress < 1) {
-        pageScrollAnimationRef.current = window.requestAnimationFrame(step);
-      } else {
-        pageScrollAnimationRef.current = null;
-      }
-    };
-
-    pageScrollAnimationRef.current = window.requestAnimationFrame(step);
-  }, [cancelPatekPageScroll]);
-
-  const setPatekSlide = useCallback((nextSlide) => {
-    const nextIndex = Math.round(clampPatekProgress(nextSlide));
-    const metrics = getPatekMetrics();
-    const stageRect = metrics?.stage.getBoundingClientRect();
-    const isStagePinned = stageRect && stageRect.top <= 1 && stageRect.bottom >= window.innerHeight - 1;
-
-    targetProgressRef.current = nextIndex;
-
-    if (metrics && isStagePinned) {
-      const targetTop = metrics.stageTop + (metrics.scrollDistance * nextIndex) / (patekSlides.length - 1);
-      smoothPageScrollTo(targetTop);
+    if (video.paused) {
+      video.play().then(() => setIsPatekPlaying(true)).catch(() => setIsPatekPlaying(false));
       return;
     }
 
-    applyPatekProgress(nextIndex);
-  }, [applyPatekProgress, clampPatekProgress, getPatekMetrics, smoothPageScrollTo]);
-
-  const syncPatekVideos = useCallback(() => {
-    const carouselRect = carouselRef.current?.getBoundingClientRect();
-    const isCarouselVisible = carouselRect && carouselRect.bottom > 0 && carouselRect.top < window.innerHeight;
-
-    patekVideoRefs.current.forEach((slideVideos, slideIndex) => {
-      slideVideos?.forEach((video) => {
-        if (!video) return;
-        const isVisible = window.getComputedStyle(video).display !== 'none';
-        if (isCarouselVisible && slideIndex === activePatekSlide && isPatekPlaying && isVisible) {
-          video.play().catch(() => {});
-        } else {
-          video.pause();
-          if (slideIndex !== activePatekSlide) video.currentTime = 0;
-        }
-      });
-    });
-  }, [activePatekSlide, isPatekPlaying]);
-
-  useEffect(() => {
-    syncPatekVideos();
-  }, [syncPatekVideos]);
-
-  useEffect(() => {
-    let videoSyncFrame = null;
-    const requestVideoSync = () => {
-      if (videoSyncFrame) return;
-      videoSyncFrame = window.requestAnimationFrame(() => {
-        videoSyncFrame = null;
-        syncPatekVideos();
-      });
-    };
-
-    window.addEventListener('scroll', requestVideoSync, { passive: true });
-    window.addEventListener('resize', requestVideoSync);
-    return () => {
-      window.removeEventListener('scroll', requestVideoSync);
-      window.removeEventListener('resize', requestVideoSync);
-      if (videoSyncFrame) window.cancelAnimationFrame(videoSyncFrame);
-    };
-  }, [syncPatekVideos]);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    let animationFrame = null;
-
-    const animateFromScroll = () => {
-      const metrics = getPatekMetrics();
-      if (metrics) {
-        const rawProgress = (window.scrollY - metrics.stageTop) / metrics.scrollDistance;
-        targetProgressRef.current = clampPatekProgress(rawProgress * (patekSlides.length - 1));
-      }
-
-      const targetProgress = targetProgressRef.current;
-      const currentProgress = renderedProgressRef.current;
-      const nextProgress = mediaQuery.matches
-        ? targetProgress
-        : currentProgress + (targetProgress - currentProgress) * 0.18;
-
-      if (Math.abs(targetProgress - nextProgress) < 0.002) {
-        applyPatekProgress(targetProgress);
-      } else {
-        applyPatekProgress(nextProgress);
-      }
-
-      animationFrame = window.requestAnimationFrame(animateFromScroll);
-    };
-
-    animationFrame = window.requestAnimationFrame(animateFromScroll);
-
-    return () => {
-      if (animationFrame) window.cancelAnimationFrame(animationFrame);
-    };
-  }, [applyPatekProgress, clampPatekProgress, getPatekMetrics]);
-
-  useEffect(() => {
-    const cancelOnUserInput = () => cancelPatekPageScroll();
-
-    window.addEventListener('wheel', cancelOnUserInput, { passive: true });
-    window.addEventListener('touchstart', cancelOnUserInput, { passive: true });
-    window.addEventListener('keydown', cancelOnUserInput);
-    return () => {
-      window.removeEventListener('wheel', cancelOnUserInput);
-      window.removeEventListener('touchstart', cancelOnUserInput);
-      window.removeEventListener('keydown', cancelOnUserInput);
-    };
-  }, [cancelPatekPageScroll]);
-
-  useEffect(() => () => {
-    cancelPatekPageScroll();
-  }, [cancelPatekPageScroll]);
+    video.pause();
+    setIsPatekPlaying(false);
+  };
 
   const { data: featuredData, isLoading } = useQuery({
     queryKey: ['featured-products'],
@@ -572,123 +388,56 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <section
-        ref={carouselStageRef}
-        className="patek-carousel-scroll-stage"
-        style={{ '--patek-slide-count': patekSlides.length }}
-      >
-        <div ref={carouselRef} className="hero-carousel_hero-carousel__bEV8J patek-hero-carousel">
-          <div
-            ref={patekTrackRef}
-            className="patek-carousel-track"
-            style={{ transform: `translate3d(0, -${renderedProgressRef.current * 100}%, 0)` }}
-          >
-          {patekSlides.map((slide, idx) => {
-            const isActive = idx === activePatekSlide;
-            return (
-              <article
-                key={idx}
-                className={`hero-carousel-item_hero-carousel-item__d5OPU patek-carousel-item ${
-                  isActive ? 'hero-carousel-item_--is-active active' : ''
-                }`}
-              >
-                {/* Media Wrapper */}
-                <div className="hero-carousel-item_media-wrapper__u6xit patek-carousel-media-wrapper">
-                  {/* Desktop Video */}
-                  <video
-                    className="patek-video desktop-only"
-                    src={slide.desktopVideo}
-                    autoPlay={isActive && isPatekPlaying}
-                    muted
-                    loop
-                    playsInline
-                    preload={isActive ? 'auto' : 'metadata'}
-                    referrerPolicy="no-referrer"
-                    ref={(node) => {
-                      patekVideoRefs.current[idx] = patekVideoRefs.current[idx] || [];
-                      patekVideoRefs.current[idx][0] = node;
-                    }}
-                  />
-                  {/* Mobile Video */}
-                  <video
-                    className="patek-video mobile-only"
-                    src={slide.mobileVideo}
-                    autoPlay={isActive && isPatekPlaying}
-                    muted
-                    loop
-                    playsInline
-                    preload={isActive ? 'auto' : 'metadata'}
-                    referrerPolicy="no-referrer"
-                    ref={(node) => {
-                      patekVideoRefs.current[idx] = patekVideoRefs.current[idx] || [];
-                      patekVideoRefs.current[idx][1] = node;
-                    }}
-                  />
-                </div>
+      <section className="patek-carousel-scroll-stage">
+        <div className="hero-carousel_hero-carousel__bEV8J patek-hero-carousel">
+          <div className="patek-carousel-track">
+            <article className="hero-carousel-item_hero-carousel-item__d5OPU patek-carousel-item hero-carousel-item_--is-active active">
+              <div className="hero-carousel-item_media-wrapper__u6xit patek-carousel-media-wrapper">
+                <video
+                  className="patek-video"
+                  src={patekFeature.video}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="auto"
+                  ref={patekVideoRef}
+                  onPlay={() => setIsPatekPlaying(true)}
+                  onPause={() => setIsPatekPlaying(false)}
+                />
+              </div>
 
-                {/* Background overlay */}
-                <div className="hero-carousel-item_background__t4Xol hero-carousel-item_--overlay-20__e2JiN patek-carousel-overlay" />
+              <div className="hero-carousel-item_background__t4Xol hero-carousel-item_--overlay-20__e2JiN patek-carousel-overlay" />
 
-                {/* Content Container */}
-                <div className="hero-carousel-item_container__iKRW4 hero-carousel-item_--is-left__tnUic patek-carousel-content-container">
-                  <h2 className="hero-carousel-item_title__Rw_ym notranslate patek-carousel-title">
-                    {slide.title}
-                  </h2>
-                  <div className="hero-carousel-item_description__d6lT4 patek-carousel-description">
-                    <p>{slide.description}</p>
-                  </div>
-                  <div className="hero-carousel-item_cta-container__qsuy2 patek-carousel-cta-container">
-                    <Link
-                      to={slide.ctaUrl}
-                      className="cta_--is-white__0hlgs patek-carousel-cta"
-                    >
-                      {slide.ctaText}
-                      <ArrowRight size={16} />
-                    </Link>
-                  </div>
+              <div className="hero-carousel-item_container__iKRW4 hero-carousel-item_--is-left__tnUic patek-carousel-content-container">
+                <h2 className="hero-carousel-item_title__Rw_ym notranslate patek-carousel-title">
+                  {patekFeature.title}
+                </h2>
+                <div className="hero-carousel-item_description__d6lT4 patek-carousel-description">
+                  <p>{patekFeature.description}</p>
                 </div>
-              </article>
-            );
-          })}
+                <div className="hero-carousel-item_cta-container__qsuy2 patek-carousel-cta-container">
+                  <Link
+                    to={patekFeature.ctaUrl}
+                    className="cta_--is-white__0hlgs patek-carousel-cta"
+                  >
+                    {patekFeature.ctaText}
+                    <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </div>
+            </article>
           </div>
 
-          {/* Carousel Pagination & Play/Pause controls */}
           <div className="patek-carousel-controls">
             <button
               type="button"
               className="patek-play-pause-btn"
-              onClick={() => setIsPatekPlaying((prev) => !prev)}
-              aria-label={isPatekPlaying ? 'Pause carousel video' : 'Play carousel video'}
+              onClick={togglePatekVideo}
+              aria-label={isPatekPlaying ? 'Pause video' : 'Play video'}
             >
               {isPatekPlaying ? <Pause size={14} fill="currentColor" /> : <Play size={14} fill="currentColor" />}
             </button>
-
-            <div className="patek-carousel-pagination">
-              {patekSlides.map((_, idx) => {
-                const isActive = idx === activePatekSlide;
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    className={`patek-pagination-item ${isActive ? 'active' : ''}`}
-                    onClick={() => {
-                      setPatekSlide(idx);
-                    }}
-                    aria-label={`Go to slide ${idx + 1}`}
-                  >
-                    <span className="patek-pagination-number">0{idx + 1}</span>
-                    <div className="patek-pagination-line-bg">
-                      <span
-                        key={`${idx}-${isPatekPlaying}-${activePatekSlide}`}
-                        className={`patek-pagination-line-fill ${isActive ? 'animate' : ''} ${
-                          !isPatekPlaying ? 'paused' : ''
-                        }`}
-                      />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
           </div>
         </div>
       </section>

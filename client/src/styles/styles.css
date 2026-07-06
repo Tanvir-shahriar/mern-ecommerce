@@ -525,28 +525,22 @@ main {
   font-weight: 800;
 }
 
-/* Patek Philippe Hero Carousel Styles */
-@keyframes patekVerticalProgress {
-  from { height: 0%; }
-  to { height: 100%; }
-}
-
 .patek-carousel-scroll-stage {
   position: relative;
-  height: calc(var(--patek-slide-count, 3) * 100vh);
-  min-height: 220vh;
+  height: 100vh;
+  min-height: 620px;
   background-color: #000000;
+  overflow: hidden;
 }
 
 .hero-carousel_hero-carousel__bEV8J.patek-hero-carousel {
-  position: sticky;
+  position: relative;
   top: 0;
   width: 100%;
-  height: 100vh;
+  height: 100%;
   overflow: hidden;
   scroll-behavior: smooth;
   isolation: isolate;
-  touch-action: pan-y;
   background-color: #000000;
 }
 
@@ -554,18 +548,14 @@ main {
   position: relative;
   width: 100%;
   height: 100%;
-  display: flex;
-  flex-direction: column;
-  transition: none;
-  will-change: transform;
+  transform: none !important;
   backface-visibility: hidden;
 }
 
 .hero-carousel-item_hero-carousel-item__d5OPU.patek-carousel-item {
   position: relative;
   width: 100%;
-  height: 100vh;
-  flex-shrink: 0;
+  height: 100%;
   overflow: hidden;
   contain: paint;
   transform: translateZ(0);
@@ -581,27 +571,18 @@ main {
 }
 
 .patek-video {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0.72;
-  transform: scale(1.045);
-  transition: transform 1.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.9s ease;
-  will-change: transform, opacity;
+  opacity: 1;
+  transform: translateZ(0);
   backface-visibility: hidden;
 }
 
 .patek-carousel-item.active .patek-video {
   opacity: 1;
-  transform: scale(1);
-}
-
-.desktop-only {
-  display: block;
-}
-
-.mobile-only {
-  display: none;
+  transform: translateZ(0);
 }
 
 .hero-carousel-item_background__t4Xol.patek-carousel-overlay {
@@ -712,22 +693,18 @@ main {
   transform: translateX(4px);
 }
 
-/* Controls & Progress styling (Vertical centered on the right edge) */
 .patek-carousel-controls {
   position: absolute;
   right: 32px;
-  top: 50%;
-  transform: translateY(-50%);
+  bottom: 32px;
   z-index: 10;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 20px;
   background: rgba(0, 0, 0, 0.55);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 24px 12px;
-  border-radius: 40px;
+  padding: 10px;
+  border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.12);
   transition: opacity 0.3s ease;
 }
@@ -754,64 +731,6 @@ main {
 
 .patek-play-pause-btn:active {
   transform: scale(0.95);
-}
-
-.patek-carousel-pagination {
-  display: flex;
-  flex-direction: column; /* Vertical layout */
-  align-items: center;
-  gap: 16px;
-}
-
-.patek-pagination-item {
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.45);
-  cursor: pointer;
-  display: flex;
-  flex-direction: column; /* Vertical orientation */
-  align-items: center;
-  gap: 8px;
-  padding: 4px 0;
-  font-size: 0.75rem;
-  font-family: "Inter", sans-serif;
-  font-weight: 700;
-  transition: color 0.3s ease;
-}
-
-.patek-pagination-item:hover,
-.patek-pagination-item.active {
-  color: #ffffff;
-}
-
-.patek-pagination-number {
-  letter-spacing: 0.05em;
-}
-
-.patek-pagination-line-bg {
-  position: relative;
-  width: 2px; /* Vertical thin line */
-  height: 36px; /* Vertical height */
-  background-color: rgba(255, 255, 255, 0.22);
-  overflow: hidden;
-  border-radius: 1px;
-}
-
-.patek-pagination-line-fill {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 0%; /* Fills from top to bottom */
-  background-color: #ffffff;
-}
-
-.patek-pagination-line-fill.animate {
-  animation: patekVerticalProgress 8s linear forwards;
-}
-
-.patek-pagination-line-fill.paused {
-  animation-play-state: paused;
 }
 
 .lahv-signature-section {
@@ -1044,7 +963,6 @@ main {
   .hero-carousel-item_title__Rw_ym.patek-carousel-title,
   .hero-carousel-item_description__d6lT4.patek-carousel-description p,
   .hero-carousel-item_cta-container__qsuy2.patek-carousel-cta-container,
-  .patek-pagination-line-fill.animate,
   .empty-cart-orbit,
   .empty-cart-bag,
   .empty-cart-tile,
@@ -6336,35 +6254,14 @@ textarea:focus {
 
   .patek-carousel-controls {
     right: 16px;
-    top: 50%;
-    transform: translateY(-50%);
-    padding: 16px 8px;
-    gap: 12px;
-    bottom: auto;
+    bottom: 16px;
+    padding: 8px;
     left: auto;
   }
 
   .patek-play-pause-btn {
     width: 28px;
     height: 28px;
-  }
-
-  .patek-carousel-pagination {
-    flex-direction: column;
-    gap: 12px;
-  }
-
-  .patek-pagination-line-bg {
-    width: 2px;
-    height: 24px;
-  }
-
-  .desktop-only {
-    display: none;
-  }
-
-  .mobile-only {
-    display: block;
   }
 
   .similar-product-grid {
