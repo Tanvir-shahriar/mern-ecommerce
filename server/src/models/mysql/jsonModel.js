@@ -371,6 +371,7 @@ export class JsonModel {
     if (this.name === 'Product') {
       base.slug ||= slugify(base.name || '', { lower: true, strict: true });
       if (base.sku) base.sku = String(base.sku).trim().toUpperCase();
+      base.productType ||= 'physical';
       base.tags ||= [];
       base.attributes ||= [];
       base.variants ||= [];

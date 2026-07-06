@@ -91,6 +91,10 @@ const buildProductFilter = async (query, includeInactive = false) => {
     filter.brand = { $in: String(query.brand).split(',').map((brand) => brand.trim()) };
   }
 
+  if (query.productType && query.productType !== 'all') {
+    filter.productType = query.productType;
+  }
+
   if (query.minPrice || query.maxPrice) {
     if (!filter.price) {
       filter.price = {};
@@ -149,12 +153,14 @@ export const getProducts = asyncHandler(async (req, res) => {
           return (
             isFuzzyMatch(product.name, token) ||
             isFuzzyMatch(product.brand, token) ||
+            isFuzzyMatch(product.vendor, token) ||
             isFuzzyMatch(product.sku, token) ||
+            isFuzzyMatch(product.barcode, token) ||
             isFuzzyMatch(product.description, token) ||
             isFuzzyMatch(product.shortDescription, token) ||
             isFuzzyMatch(catName, token) ||
             (product.tags || []).some((tag) => isFuzzyMatch(tag, token)) ||
-            (product.attributes || []).some((attr) => isFuzzyMatch(attr.value, token))
+            (product.attributes || []).some((attr) => isFuzzyMatch(attr.name, token) || isFuzzyMatch(attr.value, token))
           );
         });
       });
@@ -229,10 +235,13 @@ export const getProduct = asyncHandler(async (req, res) => {
     : { slug: req.params.slugOrId };
   const includeInactive = ['admin', 'super_admin'].includes(req.user?.role) && req.query.admin === 'true';
 
-  const product = await Product.findOne(includeInactive ? query : { ...query, status: 'active' })
+  const productQuery = Product.findOne(includeInactive ? query : { ...query, status: 'active' })
     .populate('category', 'name slug')
-    .populate('reviews.user', 'name avatar')
-    .lean();
+    .populate('reviews.user', 'name avatar');
+
+  if (includeInactive) productQuery.select('+cost');
+
+  const product = await productQuery.lean();
 
   if (!product) throw new ApiError(404, 'Product not found');
 

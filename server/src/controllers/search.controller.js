@@ -68,12 +68,14 @@ export const executeIntelligentSearch = asyncHandler(async (req, res) => {
         return (
           isFuzzyMatch(product.name, token) ||
           isFuzzyMatch(product.brand, token) ||
+          isFuzzyMatch(product.vendor, token) ||
           isFuzzyMatch(product.sku, token) ||
+          isFuzzyMatch(product.barcode, token) ||
           isFuzzyMatch(product.description, token) ||
           isFuzzyMatch(product.shortDescription, token) ||
           isFuzzyMatch(catName, token) ||
           (product.tags || []).some(tag => isFuzzyMatch(tag, token)) ||
-          (product.attributes || []).some(attr => isFuzzyMatch(attr.value, token))
+          (product.attributes || []).some(attr => isFuzzyMatch(attr.name, token) || isFuzzyMatch(attr.value, token))
         );
       });
     });
@@ -154,12 +156,14 @@ export const getSearchSuggestions = asyncHandler(async (req, res) => {
       return (
         isFuzzyMatch(product.name, token) ||
         isFuzzyMatch(product.brand, token) ||
+        isFuzzyMatch(product.vendor, token) ||
         isFuzzyMatch(product.sku, token) ||
+        isFuzzyMatch(product.barcode, token) ||
         isFuzzyMatch(product.description, token) ||
         isFuzzyMatch(product.shortDescription, token) ||
         isFuzzyMatch(catName, token) ||
         (product.tags || []).some(tag => isFuzzyMatch(tag, token)) ||
-        (product.attributes || []).some(attr => isFuzzyMatch(attr.value, token))
+        (product.attributes || []).some(attr => isFuzzyMatch(attr.name, token) || isFuzzyMatch(attr.value, token))
       );
     });
   });

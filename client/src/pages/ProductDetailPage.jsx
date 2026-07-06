@@ -1,24 +1,14 @@
 import {
-  CreditCard,
   Heart,
   Minus,
   Plus,
   ShoppingBag,
   Star,
   Award,
-  Settings,
-  Circle,
-  Maximize2,
-  Palette,
   Layers,
-  Paintbrush,
-  Sparkles,
-  CircleDot,
-  Link2,
-  Droplets,
   Tag
 } from 'lucide-react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { EmptyState } from '../components/EmptyState.jsx';
@@ -29,16 +19,16 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
-import { dateShort } from '../utils/format.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
 
-const ReviewStars = ({ rating = 0 }) => (
-  <div className="review-stars" aria-label={`${rating} out of 5 stars`}>
-    {[1, 2, 3, 4, 5].map((star) => (
-      <Star size={15} fill="currentColor" key={star} className={star <= rating ? 'filled' : ''} />
-    ))}
-  </div>
-);
+const productTypeLabels = {
+  physical: 'Physical product',
+  digital: 'Digital product',
+  service: 'Service',
+  subscription: 'Subscription',
+  gift_card: 'Gift card',
+  other: 'Other'
+};
 
 export const ProductDetailPage = () => {
   const { slugOrId } = useParams();
@@ -47,7 +37,8 @@ export const ProductDetailPage = () => {
   const [similarActionId, setSimilarActionId] = useState('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [activeTab, setActiveTab] = useState('specifications');
-  const { user, isAdmin, refreshUser } = useAuth();
+  const [selectedVariant, setSelectedVariant] = useState({});
+  const { user } = useAuth();
   const { formatMoney } = useCurrency();
 
   useEffect(() => {
@@ -57,8 +48,7 @@ export const ProductDetailPage = () => {
   const { addItem } = useCart();
   const navigate = useNavigate();
 
-  const queryClient = useQueryClient();
-  const { data: product, isLoading, isError, refetch } = useQuery({
+  const { data: product, isLoading, isError } = useQuery({
     queryKey: ['product', slugOrId],
     queryFn: async () => {
       const { data } = await api.get(`/products/${slugOrId}`);
@@ -75,10 +65,26 @@ export const ProductDetailPage = () => {
     }
   });
 
+  useEffect(() => {
+    if (!product?._id) return;
+
+    const defaults = {};
+    (product.variants || []).forEach((variant) => {
+      const firstOption = (variant.options || []).find(Boolean);
+      if (variant.name && firstOption) defaults[variant.name] = firstOption;
+    });
+    setSelectedVariant(defaults);
+  }, [product?._id]);
+
+  const selectedVariantPayload = () => {
+    const entries = Object.entries(selectedVariant).filter(([, value]) => value);
+    return entries.length ? Object.fromEntries(entries) : undefined;
+  };
+
   const addToCart = async () => {
     if (!user) return navigate('/login');
     try {
-      await addItem(product._id, quantity);
+      await addItem(product._id, quantity, selectedVariantPayload());
       setMessage('Added to cart');
     } catch (error) {
       setMessage(apiErrorMessage(error));
@@ -86,12 +92,15 @@ export const ProductDetailPage = () => {
   };
 
   const purchaseNow = async () => {
-    startDirectCheckout({ productId: product._id, quantity });
+    startDirectCheckout({ productId: product._id, quantity, variant: selectedVariantPayload() });
     if (!user) return navigate('/login', { state: { from: { pathname: '/checkout', search: '?mode=buy-now' } } });
     return navigate(directCheckoutUrl);
   };
 
   const addSimilarToCart = async (item) => {
+    if ((item.variants || []).some((variant) => variant.name && variant.options?.length)) {
+      return navigate(`/products/${item.slug || item._id}`);
+    }
     if (!user) return navigate('/login');
     setSimilarActionId(`cart-${item._id}`);
     try {
@@ -105,6 +114,9 @@ export const ProductDetailPage = () => {
   };
 
   const purchaseSimilarNow = (item) => {
+    if ((item.variants || []).some((variant) => variant.name && variant.options?.length)) {
+      return navigate(`/products/${item.slug || item._id}`);
+    }
     startDirectCheckout({ productId: item._id, quantity: 1 });
     if (!user) return navigate('/login', { state: { from: { pathname: '/checkout', search: '?mode=buy-now' } } });
     return navigate(directCheckoutUrl);
@@ -120,87 +132,53 @@ export const ProductDetailPage = () => {
   if (isError || !product) return <EmptyState title="Product not found" actionLabel="Back to catalog" actionTo="/products" />;
 
   const inStock = !product.inventory?.trackQuantity || product.inventory.stock > 0;
-  const stockStatusText = product.inventory?.trackQuantity ? `${product.inventory.stock} in stock` : 'Ready to ship';
-
   const isWishlisted = user?.wishlist?.some(
     (item) => (typeof item === 'string' ? item : item?._id) === product._id
   );
 
-  const getSpecs = (prod) => {
-    const nameLower = (prod.name || '').toLowerCase();
-    const isSmart = nameLower.includes('smart') || nameLower.includes('pulse') || nameLower.includes('apex');
-    const isGold = nameLower.includes('gold') || nameLower.includes('rose');
-    const attributes = new Map(
-      (prod.attributes || []).map((item) => [String(item.name || '').toLowerCase(), item.value])
-    );
-    const specValue = (label, fallback) => attributes.get(label.toLowerCase()) || fallback;
-    
-    return [
-      {
-        icon: <Tag size={16} />,
-        label: 'Product code',
-        value: `SKU: ${prod.sku || 'CR4007ZA RG BL LT'}`
-      },
-      {
-        icon: <Award size={16} />,
-        label: 'Family',
-        value: prod.brand || 'lahVenture'
-      },
-      {
-        icon: <Settings size={16} />,
-        label: 'Movement',
-        value: specValue('Movement', isSmart ? 'SMART / QUARTZ' : 'AUTOMATIC')
-      },
-      {
-        icon: <Circle size={16} />,
-        label: 'Case Metal',
-        value: specValue('Case Metal', isGold ? 'Rose Gold / Steel' : 'Stainless Steel')
-      },
-      {
-        icon: <Maximize2 size={16} />,
-        label: 'Case Size',
-        value: specValue('Case Size', isSmart ? '44 mm' : '42 mm')
-      },
-      {
-        icon: <Palette size={16} />,
-        label: 'Case Color',
-        value: specValue('Case Color', isGold ? 'Rose Gold' : 'Stainless Steel')
-      },
-      {
-        icon: <Layers size={16} />,
-        label: 'Bracelet Material',
-        value: specValue('Bracelet Material', nameLower.includes('strap') || nameLower.includes('leather') ? 'Leather' : isSmart ? 'Silicone' : 'Stainless Steel')
-      },
-      {
-        icon: <Paintbrush size={16} />,
-        label: 'Bracelet Color',
-        value: specValue('Bracelet Color', nameLower.includes('black') ? 'Black' : nameLower.includes('brown') || nameLower.includes('leather') ? 'Leather' : 'Stainless Steel')
-      },
-      {
-        icon: <Sparkles size={16} />,
-        label: 'Glass',
-        value: specValue('Glass', isSmart ? 'Gorilla Glass' : 'Sapphire')
-      },
-      {
-        icon: <CircleDot size={16} />,
-        label: 'Dial Color',
-        value: specValue('Dial Color', nameLower.includes('white') ? 'White' : nameLower.includes('blue') ? 'Blue' : 'Black')
-      },
-      {
-        icon: <Link2 size={16} />,
-        label: 'Buckle',
-        value: specValue('Buckle', isSmart ? 'Pin Buckle' : 'Butterfly Buckle with Double push')
-      },
-      {
-        icon: <Droplets size={16} />,
-        label: 'WR',
-        value: specValue('WR', isSmart ? 'IP68' : '5 ATM')
-      }
-    ];
-  };
+  const getSpecs = (prod) => [
+    {
+      icon: <Tag size={16} />,
+      label: 'SKU',
+      value: prod.sku
+    },
+    {
+      icon: <Tag size={16} />,
+      label: 'Barcode',
+      value: prod.barcode
+    },
+    {
+      icon: <Award size={16} />,
+      label: 'Brand',
+      value: prod.brand
+    },
+    {
+      icon: <Layers size={16} />,
+      label: 'Category',
+      value: prod.category?.name
+    },
+    {
+      icon: <Layers size={16} />,
+      label: 'Product type',
+      value: productTypeLabels[prod.productType] || productTypeLabels.physical
+    },
+    {
+      icon: <Award size={16} />,
+      label: 'Vendor',
+      value: prod.vendor
+    },
+    ...(prod.attributes || []).map((attribute) => ({
+      icon: <Tag size={16} />,
+      label: attribute.name,
+      value: attribute.value
+    }))
+  ].filter((spec) => spec.label && spec.value);
 
   const mainImageUrl = mediaUrl(product.images?.[0]?.url);
   const brandName = product.brand || 'LahVenture';
+  const variantGroups = (product.variants || []).filter(
+    (variant) => variant.name && Array.isArray(variant.options) && variant.options.length
+  );
 
   const productSchema = {
     '@context': 'https://schema.org',
@@ -210,7 +188,7 @@ export const ProductDetailPage = () => {
         '@id': `${window.location.origin}/products/${product.slug || product._id}#product`,
         'name': product.name,
         'image': [mainImageUrl],
-        'description': product.description || `Buy authentic ${product.name} luxury watch at LahVenture Bangladesh.`,
+        'description': product.description || `Buy ${product.name} at LahVenture Bangladesh.`,
         'sku': product.sku || product.name,
         'brand': {
           '@type': 'Brand',
@@ -226,7 +204,7 @@ export const ProductDetailPage = () => {
           'availability': inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
           'seller': {
             '@type': 'Organization',
-            'name': 'LahVenture Watches'
+            'name': 'LahVenture'
           }
         },
         ...(product.ratingsAverage > 0 && product.ratingsCount > 0
@@ -268,8 +246,8 @@ export const ProductDetailPage = () => {
   return (
     <section className="product-detail">
       <Seo
-        title={`${product.name} | Luxury Watch`}
-        description={product.description?.slice(0, 155) || `Buy authentic ${product.name} luxury timepiece online with guaranteed delivery.`}
+        title={product.seo?.title || `${product.name} | ${brandName}`}
+        description={product.seo?.description || product.description?.slice(0, 155) || `Buy ${product.name} online with reliable checkout and delivery.`}
         ogImage={mainImageUrl}
         ogType="product"
         schemaJson={productSchema}
@@ -309,16 +287,60 @@ export const ProductDetailPage = () => {
         </div>
 
         <div className="product-specs-list">
-          <p className="spec-item"><strong>Model:</strong> {product.sku || 'CR4007ZA RG BL LT'}</p>
-          <p className="spec-item"><strong>Barcode:</strong> {parseInt(product._id.slice(-6), 16) || '7037306'}</p>
-          <p className="spec-item"><strong>Gender:</strong> {product.gender || (product.tags?.includes('women') ? 'FEMALE' : 'MALE')}</p>
-          <p className="spec-item"><strong>Bracelet:</strong> {product.name.toLowerCase().includes('strap') || product.name.toLowerCase().includes('leather') ? 'LEATHER' : 'STAINLESS STEEL'}</p>
+          <p className="spec-item"><strong>SKU:</strong> {product.sku || 'Not set'}</p>
+          {product.barcode ? <p className="spec-item"><strong>Barcode:</strong> {product.barcode}</p> : null}
+          {product.category?.name ? <p className="spec-item"><strong>Category:</strong> {product.category.name}</p> : null}
+          <p className="spec-item"><strong>Type:</strong> {productTypeLabels[product.productType] || productTypeLabels.physical}</p>
           <p className="spec-item">
             <strong>In Stock:</strong> <span className={inStock ? 'status-available' : 'status-unavailable'}>{inStock ? 'AVAILABLE' : 'OUT OF STOCK'}</span>
           </p>
           <p className="spec-price-row">
             <strong>Price:</strong> <span className="spec-price-val">{formatMoney(product.price)}</span>
           </p>
+        </div>
+
+        {variantGroups.length ? (
+          <div className="product-option-groups" aria-label="Product options">
+            {variantGroups.map((variant) => (
+              <label key={variant.name} className="product-option-group">
+                {variant.name}
+                <select
+                  value={selectedVariant[variant.name] || variant.options[0] || ''}
+                  onChange={(event) =>
+                    setSelectedVariant((current) => ({
+                      ...current,
+                      [variant.name]: event.target.value
+                    }))
+                  }
+                >
+                  {variant.options.map((option) => (
+                    <option value={option} key={option}>
+                      {option}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
+        ) : null}
+
+        <div className="product-purchase-controls">
+          <span>Quantity</span>
+          <div className="product-quantity-stepper">
+            <button type="button" onClick={() => setQuantity((current) => Math.max(1, current - 1))} aria-label="Decrease quantity">
+              <Minus size={15} />
+            </button>
+            <input
+              type="number"
+              min="1"
+              value={quantity}
+              onChange={(event) => setQuantity(Math.max(1, Number(event.target.value) || 1))}
+              aria-label="Quantity"
+            />
+            <button type="button" onClick={() => setQuantity((current) => current + 1)} aria-label="Increase quantity">
+              <Plus size={15} />
+            </button>
+          </div>
         </div>
 
         <div className="product-actions-row">
@@ -389,6 +411,7 @@ export const ProductDetailPage = () => {
               const itemTo = `/products/${item.slug || item._id}`;
               const itemInStock = !item.inventory?.trackQuantity || item.inventory.stock > 0;
               const isAddingSimilar = similarActionId === `cart-${item._id}`;
+              const itemHasOptions = (item.variants || []).some((variant) => variant.name && variant.options?.length);
 
               const isItemWishlisted = user?.wishlist?.some(
                 (w) => (typeof w === 'string' ? w : w?._id) === item._id
@@ -424,7 +447,7 @@ export const ProductDetailPage = () => {
                       </button>
                       <button className="button-add-to-cart" type="button" onClick={() => addSimilarToCart(item)} disabled={!itemInStock || isAddingSimilar}>
                         {isAddingSimilar ? <span className="spinner tiny" /> : <ShoppingBag size={15} color="white" />}
-                        Add To Cart
+                        {itemHasOptions ? 'Choose Options' : 'Add To Cart'}
                       </button>
                       <button className="button-wishlist" type="button" onClick={toggleSimilarWishlist} aria-label="Wishlist">
                         <Heart size={18} fill={isItemWishlisted ? '#66000c' : 'none'} color="#66000c" />

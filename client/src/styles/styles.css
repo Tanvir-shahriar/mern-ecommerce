@@ -2122,6 +2122,79 @@ textarea:focus {
   font-weight: 800;
 }
 
+.product-option-groups,
+.product-purchase-controls {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.product-option-groups {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.product-option-group {
+  display: grid;
+  gap: 7px;
+  color: #475569;
+  font-size: 0.84rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.product-option-group select {
+  min-height: 42px;
+  border: 1px solid #d7dee8;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 700;
+  text-transform: none;
+  padding: 0 12px;
+}
+
+.product-purchase-controls {
+  grid-template-columns: auto minmax(138px, 170px);
+  align-items: center;
+  color: #475569;
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.84rem;
+}
+
+.product-quantity-stepper {
+  display: grid;
+  grid-template-columns: 38px minmax(54px, 1fr) 38px;
+  min-height: 42px;
+  overflow: hidden;
+  border: 1px solid #d7dee8;
+  border-radius: 6px;
+  background: #ffffff;
+}
+
+.product-quantity-stepper button,
+.product-quantity-stepper input {
+  border: 0;
+  background: transparent;
+}
+
+.product-quantity-stepper button {
+  display: grid;
+  place-items: center;
+  color: #66000c;
+  cursor: pointer;
+}
+
+.product-quantity-stepper input {
+  width: 100%;
+  text-align: center;
+  font-weight: 800;
+  color: #0f172a;
+  border-left: 1px solid #e2e8f0;
+  border-right: 1px solid #e2e8f0;
+}
+
 /* Actions styling */
 .product-actions-row {
   display: flex;
@@ -4806,10 +4879,35 @@ textarea:focus {
   padding: 0;
 }
 
-.watch-spec-grid {
+.watch-spec-grid,
+.dynamic-field-list {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
+}
+
+.watch-spec-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.admin-helper-text,
+.empty-inline-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.dynamic-field-row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr) 38px;
+  gap: 12px;
+  align-items: end;
+}
+
+.dynamic-remove-button {
+  width: 38px;
+  height: 38px;
+  align-self: end;
 }
 
 .product-editor-preview-media {
@@ -6972,8 +7070,14 @@ textarea:focus {
   }
 
   .admin-page .product-editor-image-grid,
-  .admin-page .watch-spec-grid {
+  .admin-page .watch-spec-grid,
+  .admin-page .dynamic-field-row {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .admin-page .dynamic-remove-button {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 
   .admin-page .product-editor-side-grid {

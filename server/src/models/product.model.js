@@ -92,6 +92,21 @@ const productSchema = new mongoose.Schema(
       trim: true,
       index: true
     },
+    vendor: {
+      type: String,
+      trim: true
+    },
+    productType: {
+      type: String,
+      enum: ['physical', 'digital', 'service', 'subscription', 'gift_card', 'other'],
+      default: 'physical',
+      index: true
+    },
+    barcode: {
+      type: String,
+      trim: true,
+      index: true
+    },
     sku: {
       type: String,
       required: [true, 'SKU is required'],
@@ -132,14 +147,28 @@ const productSchema = new mongoose.Schema(
     ],
     attributes: [
       {
-        name: String,
-        value: String
+        name: {
+          type: String,
+          trim: true
+        },
+        value: {
+          type: String,
+          trim: true
+        }
       }
     ],
     variants: [
       {
-        name: String,
-        options: [String]
+        name: {
+          type: String,
+          trim: true
+        },
+        options: [
+          {
+            type: String,
+            trim: true
+          }
+        ]
       }
     ],
     inventory: {
@@ -213,7 +242,7 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-productSchema.index({ name: 'text', description: 'text', brand: 'text', tags: 'text' });
+productSchema.index({ name: 'text', description: 'text', brand: 'text', vendor: 'text', barcode: 'text', tags: 'text' });
 productSchema.index({ status: 1, category: 1, createdAt: -1 });
 productSchema.index({ status: 1, brand: 1, createdAt: -1 });
 productSchema.index({ status: 1, isFeatured: 1, ratingsAverage: -1, salesCount: -1 });

@@ -9,16 +9,27 @@ import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import { money } from '../utils/format.js';
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
 
+const productTypes = [
+  { value: 'all', label: 'All product types' },
+  { value: 'physical', label: 'Physical products' },
+  { value: 'digital', label: 'Digital products' },
+  { value: 'service', label: 'Services' },
+  { value: 'subscription', label: 'Subscriptions' },
+  { value: 'gift_card', label: 'Gift cards' },
+  { value: 'other', label: 'Other' }
+];
+
 export const AdminProductsPage = () => {
   const [categoryName, setCategoryName] = useState('');
   const [message, setMessage] = useState('');
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [typeFilter, setTypeFilter] = useState('all');
   const debouncedSearch = useDebouncedValue(search);
   const queryClient = useQueryClient();
 
   const { data: productData, isLoading: productsLoading, isFetching: productsFetching } = useQuery({
-    queryKey: ['admin-products', debouncedSearch, statusFilter],
+    queryKey: ['admin-products', debouncedSearch, statusFilter, typeFilter],
     queryFn: async () => {
       const { data } = await api.get('/products', {
         params: {
@@ -26,7 +37,8 @@ export const AdminProductsPage = () => {
           limit: 50,
           sort: 'newest',
           search: debouncedSearch || undefined,
-          status: statusFilter
+          status: statusFilter,
+          productType: typeFilter
         }
       });
       return data.data.products;
@@ -103,8 +115,15 @@ export const AdminProductsPage = () => {
           <div className="admin-toolbar">
             <label className="search-field">
               <Search size={16} />
-              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search watch, SKU, brand" />
+              <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search product, SKU, barcode, brand" />
             </label>
+            <select value={typeFilter} onChange={(event) => setTypeFilter(event.target.value)} aria-label="Product type">
+              {productTypes.map((type) => (
+                <option value={type.value} key={type.value}>
+                  {type.label}
+                </option>
+              ))}
+            </select>
             <select value={statusFilter} onChange={(event) => setStatusFilter(event.target.value)} aria-label="Product status">
               <option value="all">All statuses</option>
               <option value="active">Active</option>
@@ -123,7 +142,8 @@ export const AdminProductsPage = () => {
                     <Link to={`/products/${product.slug || product._id}`} className="admin-product-name-link">
                       <strong>{product.name}</strong>
                     </Link>
-                    <span>{product.sku}</span>
+                    <span>{[product.sku, product.barcode].filter(Boolean).join(' / ')}</span>
+                    <span>{product.brand || product.category?.name || product.productType || 'Uncategorized'}</span>
                     <span className={`inventory-status ${product.status}`}>{product.status}</span>
                   </div>
                   <span>{money(product.price)}</span>

@@ -10,8 +10,11 @@ export const ProductCard = ({ product, onChanged }) => {
   const { addItem } = useCart();
   const { formatMoney } = useCurrency();
   const navigate = useNavigate();
+  const productUrl = `/products/${product.slug || product._id}`;
+  const hasOptions = (product.variants || []).some((variant) => variant.name && variant.options?.length);
 
   const handleCart = async () => {
+    if (hasOptions) return navigate(productUrl);
     if (!user) return navigate('/login');
     await addItem(product._id, 1);
     refreshUser?.();
@@ -37,7 +40,7 @@ export const ProductCard = ({ product, onChanged }) => {
     <article className="product-card">
       <div className="product-card__content-box">
         <div className="product-card__media">
-          <Link to={`/products/${product.slug || product._id}`}>
+          <Link to={productUrl}>
             <img src={mediaUrl(product.images?.[0]?.url)} alt={product.images?.[0]?.alt || product.name} />
           </Link>
           <button type="button" className="product-card__wishlist" onClick={handleWishlist} aria-label="Wishlist">
@@ -46,7 +49,7 @@ export const ProductCard = ({ product, onChanged }) => {
           {product.compareAtPrice ? <span className="badge sale">Sale</span> : null}
         </div>
         <div className="product-card__info-row">
-          <Link to={`/products/${product.slug || product._id}`} className="product-card__title">
+          <Link to={productUrl} className="product-card__title">
             {product.name}
           </Link>
           <span className="product-card__price">
@@ -55,7 +58,7 @@ export const ProductCard = ({ product, onChanged }) => {
         </div>
       </div>
       <button type="button" className="product-card__add-to-cart" onClick={handleCart}>
-        Add to cart
+        {hasOptions ? 'Choose options' : 'Add to cart'}
       </button>
     </article>
   );

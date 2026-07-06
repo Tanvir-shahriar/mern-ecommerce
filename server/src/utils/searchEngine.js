@@ -180,9 +180,11 @@ export const calculateRelevanceScore = (product, queryTokens, originalQuery) => 
   let score = 0;
   const name = (product.name || '').toLowerCase();
   const brand = (product.brand || '').toLowerCase();
+  const vendor = (product.vendor || '').toLowerCase();
   const description = (product.description || '').toLowerCase();
   const shortDesc = (product.shortDescription || '').toLowerCase();
   const sku = (product.sku || '').toLowerCase();
+  const barcode = (product.barcode || '').toLowerCase();
   const tags = (product.tags || []).map(t => String(t).toLowerCase());
   const attributes = (product.attributes || []).map(attr => `${attr.name} ${attr.value}`.toLowerCase());
 
@@ -191,8 +193,10 @@ export const calculateRelevanceScore = (product, queryTokens, originalQuery) => 
   // 1. Direct name / SKU match (Highest weight)
   if (name === originalLower) score += 1000;
   if (sku === originalLower) score += 800;
+  if (barcode === originalLower) score += 800;
   if (name.startsWith(originalLower)) score += 500;
   if (brand === originalLower) score += 300;
+  if (vendor === originalLower) score += 250;
 
   // 2. Tokenized match
   queryTokens.forEach(token => {
@@ -210,11 +214,21 @@ export const calculateRelevanceScore = (product, queryTokens, originalQuery) => 
       score += 30;
     }
 
+    if (vendor.split(/\s+/).includes(token)) {
+      score += 80;
+    } else if (vendor.includes(token)) {
+      score += 25;
+    }
+
     if (tags.includes(token)) {
       score += 80;
     }
 
     if (sku.includes(token)) {
+      score += 60;
+    }
+
+    if (barcode.includes(token)) {
       score += 60;
     }
 
@@ -227,9 +241,10 @@ export const calculateRelevanceScore = (product, queryTokens, originalQuery) => 
     if (description.includes(token)) score += 5;
 
     // Fuzzy matching fallback if no exact token matches
-    if (!name.includes(token) && !brand.includes(token) && !sku.includes(token)) {
+    if (!name.includes(token) && !brand.includes(token) && !vendor.includes(token) && !sku.includes(token) && !barcode.includes(token)) {
       if (isFuzzyMatch(name, token)) score += 40;
       if (isFuzzyMatch(brand, token)) score += 25;
+      if (isFuzzyMatch(vendor, token)) score += 20;
       if (isFuzzyMatch(description, token)) score += 2;
     }
   });
