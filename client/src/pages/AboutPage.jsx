@@ -314,19 +314,10 @@ export const AboutPage = () => {
         }
       `}</style>
 
-      {/* Floating Home/Back Link */}
-      <Link 
-        to="/" 
-        className="fixed top-6 right-6 z-50 flex items-center gap-2 px-5 py-2.5 bg-[#7A0000] text-white font-sans text-xs sm:text-sm font-semibold rounded-full shadow-lg hover:bg-[#5A0000] hover:scale-105 active:scale-95 transition-all duration-300 pointer-events-auto"
-      >
-        <span>Back to Shop</span>
-        <ArrowRight size={16} />
-      </Link>
-
       <div className="slides-container fixed inset-0 w-full h-full pointer-events-none z-40">
 
         <div className="slide bg-bglight" id="slide-0">
-          <div className="flex flex-col justify-center gap-6 md:gap-0 items-center h-full w-full px-6 pt-12 pb-4 md:block md:p-0">
+          <div className="flex flex-col justify-center gap-6 md:gap-0 items-center h-full w-full px-6 pt-24 pb-4 md:block md:p-0">
             <div className="relative md:absolute md:left-[10%] md:top-[28%] text-center md:text-left dynamic-text">
               <h2 className="text-3xl sm:text-4xl md:text-7xl font-serif text-maroon mb-1 md:mb-2">Hello, I Am</h2>
               <h1 className="text-5xl sm:text-6xl md:text-9xl font-serif italic text-maroon ml-0 md:ml-12 lg:ml-24">Laham !</h1>
@@ -346,7 +337,7 @@ export const AboutPage = () => {
         </div>
 
         <div className="slide bg-bglight" id="slide-1">
-          <div className="flex flex-col justify-center gap-6 md:gap-0 items-center h-full w-full px-6 pt-12 pb-4 md:block md:p-0">
+          <div className="flex flex-col justify-center gap-6 md:gap-0 items-center h-full w-full px-6 pt-24 pb-4 md:block md:p-0">
             <div className="relative md:absolute md:left-[10%] md:top-[28%] text-center md:text-left dynamic-text">
               <h2 className="text-3xl sm:text-4xl md:text-7xl font-serif text-maroon mb-1 md:mb-2">Hello, I Am</h2>
               <h1 className="text-5xl sm:text-6xl md:text-9xl font-serif italic text-maroon ml-0 md:ml-12 lg:ml-24">Sourav!</h1>
@@ -366,7 +357,7 @@ export const AboutPage = () => {
         </div>
 
         <div className="slide bg-bglight" id="slide-2">
-          <div className="flex flex-col justify-center gap-6 md:gap-0 items-center h-full w-full px-6 pt-12 pb-4 md:block md:p-0">
+          <div className="flex flex-col justify-center gap-6 md:gap-0 items-center h-full w-full px-6 pt-24 pb-4 md:block md:p-0">
             <div className="relative md:absolute md:left-[10%] md:top-[28%] text-center md:text-left dynamic-text">
               <h2 className="text-3xl sm:text-4xl md:text-7xl font-serif text-maroon mb-1 md:mb-2">Hello, I Am</h2>
               <h1 className="text-5xl sm:text-6xl md:text-9xl font-serif italic text-maroon ml-0 md:ml-12 lg:ml-24">Tushar!</h1>

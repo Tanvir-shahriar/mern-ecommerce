@@ -28,9 +28,9 @@ export const App = () => (
     <ScrollToTop />
     <OrderRealtimeSync />
     <Routes>
-      <Route path="about" element={<AboutPage />} />
       <Route element={<Layout />}>
       <Route index element={<HomePage />} />
+      <Route path="about" element={<AboutPage />} />
       <Route path="products" element={<ProductsPage />} />
       <Route path="products/:slugOrId" element={<ProductDetailPage />} />
       <Route path="cart" element={<CartPage />} />
