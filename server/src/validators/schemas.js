@@ -187,6 +187,17 @@ export const orderPaymentSubmissionSchema = z.object({
   proofImages: z.array(imageSchema).max(5).optional()
 });
 
+export const contactMessageSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  email: z.string().trim().email('Invalid email address').max(190),
+  phone: z.string().trim().min(5).max(40),
+  message: z.string().trim().min(5).max(3000)
+});
+
+export const contactMessageStatusSchema = z.object({
+  status: z.enum(['new', 'read', 'replied', 'archived'])
+});
+
 export const stockUpdateSchema = z
   .object({
     stock: z.coerce.number().int().min(0).optional(),

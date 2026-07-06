@@ -11,6 +11,8 @@ import { AdminOrdersPage } from '../pages/AdminOrdersPage.jsx';
 import { AdminProductsPage } from '../pages/AdminProductsPage.jsx';
 import { AdminUsersPage } from '../pages/AdminUsersPage.jsx';
 import { CartPage } from '../pages/CartPage.jsx';
+import { AdminContactMessagesPage } from '../pages/AdminContactMessagesPage.jsx';
+import { ContactPage } from '../pages/ContactPage.jsx';
 import { CheckoutPage } from '../pages/CheckoutPage.jsx';
 import { HomePage } from '../pages/HomePage.jsx';
 import { LoginPage } from '../pages/LoginPage.jsx';
@@ -31,6 +33,7 @@ export const App = () => (
       <Route element={<Layout />}>
       <Route index element={<HomePage />} />
       <Route path="about" element={<AboutPage />} />
+      <Route path="contact" element={<ContactPage />} />
       <Route path="products" element={<ProductsPage />} />
       <Route path="products/:slugOrId" element={<ProductDetailPage />} />
       <Route path="cart" element={<CartPage />} />
@@ -92,6 +95,14 @@ export const App = () => (
         element={
           <ProtectedRoute adminOnly>
             <AdminOrdersPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="admin/contact-messages"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminContactMessagesPage />
           </ProtectedRoute>
         }
       />

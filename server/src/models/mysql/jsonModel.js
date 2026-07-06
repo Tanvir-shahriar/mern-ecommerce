@@ -402,6 +402,13 @@ export class JsonModel {
       base.timeline = base.timeline?.length ? base.timeline : [{ status: base.status, note: 'Order created', at: now() }];
     }
 
+    if (this.name === 'ContactMessage') {
+      base.email = String(base.email || '').trim().toLowerCase();
+      base.status ||= 'new';
+      base.source ||= 'contact_page';
+      base.user ||= null;
+    }
+
     return base;
   }
 
@@ -454,6 +461,10 @@ export class JsonModel {
         at: item.at || now(),
         ...item
       }));
+    }
+
+    if (this.name === 'ContactMessage') {
+      doc.email = String(doc.email || '').trim().toLowerCase();
     }
   }
 

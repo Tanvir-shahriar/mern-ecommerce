@@ -31,6 +31,7 @@ import galleryRoutes from './routes/gallery.routes.js';
 import currencyRoutes from './routes/currency.routes.js';
 import sitemapRoutes from './routes/sitemap.routes.js';
 import searchRoutes from './routes/search.routes.js';
+import contactRoutes from './routes/contact.routes.js';
 
 export const app = express();
 // ... [rest unchanged up to line 100] ...
@@ -98,11 +99,12 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/auth/login', authRateLimiter);
 app.use('/api/auth/register', authRateLimiter);
 app.use('/api/uploads', uploadRateLimiter);
-app.use(['/api/cart', '/api/orders', '/api/users', '/api/admin', '/api/products', '/api/categories', '/api/gallery'], writeRateLimiter);
+app.use(['/api/cart', '/api/orders', '/api/users', '/api/admin', '/api/products', '/api/categories', '/api/gallery', '/api/contact'], writeRateLimiter);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/search', searchRoutes);
+app.use('/api/contact', contactRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/orders', orderRoutes);

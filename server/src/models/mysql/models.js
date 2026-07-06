@@ -12,5 +12,6 @@ registry.CurrencySetting = new JsonModel('CurrencySetting', 'currency_settings',
 registry.PaymentSetting = new JsonModel('PaymentSetting', 'payment_settings', { registry });
 registry.Gallery = new JsonModel('Gallery', 'galleries', { registry });
 registry.SearchLog = new JsonModel('SearchLog', 'search_logs', { registry });
+registry.ContactMessage = new JsonModel('ContactMessage', 'contact_messages', { registry });
 
 export const mysqlModels = registry;
