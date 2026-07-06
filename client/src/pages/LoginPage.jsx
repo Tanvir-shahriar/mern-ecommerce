@@ -6,22 +6,27 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useSocialAuth } from '../hooks/useSocialAuth.js';
 import { apiErrorMessage } from '../services/api.js';
 import { Seo } from '../components/Seo.jsx';
+import watchOne from '../assets/watches/1.png';
+import watchTwo from '../assets/watches/2.png';
+import watchFour from '../assets/watches/4.png';
+import watchSix from '../assets/watches/6.png';
 
-const loginSlides = [
+const loginHeroWatches = [
   {
-    image: '/jupiter_watch.png',
-    title: 'Mechanical collection access',
-    text: 'Track orders, delivery details, and saved watches from one secure profile.'
+    src: watchOne,
+    className: 'primary'
   },
   {
-    image: '/watch_video_thumbnail.png',
-    title: 'Curated watch drops',
-    text: 'Return to your cart and checkout faster when new LahVenture pieces arrive.'
+    src: watchTwo,
+    className: 'floating top'
   },
   {
-    image: '/lahventure.png',
-    title: 'Time well lived',
-    text: 'Keep your customer profile ready for Bangladesh delivery and order updates.'
+    src: watchFour,
+    className: 'floating bottom'
+  },
+  {
+    src: watchSix,
+    className: 'thumb'
   }
 ];
 
@@ -83,18 +88,20 @@ export const LoginPage = () => {
           </p>
         </div>
 
-        <div className="login-slideshow" aria-hidden="true">
-          {loginSlides.map((slide, index) => (
-            <div className="login-slide" style={{ '--slide-index': index }} key={slide.title}>
-              <span className="login-slide-media">
-                <img src={slide.image} alt="" />
+        <div className="login-watch-gallery" aria-hidden="true">
+          <div className="login-watch-stage">
+            <span className="login-watch-ring" />
+            {loginHeroWatches.slice(0, 3).map((watch) => (
+              <img className={`login-watch-image ${watch.className}`} src={watch.src} alt="" key={watch.className} />
+            ))}
+          </div>
+          <div className="login-watch-rail">
+            {loginHeroWatches.map((watch) => (
+              <span className={`login-watch-thumb ${watch.className}`} key={`thumb-${watch.className}`}>
+                <img src={watch.src} alt="" />
               </span>
-              <div>
-                <strong>{slide.title}</strong>
-                <span>{slide.text}</span>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
 
         <div className="login-trust-strip">

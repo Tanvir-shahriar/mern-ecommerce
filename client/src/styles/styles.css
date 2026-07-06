@@ -1049,7 +1049,8 @@ main {
   .empty-cart-bag,
   .empty-cart-tile,
   .empty-cart-heart,
-  .empty-cart-shelf {
+  .empty-cart-shelf,
+  .login-watch-image {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
@@ -3444,6 +3445,127 @@ textarea:focus {
   line-height: 1.65;
 }
 
+.login-watch-gallery {
+  position: relative;
+  min-height: 318px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  align-items: end;
+  gap: 18px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.login-watch-gallery::before {
+  content: "";
+  position: absolute;
+  inset: 14px 74px 26px 16px;
+  z-index: -1;
+  border: 1px solid rgba(240, 198, 106, 0.2);
+  background:
+    linear-gradient(135deg, rgba(255, 247, 232, 0.08), rgba(122, 11, 23, 0.08)),
+    rgba(255, 255, 255, 0.035);
+  transform: skewX(-7deg);
+}
+
+.login-watch-stage {
+  position: relative;
+  min-height: 318px;
+}
+
+.login-watch-ring {
+  position: absolute;
+  left: 11%;
+  right: 18%;
+  top: 18%;
+  bottom: 13%;
+  border: 1px solid rgba(240, 198, 106, 0.18);
+  transform: rotate(-7deg);
+}
+
+.login-watch-ring::before,
+.login-watch-ring::after {
+  content: "";
+  position: absolute;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(240, 198, 106, 0.72), transparent);
+}
+
+.login-watch-ring::before {
+  top: 24px;
+  left: -34px;
+  width: 42%;
+}
+
+.login-watch-ring::after {
+  right: -42px;
+  bottom: 34px;
+  width: 52%;
+}
+
+.login-watch-image {
+  position: absolute;
+  display: block;
+  object-fit: contain;
+  filter: drop-shadow(0 34px 38px rgba(0, 0, 0, 0.4));
+  user-select: none;
+  pointer-events: none;
+}
+
+.login-watch-image.primary {
+  left: 38%;
+  top: 48%;
+  width: min(320px, 62%);
+  height: 290px;
+  transform: translate(-50%, -50%) rotate(-8deg);
+  animation: login-watch-drift 8s ease-in-out infinite;
+}
+
+.login-watch-image.floating.top {
+  right: 2%;
+  top: 11%;
+  width: min(190px, 36%);
+  height: 178px;
+  transform: rotate(12deg);
+  opacity: 0.94;
+  animation: login-watch-float-top 9s ease-in-out infinite;
+}
+
+.login-watch-image.floating.bottom {
+  right: 16%;
+  bottom: 2%;
+  width: min(178px, 35%);
+  height: 168px;
+  transform: rotate(9deg);
+  opacity: 0.9;
+  animation: login-watch-float-bottom 9.5s ease-in-out infinite;
+}
+
+.login-watch-rail {
+  display: grid;
+  gap: 10px;
+  align-content: end;
+  padding-bottom: 20px;
+}
+
+.login-watch-thumb {
+  width: 76px;
+  height: 64px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(240, 198, 106, 0.24);
+  background: rgba(255, 247, 232, 0.07);
+}
+
+.login-watch-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 5px;
+  filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.28));
+}
+
 .login-trust-strip {
   display: flex;
   flex-wrap: wrap;
@@ -5710,6 +5832,24 @@ textarea:focus {
   }
 }
 
+@keyframes login-watch-drift {
+  50% {
+    transform: translate(-50%, -52%) rotate(-6deg);
+  }
+}
+
+@keyframes login-watch-float-top {
+  50% {
+    transform: translateY(-8px) rotate(10deg);
+  }
+}
+
+@keyframes login-watch-float-bottom {
+  50% {
+    transform: translateY(8px) rotate(11deg);
+  }
+}
+
 @media (max-width: 1060px) {
   .site-header {
     padding: 10px 0;
@@ -5964,6 +6104,14 @@ textarea:focus {
 
   .login-hero-panel {
     min-height: 540px;
+  }
+
+  .login-watch-gallery {
+    min-height: 300px;
+  }
+
+  .login-watch-stage {
+    min-height: 300px;
   }
 
   .login-card.auth-card {
@@ -6533,8 +6681,42 @@ textarea:focus {
     line-height: 1.65;
   }
 
-  .login-slideshow,
-  .login-trust-strip {
+  .login-watch-gallery {
+    min-height: 230px;
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .login-watch-gallery::before {
+    inset: 12px;
+  }
+
+  .login-watch-stage {
+    min-height: 230px;
+  }
+
+  .login-watch-image.primary {
+    left: 42%;
+    width: min(230px, 62%);
+    height: 220px;
+  }
+
+  .login-watch-image.floating.top {
+    right: 2%;
+    top: 6%;
+    width: min(130px, 34%);
+    height: 130px;
+  }
+
+  .login-watch-image.floating.bottom {
+    right: 14%;
+    width: min(125px, 32%);
+    height: 120px;
+  }
+
+  .login-watch-rail,
+  .login-trust-strip,
+  .login-slideshow {
     display: none;
   }
 
