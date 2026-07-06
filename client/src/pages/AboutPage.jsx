@@ -152,6 +152,15 @@ export const AboutPage = () => {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 
+        /* Keep navbar fixed above slides during scroll-snap */
+        .site-header {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 200 !important;
+        }
+
         .section-trigger {
             scroll-snap-align: start;
             scroll-snap-stop: always;
