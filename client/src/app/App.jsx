@@ -21,12 +21,14 @@ import { ProductsPage } from '../pages/ProductsPage.jsx';
 import { RegisterPage } from '../pages/RegisterPage.jsx';
 import { ScrollToTop } from '../components/ScrollToTop.jsx';
 import { OrderRealtimeSync } from '../components/OrderRealtimeSync.jsx';
+import { AboutPage } from '../pages/AboutPage.jsx';
 
 export const App = () => (
   <>
     <ScrollToTop />
     <OrderRealtimeSync />
     <Routes>
+      <Route path="about" element={<AboutPage />} />
       <Route element={<Layout />}>
       <Route index element={<HomePage />} />
       <Route path="products" element={<ProductsPage />} />
