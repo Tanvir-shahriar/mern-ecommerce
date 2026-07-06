@@ -11,16 +11,6 @@ import { api } from '../services/api.js';
 
 const toParamsObject = (searchParams) => Object.fromEntries(searchParams.entries());
 
-const productTypes = [
-  { value: 'all', label: 'All product types' },
-  { value: 'physical', label: 'Physical products' },
-  { value: 'digital', label: 'Digital products' },
-  { value: 'service', label: 'Services' },
-  { value: 'subscription', label: 'Subscriptions' },
-  { value: 'gift_card', label: 'Gift cards' },
-  { value: 'other', label: 'Other' }
-];
-
 export const ProductsPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [search, setSearch] = useState(searchParams.get('search') || '');
@@ -32,7 +22,6 @@ export const ProductsPage = () => {
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (searchParams.get('search')) count++;
-    if (searchParams.get('productType')) count++;
     if (searchParams.get('minPrice')) count++;
     if (searchParams.get('maxPrice')) count++;
     if (searchParams.get('inStock') === 'true') count++;
@@ -87,7 +76,7 @@ export const ProductsPage = () => {
   const activeCategoryObj = categories.find((c) => c.slug === currentCategorySlug);
   const categoryName = activeCategoryObj?.name || (currentCategorySlug ? currentCategorySlug.toUpperCase() : '');
 
-  let pageTitle = 'Product Catalog';
+  let pageTitle = 'Luxury Watches & Smartwatches Collection';
   if (search) {
     pageTitle = `Search results for "${search}"`;
   } else if (categoryName) {
@@ -98,7 +87,7 @@ export const ProductsPage = () => {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     'name': pageTitle,
-    'description': `Browse ${categoryName || 'products'} at LahVenture.`,
+    'description': `Browse authentic ${categoryName || 'luxury'} timepieces and smartwatches at LahVenture.`,
     'url': window.location.href,
     'mainEntity': {
       '@type': 'ItemList',
@@ -115,7 +104,7 @@ export const ProductsPage = () => {
     <section className="catalog-page">
       <Seo
         title={pageTitle}
-        description={`Explore our curated collection of ${categoryName || 'products'} with reliable checkout and delivery.`}
+        description={`Explore our curated collection of ${categoryName || 'luxury mechanical and smartwatch'} timepieces with guaranteed authenticity and fast delivery.`}
         schemaJson={catalogSchema}
       />
       {/* Mobile Filters UI */}
@@ -178,7 +167,7 @@ export const ProductsPage = () => {
                   type="search"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search products, SKU, barcode, brand"
+                  placeholder="Search watches, SKU, brand"
                 />
                 {search ? (
                   <button type="button" onClick={() => setSearch('')} aria-label="Clear search">
@@ -186,17 +175,6 @@ export const ProductsPage = () => {
                   </button>
                 ) : null}
               </div>
-            </label>
-
-            <label>
-              Product type
-              <select value={searchParams.get('productType') || 'all'} onChange={(event) => updateFilter('productType', event.target.value)}>
-                {productTypes.map((type) => (
-                  <option value={type.value} key={type.value}>
-                    {type.label}
-                  </option>
-                ))}
-              </select>
             </label>
 
             <div className="price-row" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
@@ -260,7 +238,7 @@ export const ProductsPage = () => {
           Search
           <div className="search-field">
             <Search size={16} />
-            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products, SKU, barcode, brand" />
+            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search watches, SKU, brand" />
             {search ? (
               <button type="button" onClick={() => setSearch('')} aria-label="Clear search">
                 <X size={15} />
@@ -275,16 +253,6 @@ export const ProductsPage = () => {
             {categories.map((category) => (
               <option value={category.slug} key={category._id}>
                 {category.name}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Product type
-          <select value={searchParams.get('productType') || 'all'} onChange={(event) => updateFilter('productType', event.target.value)}>
-            {productTypes.map((type) => (
-              <option value={type.value} key={type.value}>
-                {type.label}
               </option>
             ))}
           </select>
@@ -313,7 +281,7 @@ export const ProductsPage = () => {
         <div className="section-heading compact">
           <div>
             <p className="eyebrow">Catalog</p>
-            <h1>{pageTitle || 'Shop products'}</h1>
+            <h1>{pageTitle || 'Shop watches'}</h1>
             {params.search ? <span className="search-meta">{data?.pagination?.total || 0} result(s) for "{params.search}"</span> : null}
           </div>
           <select value={searchParams.get('sort') || 'newest'} onChange={(event) => updateFilter('sort', event.target.value)} aria-label="Sort products" className="desktop-only">

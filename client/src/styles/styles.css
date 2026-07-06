@@ -5866,7 +5866,23 @@ textarea:focus {
   }
 }
 
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
 @media (max-width: 1060px) {
+  .desktop-only {
+    display: none;
+  }
+
+  .mobile-only {
+    display: block;
+  }
+
   .site-header {
     padding: 10px 0;
   }
@@ -6074,6 +6090,10 @@ textarea:focus {
   .address-manager,
   .reviews-layout {
     grid-template-columns: 1fr !important;
+  }
+
+  select.desktop-only {
+    display: none;
   }
 
   .account-page,
