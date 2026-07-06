@@ -33,14 +33,14 @@ export const AboutPage = () => {
     const script = document.createElement('script');
     script.src = 'https://cdn.tailwindcss.com';
     script.id = 'tailwind-cdn-script';
-    
+
     // Set Tailwind config before script loads
     window.tailwind = {
       config: {
         theme: {
           extend: {
             colors: {
-              maroon: '#7A0000',
+              maroon: '#6b000b',
               bglight: '#EAEAEA'
             },
             fontFamily: {
@@ -148,7 +148,7 @@ export const AboutPage = () => {
   return (
     <>
       <Seo title="Lahventure - Team Profiles" />
-      
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
 
@@ -290,9 +290,91 @@ export const AboutPage = () => {
             transition: opacity 0.4s ease;
         }
 
+        /* Thank You Pulsing Ring Animations */
+        @keyframes pulseRing {
+            0% {
+                transform: scale(0.85);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.15;
+            }
+            100% {
+                transform: scale(0.85);
+                opacity: 0.6;
+            }
+        }
+
+        @keyframes pulseRingSlow {
+            0% {
+                transform: scale(0.9);
+                opacity: 0.4;
+            }
+            50% {
+                transform: scale(1.08);
+                opacity: 0.08;
+            }
+            100% {
+                transform: scale(0.9);
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes pulseRingOuter {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.2;
+            }
+            50% {
+                transform: scale(1.03);
+                opacity: 0.05;
+            }
+            100% {
+                transform: scale(0.95);
+                opacity: 0.2;
+            }
+        }
+
+        .ring-1 {
+            animation: pulseRing 4s ease-in-out infinite;
+        }
+
+        .ring-2 {
+            animation: pulseRingSlow 6s ease-in-out infinite 1s;
+        }
+
+        .ring-3 {
+            animation: pulseRingOuter 8s ease-in-out infinite 2s;
+        }
+
+        #slide-3 .ring-1,
+        #slide-3 .ring-2,
+        #slide-3 .ring-3 {
+            opacity: 0;
+        }
+
+        #slide-3.active .ring-1,
+        #slide-3.active .ring-2,
+        #slide-3.active .ring-3 {
+            opacity: 1;
+        }
+
         /* Thank You Screen Text Scale Animation */
         #slide-3.active .thank-you-text {
             animation: scaleUp 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        #slide-3.active .thank-you-line-1 {
+            animation: fadeSlideUp 1s cubic-bezier(0.25, 1, 0.5, 1) 0.2s forwards;
+        }
+
+        #slide-3.active .thank-you-line-2 {
+            animation: fadeSlideUp 1s cubic-bezier(0.25, 1, 0.5, 1) 0.5s forwards;
+        }
+
+        #slide-3.active .thank-you-line-3 {
+            animation: fadeSlideUp 1s cubic-bezier(0.25, 1, 0.5, 1) 0.8s forwards;
         }
 
         @keyframes scaleUp {
@@ -300,9 +382,19 @@ export const AboutPage = () => {
                 transform: scale(0.9);
                 opacity: 0;
             }
-
             to {
                 transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeSlideUp {
+            from {
+                transform: translateY(25px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
                 opacity: 1;
             }
         }
@@ -377,26 +469,27 @@ export const AboutPage = () => {
         </div>
 
         <div className="slide bg-bglight flex flex-col items-center justify-center" id="slide-3">
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden bio-text opacity-30">
-            <div className="absolute w-[30vw] h-[30vw] rounded-full border border-maroon/20 animate-[ping_4s_ease-out_infinite]"></div>
-            <div className="absolute w-[50vw] h-[50vw] rounded-full border border-maroon/30 animate-[ping_6s_ease-out_infinite_1s]"></div>
-            <div className="absolute w-[70vw] h-[70vw] rounded-full border border-maroon/10"></div>
+          {/* Pulsing ring background */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+            <div className="ring-1 absolute rounded-full" style={{ width: '30vw', height: '30vw', border: '1px solid rgba(107, 0, 11, 0.2)' }}></div>
+            <div className="ring-2 absolute rounded-full" style={{ width: '50vw', height: '50vw', border: '1px solid rgba(107, 0, 11, 0.15)' }}></div>
+            <div className="ring-3 absolute rounded-full" style={{ width: '70vw', height: '70vw', border: '1px solid rgba(107, 0, 11, 0.08)' }}></div>
           </div>
 
           <div className="text-center thank-you-text opacity-0 z-10">
-            <h1 className="text-6xl md:text-9xl font-serif font-bold text-maroon uppercase tracking-widest">Thank You</h1>
-            <h2 className="text-2xl md:text-4xl font-sans font-medium text-maroon mt-6 uppercase tracking-wider">For Visiting</h2>
-            <h3 className="text-4xl md:text-6xl font-serif italic text-maroon mt-4">Our Website</h3>
+            <h1 className="thank-you-line-1 text-6xl md:text-9xl font-serif font-bold text-maroon uppercase tracking-widest" style={{ opacity: 0 }}>Thank You</h1>
+            <h2 className="thank-you-line-2 text-2xl md:text-4xl font-sans font-medium text-maroon mt-6 uppercase tracking-wider" style={{ opacity: 0 }}>For Visiting</h2>
+            <h3 className="thank-you-line-3 text-4xl md:text-6xl font-serif italic text-maroon mt-4" style={{ opacity: 0 }}>Our Website</h3>
           </div>
         </div>
 
       </div>
 
       <div id="scroll-track" className="relative w-full z-0">
-        <section className="h-screen w-full section-trigger" data-index="0"></section>
-        <section className="h-screen w-full section-trigger" data-index="1"></section>
-        <section className="h-screen w-full section-trigger" data-index="2"></section>
-        <section className="h-screen w-full section-trigger" data-index="3"></section>
+        <section id="section-laham" className="h-screen w-full section-trigger" data-index="0"></section>
+        <section id="section-sourav" className="h-screen w-full section-trigger" data-index="1"></section>
+        <section id="section-tushar" className="h-screen w-full section-trigger" data-index="2"></section>
+        <section id="section-thankyou" className="h-screen w-full section-trigger" data-index="3"></section>
       </div>
     </>
   );
