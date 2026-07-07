@@ -11895,8 +11895,8 @@ textarea:focus {
 
 .contact-heading-container {
   transition:
-    opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.36s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.36s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .contact-heading-container h1 {
@@ -11930,25 +11930,25 @@ textarea:focus {
   gap: 16px;
   color: var(--contact-red);
   transition:
-    opacity 1s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 1s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 1s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.34s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.34s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .contact-grid-item-1 {
-  transition-delay: 0.1s;
+  transition-delay: 0.03s;
 }
 
 .contact-grid-item-2 {
-  transition-delay: 0.2s;
+  transition-delay: 0.06s;
 }
 
 .contact-grid-item-3 {
-  transition-delay: 0.3s;
+  transition-delay: 0.09s;
 }
 
 .contact-grid-item-4 {
-  transition-delay: 0.4s;
+  transition-delay: 0.12s;
 }
 
 .contact-info-icon {
@@ -12021,9 +12021,9 @@ textarea:focus {
   transition:
     box-shadow 180ms ease,
     border-color 180ms ease,
-    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    filter 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .contact-field input {
@@ -12053,10 +12053,10 @@ textarea:focus {
   opacity: 1;
   transform: translateY(0);
   transition:
-    max-height 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    margin-bottom 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    max-height 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+    margin-bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .contact-field-grid {
@@ -12088,8 +12088,8 @@ textarea:focus {
   border-radius: 8px;
   background: #ffffff;
   transition:
-    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    visibility 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+    visibility 0.24s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
 }
 
@@ -12098,7 +12098,7 @@ textarea:focus {
   border-radius: 999px;
   background: #d1d5db;
   filter: blur(1px);
-  animation: contact-skeleton-pulse 1.25s ease-in-out infinite;
+  animation: contact-skeleton-pulse 0.8s ease-in-out infinite;
 }
 
 .contact-email-skeleton span {
@@ -12115,10 +12115,10 @@ textarea:focus {
   opacity: 1;
   transform: translateY(0) scale(1);
   transition:
-    max-height 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s,
-    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.1s,
-    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s,
-    margin-bottom 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.1s;
+    max-height 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.03s,
+    opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1) 0.03s,
+    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.03s,
+    margin-bottom 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.03s;
 }
 
 .contact-submit-container {
@@ -12127,10 +12127,10 @@ textarea:focus {
   opacity: 1;
   transform: translateY(0);
   transition:
-    max-height 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
-    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
-    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s,
-    margin-top 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+    max-height 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.06s,
+    opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1) 0.06s,
+    transform 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.06s,
+    margin-top 0.32s cubic-bezier(0.16, 1, 0.3, 1) 0.06s;
 }
 
 .contact-submit-container button {
@@ -12182,7 +12182,7 @@ textarea:focus {
 .contact-state-phase1 .contact-email-input,
 .contact-state-phase1 .contact-phone-input {
   opacity: 0;
-  filter: blur(4px);
+  filter: blur(2px);
   transform: scale(0.97);
   pointer-events: none;
 }
@@ -12191,7 +12191,7 @@ textarea:focus {
   max-height: 0;
   margin-bottom: 0;
   opacity: 0;
-  transform: translateY(20px) scale(0.98);
+  transform: translateY(12px) scale(0.98);
   pointer-events: none;
   overflow: hidden;
 }
@@ -12200,14 +12200,14 @@ textarea:focus {
   max-height: 0;
   margin-top: 0;
   opacity: 0;
-  transform: translateY(15px);
+  transform: translateY(10px);
   pointer-events: none;
   overflow: hidden;
 }
 
 .contact-state-phase1 .contact-info-item {
   opacity: 0;
-  transform: translateY(15px);
+  transform: translateY(10px);
   pointer-events: none;
 }
 
@@ -12256,7 +12256,7 @@ textarea:focus {
 .contact-state-phase3 .contact-email-input,
 .contact-state-phase3 .contact-phone-input {
   opacity: 0.5;
-  filter: blur(5px);
+  filter: blur(3px);
   transform: scale(0.97);
   pointer-events: none;
 }
@@ -12265,7 +12265,7 @@ textarea:focus {
   max-height: 0;
   margin-bottom: 0;
   opacity: 0;
-  transform: translateY(20px) scale(0.98);
+  transform: translateY(12px) scale(0.98);
   pointer-events: none;
   overflow: hidden;
   transition-delay: 0s;
@@ -12275,7 +12275,7 @@ textarea:focus {
   max-height: 0;
   margin-top: 0;
   opacity: 0;
-  transform: translateY(15px);
+  transform: translateY(10px);
   pointer-events: none;
   overflow: hidden;
   transition-delay: 0s;

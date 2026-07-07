@@ -10,6 +10,10 @@ const initialForm = {
   message: ''
 };
 
+const CONTACT_REVEAL_DELAY_MS = 420;
+const CONTACT_SUCCESS_DELAY_MS = 320;
+const CONTACT_ERROR_DELAY_MS = 240;
+
 const contactItems = [
   {
     className: 'contact-grid-item-1',
@@ -73,7 +77,7 @@ export const ContactPage = () => {
     }
 
     setPhase(1);
-    queueTimer(() => setPhase(2), 1500);
+    queueTimer(() => setPhase(2), CONTACT_REVEAL_DELAY_MS);
 
     return () => {
       clearTimers();
@@ -109,15 +113,15 @@ export const ContactPage = () => {
         setForm(initialForm);
         setSubmitting(false);
         setPhase(1);
-        queueTimer(() => setPhase(2), 1500);
-      }, 900);
+        queueTimer(() => setPhase(2), CONTACT_REVEAL_DELAY_MS);
+      }, CONTACT_SUCCESS_DELAY_MS);
     } catch (error) {
       queueTimer(() => {
         setStatusMessage(apiErrorMessage(error));
         setStatusType('error');
         setSubmitting(false);
         setPhase(2);
-      }, 700);
+      }, CONTACT_ERROR_DELAY_MS);
     }
   };
 
@@ -184,7 +188,6 @@ export const ContactPage = () => {
               <span>Name</span>
               <input
                 type="text"
-                placeholder="Francisco Andrade"
                 required
                 value={form.name}
                 onChange={updateField('name')}
@@ -201,7 +204,6 @@ export const ContactPage = () => {
                   <input
                     className="contact-email-input"
                     type="email"
-                    placeholder="hello@reallygreatsite.com"
                     required
                     value={form.email}
                     onChange={updateField('email')}
@@ -218,7 +220,6 @@ export const ContactPage = () => {
                   <input
                     className="contact-phone-input"
                     type="tel"
-                    placeholder="123-456-7890"
                     required
                     value={form.phone}
                     onChange={updateField('phone')}
@@ -231,7 +232,6 @@ export const ContactPage = () => {
               <span>Message</span>
               <textarea
                 rows="4"
-                placeholder="Hi..."
                 required
                 value={form.message}
                 onChange={updateField('message')}
