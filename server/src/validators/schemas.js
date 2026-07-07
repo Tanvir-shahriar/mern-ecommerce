@@ -20,6 +20,8 @@ const imageSchema = z.object({
   publicId: z.string().optional()
 });
 
+const optionalImageSchema = imageSchema.nullable().optional();
+
 const manualPaymentMethodSchema = z.enum(['cash_on_delivery', 'bank_transfer', 'mobile_banking']);
 
 const paymentProofSchema = z.object({
@@ -84,12 +86,33 @@ export const categorySchema = z.object({
   order: z.coerce.number().optional()
 });
 
+export const brandSchema = z.object({
+  name: z.string().trim().min(2).max(120),
+  tagline: z.string().trim().max(120).optional(),
+  description: z.string().trim().max(600).optional(),
+  filterGroup: z.string().trim().max(80).optional(),
+  origin: z.string().trim().max(80).optional(),
+  founded: z.string().trim().max(40).optional(),
+  image: optionalImageSchema,
+  spotlightImage: optionalImageSchema,
+  spotlightTitle: z.string().trim().max(180).optional(),
+  spotlightDescription: z.string().trim().max(1200).optional(),
+  ctaText: z.string().trim().max(60).optional(),
+  isActive: z.boolean().optional(),
+  isSpotlight: z.boolean().optional(),
+  order: z.coerce.number().optional()
+});
+
+export const brandUpdateSchema = brandSchema.partial();
+
 export const productSchema = z.object({
   name: z.string().min(2),
   description: z.string().min(10),
   shortDescription: z.string().max(220).optional(),
   category: objectId,
   brand: z.string().optional(),
+  brandRef: objectId.nullable().optional(),
+  brandId: objectId.nullable().optional(),
   vendor: z.string().optional(),
   productType: z.enum(['physical', 'digital', 'service', 'subscription', 'gift_card', 'other']).optional(),
   barcode: z.string().optional(),

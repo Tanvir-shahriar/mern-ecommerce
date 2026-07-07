@@ -368,6 +368,15 @@ export class JsonModel {
       base.order ||= 0;
     }
 
+    if (this.name === 'Brand') {
+      base.slug ||= slugify(base.name || '', { lower: true, strict: true });
+      base.filterGroup ||= 'All Brands';
+      base.ctaText ||= 'Explore Collection';
+      base.isActive = base.isActive !== false;
+      base.isSpotlight = Boolean(base.isSpotlight);
+      base.order ||= 0;
+    }
+
     if (this.name === 'Product') {
       base.slug ||= slugify(base.name || '', { lower: true, strict: true });
       if (base.sku) base.sku = String(base.sku).trim().toUpperCase();
@@ -427,6 +436,10 @@ export class JsonModel {
     }
 
     if (this.name === 'Category' && (!doc.slug || doc.name)) {
+      doc.slug = slugify(doc.name || '', { lower: true, strict: true });
+    }
+
+    if (this.name === 'Brand' && (!doc.slug || doc.name)) {
       doc.slug = slugify(doc.name || '', { lower: true, strict: true });
     }
 
@@ -552,6 +565,7 @@ export class JsonModel {
   async enforceUnique(doc) {
     const uniqueByModel = {
       User: ['email'],
+      Brand: ['slug', 'name'],
       Product: ['slug', 'sku'],
       Category: ['slug', 'name'],
       Coupon: ['code'],
@@ -652,6 +666,9 @@ export class JsonModel {
 
     if (path === 'category' && data.category) {
       data.category = await this.registry.Category.findById(data.category).select(select || '').lean();
+    }
+    if (path === 'brandRef' && data.brandRef) {
+      data.brandRef = await this.registry.Brand.findById(data.brandRef).select(select || '').lean();
     }
     if (path === 'parent' && data.parent) {
       data.parent = await this.registry.Category.findById(data.parent).select(select || '').lean();

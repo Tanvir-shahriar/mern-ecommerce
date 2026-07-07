@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { Brand } from '../models/brand.model.js';
 import { Category } from '../models/category.model.js';
 import { Order } from '../models/order.model.js';
 import { Product } from '../models/product.model.js';
@@ -63,6 +64,67 @@ const resolveCategory = async (category) => {
   return found?._id || null;
 };
 
+const findBrandByInput = async (brand) => {
+  if (!brand) return null;
+  if (mongoose.isValidObjectId(brand)) return Brand.findById(brand).lean();
+
+  return Brand.findOne({
+    $or: [
+      { slug: String(brand).trim().toLowerCase() },
+      { name: new RegExp(`^${escapeRegex(String(brand).trim())}$`, 'i') }
+    ]
+  }).lean();
+};
+
+const resolveBrandNames = async (brandQuery) => {
+  const values = String(brandQuery)
+    .split(',')
+    .map((brand) => brand.trim())
+    .filter(Boolean);
+
+  const names = [];
+
+  for (const value of values) {
+    const brand = await findBrandByInput(value);
+    names.push(brand?.name || value);
+  }
+
+  return [...new Set(names)];
+};
+
+const normalizeProductBrandPayload = async (payload = {}) => {
+  const next = { ...payload };
+  const explicitBrandRef = next.brandRef || next.brandId;
+  delete next.brandId;
+
+  if (explicitBrandRef === null) {
+    next.brandRef = undefined;
+    return next;
+  }
+
+  if (explicitBrandRef) {
+    const brand = await Brand.findById(explicitBrandRef).lean();
+    if (!brand) throw new ApiError(404, 'Brand not found');
+    next.brandRef = brand._id;
+    next.brand = brand.name;
+    return next;
+  }
+
+  if (typeof next.brand === 'string' && next.brand.trim()) {
+    const brand = await findBrandByInput(next.brand);
+    if (brand) {
+      next.brandRef = brand._id;
+      next.brand = brand.name;
+    }
+  }
+
+  return next;
+};
+
+const populateProductQuery = (query) => query
+  .populate('category', 'name slug')
+  .populate('brandRef', 'name slug tagline image');
+
 const buildProductFilter = async (query, includeInactive = false) => {
   const filter = {};
 
@@ -88,7 +150,7 @@ const buildProductFilter = async (query, includeInactive = false) => {
   }
 
   if (query.brand) {
-    filter.brand = { $in: String(query.brand).split(',').map((brand) => brand.trim()) };
+    filter.brand = { $in: await resolveBrandNames(query.brand) };
   }
 
   if (query.productType && query.productType !== 'all') {
@@ -126,13 +188,12 @@ export const getProducts = asyncHandler(async (req, res) => {
   // If NOT a search query, we do standard pagination in DB for performance.
   const [productsRaw, totalCount, brands] = await Promise.all([
     isSearchQuery
-      ? Product.find(filter).populate('category', 'name slug').lean()
-      : Product.find(filter)
-          .populate('category', 'name slug')
-          .sort(sort)
-          .skip(skip)
-          .limit(limit)
-          .lean(),
+      ? populateProductQuery(Product.find(filter)).lean()
+      : populateProductQuery(Product.find(filter))
+        .sort(sort)
+        .skip(skip)
+        .limit(limit)
+        .lean(),
     isSearchQuery ? null : Product.countDocuments(filter),
     Product.distinct('brand', { status: 'active', brand: { $ne: null } })
   ]);
@@ -219,6 +280,7 @@ export const getFeaturedProducts = asyncHandler(async (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 8, 16);
   const products = await Product.find({ status: 'active', isFeatured: true })
     .populate('category', 'name slug')
+    .populate('brandRef', 'name slug tagline image')
     .sort('-ratingsAverage -salesCount')
     .limit(limit)
     .lean();
@@ -237,6 +299,7 @@ export const getProduct = asyncHandler(async (req, res) => {
 
   const productQuery = Product.findOne(includeInactive ? query : { ...query, status: 'active' })
     .populate('category', 'name slug')
+    .populate('brandRef', 'name slug tagline image spotlightTitle')
     .populate('reviews.user', 'name avatar');
 
   if (includeInactive) productQuery.select('+cost');
@@ -269,6 +332,7 @@ export const getSimilarProducts = asyncHandler(async (req, res) => {
     ]
   })
     .populate('category', 'name slug')
+    .populate('brandRef', 'name slug tagline image')
     .sort('-ratingsAverage -salesCount -createdAt')
     .limit(limit)
     .lean();
@@ -283,7 +347,8 @@ export const createProduct = asyncHandler(async (req, res) => {
   const categoryExists = await Category.exists({ _id: req.body.category });
   if (!categoryExists) throw new ApiError(404, 'Category not found');
 
-  const product = await Product.create(req.body);
+  const payload = await normalizeProductBrandPayload(req.body);
+  const product = await Product.create(payload);
 
   res.status(201).json({
     status: 'success',
@@ -300,7 +365,8 @@ export const updateProduct = asyncHandler(async (req, res) => {
     if (!categoryExists) throw new ApiError(404, 'Category not found');
   }
 
-  Object.assign(product, req.body);
+  const payload = await normalizeProductBrandPayload(req.body);
+  Object.assign(product, payload);
   await product.save();
 
   res.json({
@@ -406,6 +472,7 @@ export const addReview = asyncHandler(async (req, res) => {
 
   const reviewedProduct = await Product.findById(product._id)
     .populate('category', 'name slug')
+    .populate('brandRef', 'name slug tagline image')
     .populate('reviews.user', 'name avatar')
     .lean();
 

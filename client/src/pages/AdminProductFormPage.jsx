@@ -37,6 +37,7 @@ const newVariant = () => ({ name: '', optionsText: '' });
 
 const initialForm = {
   name: '',
+  brandRef: '',
   brand: '',
   vendor: '',
   productType: 'physical',
@@ -67,9 +68,12 @@ const initialForm = {
   seoDescription: ''
 };
 
-const productToForm = (product, categories) => ({
+const productToForm = (product, categories, brands = []) => ({
   name: product.name || '',
-  brand: product.brand || '',
+  brandRef: typeof product.brandRef === 'object'
+    ? product.brandRef?._id || ''
+    : product.brandRef || brands.find((brand) => brand.name === product.brand)?._id || '',
+  brand: product.brand || (typeof product.brandRef === 'object' ? product.brandRef?.name : '') || '',
   vendor: product.vendor || '',
   productType: product.productType || 'physical',
   barcode: product.barcode || '',
@@ -135,6 +139,14 @@ export const AdminProductFormPage = () => {
     }
   });
 
+  const { data: brands = [] } = useQuery({
+    queryKey: ['admin-brands'],
+    queryFn: async () => {
+      const { data } = await api.get('/brands/admin');
+      return data.data.brands;
+    }
+  });
+
   const { data: product, isLoading: productLoading } = useQuery({
     queryKey: ['admin-product-edit', id],
     enabled: isEdit,
@@ -146,9 +158,9 @@ export const AdminProductFormPage = () => {
 
   useEffect(() => {
     if (isEdit && product) {
-      setForm(productToForm(product, categories));
+      setForm(productToForm(product, categories, brands));
     }
-  }, [isEdit, product?._id]);
+  }, [isEdit, product?._id, categories.length, brands.length]);
 
   useEffect(() => {
     if (!isEdit && categories[0]?._id) {
@@ -160,6 +172,10 @@ export const AdminProductFormPage = () => {
   const selectedCategory = useMemo(
     () => categories.find((category) => category._id === form.category),
     [categories, form.category]
+  );
+  const selectedBrand = useMemo(
+    () => brands.find((brand) => brand._id === form.brandRef),
+    [brands, form.brandRef]
   );
 
   const updateField = (key, value) => {
@@ -284,7 +300,8 @@ export const AdminProductFormPage = () => {
 
     return {
       name: form.name.trim(),
-      brand: form.brand.trim(),
+      brandRef: form.brandRef || undefined,
+      brand: selectedBrand?.name || form.brand.trim(),
       vendor: form.vendor.trim() || undefined,
       productType: form.productType,
       barcode: form.barcode.trim() || undefined,
@@ -360,6 +377,8 @@ export const AdminProductFormPage = () => {
 
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['brands'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-brands'] });
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
       navigate('/admin/products');
     } catch (error) {
@@ -415,8 +434,33 @@ export const AdminProductFormPage = () => {
                 <input required value={form.name} onChange={(event) => updateField('name', event.target.value)} />
               </label>
               <label>
-                Brand / Maker
-                <input value={form.brand} onChange={(event) => updateField('brand', event.target.value)} placeholder="Apple, Nike, LahVenture, Handmade" />
+                Brand category
+                <select
+                  value={form.brandRef}
+                  onChange={(event) => {
+                    const brand = brands.find((item) => item._id === event.target.value);
+                    setForm((current) => ({
+                      ...current,
+                      brandRef: event.target.value,
+                      brand: brand?.name || current.brand
+                    }));
+                  }}
+                >
+                  <option value="">Manual or uncategorized brand</option>
+                  {brands.map((brand) => (
+                    <option value={brand._id} key={brand._id}>
+                      {brand.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Brand / Maker name
+                <input
+                  value={form.brand}
+                  onChange={(event) => setForm((current) => ({ ...current, brand: event.target.value, brandRef: '' }))}
+                  placeholder="Apple, Nike, LahVenture, Handmade"
+                />
               </label>
               <label>
                 Vendor / Supplier
@@ -640,7 +684,7 @@ export const AdminProductFormPage = () => {
               )}
             </div>
             <div className="product-editor-preview-copy">
-              <span>{form.brand || selectedCategory?.name || 'Brand or category'}</span>
+              <span>{selectedBrand?.name || form.brand || selectedCategory?.name || 'Brand or category'}</span>
               <strong>{form.name || 'Product name'}</strong>
               <p>{form.shortDescription || form.description || 'Product summary will appear here.'}</p>
             </div>

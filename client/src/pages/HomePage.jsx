@@ -508,7 +508,7 @@ export const HomePage = () => {
 
           <div className="brand-showcase-footer">
             <span>Browse by brand, movement style, case profile, and daily-wear purpose.</span>
-            <Link to="/products" className="button brand-view-button">
+            <Link to="/brands" className="button brand-view-button">
               View all brands
               <ArrowRight size={17} />
             </Link>

@@ -10,6 +10,7 @@ import { AdminPaymentMethodsPage } from '../pages/AdminPaymentMethodsPage.jsx';
 import { AdminProductFormPage } from '../pages/AdminProductFormPage.jsx';
 import { AdminOrdersPage } from '../pages/AdminOrdersPage.jsx';
 import { AdminProductsPage } from '../pages/AdminProductsPage.jsx';
+import { AdminBrandsPage } from '../pages/AdminBrandsPage.jsx';
 import { AdminUsersPage } from '../pages/AdminUsersPage.jsx';
 import { CartPage } from '../pages/CartPage.jsx';
 import { AdminContactMessagesPage } from '../pages/AdminContactMessagesPage.jsx';
@@ -25,6 +26,7 @@ import { RegisterPage } from '../pages/RegisterPage.jsx';
 import { ScrollToTop } from '../components/ScrollToTop.jsx';
 import { OrderRealtimeSync } from '../components/OrderRealtimeSync.jsx';
 import { AboutPage } from '../pages/AboutPage.jsx';
+import { BrandsPage } from '../pages/BrandsPage.jsx';
 
 export const App = () => (
   <>
@@ -34,6 +36,7 @@ export const App = () => (
       <Route element={<Layout />}>
       <Route index element={<HomePage />} />
       <Route path="about" element={<AboutPage />} />
+      <Route path="brands" element={<BrandsPage />} />
       <Route path="contact" element={<ContactPage />} />
       <Route path="products" element={<ProductsPage />} />
       <Route path="products/:slugOrId" element={<ProductDetailPage />} />
@@ -96,6 +99,14 @@ export const App = () => (
         element={
           <ProtectedRoute adminOnly>
             <AdminPaymentMethodsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="admin/brands"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminBrandsPage />
           </ProtectedRoute>
         }
       />

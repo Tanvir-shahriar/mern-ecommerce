@@ -1,3 +1,4 @@
+import { Brand } from '../models/brand.model.js';
 import { Category } from '../models/category.model.js';
 import { Product } from '../models/product.model.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
@@ -37,11 +38,17 @@ export const getSitemapXml = asyncHandler(async (_req, res) => {
     ? await categoryQuery.select('slug updatedAt').lean() 
     : await categoryQuery;
 
+  const brandQuery = Brand.find({ isActive: true });
+  const brands = typeof brandQuery.select === 'function'
+    ? await brandQuery.select('name slug updatedAt').lean()
+    : await brandQuery;
+
   const today = new Date().toISOString().split('T')[0];
 
   const staticPages = [
     { url: '', priority: '1.0', changefreq: 'daily' },
-    { url: '/products', priority: '0.9', changefreq: 'daily' }
+    { url: '/products', priority: '0.9', changefreq: 'daily' },
+    { url: '/brands', priority: '0.8', changefreq: 'weekly' }
   ];
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
@@ -63,6 +70,19 @@ export const getSitemapXml = asyncHandler(async (_req, res) => {
     const lastmod = cat.updatedAt ? new Date(cat.updatedAt).toISOString().split('T')[0] : today;
     xml += `  <url>\n`;
     xml += `    <loc>${baseUrl}/products?category=${encodeURIComponent(cat.slug)}</loc>\n`;
+    xml += `    <lastmod>${lastmod}</lastmod>\n`;
+    xml += `    <changefreq>weekly</changefreq>\n`;
+    xml += `    <priority>0.8</priority>\n`;
+    xml += `  </url>\n`;
+  }
+
+  // Brand URLs
+  for (const brand of brands || []) {
+    const brandFilter = brand.name || brand.slug;
+    if (!brandFilter) continue;
+    const lastmod = brand.updatedAt ? new Date(brand.updatedAt).toISOString().split('T')[0] : today;
+    xml += `  <url>\n`;
+    xml += `    <loc>${baseUrl}/products?brand=${encodeURIComponent(brandFilter)}</loc>\n`;
     xml += `    <lastmod>${lastmod}</lastmod>\n`;
     xml += `    <changefreq>weekly</changefreq>\n`;
     xml += `    <priority>0.8</priority>\n`;

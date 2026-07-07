@@ -22,6 +22,7 @@ export const ProductsPage = () => {
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (searchParams.get('search')) count++;
+    if (searchParams.get('brand')) count++;
     if (searchParams.get('minPrice')) count++;
     if (searchParams.get('maxPrice')) count++;
     if (searchParams.get('inStock') === 'true') count++;
@@ -53,6 +54,14 @@ export const ProductsPage = () => {
     }
   });
 
+  const { data: brands = [] } = useQuery({
+    queryKey: ['brands'],
+    queryFn: async () => {
+      const { data } = await api.get('/brands');
+      return data.data.brands;
+    }
+  });
+
   const { data, isLoading } = useQuery({
     queryKey: ['products', apiParams],
     queryFn: async () => {
@@ -71,14 +80,21 @@ export const ProductsPage = () => {
 
   const products = data?.products || [];
   const pagination = data?.pagination || { page: 1, pages: 1 };
+  const fallbackBrandOptions = (data?.filters?.brands || []).map((brand) => ({ name: brand, slug: brand }));
+  const brandOptions = brands.length ? brands : fallbackBrandOptions;
 
   const currentCategorySlug = searchParams.get('category');
+  const currentBrand = searchParams.get('brand');
   const activeCategoryObj = categories.find((c) => c.slug === currentCategorySlug);
+  const activeBrandObj = brandOptions.find((brand) => brand.slug === currentBrand || brand.name === currentBrand);
   const categoryName = activeCategoryObj?.name || (currentCategorySlug ? currentCategorySlug.toUpperCase() : '');
+  const brandName = activeBrandObj?.name || currentBrand || '';
 
   let pageTitle = 'Luxury Watches & Smartwatches Collection';
   if (search) {
     pageTitle = `Search results for "${search}"`;
+  } else if (brandName) {
+    pageTitle = `${brandName} Collection`;
   } else if (categoryName) {
     pageTitle = `${categoryName} Collection`;
   }
@@ -87,7 +103,7 @@ export const ProductsPage = () => {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     'name': pageTitle,
-    'description': `Browse authentic ${categoryName || 'luxury'} timepieces and smartwatches at LahVenture.`,
+    'description': `Browse authentic ${brandName || categoryName || 'luxury'} timepieces and smartwatches at LahVenture.`,
     'url': window.location.href,
     'mainEntity': {
       '@type': 'ItemList',
@@ -104,7 +120,7 @@ export const ProductsPage = () => {
     <section className="catalog-page">
       <Seo
         title={pageTitle}
-        description={`Explore our curated collection of ${categoryName || 'luxury mechanical and smartwatch'} timepieces with guaranteed authenticity and fast delivery.`}
+        description={`Explore our curated collection of ${brandName || categoryName || 'luxury mechanical and smartwatch'} timepieces with guaranteed authenticity and fast delivery.`}
         schemaJson={catalogSchema}
       />
       {/* Mobile Filters UI */}
@@ -200,6 +216,18 @@ export const ProductsPage = () => {
               </label>
             </div>
 
+            <label>
+              Brand
+              <select value={searchParams.get('brand') || 'all'} onChange={(event) => updateFilter('brand', event.target.value)}>
+                <option value="all">All brands</option>
+                {brandOptions.map((brand) => (
+                  <option value={brand.slug || brand.name} key={brand._id || brand.slug || brand.name}>
+                    {brand.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+
             <label className="checkbox-row" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', margin: '4px 0' }}>
               <input
                 type="checkbox"
@@ -253,6 +281,17 @@ export const ProductsPage = () => {
             {categories.map((category) => (
               <option value={category.slug} key={category._id}>
                 {category.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Brand
+          <select value={searchParams.get('brand') || 'all'} onChange={(event) => updateFilter('brand', event.target.value)}>
+            <option value="all">All brands</option>
+            {brandOptions.map((brand) => (
+              <option value={brand.slug || brand.name} key={brand._id || brand.slug || brand.name}>
+                {brand.name}
               </option>
             ))}
           </select>

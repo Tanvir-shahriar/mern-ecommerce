@@ -13,5 +13,6 @@ router.post('/products', setUploadFolder('products'), upload.array('images', 8),
 router.post('/users', setUploadFolder('users'), upload.single('image'), uploadImages);
 router.post('/gallery', setUploadFolder('gallery'), galleryUpload.array('images', 50), uploadImages);
 router.post('/hero', setUploadFolder('hero'), heroMediaUpload.array('media', 12), uploadMedia);
+router.post('/brands', setUploadFolder('brands'), upload.array('images', 4), uploadImages);
 
 export default router;

@@ -228,7 +228,7 @@ export const Layout = () => {
                   Shop
                 </Link>
 
-                <Link to="/products?filter=brands" className="hamburger-item" onClick={() => setOpen(false)}>
+                <Link to="/brands" className="hamburger-item" onClick={() => setOpen(false)}>
                   Brands
                 </Link>
                 
@@ -361,7 +361,7 @@ export const Layout = () => {
             <NavLink className={navClass} to="/products" onClick={() => setOpen(false)}>
               Shop
             </NavLink>
-            <NavLink className={navClass} to="/products?filter=brands" onClick={() => setOpen(false)}>
+            <NavLink className={navClass} to="/brands" onClick={() => setOpen(false)}>
               Brands
             </NavLink>
             <NavLink className={navClass} to="/products" onClick={() => setOpen(false)}>
@@ -618,7 +618,7 @@ export const Layout = () => {
                 <Link to="/products?brand=San%20Martin">San Martin</Link>
                 <Link to="/products?brand=Sugess">Sugess</Link>
                 <Link to="/products?brand=Pagani%20Design">Pagani Design</Link>
-                <Link to="/products?filter=brands">View all brands</Link>
+                <Link to="/brands">View all brands</Link>
               </div>
 
               <div className="footer-column">

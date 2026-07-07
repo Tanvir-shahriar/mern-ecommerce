@@ -3,6 +3,7 @@ import { JsonModel } from './jsonModel.js';
 const registry = {};
 
 registry.User = new JsonModel('User', 'users', { registry });
+registry.Brand = new JsonModel('Brand', 'brands', { registry });
 registry.Category = new JsonModel('Category', 'categories', { registry });
 registry.Product = new JsonModel('Product', 'products', { registry });
 registry.Coupon = new JsonModel('Coupon', 'coupons', { registry });

@@ -1,4 +1,4 @@
-import { BarChart3, Boxes, CircleDollarSign, ClipboardList, CreditCard, Image, Mail, Users, Video } from 'lucide-react';
+import { BarChart3, Boxes, CircleDollarSign, ClipboardList, CreditCard, Image, Mail, Tags, Users, Video } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 
 const className = ({ isActive }) => (isActive ? 'admin-tab active' : 'admin-tab');
@@ -16,6 +16,10 @@ export const AdminNav = () => (
     <NavLink className={className} to="/admin/hero">
       <Video size={18} />
       Hero
+    </NavLink>
+    <NavLink className={className} to="/admin/brands">
+      <Tags size={18} />
+      Brands
     </NavLink>
     <NavLink className={className} to="/admin/orders">
       <ClipboardList size={18} />

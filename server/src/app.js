@@ -20,6 +20,7 @@ import {
 } from './middleware/security.middleware.js';
 import authRoutes from './routes/auth.routes.js';
 import productRoutes from './routes/product.routes.js';
+import brandRoutes from './routes/brand.routes.js';
 import categoryRoutes from './routes/category.routes.js';
 import cartRoutes from './routes/cart.routes.js';
 import orderRoutes from './routes/order.routes.js';
@@ -100,10 +101,11 @@ app.get('/api/health', (_req, res) => {
 app.use('/api/auth/login', authRateLimiter);
 app.use('/api/auth/register', authRateLimiter);
 app.use('/api/uploads', uploadRateLimiter);
-app.use(['/api/cart', '/api/orders', '/api/users', '/api/admin', '/api/products', '/api/categories', '/api/gallery', '/api/contact'], writeRateLimiter);
+app.use(['/api/cart', '/api/orders', '/api/users', '/api/admin', '/api/products', '/api/brands', '/api/categories', '/api/gallery', '/api/contact'], writeRateLimiter);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/brands', brandRoutes);
 app.use('/api/search', searchRoutes);
 app.use('/api/contact', contactRoutes);
 app.use('/api/categories', categoryRoutes);
