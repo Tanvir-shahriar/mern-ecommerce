@@ -4,6 +4,7 @@ import { ProtectedRoute } from '../routes/ProtectedRoute.jsx';
 import { AccountPage } from '../pages/AccountPage.jsx';
 import { AdminDashboardPage } from '../pages/AdminDashboardPage.jsx';
 import { AdminGalleryPage } from '../pages/AdminGalleryPage.jsx';
+import { AdminHeroPage } from '../pages/AdminHeroPage.jsx';
 import { AdminCurrencyPage } from '../pages/AdminCurrencyPage.jsx';
 import { AdminPaymentMethodsPage } from '../pages/AdminPaymentMethodsPage.jsx';
 import { AdminProductFormPage } from '../pages/AdminProductFormPage.jsx';
@@ -47,6 +48,14 @@ export const App = () => (
         element={
           <ProtectedRoute adminOnly>
             <AdminDashboardPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="admin/hero"
+        element={
+          <ProtectedRoute adminOnly>
+            <AdminHeroPage />
           </ProtectedRoute>
         }
       />

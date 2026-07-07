@@ -1,4 +1,4 @@
-import { ArrowRight, Cpu, CreditCard, ShieldCheck, Timer, Truck, Play, Pause } from 'lucide-react';
+import { ArrowRight, Cpu, CreditCard, ShieldCheck, Timer, Truck, Play, Pause, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -15,140 +15,10 @@ import fossilLogo from '../assets/Logo/png-clipart-fossil-group-watch-business-l
 import maxlordLogo from '../assets/Logo/images (2).jpg';
 import soberLogo from '../assets/Logo/Gemini_Generated_Image_4hnyq84hnyq84hny.png';
 import successWayBrandLogo from '../assets/Logo/Success way logo.jpg';
-import watch1 from '../assets/watches/1.png';
-import watch2 from '../assets/watches/2.png';
-import watch3 from '../assets/watches/3.png';
-import watch4 from '../assets/watches/4.png';
-import watch5 from '../assets/watches/5.png';
-import watch6 from '../assets/watches/6.png';
-import watch7 from '../assets/watches/7.png';
-import watch8 from '../assets/watches/8.png';
 import watchGearsVideo from '../assets/video/Watch face gears ticking.mp4';
+import { defaultHeroSlides } from '../data/heroDefaults.js';
 import { api, mediaUrl } from '../services/api.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
-
-const watchSlides = [
-  {
-    image: watch4, // cowboy watch (4.png)
-    badge: "LIMITED TO 30 PIECES",
-    sku: "CH-67255-BKGO",
-    title: ["FLYING GRAND", "REGULATOR", "SKELETON", "COWBOY"],
-    slogan: "The Time Is Yours",
-    subtext: "Shop our exquisite collection of luxury watches and elevate your style today",
-    gradient: "radial-gradient(circle at 60% 50%, #2a1f15 0%, #0c0906 60%, #040302 100%)",
-    accentColor: "#7a0b17", // Maroon / Cowboy Red
-    accentColorRgb: "122, 11, 23",
-    badgeBg: "rgba(255, 255, 255, 0.08)",
-    badgeColor: "#dfc8ad",
-    badgeBgTrans: "rgba(223, 200, 173, 0.1)",
-    badgeBorderTrans: "rgba(223, 200, 173, 0.3)"
-  },
-  {
-    image: watch1, // jubilee watch (1.png)
-    badge: "LIMITED TO 50 PIECES",
-    sku: "DJ-41-YGSS",
-    title: ["OYSTER", "PERPETUAL", "DATEJUST"],
-    slogan: "A Tribute to Elegance",
-    subtext: "The classic timepiece of reference, featuring a distinct fluted bezel and gold-steel Jubilee bracelet.",
-    gradient: "radial-gradient(circle at 60% 50%, #2f251b 0%, #0d0a08 60%, #050404 100%)",
-    accentColor: "#d4af37", // Gold
-    accentColorRgb: "212, 175, 55",
-    badgeBg: "#3c3226",
-    badgeColor: "#dfc8ad",
-    badgeBgTrans: "rgba(212, 175, 55, 0.1)",
-    badgeBorderTrans: "rgba(212, 175, 55, 0.3)"
-  },
-  {
-    image: watch2, // speedmaster (2.png)
-    badge: "RACING HERITAGE",
-    sku: "SP-321-CH",
-    title: ["SPEEDMASTER", "RACING", "CHRONOGRAPH"],
-    slogan: "Beyond the Horizon",
-    subtext: "A legendary racing chronograph celebrating precision, high-speed performance, and classic mechanical heritage.",
-    gradient: "radial-gradient(circle at 60% 50%, #2c2d30 0%, #111215 60%, #08090a 100%)",
-    accentColor: "#a6a9ad", // Steel/Silver
-    accentColorRgb: "166, 169, 173",
-    badgeBg: "#22252a",
-    badgeColor: "#cccccc",
-    badgeBgTrans: "rgba(166, 169, 173, 0.1)",
-    badgeBorderTrans: "rgba(166, 169, 173, 0.3)"
-  },
-  {
-    image: watch3, // blue watch (3.png)
-    badge: "MODERN CLASSIC",
-    sku: "RG-790-BL",
-    title: ["ROYAL", "OCEAN", "BLUE"],
-    slogan: "Elegance Reimagined",
-    subtext: "The perfect contrast of a deep sunburst blue dial and warm hand-polished rose gold casing.",
-    gradient: "radial-gradient(circle at 60% 50%, #151e2b 0%, #080c14 60%, #030509 100%)",
-    accentColor: "#e0b0ff", // Rose Gold / Lilac
-    accentColorRgb: "224, 176, 255",
-    badgeBg: "#0f1622",
-    badgeColor: "#a3c2f0",
-    badgeBgTrans: "rgba(224, 176, 255, 0.1)",
-    badgeBorderTrans: "rgba(224, 176, 255, 0.3)"
-  },
-  {
-    image: watch5, // calatrava brown (5.png)
-    badge: "MINIMALIST DRESS",
-    sku: "CL-1950-BR",
-    title: ["VINTAGE", "CALATRAVA", "SILVER"],
-    slogan: "Understated Grace",
-    subtext: "Clean white dial meets rich brown calfskin leather. An authentic tribute to mid-century horology.",
-    gradient: "radial-gradient(circle at 60% 50%, #291e17 0%, #0f0b09 60%, #080605 100%)",
-    accentColor: "#8b5a2b", // Brown
-    accentColorRgb: "139, 90, 43",
-    badgeBg: "#281b12",
-    badgeColor: "#dfbe9b",
-    badgeBgTrans: "rgba(139, 90, 43, 0.1)",
-    badgeBorderTrans: "rgba(139, 90, 43, 0.3)"
-  },
-  {
-    image: watch6, // emerald diver (6.png)
-    badge: "DEEP DIVER",
-    sku: "SUB-300-GR",
-    title: ["EMERALD", "OCEAN", "HULK"],
-    slogan: "Conquer the Depths",
-    subtext: "Robust 300m water resistant case with a vibrant green ceramic bezel and matching sunburst green dial.",
-    gradient: "radial-gradient(circle at 60% 50%, #12281a 0%, #07120c 60%, #030805 100%)",
-    accentColor: "#10b981", // Emerald Green
-    accentColorRgb: "16, 185, 129",
-    badgeBg: "#0f2015",
-    badgeColor: "#a7f3d0",
-    badgeBgTrans: "rgba(16, 185, 129, 0.1)",
-    badgeBorderTrans: "rgba(16, 185, 129, 0.3)"
-  },
-  {
-    image: watch7, // gold cellini (7.png)
-    badge: "HERITAGE TRADITION",
-    sku: "CELL-90-YG",
-    title: ["PRESTIGE", "CELLINI", "GOLD"],
-    slogan: "Timeless Tradition",
-    subtext: "A classic dress watch featuring a clean white dial, delicate gold markers, and a premium black alligator strap.",
-    gradient: "radial-gradient(circle at 60% 50%, #2f271a 0%, #120e0a 60%, #070503 100%)",
-    accentColor: "#eab308", // Yellow Gold
-    accentColorRgb: "234, 179, 8",
-    badgeBg: "#2e210f",
-    badgeColor: "#fef08a",
-    badgeBgTrans: "rgba(234, 179, 8, 0.1)",
-    badgeBorderTrans: "rgba(234, 179, 8, 0.3)"
-  },
-  {
-    image: watch8, // black/red sport (8.png)
-    badge: "ATHLETIC SPORT",
-    sku: "SP-X9-RED",
-    title: ["CARBON", "ATHLETE", "RED"],
-    slogan: "Engineered for Action",
-    subtext: "High-grade matte black carbon case with racing red highlights and a sweat-proof heavy-duty silicone strap.",
-    gradient: "radial-gradient(circle at 60% 50%, #2a0b0d 0%, #100405 60%, #050102 100%)",
-    accentColor: "#ef4444", // Red
-    accentColorRgb: "239, 68, 68",
-    badgeBg: "#2d0b0f",
-    badgeColor: "#fca5a5",
-    badgeBgTrans: "rgba(239, 68, 68, 0.1)",
-    badgeBorderTrans: "rgba(239, 68, 68, 0.3)"
-  }
-];
 
 const perks = [
   {
@@ -196,8 +66,20 @@ const patekFeature = {
   video: watchGearsVideo
 };
 
+const heroMediaUrl = (asset, fallback = '') => {
+  const url = typeof asset === 'string' ? asset : asset?.url;
+  if (!url) return fallback;
+  return mediaUrl(url);
+};
+
+const titleLines = (title) => {
+  if (Array.isArray(title)) return title.filter(Boolean);
+  return String(title || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+};
+
 export const HomePage = () => {
   const [heroIndex, setHeroIndex] = useState(0);
+  const [activeHeroVideo, setActiveHeroVideo] = useState(null);
   const [purchaseId, setPurchaseId] = useState('');
   const [isPatekPlaying, setIsPatekPlaying] = useState(true);
   const { user } = useAuth();
@@ -229,16 +111,50 @@ export const HomePage = () => {
     }
   });
 
-  const activeWatchIndex = watchSlides.length ? heroIndex % watchSlides.length : 0;
-  const activeWatch = watchSlides[activeWatchIndex];
+  const { data: heroData } = useQuery({
+    queryKey: ['hero-settings'],
+    queryFn: async () => {
+      const { data } = await api.get('/hero');
+      return data.data;
+    },
+    staleTime: 60 * 1000,
+    retry: 1
+  });
+
+  const configuredHeroSlides = heroData?.slides?.length ? heroData.slides : defaultHeroSlides;
+  const visibleHeroSlides = configuredHeroSlides.filter((slide) => slide.isActive !== false);
+  const heroSlides = visibleHeroSlides.length ? visibleHeroSlides : defaultHeroSlides;
+  const activeWatchIndex = heroSlides.length ? heroIndex % heroSlides.length : 0;
+  const activeWatch = heroSlides[activeWatchIndex] || defaultHeroSlides[0];
+  const activeTitleLines = titleLines(activeWatch.title);
+  const activeImageUrl = heroMediaUrl(activeWatch.image);
+  const activeVideoUrl = activeWatch.video?.url ? heroMediaUrl(activeWatch.video.url) : '';
+  const activeVideoThumbnail = heroMediaUrl(activeWatch.video?.thumbnail, activeImageUrl);
 
   useEffect(() => {
+    if (heroSlides.length <= 1) return undefined;
+
     const interval = window.setInterval(() => {
-      setHeroIndex((index) => (index + 1) % watchSlides.length);
+      setHeroIndex((index) => (index + 1) % heroSlides.length);
     }, 5500);
 
     return () => window.clearInterval(interval);
-  }, []);
+  }, [heroSlides.length]);
+
+  useEffect(() => {
+    if (heroIndex >= heroSlides.length) setHeroIndex(0);
+  }, [heroIndex, heroSlides.length]);
+
+  useEffect(() => {
+    if (!activeHeroVideo) return undefined;
+
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') setActiveHeroVideo(null);
+    };
+
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [activeHeroVideo]);
 
   const purchaseNow = (product) => {
     setPurchaseId(product._id);
@@ -321,36 +237,36 @@ export const HomePage = () => {
       />
       <section 
         className="hero-section" 
-        style={{ background: activeWatch.gradient }}
+        style={{ background: activeWatch.gradient || defaultHeroSlides[0].gradient }}
       >
         <div 
           key={activeWatchIndex} 
           className="hero-content-custom animate-slide-up"
           style={{
-            '--accent-color': activeWatch.accentColor,
-            '--accent-color-rgb': activeWatch.accentColorRgb,
-            '--badge-color': activeWatch.badgeColor,
-            '--badge-bg': activeWatch.badgeBg,
-            '--badge-bg-trans': activeWatch.badgeBgTrans,
-            '--badge-border-trans': activeWatch.badgeBorderTrans
+            '--accent-color': activeWatch.accentColor || defaultHeroSlides[0].accentColor,
+            '--accent-color-rgb': activeWatch.accentColorRgb || defaultHeroSlides[0].accentColorRgb,
+            '--badge-color': activeWatch.badgeColor || defaultHeroSlides[0].badgeColor,
+            '--badge-bg': activeWatch.badgeBg || defaultHeroSlides[0].badgeBg,
+            '--badge-bg-trans': activeWatch.badgeBgTrans || defaultHeroSlides[0].badgeBgTrans,
+            '--badge-border-trans': activeWatch.badgeBorderTrans || defaultHeroSlides[0].badgeBorderTrans
           }}
         >
-          <span className="hero-badge-pill">{activeWatch.badge}</span>
-          <span className="hero-sku">{activeWatch.sku}</span>
+          {activeWatch.badge ? <span className="hero-badge-pill">{activeWatch.badge}</span> : null}
+          {activeWatch.sku ? <span className="hero-sku">{activeWatch.sku}</span> : null}
           <h1 className="hero-title-custom">
-            {activeWatch.title.map((line, idx) => (
+            {activeTitleLines.map((line, idx) => (
               <span key={idx}>{line}</span>
             ))}
           </h1>
-          <h2 className="hero-slogan-custom">{activeWatch.slogan}</h2>
+          {activeWatch.slogan ? <h2 className="hero-slogan-custom">{activeWatch.slogan}</h2> : null}
           
-          <div className="hero-subtext-container">
+          {activeWatch.subtext ? <div className="hero-subtext-container">
             <span className="find-out-more-badge">FIND OUT MORE</span>
             <p className="hero-subtext-custom">{activeWatch.subtext}</p>
-          </div>
+          </div> : null}
           
-          <Link to="/products" className="hero-shop-btn">
-            SHOP
+          <Link to={activeWatch.ctaUrl || '/products'} className="hero-shop-btn">
+            {activeWatch.ctaText || 'SHOP'}
           </Link>
         </div>
 
@@ -359,34 +275,56 @@ export const HomePage = () => {
           
           <div key={activeWatchIndex} className="hero-watch-container animate-fade-in-scale">
             <img 
-              src={activeWatch.image} 
-              alt={activeWatch.title.join(' ')} 
+              src={activeImageUrl} 
+              alt={activeWatch.image?.alt || activeTitleLines.join(' ') || 'Featured watch'} 
               className="hero-watch-image" 
             />
           </div>
 
-          <div className="hero-video-widget">
-            <img src="/watch_video_thumbnail.png" alt="Watch video preview" />
-            <button className="play-button-custom" aria-label="Play video">
-              <span className="play-icon-circle"></span>
+          {activeVideoUrl ? (
+            <button
+              type="button"
+              className="hero-video-widget"
+              onClick={() => setActiveHeroVideo({
+                url: activeVideoUrl,
+                thumbnail: activeVideoThumbnail,
+                title: activeWatch.video?.title || activeWatch.slogan || activeTitleLines.join(' ')
+              })}
+              aria-label={`Play ${activeWatch.video?.title || activeTitleLines.join(' ') || 'hero'} video`}
+            >
+              <img src={activeVideoThumbnail} alt={activeWatch.video?.alt || 'Watch video preview'} />
+              <span className="play-button-custom" aria-hidden="true">
+                <span className="play-icon-circle"></span>
+              </span>
             </button>
-          </div>
+          ) : null}
         </div>
 
         <div className="hero-dots-container">
-          {watchSlides.map((slide, idx) => (
+          {heroSlides.map((slide, idx) => (
             <button
-              key={idx}
+              key={slide.id || idx}
               onClick={() => setHeroIndex(idx)}
               className={`hero-dot-btn ${idx === activeWatchIndex ? 'active' : ''}`}
               style={{
-                '--dot-accent': activeWatch.accentColor
+                '--dot-accent': activeWatch.accentColor || defaultHeroSlides[0].accentColor
               }}
               aria-label={`Go to slide ${idx + 1}`}
             />
           ))}
         </div>
       </section>
+
+      {activeHeroVideo ? (
+        <div className="hero-video-modal" role="dialog" aria-modal="true" aria-label={activeHeroVideo.title || 'Hero video player'} onClick={() => setActiveHeroVideo(null)}>
+          <div className="hero-video-modal-card" onClick={(event) => event.stopPropagation()}>
+            <button type="button" className="hero-video-close" onClick={() => setActiveHeroVideo(null)} aria-label="Close video">
+              <X size={20} />
+            </button>
+            <video src={activeHeroVideo.url} poster={activeHeroVideo.thumbnail} controls autoPlay playsInline />
+          </div>
+        </div>
+      ) : null}
 
       <section className="patek-carousel-scroll-stage">
         <div className="hero-carousel_hero-carousel__bEV8J patek-hero-carousel">

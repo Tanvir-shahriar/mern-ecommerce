@@ -32,6 +32,7 @@ import currencyRoutes from './routes/currency.routes.js';
 import sitemapRoutes from './routes/sitemap.routes.js';
 import searchRoutes from './routes/search.routes.js';
 import contactRoutes from './routes/contact.routes.js';
+import heroRoutes from './routes/hero.routes.js';
 
 export const app = express();
 // ... [rest unchanged up to line 100] ...
@@ -113,6 +114,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/uploads', uploadRoutes);
 app.use('/api/payment-methods', paymentRoutes);
 app.use('/api/gallery', galleryRoutes);
+app.use('/api/hero', heroRoutes);
 app.use('/api/currency', currencyRoutes);
 app.use('/', sitemapRoutes);
 app.use('/api', sitemapRoutes);

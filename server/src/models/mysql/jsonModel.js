@@ -559,7 +559,8 @@ export class JsonModel {
       Cart: ['user'],
       CurrencySetting: ['key'],
       PaymentSetting: ['key'],
-      Gallery: ['key']
+      Gallery: ['key'],
+      HeroSetting: ['key']
     };
 
     for (const field of uniqueByModel[this.name] || []) {

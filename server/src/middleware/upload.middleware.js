@@ -29,13 +29,23 @@ const diskStorage = multer.diskStorage({
 
 const storage = process.env.VERCEL ? multer.memoryStorage() : diskStorage;
 
-const fileFilter = (_req, file, cb) => {
-  if (!file.mimetype.startsWith('image/')) {
-    cb(new ApiError(400, 'Only image uploads are allowed'));
+const createFileFilter = (isAllowed, message) => (_req, file, cb) => {
+  if (!isAllowed(file.mimetype)) {
+    cb(new ApiError(400, message));
     return;
   }
   cb(null, true);
 };
+
+const imageFileFilter = createFileFilter(
+  (mimeType) => mimeType.startsWith('image/'),
+  'Only image uploads are allowed'
+);
+
+const imageOrVideoFileFilter = createFileFilter(
+  (mimeType) => mimeType.startsWith('image/') || mimeType.startsWith('video/'),
+  'Only image and video uploads are allowed'
+);
 
 export const setUploadFolder = (folder) => (req, _res, next) => {
   req.uploadFolder = folder;
@@ -44,7 +54,7 @@ export const setUploadFolder = (folder) => (req, _res, next) => {
 
 export const upload = multer({
   storage,
-  fileFilter,
+  fileFilter: imageFileFilter,
   limits: {
     fileSize: env.uploadFileSizeMb * 1024 * 1024,
     files: env.uploadMaxFiles
@@ -53,9 +63,18 @@ export const upload = multer({
 
 export const galleryUpload = multer({
   storage,
-  fileFilter,
+  fileFilter: imageFileFilter,
   limits: {
     fileSize: 100 * 1024 * 1024, // 100MB per image (unconstrained high-res support)
     files: 50 // Up to 50 images per upload action
+  }
+});
+
+export const heroMediaUpload = multer({
+  storage,
+  fileFilter: imageOrVideoFileFilter,
+  limits: {
+    fileSize: 150 * 1024 * 1024,
+    files: 12
   }
 });

@@ -276,3 +276,53 @@ export const paymentSettingsSchema = z
   .refine((value) => value.methods !== undefined, {
     message: 'Provide payment methods to update'
   });
+
+const heroMediaSchema = z
+  .object({
+    url: z.string().trim().optional(),
+    alt: z.string().trim().optional(),
+    publicId: z.string().trim().optional(),
+    mimeType: z.string().trim().optional()
+  })
+  .nullable()
+  .optional();
+
+const heroVideoSchema = z
+  .object({
+    url: z.string().trim().optional(),
+    thumbnail: z.string().trim().optional(),
+    title: z.string().trim().optional(),
+    alt: z.string().trim().optional(),
+    publicId: z.string().trim().optional(),
+    mimeType: z.string().trim().optional()
+  })
+  .nullable()
+  .optional();
+
+export const heroSettingsSchema = z.object({
+  slides: z
+    .array(
+      z.object({
+        id: z.string().trim().max(80).optional(),
+        badge: z.string().trim().max(100).optional(),
+        sku: z.string().trim().max(100).optional(),
+        title: z.array(z.string().trim().max(100)).max(5).optional(),
+        slogan: z.string().trim().max(140).optional(),
+        subtext: z.string().trim().max(360).optional(),
+        ctaText: z.string().trim().max(40).optional(),
+        ctaUrl: z.string().trim().max(300).optional(),
+        image: heroMediaSchema,
+        video: heroVideoSchema,
+        gradient: z.string().trim().max(400).optional(),
+        accentColor: z.string().trim().max(40).optional(),
+        accentColorRgb: z.string().trim().max(40).optional(),
+        badgeBg: z.string().trim().max(80).optional(),
+        badgeColor: z.string().trim().max(80).optional(),
+        badgeBgTrans: z.string().trim().max(80).optional(),
+        badgeBorderTrans: z.string().trim().max(80).optional(),
+        isActive: z.boolean().optional()
+      })
+    )
+    .min(1)
+    .max(12)
+});
