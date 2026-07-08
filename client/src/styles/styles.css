@@ -1691,6 +1691,21 @@ main {
   opacity: 0.9;
 }
 
+.brand-editorial-image.brand-editorial-logo {
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  background: #fff;
+}
+
+.brand-editorial-image.brand-editorial-logo.dark-logo {
+  background: #171717;
+}
+
+.brand-editorial-image.brand-editorial-logo img {
+  padding: 22px;
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+
 .brand-editorial-copy {
   flex: 1;
   display: grid;
@@ -5299,6 +5314,80 @@ textarea:focus {
   width: fit-content;
 }
 
+.admin-brand-faq-editor {
+  display: grid;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.admin-faq-heading-actions,
+.admin-faq-item-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-faq-list {
+  display: grid;
+  gap: 12px;
+}
+
+.admin-faq-item {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #f8fafc;
+}
+
+.admin-faq-item-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.admin-faq-item-heading strong {
+  color: var(--ink);
+  font-size: 0.92rem;
+}
+
+.admin-faq-item-actions .icon-button {
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
+  padding: 0;
+}
+
+.compact-checkbox {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: #fff;
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.compact-checkbox input {
+  width: 16px;
+  min-height: 16px;
+}
+
+.admin-faq-fields {
+  display: grid;
+  grid-template-columns: minmax(220px, 0.8fr) minmax(0, 1.2fr);
+  gap: 12px;
+}
+
+.admin-faq-fields textarea {
+  min-height: 120px;
+}
+
 @media (max-width: 1200px) {
   .admin-hero-layout {
     grid-template-columns: 250px minmax(0, 1fr);
@@ -5315,8 +5404,15 @@ textarea:focus {
   .admin-hero-editor-grid,
   .admin-hero-media-grid,
   .admin-brand-form-grid,
-  .admin-brand-media-grid {
+  .admin-brand-media-grid,
+  .admin-faq-fields {
     grid-template-columns: 1fr;
+  }
+
+  .admin-faq-heading-actions,
+  .admin-faq-item-heading {
+    align-items: stretch;
+    flex-direction: column;
   }
 
   .admin-hero-slide-tab {

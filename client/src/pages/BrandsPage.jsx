@@ -3,11 +3,44 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Seo } from '../components/Seo.jsx';
+import { localBrandAsset } from '../data/brandAssets.js';
 import { defaultBrands } from '../data/brandDefaults.js';
 import { api, mediaUrl } from '../services/api.js';
 
 const brandImage = (image) => mediaUrl(typeof image === 'string' ? image : image?.url);
 const asFilterLabel = (value) => value || 'All Brands';
+
+const brandGridImage = (brand) => {
+  const localAsset = localBrandAsset(brand);
+  if (localAsset) {
+    return {
+      src: localAsset.url,
+      alt: `${brand.name} brand logo`,
+      isLocal: true,
+      mode: localAsset.mode
+    };
+  }
+
+  return {
+    src: brandImage(brand.image),
+    alt: brand.image?.alt || `${brand.name} brand`,
+    isLocal: false,
+    mode: 'light'
+  };
+};
+
+const defaultBrandFaqs = [
+  {
+    id: 'genuine-brand-watches',
+    question: 'Are all brand watches genuine?',
+    answer: 'LahVenture keeps product and brand details clear so customers can review model, movement, sourcing, and seller information before purchase.'
+  },
+  {
+    id: 'shipping-across-bangladesh',
+    question: 'Shipping terms across Bangladesh',
+    answer: 'Orders are dispatched with address-aware checkout details and tracking updates for customers across Bangladesh.'
+  }
+];
 
 export const BrandsPage = () => {
   const [activeFilter, setActiveFilter] = useState('All Brands');
@@ -21,7 +54,18 @@ export const BrandsPage = () => {
     staleTime: 60 * 1000
   });
 
+  const { data: brandPageSettings } = useQuery({
+    queryKey: ['brand-page-settings'],
+    queryFn: async () => {
+      const { data } = await api.get('/brand-page');
+      return data.data;
+    },
+    staleTime: 60 * 1000,
+    retry: 1
+  });
+
   const brands = data?.length ? data : defaultBrands;
+  const faqs = Array.isArray(brandPageSettings?.faqs) ? brandPageSettings.faqs : defaultBrandFaqs;
   const filterGroups = useMemo(() => (
     ['All Brands', ...new Set(brands.map((brand) => asFilterLabel(brand.filterGroup)).filter((group) => group !== 'All Brands'))]
   ), [brands]);
@@ -32,10 +76,29 @@ export const BrandsPage = () => {
 
   const schema = {
     '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: 'Watch Brands at LahVenture',
-    description: 'Explore curated watchmaking brands available at LahVenture Bangladesh.',
-    url: window.location.href
+    '@graph': [
+      {
+        '@type': 'CollectionPage',
+        name: 'Watch Brands at LahVenture',
+        description: 'Explore curated watchmaking brands available at LahVenture Bangladesh.',
+        url: window.location.href
+      },
+      ...(faqs.length
+        ? [
+            {
+              '@type': 'FAQPage',
+              mainEntity: faqs.map((faq) => ({
+                '@type': 'Question',
+                name: faq.question,
+                acceptedAnswer: {
+                  '@type': 'Answer',
+                  text: faq.answer
+                }
+              }))
+            }
+          ]
+        : [])
+    ]
   };
 
   return (
@@ -69,22 +132,28 @@ export const BrandsPage = () => {
       </section>
 
       <section className="brands-grid" aria-label="Watch brands">
-        {visibleBrands.map((brand) => (
-          <article className="brand-editorial-card" key={brand._id || brand.slug || brand.name}>
-            <Link className="brand-editorial-image" to={`/products?brand=${encodeURIComponent(brand.name)}`}>
-              <img src={brandImage(brand.image)} alt={brand.image?.alt || `${brand.name} brand`} loading="lazy" />
-            </Link>
-            <div className="brand-editorial-copy">
-              <span>{brand.tagline || brand.filterGroup || 'Watchmaking'}</span>
-              <h2>{brand.name}</h2>
-              <p>{brand.description || 'Explore selected watches from this brand.'}</p>
-            </div>
-            <Link className="brand-editorial-link" to={`/products?brand=${encodeURIComponent(brand.name)}`}>
-              Explore Collection
-              <ArrowRight size={13} />
-            </Link>
-          </article>
-        ))}
+        {visibleBrands.map((brand) => {
+          const gridImage = brandGridImage(brand);
+          return (
+            <article className="brand-editorial-card" key={brand._id || brand.slug || brand.name}>
+              <Link
+                className={`brand-editorial-image${gridImage.isLocal ? ' brand-editorial-logo' : ''}${gridImage.mode === 'dark' ? ' dark-logo' : ''}`}
+                to={`/products?brand=${encodeURIComponent(brand.name)}`}
+              >
+                <img src={gridImage.src} alt={gridImage.alt} loading="lazy" />
+              </Link>
+              <div className="brand-editorial-copy">
+                <span>{brand.tagline || brand.filterGroup || 'Watchmaking'}</span>
+                <h2>{brand.name}</h2>
+                <p>{brand.description || 'Explore selected watches from this brand.'}</p>
+              </div>
+              <Link className="brand-editorial-link" to={`/products?brand=${encodeURIComponent(brand.name)}`}>
+                Explore Collection
+                <ArrowRight size={13} />
+              </Link>
+            </article>
+          );
+        })}
       </section>
 
       {spotlightBrand ? (
@@ -119,31 +188,22 @@ export const BrandsPage = () => {
         </section>
       ) : null}
 
-      <section className="brands-faq-section">
-        <h2>Frequently Asked Questions</h2>
-        <div className="brands-faq-list">
-          <details>
-            <summary>
-              Are all brand watches genuine?
-              <ChevronDown size={18} />
-            </summary>
-            <p>
-              LahVenture keeps product and brand details clear so customers can review model,
-              movement, sourcing, and seller information before purchase.
-            </p>
-          </details>
-          <details>
-            <summary>
-              Shipping terms across Bangladesh
-              <ChevronDown size={18} />
-            </summary>
-            <p>
-              Orders are dispatched with address-aware checkout details and tracking updates for
-              customers across Bangladesh.
-            </p>
-          </details>
-        </div>
-      </section>
+      {faqs.length ? (
+        <section className="brands-faq-section">
+          <h2>Frequently Asked Questions</h2>
+          <div className="brands-faq-list">
+            {faqs.map((faq) => (
+              <details key={faq.id || faq.question}>
+                <summary>
+                  {faq.question}
+                  <ChevronDown size={18} />
+                </summary>
+                <p>{faq.answer}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+      ) : null}
     </main>
   );
 };

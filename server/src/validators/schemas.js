@@ -349,3 +349,16 @@ export const heroSettingsSchema = z.object({
     .min(1)
     .max(12)
 });
+
+export const brandPageSettingsSchema = z.object({
+  faqs: z
+    .array(
+      z.object({
+        id: z.string().trim().max(80).optional(),
+        question: z.string().trim().min(2).max(240),
+        answer: z.string().trim().min(2).max(1200),
+        isActive: z.boolean().optional()
+      })
+    )
+    .max(12)
+});

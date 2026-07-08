@@ -1,95 +1,220 @@
-import watch1 from '../assets/watches/1.png';
-import watch2 from '../assets/watches/2.png';
-import watch3 from '../assets/watches/3.png';
-import watch4 from '../assets/watches/4.png';
-import watch5 from '../assets/watches/5.png';
-import watch6 from '../assets/watches/6.png';
-import watch7 from '../assets/watches/7.png';
-import watch8 from '../assets/watches/8.png';
+const brand = ({
+  name,
+  assetKey,
+  tagline,
+  filterGroup,
+  description,
+  founded = 'Curated',
+  origin = 'Global',
+  isSpotlight = false
+}) => ({
+  name,
+  slug: assetKey,
+  assetKey,
+  tagline,
+  filterGroup,
+  description,
+  founded,
+  origin,
+  isSpotlight,
+  productCount: 0
+});
 
 export const defaultBrands = [
-  {
-    name: 'Patek Philippe',
-    slug: 'patek-philippe',
-    tagline: 'Haute Horlogerie',
-    filterGroup: 'Swiss Heritage',
-    description: 'Master of mechanical complexity. Creating timepieces of unmatched prestige and enduring value.',
-    image: { url: watch4, alt: 'Patek Philippe mechanical watch movement' },
-    spotlightImage: { url: watch4, alt: 'Detailed watch movement' },
-    spotlightTitle: 'Patek Philippe: The Pursuit of the Perfect Movement',
-    spotlightDescription: 'For over a century, Patek Philippe has operated at the pinnacle of fine watchmaking. Their commitment to independent excellence creates timepieces that are often passed down through generations.',
-    founded: '1839',
-    origin: 'Geneva',
-    isSpotlight: true,
-    productCount: 0
-  },
-  {
-    name: 'Seiko',
-    slug: 'seiko',
-    tagline: 'Pioneering Innovation',
-    filterGroup: 'Japanese Innovation',
-    description: 'Robust quartz and automatic pioneers. Uncompromising quality from everyday wear to refined mechanical pieces.',
-    image: { url: watch1, alt: 'Seiko inspired dress watch' },
-    founded: '1881',
-    origin: 'Tokyo',
-    productCount: 0
-  },
-  {
-    name: 'Omega',
-    slug: 'omega',
-    tagline: 'Precision & Heritage',
-    filterGroup: 'Swiss Heritage',
-    description: 'Historic Swiss precision and chronometers. A legacy spanning ocean depth, racing, and lunar exploration.',
-    image: { url: watch2, alt: 'Omega inspired chronograph watch' },
-    founded: '1848',
-    origin: 'Bienne',
-    productCount: 0
-  },
-  {
-    name: 'Rado',
-    slug: 'rado',
-    tagline: 'Swiss Master of Materials',
-    filterGroup: 'Minimalist & Modern',
-    description: 'Ceramic specialist. Renowned for innovative design and scratch-resistant modern materials.',
-    image: { url: watch3, alt: 'Rado inspired modern watch' },
-    founded: '1917',
-    origin: 'Lengnau',
-    productCount: 0
-  },
-  {
-    name: 'Fossil',
-    slug: 'fossil',
-    tagline: 'Contemporary Fashion',
-    filterGroup: 'Fashion & Lifestyle',
-    description: 'Modern lifestyle accessories blending vintage inspiration with contemporary everyday elegance.',
-    image: { url: watch5, alt: 'Fossil inspired lifestyle watch' },
-    productCount: 0
-  },
-  {
-    name: 'Maxlord',
-    slug: 'maxlord',
-    tagline: 'Distinctive Design',
-    filterGroup: 'Minimalist & Modern',
-    description: 'Bold structural profiles. Statement pieces engineered for powerful, unapologetic aesthetics.',
-    image: { url: watch8, alt: 'Maxlord inspired structural watch' },
-    productCount: 0
-  },
-  {
-    name: 'Sober',
-    slug: 'sober',
-    tagline: 'Modern Minimalist',
-    filterGroup: 'Minimalist & Modern',
-    description: 'Clean dials and ultra-thin profiles. The essence of timekeeping distilled to its most essential form.',
-    image: { url: watch6, alt: 'Sober inspired minimalist watch' },
-    productCount: 0
-  },
-  {
-    name: 'Success Way',
-    slug: 'success-way',
-    tagline: 'Curated Heritage',
-    filterGroup: 'Fashion & Lifestyle',
-    description: 'Vintage revivals honoring the golden era of watchmaking with carefully crafted nostalgic designs.',
-    image: { url: watch7, alt: 'Success Way inspired heritage watch' },
-    productCount: 0
-  }
+  brand({
+    name: 'Sea-Gull',
+    assetKey: 'seagull',
+    tagline: 'Chinese Heritage',
+    filterGroup: 'Chinese Heritage',
+    description: 'Historic Chinese watchmaking with accessible mechanical movements and classic daily-wear designs.',
+    founded: '1955',
+    origin: 'Tianjin',
+    isSpotlight: true
+  }),
+  brand({
+    name: 'San Martin',
+    assetKey: 'sanmartin',
+    tagline: 'Tool Watch Microbrand',
+    filterGroup: 'Microbrand Tools',
+    description: 'Crisp finishing, robust cases, and enthusiast-focused divers built around strong everyday value.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Sugess',
+    assetKey: 'sugess',
+    tagline: 'Chronograph & Tourbillon',
+    filterGroup: 'Chinese Heritage',
+    description: 'Mechanical chronographs, moonphases, and tourbillon-led pieces with expressive dress-watch detail.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Pagani Design',
+    assetKey: 'pagani',
+    tagline: 'Sport Homage Watches',
+    filterGroup: 'Microbrand Tools',
+    description: 'Accessible sport watches with automatic movements, familiar case profiles, and broad strap versatility.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'CIGA Design',
+    assetKey: 'ciga',
+    tagline: 'Design-Led Mechanical',
+    filterGroup: 'Design Focused',
+    description: 'Contemporary mechanical watches built around skeleton architecture and industrial design language.',
+    origin: 'Shenzhen'
+  }),
+  brand({
+    name: 'Shanghai Watch',
+    assetKey: 'shanghai',
+    tagline: 'Heritage Reissue',
+    filterGroup: 'Chinese Heritage',
+    description: 'Classic Chinese dress-watch styling with reissue character and a long domestic watchmaking legacy.',
+    founded: '1955',
+    origin: 'Shanghai'
+  }),
+  brand({
+    name: 'Beijing Watch',
+    assetKey: 'beijing',
+    tagline: 'Chinese Horology',
+    filterGroup: 'Chinese Heritage',
+    description: 'Traditional Chinese watchmaking with mechanical complications, formal cases, and refined dial work.',
+    founded: '1958',
+    origin: 'Beijing'
+  }),
+  brand({
+    name: 'FIYTA',
+    assetKey: 'fiyta',
+    tagline: 'Aerospace Precision',
+    filterGroup: 'Chinese Heritage',
+    description: 'Modern Chinese watches with aviation links, crisp cases, and polished everyday mechanical collections.',
+    origin: 'Shenzhen'
+  }),
+  brand({
+    name: 'Rossini',
+    assetKey: 'rossini',
+    tagline: 'Dress & Classic',
+    filterGroup: 'Chinese Heritage',
+    description: 'Dress watches and classic daily pieces with elegant proportions and approachable pricing.',
+    origin: 'Zhuhai'
+  }),
+  brand({
+    name: 'Ebohr',
+    assetKey: 'ebohr',
+    tagline: 'Contemporary Mechanical',
+    filterGroup: 'Chinese Heritage',
+    description: 'Modern mechanical watches with dress, business, and everyday collections for practical wear.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Tian Wang',
+    assetKey: 'tianwang',
+    tagline: 'Modern Chinese Watchmaking',
+    filterGroup: 'Chinese Heritage',
+    description: 'Established Chinese watch design across formal, sport, and daily timepiece collections.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Peacock',
+    assetKey: 'peacock',
+    tagline: 'Mechanical Manufacture',
+    filterGroup: 'Chinese Heritage',
+    description: 'Mechanical manufacture work with dress-focused watches and movement-building heritage.',
+    origin: 'Dandong'
+  }),
+  brand({
+    name: 'Memorigin',
+    assetKey: 'memorigin',
+    tagline: 'Tourbillon Specialist',
+    filterGroup: 'Design Focused',
+    description: 'Tourbillon-centered watchmaking with ornate movement displays and collector-driven finishing.',
+    origin: 'Hong Kong'
+  }),
+  brand({
+    name: 'Cadisen',
+    assetKey: 'cadisen',
+    tagline: 'Accessible Automatic',
+    filterGroup: 'Microbrand Tools',
+    description: 'Automatic watches with clean designs, practical specifications, and straightforward everyday appeal.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Berny',
+    assetKey: 'berny',
+    tagline: 'Everyday Mechanical',
+    filterGroup: 'Microbrand Tools',
+    description: 'Affordable mechanical and quartz watches with utility styling and easy daily-wear sizing.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Addiesdive',
+    assetKey: 'addiesdive',
+    tagline: 'Diver Tool Watches',
+    filterGroup: 'Microbrand Tools',
+    description: 'Dive-watch focused tool pieces with rugged cases, legible dials, and water-ready specifications.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Heimdallr',
+    assetKey: 'heimdallr',
+    tagline: 'Diver Specialist',
+    filterGroup: 'Microbrand Tools',
+    description: 'Enthusiast dive watches with strong lume, solid bracelets, and classic tool-watch proportions.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Proxima',
+    assetKey: 'proxima',
+    tagline: 'Microbrand Tool Watches',
+    filterGroup: 'Microbrand Tools',
+    description: 'Compact tool watches and divers with practical automatic movements and restrained case design.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Cronos',
+    assetKey: 'cronos',
+    tagline: 'Professional Divers',
+    filterGroup: 'Microbrand Tools',
+    description: 'Sport and dive watches with premium-leaning specifications, bracelet finishing, and sharp dial execution.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Baltany',
+    assetKey: 'baltany',
+    tagline: 'Vintage Field Watches',
+    filterGroup: 'Microbrand Tools',
+    description: 'Vintage military and field-watch inspired pieces with domed crystals and warm dial layouts.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Merkur',
+    assetKey: 'merkur',
+    tagline: 'Retro Mechanical',
+    filterGroup: 'Design Focused',
+    description: 'Retro mechanical watches with distinctive dials, compact cases, and playful vintage references.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Tandorio',
+    assetKey: 'tandorio',
+    tagline: 'Custom Tool Watches',
+    filterGroup: 'Microbrand Tools',
+    description: 'Configurable tool watches with practical cases, simple dials, and approachable mechanical builds.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Guanqin',
+    assetKey: 'guanqin',
+    tagline: 'Dress Automatics',
+    filterGroup: 'Design Focused',
+    description: 'Dress-oriented automatics with polished cases, visible movement details, and accessible pricing.',
+    origin: 'China'
+  }),
+  brand({
+    name: 'Lobinni',
+    assetKey: 'lobinni',
+    tagline: 'Elegant Mechanical',
+    filterGroup: 'Design Focused',
+    description: 'Elegant mechanical pieces with dress-watch proportions, open-heart layouts, and formal finishing cues.',
+    origin: 'China'
+  })
 ];

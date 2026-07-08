@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle2, ImagePlus, Plus, Save, Star, Trash2, Upload, X } from 'lucide-react';
+import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, ImagePlus, Plus, Save, Star, Trash2, Upload, X } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
@@ -48,19 +48,64 @@ const serializeBrand = (brand) => ({
   order: Number(brand.order || 0)
 });
 
+const newFaq = () => ({
+  id: `brand-faq-${Date.now()}`,
+  question: '',
+  answer: '',
+  isActive: true
+});
+
+const normalizeFaq = (faq = {}, index = 0) => ({
+  id: faq.id || `brand-faq-${index + 1}`,
+  question: faq.question || '',
+  answer: faq.answer || '',
+  isActive: faq.isActive !== false
+});
+
+const normalizeFaqForm = (settings) => {
+  if (settings && Array.isArray(settings.faqs) && settings.faqs.length) {
+    return settings.faqs.map(normalizeFaq);
+  }
+  return [newFaq()];
+};
+
+const serializeFaq = (faq) => ({
+  id: faq.id,
+  question: faq.question.trim(),
+  answer: faq.answer.trim(),
+  isActive: faq.isActive !== false
+});
+
 export const AdminBrandsPage = () => {
   const queryClient = useQueryClient();
   const [selectedId, setSelectedId] = useState('new');
   const [form, setForm] = useState(emptyBrand);
+  const [faqForm, setFaqForm] = useState(() => [newFaq()]);
   const [saving, setSaving] = useState(false);
+  const [faqSaving, setFaqSaving] = useState(false);
   const [uploading, setUploading] = useState('');
   const [message, setMessage] = useState({ text: '', type: 'success' });
+  const [faqMessage, setFaqMessage] = useState({ text: '', type: 'success' });
 
   const { data: brands = [], isLoading, isFetching, isError, error } = useQuery({
     queryKey: ['admin-brands'],
     queryFn: async () => {
       const { data } = await api.get('/brands/admin');
       return data.data.brands;
+    }
+  });
+
+  const {
+    data: brandPageSettings,
+    isLoading: faqLoading,
+    isFetching: faqFetching,
+    isError: faqIsError,
+    error: faqError
+  } = useQuery({
+    queryKey: ['admin-brand-page-settings'],
+    queryFn: async () => {
+      const { data } = await api.get('/admin/brand-page');
+      return data.data;
     }
   });
 
@@ -78,12 +123,44 @@ export const AdminBrandsPage = () => {
     if (selectedBrand) setForm(normalizeBrand(selectedBrand));
   }, [selectedId, selectedBrand?._id, brands.length]);
 
+  useEffect(() => {
+    if (brandPageSettings) setFaqForm(normalizeFaqForm(brandPageSettings));
+  }, [brandPageSettings]);
+
   const updateField = (key, value) => {
     setForm((current) => ({ ...current, [key]: value }));
   };
 
   const updateImage = (key, image) => {
     setForm((current) => ({ ...current, [key]: image }));
+  };
+
+  const updateFaq = (index, patch) => {
+    setFaqForm((current) => current.map((faq, faqIndex) => (
+      faqIndex === index ? { ...faq, ...patch } : faq
+    )));
+  };
+
+  const addFaq = () => {
+    setFaqForm((current) => [...current, newFaq()]);
+  };
+
+  const removeFaq = (index) => {
+    setFaqForm((current) => {
+      const next = current.filter((_, faqIndex) => faqIndex !== index);
+      return next.length ? next : [newFaq()];
+    });
+  };
+
+  const moveFaq = (index, direction) => {
+    const nextIndex = index + direction;
+    if (nextIndex < 0 || nextIndex >= faqForm.length) return;
+    setFaqForm((current) => {
+      const next = [...current];
+      const [moved] = next.splice(index, 1);
+      next.splice(nextIndex, 0, moved);
+      return next;
+    });
   };
 
   const uploadBrandImage = async (target, event) => {
@@ -137,6 +214,34 @@ export const AdminBrandsPage = () => {
       setMessage({ text: apiErrorMessage(saveError), type: 'error' });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const saveFaqSettings = async (event) => {
+    event.preventDefault();
+    setFaqSaving(true);
+    setFaqMessage({ text: '', type: 'success' });
+
+    const faqs = faqForm
+      .map(serializeFaq)
+      .filter((faq) => faq.question || faq.answer);
+
+    if (faqs.some((faq) => !faq.question || !faq.answer)) {
+      setFaqMessage({ text: 'Each saved FAQ needs both a question and an answer.', type: 'error' });
+      setFaqSaving(false);
+      return;
+    }
+
+    try {
+      const { data } = await api.patch('/admin/brand-page', { faqs });
+      setFaqForm(normalizeFaqForm(data.data));
+      setFaqMessage({ text: data.message || 'Brand FAQ section saved', type: 'success' });
+      queryClient.setQueryData(['admin-brand-page-settings'], data.data);
+      queryClient.invalidateQueries({ queryKey: ['brand-page-settings'] });
+    } catch (saveError) {
+      setFaqMessage({ text: apiErrorMessage(saveError), type: 'error' });
+    } finally {
+      setFaqSaving(false);
     }
   };
 
@@ -359,6 +464,90 @@ export const AdminBrandsPage = () => {
           </div>
         </form>
       </div>
+
+      <form id="admin-brand-faq-form" className="panel admin-brand-faq-editor" onSubmit={saveFaqSettings}>
+        <div className="editor-card-heading">
+          <div>
+            <p className="eyebrow">Brands page</p>
+            <h2>FAQ section</h2>
+          </div>
+          <div className="admin-faq-heading-actions">
+            {faqFetching ? <span className="admin-fetching"><span className="spinner tiny" /> Syncing</span> : null}
+            <button className="button compact" type="button" onClick={addFaq}>
+              <Plus size={15} />
+              Add FAQ
+            </button>
+            <button className="button primary compact" type="submit" disabled={faqSaving || faqLoading || faqIsError}>
+              <Save size={16} />
+              {faqSaving ? 'Saving...' : 'Save FAQ'}
+            </button>
+          </div>
+        </div>
+
+        {faqMessage.text ? (
+          <p className={faqMessage.type === 'error' ? 'form-error admin-currency-message' : 'form-note admin-currency-message'}>
+            {faqMessage.type === 'error' ? <AlertTriangle size={16} /> : <CheckCircle2 size={16} />}
+            {faqMessage.text}
+          </p>
+        ) : null}
+
+        {faqLoading ? (
+          <AdminLoadingState label="Loading brand FAQs" />
+        ) : faqIsError ? (
+          <p className="form-error">
+            <AlertTriangle size={16} />
+            {apiErrorMessage(faqError)}
+          </p>
+        ) : (
+          <div className="admin-faq-list">
+            {faqForm.map((faq, index) => (
+              <article className="admin-faq-item" key={faq.id || index}>
+                <div className="admin-faq-item-heading">
+                  <strong>FAQ {index + 1}</strong>
+                  <div className="admin-faq-item-actions">
+                    <label className="checkbox-row compact-checkbox">
+                      <input
+                        type="checkbox"
+                        checked={faq.isActive}
+                        onChange={(event) => updateFaq(index, { isActive: event.target.checked })}
+                      />
+                      Active
+                    </label>
+                    <button type="button" className="button icon-button" onClick={() => moveFaq(index, -1)} disabled={index === 0} aria-label="Move FAQ up">
+                      <ArrowUp size={15} />
+                    </button>
+                    <button type="button" className="button icon-button" onClick={() => moveFaq(index, 1)} disabled={index === faqForm.length - 1} aria-label="Move FAQ down">
+                      <ArrowDown size={15} />
+                    </button>
+                    <button type="button" className="button icon-button danger-soft" onClick={() => removeFaq(index)} aria-label="Remove FAQ">
+                      <Trash2 size={15} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="admin-faq-fields">
+                  <label>
+                    Question
+                    <input
+                      value={faq.question}
+                      onChange={(event) => updateFaq(index, { question: event.target.value })}
+                      placeholder="Are all brand watches genuine?"
+                    />
+                  </label>
+                  <label>
+                    Answer
+                    <textarea
+                      value={faq.answer}
+                      onChange={(event) => updateFaq(index, { answer: event.target.value })}
+                      placeholder="Write the customer-facing answer."
+                    />
+                  </label>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </form>
     </section>
   );
 };
