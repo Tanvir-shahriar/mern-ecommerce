@@ -165,7 +165,7 @@ export const LoginPage = () => {
         </div>
 
         <div className="login-divider">
-          <span>or continue with email</span>
+          <span>or continue with</span>
         </div>
 
         <label className="login-field">

@@ -4006,6 +4006,45 @@ textarea:focus {
   border-color: rgba(255, 255, 255, 0.7);
 }
 
+.login-page:not(.register-page) .login-card-heading {
+  order: 1;
+}
+
+.login-page:not(.register-page) .login-card > .login-field {
+  order: 2;
+}
+
+.login-page:not(.register-page) .login-card > .form-error {
+  order: 3;
+}
+
+.login-page:not(.register-page) .login-submit-button {
+  order: 4;
+}
+
+.login-page:not(.register-page) .login-card > .login-divider {
+  order: 5;
+  margin-top: 10px;
+  text-transform: none;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.login-page:not(.register-page) .login-card > .login-divider::before,
+.login-page:not(.register-page) .login-card > .login-divider::after {
+  opacity: 0;
+}
+
+.login-page:not(.register-page) .login-card > .social-login-grid {
+  order: 6;
+}
+
+.login-page:not(.register-page) .login-card > .login-register-link {
+  order: 7;
+  margin: 0;
+  text-align: center;
+}
+
 .login-card-heading {
   display: grid;
   gap: 7px;
