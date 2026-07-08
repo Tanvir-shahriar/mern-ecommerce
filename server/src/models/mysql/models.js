@@ -13,6 +13,7 @@ registry.CurrencySetting = new JsonModel('CurrencySetting', 'currency_settings',
 registry.PaymentSetting = new JsonModel('PaymentSetting', 'payment_settings', { registry });
 registry.Gallery = new JsonModel('Gallery', 'galleries', { registry });
 registry.HeroSetting = new JsonModel('HeroSetting', 'hero_settings', { registry });
+registry.BrandPageSetting = new JsonModel('BrandPageSetting', 'brand_page_settings', { registry });
 registry.SearchLog = new JsonModel('SearchLog', 'search_logs', { registry });
 registry.ContactMessage = new JsonModel('ContactMessage', 'contact_messages', { registry });
 
