@@ -201,15 +201,21 @@ export const AboutPage = () => {
         }
 
         .slides-container {
+            --about-theme-red: #6b000b;
             position: fixed;
             inset: 0;
             width: 100%;
             height: 100vh !important;
             min-height: 100vh;
+            color: var(--about-theme-red);
             pointer-events: auto !important;
             z-index: 40;
             overflow: hidden;
             contain: layout paint;
+        }
+
+        .slides-container :is(h1, h2, h3, p) {
+            color: var(--about-theme-red) !important;
         }
 
         @supports (height: 100svh) {
