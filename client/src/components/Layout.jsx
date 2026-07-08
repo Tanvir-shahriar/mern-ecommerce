@@ -358,14 +358,14 @@ export const Layout = () => {
           </div>
 
           <nav className={open ? 'primary-nav open' : 'primary-nav'}>
+            <NavLink className={navClass} to="/" onClick={() => setOpen(false)}>
+              Home
+            </NavLink>
             <NavLink className={navClass} to="/products" onClick={() => setOpen(false)}>
               Shop
             </NavLink>
             <NavLink className={navClass} to="/brands" onClick={() => setOpen(false)}>
               Brands
-            </NavLink>
-            <NavLink className={navClass} to="/products" onClick={() => setOpen(false)}>
-              Catalog
             </NavLink>
             <NavLink className={navClass} to="/about" onClick={() => setOpen(false)}>
               About
