@@ -3,11 +3,31 @@ import { useQuery } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Seo } from '../components/Seo.jsx';
+import { localBrandAsset } from '../data/brandAssets.js';
 import { defaultBrands } from '../data/brandDefaults.js';
 import { api, mediaUrl } from '../services/api.js';
 
 const brandImage = (image) => mediaUrl(typeof image === 'string' ? image : image?.url);
 const asFilterLabel = (value) => value || 'All Brands';
+
+const brandGridImage = (brand) => {
+  const localAsset = localBrandAsset(brand);
+  if (localAsset) {
+    return {
+      src: localAsset.url,
+      alt: `${brand.name} brand logo`,
+      isLocal: true,
+      mode: localAsset.mode
+    };
+  }
+
+  return {
+    src: brandImage(brand.image),
+    alt: brand.image?.alt || `${brand.name} brand`,
+    isLocal: false,
+    mode: 'light'
+  };
+};
 
 const defaultBrandFaqs = [
   {
@@ -112,22 +132,28 @@ export const BrandsPage = () => {
       </section>
 
       <section className="brands-grid" aria-label="Watch brands">
-        {visibleBrands.map((brand) => (
-          <article className="brand-editorial-card" key={brand._id || brand.slug || brand.name}>
-            <Link className="brand-editorial-image" to={`/products?brand=${encodeURIComponent(brand.name)}`}>
-              <img src={brandImage(brand.image)} alt={brand.image?.alt || `${brand.name} brand`} loading="lazy" />
-            </Link>
-            <div className="brand-editorial-copy">
-              <span>{brand.tagline || brand.filterGroup || 'Watchmaking'}</span>
-              <h2>{brand.name}</h2>
-              <p>{brand.description || 'Explore selected watches from this brand.'}</p>
-            </div>
-            <Link className="brand-editorial-link" to={`/products?brand=${encodeURIComponent(brand.name)}`}>
-              Explore Collection
-              <ArrowRight size={13} />
-            </Link>
-          </article>
-        ))}
+        {visibleBrands.map((brand) => {
+          const gridImage = brandGridImage(brand);
+          return (
+            <article className="brand-editorial-card" key={brand._id || brand.slug || brand.name}>
+              <Link
+                className={`brand-editorial-image${gridImage.isLocal ? ' brand-editorial-logo' : ''}${gridImage.mode === 'dark' ? ' dark-logo' : ''}`}
+                to={`/products?brand=${encodeURIComponent(brand.name)}`}
+              >
+                <img src={gridImage.src} alt={gridImage.alt} loading="lazy" />
+              </Link>
+              <div className="brand-editorial-copy">
+                <span>{brand.tagline || brand.filterGroup || 'Watchmaking'}</span>
+                <h2>{brand.name}</h2>
+                <p>{brand.description || 'Explore selected watches from this brand.'}</p>
+              </div>
+              <Link className="brand-editorial-link" to={`/products?brand=${encodeURIComponent(brand.name)}`}>
+                Explore Collection
+                <ArrowRight size={13} />
+              </Link>
+            </article>
+          );
+        })}
       </section>
 
       {spotlightBrand ? (

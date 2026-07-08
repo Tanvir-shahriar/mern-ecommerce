@@ -1634,6 +1634,21 @@ main {
   opacity: 0.9;
 }
 
+.brand-editorial-image.brand-editorial-logo {
+  border: 1px solid rgba(17, 17, 17, 0.08);
+  background: #fff;
+}
+
+.brand-editorial-image.brand-editorial-logo.dark-logo {
+  background: #171717;
+}
+
+.brand-editorial-image.brand-editorial-logo img {
+  padding: 22px;
+  mix-blend-mode: normal;
+  opacity: 1;
+}
+
 .brand-editorial-copy {
   flex: 1;
   display: grid;
