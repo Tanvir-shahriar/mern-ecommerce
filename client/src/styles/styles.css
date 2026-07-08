@@ -2040,6 +2040,8 @@ main {
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
   flex-direction: column;
+  height: 100%;
+  min-width: 0;
 }
 
 .product-card:hover {
@@ -2053,16 +2055,26 @@ main {
   flex-direction: column;
   gap: 12px;
   position: relative;
+  flex: 1 1 auto;
 }
 
 .product-card__media {
   position: relative;
   aspect-ratio: 1 / 1;
+  width: 100%;
+  flex: 0 0 auto;
   background: transparent;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.product-card__media a {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
 }
 
 .product-card__media img {
@@ -2099,19 +2111,26 @@ main {
 .product-card__info-row {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
   margin-top: 4px;
+  min-height: calc(0.95rem * 1.35 * 2);
 }
 
 .product-card__title {
-  display: block;
+  display: -webkit-box;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: calc(0.95rem * 1.35 * 2);
   font-size: 0.95rem;
   font-weight: 700;
   color: #66000c;
   line-height: 1.35;
   transition: color 0.2s ease;
+  overflow: hidden;
   overflow-wrap: anywhere;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
 }
 
 .product-card__title:hover {
@@ -2119,10 +2138,12 @@ main {
 }
 
 .product-card__price {
+  flex: 0 0 auto;
   font-size: 0.95rem;
   font-weight: 700;
   color: #66000c;
   white-space: nowrap;
+  line-height: 1.35;
 }
 
 .product-card__add-to-cart {
@@ -2139,6 +2160,7 @@ main {
   cursor: pointer;
   text-align: center;
   transition: background 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  flex: 0 0 auto;
 }
 
 .product-card__add-to-cart:hover {
@@ -7934,11 +7956,13 @@ textarea:focus {
     align-items: flex-start !important;
     gap: 4px !important;
     margin-top: 2px !important;
+    min-height: calc((0.85rem * 1.3 * 2) + 0.85rem + 4px) !important;
   }
 
   .product-card__title {
     font-size: 0.85rem !important;
     line-height: 1.3 !important;
+    min-height: calc(0.85rem * 1.3 * 2) !important;
     word-break: break-word;
   }
 
