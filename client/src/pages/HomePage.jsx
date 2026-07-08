@@ -86,6 +86,12 @@ export const HomePage = () => {
   const navigate = useNavigate();
 
   const patekVideoRef = useRef(null);
+  const heroSlidesRef = useRef([]);
+  const heroIndexRef = useRef(0);
+  const heroImageLoadRequestsRef = useRef(new Map());
+  const loadedHeroImagesRef = useRef(new Set());
+  const heroTransitionRequestRef = useRef(0);
+  const isHeroMountedRef = useRef(true);
 
   const togglePatekVideo = () => {
     const video = patekVideoRef.current;
@@ -131,11 +137,94 @@ export const HomePage = () => {
   const activeVideoUrl = activeWatch.video?.url ? heroMediaUrl(activeWatch.video.url) : '';
   const activeVideoThumbnail = heroMediaUrl(activeWatch.video?.thumbnail, activeImageUrl);
 
+  const rememberHeroImageLoaded = (imageUrl) => {
+    if (imageUrl) {
+      loadedHeroImagesRef.current.add(imageUrl);
+    }
+  };
+
+  const loadHeroImage = (imageUrl) => {
+    if (!imageUrl || loadedHeroImagesRef.current.has(imageUrl)) {
+      return Promise.resolve(true);
+    }
+
+    const existingRequest = heroImageLoadRequestsRef.current.get(imageUrl);
+    if (existingRequest) {
+      return existingRequest;
+    }
+
+    const request = new Promise((resolve) => {
+      const preloadImage = new Image();
+
+      preloadImage.onload = () => {
+        rememberHeroImageLoaded(imageUrl);
+        heroImageLoadRequestsRef.current.delete(imageUrl);
+        resolve(true);
+      };
+
+      preloadImage.onerror = () => {
+        heroImageLoadRequestsRef.current.delete(imageUrl);
+        resolve(false);
+      };
+
+      preloadImage.src = imageUrl;
+    });
+
+    heroImageLoadRequestsRef.current.set(imageUrl, request);
+    return request;
+  };
+
+  const showHeroSlideWhenReady = (targetIndex) => {
+    const slides = heroSlidesRef.current;
+    if (!slides.length) return;
+
+    const normalizedIndex = ((targetIndex % slides.length) + slides.length) % slides.length;
+    const targetImageUrl = heroMediaUrl(slides[normalizedIndex]?.image);
+    const requestId = ++heroTransitionRequestRef.current;
+
+    loadHeroImage(targetImageUrl).then((isLoaded) => {
+      if (!isHeroMountedRef.current || requestId !== heroTransitionRequestRef.current || !isLoaded) {
+        return;
+      }
+
+      setHeroIndex(normalizedIndex);
+    });
+  };
+
+  useEffect(() => {
+    isHeroMountedRef.current = true;
+
+    return () => {
+      isHeroMountedRef.current = false;
+      heroImageLoadRequestsRef.current.clear();
+    };
+  }, []);
+
+  useEffect(() => {
+    heroSlidesRef.current = heroSlides;
+  }, [heroSlides]);
+
+  useEffect(() => {
+    heroIndexRef.current = activeWatchIndex;
+  }, [activeWatchIndex]);
+
+  useEffect(() => {
+    loadHeroImage(activeImageUrl);
+
+    const nextSlide = heroSlides[(activeWatchIndex + 1) % heroSlides.length];
+    if (nextSlide) {
+      loadHeroImage(heroMediaUrl(nextSlide.image));
+    }
+  }, [activeImageUrl, activeWatchIndex, heroSlides]);
+
   useEffect(() => {
     if (heroSlides.length <= 1) return undefined;
 
     const interval = window.setInterval(() => {
-      setHeroIndex((index) => (index + 1) % heroSlides.length);
+      const slides = heroSlidesRef.current;
+      if (slides.length <= 1) return;
+
+      showHeroSlideWhenReady((heroIndexRef.current + 1) % slides.length);
     }, 5500);
 
     return () => window.clearInterval(interval);
@@ -278,6 +367,7 @@ export const HomePage = () => {
               src={activeImageUrl} 
               alt={activeWatch.image?.alt || activeTitleLines.join(' ') || 'Featured watch'} 
               className="hero-watch-image" 
+              onLoad={() => rememberHeroImageLoaded(activeImageUrl)}
             />
           </div>
 
@@ -304,7 +394,7 @@ export const HomePage = () => {
           {heroSlides.map((slide, idx) => (
             <button
               key={slide.id || idx}
-              onClick={() => setHeroIndex(idx)}
+              onClick={() => showHeroSlideWhenReady(idx)}
               className={`hero-dot-btn ${idx === activeWatchIndex ? 'active' : ''}`}
               style={{
                 '--dot-accent': activeWatch.accentColor || defaultHeroSlides[0].accentColor
