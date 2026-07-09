@@ -26,6 +26,96 @@ const sortOptions = {
 
 const isPublishedReview = (review) => !review.status || review.status === 'approved';
 
+const toIdString = (value) => {
+  if (!value) return '';
+  if (typeof value === 'object' && value._id) return value._id.toString();
+  return value.toString?.() || String(value);
+};
+
+const createdTime = (value) => {
+  const time = Date.parse(value || 0);
+  return Number.isNaN(time) ? 0 : time;
+};
+
+const sortProductsInMemory = (products, sortKey = 'newest') => {
+  products.sort((first, second) => {
+    switch (sortKey) {
+      case 'oldest':
+        return createdTime(first.createdAt) - createdTime(second.createdAt);
+      case 'price-asc':
+        return Number(first.price || 0) - Number(second.price || 0);
+      case 'price-desc':
+        return Number(second.price || 0) - Number(first.price || 0);
+      case 'rating':
+        return Number(second.ratingsAverage || 0) - Number(first.ratingsAverage || 0);
+      case 'popular':
+        return Number(second.salesCount || 0) - Number(first.salesCount || 0);
+      case 'newest':
+      default:
+        return createdTime(second.createdAt) - createdTime(first.createdAt);
+    }
+  });
+
+  return products;
+};
+
+const applySearchFilteringAndSort = (productsRaw, reqQuery, sortKey, isRelevanceSort) => {
+  let products = productsRaw;
+
+  if (!reqQuery.search) {
+    return { products, total: products.length };
+  }
+
+  const searchStr = String(reqQuery.search);
+  const { cleanQuery } = extractPriceFilters(searchStr);
+  const queryTokens = tokenizeAndExpand(cleanQuery);
+
+  if (queryTokens.length > 0) {
+    products = productsRaw.filter((product) => {
+      const catName = product.category?.name || '';
+      return queryTokens.every((token) => {
+        return (
+          isFuzzyMatch(product.name, token) ||
+          isFuzzyMatch(product.brand, token) ||
+          isFuzzyMatch(product.vendor, token) ||
+          isFuzzyMatch(product.sku, token) ||
+          isFuzzyMatch(product.barcode, token) ||
+          isFuzzyMatch(product.description, token) ||
+          isFuzzyMatch(product.shortDescription, token) ||
+          isFuzzyMatch(catName, token) ||
+          (product.tags || []).some((tag) => isFuzzyMatch(tag, token)) ||
+          (product.attributes || []).some((attr) => isFuzzyMatch(attr.name, token) || isFuzzyMatch(attr.value, token))
+        );
+      });
+    });
+
+    products = products.map((product) => {
+      product.relevanceScore = calculateRelevanceScore(product, queryTokens, cleanQuery);
+      return product;
+    });
+  }
+
+  if (isRelevanceSort && queryTokens.length > 0) {
+    products.sort((first, second) =>
+      Number(second.relevanceScore || 0) - Number(first.relevanceScore || 0) ||
+      createdTime(second.createdAt) - createdTime(first.createdAt)
+    );
+  } else {
+    sortProductsInMemory(products, sortKey);
+  }
+
+  return { products, total: products.length };
+};
+
+const presentCategory = (category) => ({
+  _id: category._id?.toString?.() || category._id,
+  name: category.name,
+  slug: category.slug,
+  description: category.description,
+  image: category.image,
+  order: category.order || 0
+});
+
 const approvedReviews = (reviews = []) =>
   reviews
     .filter(isPublishedReview)
@@ -122,7 +212,7 @@ const normalizeProductBrandPayload = async (payload = {}) => {
 };
 
 const populateProductQuery = (query) => query
-  .populate('category', 'name slug')
+  .populate('category', 'name slug description image order')
   .populate('brandRef', 'name slug tagline image');
 
 const buildProductFilter = async (query, includeInactive = false) => {
@@ -178,7 +268,8 @@ export const getProducts = asyncHandler(async (req, res) => {
   const page = Math.max(Number(req.query.page) || 1, 1);
   const limit = Math.min(Math.max(Number(req.query.limit) || 12, 1), 48);
   const skip = (page - 1) * limit;
-  const sort = sortOptions[req.query.sort] || sortOptions.newest;
+  const sortKey = sortOptions[req.query.sort] ? req.query.sort : 'newest';
+  const sort = sortOptions[sortKey];
 
   const isSearchQuery = Boolean(req.query.search);
   const isRelevanceSort = isSearchQuery && (!req.query.sort || req.query.sort === 'newest');
@@ -202,59 +293,7 @@ export const getProducts = asyncHandler(async (req, res) => {
   let total = totalCount;
 
   if (isSearchQuery) {
-    const searchStr = String(req.query.search);
-    const { cleanQuery } = extractPriceFilters(searchStr);
-    const queryTokens = tokenizeAndExpand(cleanQuery);
-
-    // Apply in-memory typo tolerance/fuzzy matching
-    if (queryTokens.length > 0) {
-      products = productsRaw.filter((product) => {
-        const catName = product.category?.name || '';
-        return queryTokens.every((token) => {
-          return (
-            isFuzzyMatch(product.name, token) ||
-            isFuzzyMatch(product.brand, token) ||
-            isFuzzyMatch(product.vendor, token) ||
-            isFuzzyMatch(product.sku, token) ||
-            isFuzzyMatch(product.barcode, token) ||
-            isFuzzyMatch(product.description, token) ||
-            isFuzzyMatch(product.shortDescription, token) ||
-            isFuzzyMatch(catName, token) ||
-            (product.tags || []).some((tag) => isFuzzyMatch(tag, token)) ||
-            (product.attributes || []).some((attr) => isFuzzyMatch(attr.name, token) || isFuzzyMatch(attr.value, token))
-          );
-        });
-      });
-    }
-
-    total = products.length;
-
-    // Apply relevance scoring
-    if (queryTokens.length > 0) {
-      products = products.map((product) => {
-        product.relevanceScore = calculateRelevanceScore(product, queryTokens, cleanQuery);
-        return product;
-      });
-      // Sort by score if relevance sort is active
-      if (isRelevanceSort) {
-        products.sort((a, b) => b.relevanceScore - a.relevanceScore);
-      }
-    }
-
-    // Apply other sorts in-memory if needed
-    if (!isRelevanceSort && sort !== 'newest') {
-      if (sort === 'price-asc') {
-        products.sort((a, b) => a.price - b.price);
-      } else if (sort === 'price-desc') {
-        products.sort((a, b) => b.price - a.price);
-      } else if (sort === 'rating') {
-        products.sort((a, b) => (b.ratingsAverage || 0) - (a.ratingsAverage || 0));
-      } else if (sort === 'popular') {
-        products.sort((a, b) => (b.salesCount || 0) - (a.salesCount || 0));
-      }
-    }
-
-    // Paginate in memory
+    ({ products, total } = applySearchFilteringAndSort(productsRaw, req.query, sortKey, isRelevanceSort));
     products = products.slice(skip, skip + limit);
   }
 
@@ -269,6 +308,80 @@ export const getProducts = asyncHandler(async (req, res) => {
         total,
         pages: Math.ceil(total / limit)
       },
+      filters: {
+        brands: brands.filter(Boolean).sort()
+      }
+    }
+  });
+});
+
+export const getProductSections = asyncHandler(async (req, res) => {
+  const filter = await buildProductFilter(req.query, false);
+  const sortKey = sortOptions[req.query.sort] ? req.query.sort : 'newest';
+  const sort = sortOptions[sortKey];
+  const isSearchQuery = Boolean(req.query.search);
+  const isRelevanceSort = isSearchQuery && (!req.query.sort || req.query.sort === 'newest');
+
+  const productsQuery = populateProductQuery(Product.find(filter));
+  if (isSearchQuery) {
+    productsQuery.sort(sortOptions.newest);
+  } else {
+    productsQuery.sort(sort);
+  }
+
+  let products = await productsQuery.lean();
+
+  if (isSearchQuery) {
+    ({ products } = applySearchFilteringAndSort(products, req.query, sortKey, isRelevanceSort));
+  }
+
+  const [categories, brands] = await Promise.all([
+    Category.find()
+      .sort({ order: 1, name: 1 })
+      .lean(),
+    Product.distinct('brand', { status: 'active', brand: { $ne: null } })
+  ]);
+
+  const productsByCategory = new Map();
+  products.forEach((product) => {
+    const categoryId = toIdString(product.category);
+    if (!categoryId) return;
+    if (!productsByCategory.has(categoryId)) productsByCategory.set(categoryId, []);
+    productsByCategory.get(categoryId).push(product);
+  });
+
+  const knownCategoryIds = new Set(categories.map((category) => toIdString(category._id)));
+  const sections = categories
+    .map((category) => ({
+      category: presentCategory(category),
+      products: productsByCategory.get(toIdString(category._id)) || []
+    }))
+    .filter((section) => section.products.length > 0);
+
+  const orphanProducts = products.filter((product) => {
+    const categoryId = toIdString(product.category);
+    return categoryId && !knownCategoryIds.has(categoryId);
+  });
+
+  if (orphanProducts.length) {
+    sections.push({
+      category: {
+        _id: 'uncategorized',
+        name: 'Other products',
+        slug: 'other-products',
+        order: Number.MAX_SAFE_INTEGER
+      },
+      products: orphanProducts
+    });
+  }
+
+  res.json({
+    status: 'success',
+    results: sections.length,
+    data: {
+      sections,
+      totalProducts: products.length,
+      sort: sortKey,
       filters: {
         brands: brands.filter(Boolean).sort()
       }

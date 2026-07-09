@@ -1,6 +1,6 @@
-import { Archive, Edit3, Minus, PackagePlus, Plus, Search } from 'lucide-react';
+import { Archive, ArrowDown, ArrowUp, Edit3, Minus, PackagePlus, Plus, Save, Search } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
 import { AdminNav } from '../components/AdminNav.jsx';
@@ -25,6 +25,8 @@ export const AdminProductsPage = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [categoryOrderDrafts, setCategoryOrderDrafts] = useState({});
+  const [savingCategoryOrder, setSavingCategoryOrder] = useState(false);
   const debouncedSearch = useDebouncedValue(search);
   const queryClient = useQueryClient();
 
@@ -53,16 +55,105 @@ export const AdminProductsPage = () => {
     }
   });
 
+  useEffect(() => {
+    setCategoryOrderDrafts((current) => {
+      const next = {};
+      categories.forEach((category, index) => {
+        next[category._id] = current[category._id] ?? category.order ?? index + 1;
+      });
+      return next;
+    });
+  }, [categories]);
+
+  const orderedCategories = useMemo(() => {
+    const draftOrder = (category) => {
+      const value = Number(categoryOrderDrafts[category._id] ?? category.order ?? 0);
+      return Number.isFinite(value) ? value : 0;
+    };
+
+    return [...categories]
+      .map((category) => ({ ...category, draftOrder: draftOrder(category) }))
+      .sort((first, second) => first.draftOrder - second.draftOrder || first.name.localeCompare(second.name));
+  }, [categories, categoryOrderDrafts]);
+
+  const hasCategoryOrderChanges = useMemo(
+    () => categories.some((category) => Number(categoryOrderDrafts[category._id] ?? category.order ?? 0) !== Number(category.order ?? 0)),
+    [categories, categoryOrderDrafts]
+  );
+
   const createCategory = async (event) => {
     event.preventDefault();
     if (!categoryName.trim()) return;
     try {
-      await api.post('/categories', { name: categoryName });
+      const nextOrder = categories.length
+        ? Math.max(...categories.map((category) => Number(category.order || 0))) + 1
+        : 1;
+      await api.post('/categories', { name: categoryName, order: nextOrder });
       setCategoryName('');
       setMessage('Category created');
       queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['product-sections'] });
     } catch (error) {
       setMessage(apiErrorMessage(error));
+    }
+  };
+
+  const moveCategory = (categoryId, direction) => {
+    setCategoryOrderDrafts((current) => {
+      const sorted = [...categories]
+        .map((category) => {
+          const value = Number(current[category._id] ?? category.order ?? 0);
+          return {
+            ...category,
+            draftOrder: Number.isFinite(value) ? value : 0
+          };
+        })
+        .sort((first, second) => first.draftOrder - second.draftOrder || first.name.localeCompare(second.name));
+      const index = sorted.findIndex((category) => category._id === categoryId);
+      const targetIndex = index + direction;
+      if (index < 0 || targetIndex < 0 || targetIndex >= sorted.length) return current;
+
+      const nextSorted = [...sorted];
+      [nextSorted[index], nextSorted[targetIndex]] = [nextSorted[targetIndex], nextSorted[index]];
+
+      return nextSorted.reduce((next, category, categoryIndex) => {
+        next[category._id] = categoryIndex + 1;
+        return next;
+      }, { ...current });
+    });
+  };
+
+  const updateCategoryOrderDraft = (categoryId, value) => {
+    setCategoryOrderDrafts((current) => ({
+      ...current,
+      [categoryId]: value
+    }));
+  };
+
+  const saveCategoryOrder = async () => {
+    const changedCategories = categories.filter(
+      (category) => Number(categoryOrderDrafts[category._id] ?? category.order ?? 0) !== Number(category.order ?? 0)
+    );
+    if (!changedCategories.length) return;
+
+    setSavingCategoryOrder(true);
+    setMessage('');
+    try {
+      await Promise.all(
+        changedCategories.map((category) =>
+          api.patch(`/categories/${category._id}`, {
+            order: Number(categoryOrderDrafts[category._id] ?? category.order ?? 0)
+          })
+        )
+      );
+      setMessage('Category order updated');
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      queryClient.invalidateQueries({ queryKey: ['product-sections'] });
+      queryClient.invalidateQueries({ queryKey: ['products'] });
+    } catch (error) {
+      setMessage(apiErrorMessage(error));
+    } finally {
+      setSavingCategoryOrder(false);
     }
   };
 
@@ -75,6 +166,7 @@ export const AdminProductsPage = () => {
       setMessage(data.message || 'Product archived');
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       queryClient.invalidateQueries({ queryKey: ['products'] });
+      queryClient.invalidateQueries({ queryKey: ['product-sections'] });
     } catch (error) {
       setMessage(apiErrorMessage(error));
     }
@@ -86,6 +178,7 @@ export const AdminProductsPage = () => {
       setMessage(`${data.data.product.name} stock updated to ${data.data.product.inventory.stock}`);
       queryClient.invalidateQueries({ queryKey: ['admin-products'] });
       queryClient.invalidateQueries({ queryKey: ['admin-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['product-sections'] });
     } catch (error) {
       setMessage(apiErrorMessage(error));
     }
@@ -105,6 +198,11 @@ export const AdminProductsPage = () => {
           Add product
         </Link>
       </div>
+      {message ? (
+        <p className={/created|updated|archived|stock/i.test(message) ? 'form-note admin-products-message' : 'form-error admin-products-message'}>
+          {message}
+        </p>
+      ) : null}
 
       <div className="admin-products-layout">
         <div className="panel">
@@ -188,6 +286,62 @@ export const AdminProductsPage = () => {
               Add category
             </button>
           </form>
+
+          <div className="panel category-order-panel">
+            <div className="panel-heading">
+              <h2>Shop category order</h2>
+              <span>{orderedCategories.length} categories</span>
+            </div>
+            {orderedCategories.length ? (
+              <>
+                <div className="category-order-list">
+                  {orderedCategories.map((category, index) => (
+                    <div className="category-order-row" key={category._id}>
+                      <span className="category-order-position">{index + 1}</span>
+                      <div className="category-order-copy">
+                        <strong>{category.name}</strong>
+                        <span>{category.slug}</span>
+                      </div>
+                      <input
+                        className="category-order-input"
+                        type="number"
+                        min="0"
+                        value={categoryOrderDrafts[category._id] ?? category.order ?? 0}
+                        onChange={(event) => updateCategoryOrderDraft(category._id, event.target.value)}
+                        aria-label={`Shop order for ${category.name}`}
+                      />
+                      <div className="category-order-controls">
+                        <button
+                          type="button"
+                          className="icon-button"
+                          onClick={() => moveCategory(category._id, -1)}
+                          disabled={index === 0}
+                          aria-label={`Move ${category.name} up`}
+                        >
+                          <ArrowUp size={15} />
+                        </button>
+                        <button
+                          type="button"
+                          className="icon-button"
+                          onClick={() => moveCategory(category._id, 1)}
+                          disabled={index === orderedCategories.length - 1}
+                          aria-label={`Move ${category.name} down`}
+                        >
+                          <ArrowDown size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button className="button dark full" type="button" onClick={saveCategoryOrder} disabled={!hasCategoryOrderChanges || savingCategoryOrder}>
+                  <Save size={17} />
+                  {savingCategoryOrder ? 'Saving...' : 'Save shop order'}
+                </button>
+              </>
+            ) : (
+              <p className="empty-inline-note">Create a category to arrange the shop page.</p>
+            )}
+          </div>
         </div>
       </div>
     </section>

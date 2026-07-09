@@ -5,6 +5,7 @@ import {
   deleteProduct,
   getFeaturedProducts,
   getProduct,
+  getProductSections,
   getProducts,
   getSimilarProducts,
   updateProductStock,
@@ -26,6 +27,7 @@ const router = express.Router();
 
 router.get('/', optionalProtect, cachePublic(45), getProducts);
 router.get('/featured', cachePublic(90), getFeaturedProducts);
+router.get('/sections', cachePublic(45), getProductSections);
 router.get('/:id/similar', validate({ params: idParamSchema }), cachePublic(60), getSimilarProducts);
 router.get('/:slugOrId', optionalProtect, validate({ params: slugOrIdParamSchema }), getProduct);
 router.post('/:id/reviews', protect, validate({ params: idParamSchema, body: reviewSchema }), addReview);

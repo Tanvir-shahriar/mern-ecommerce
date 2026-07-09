@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { ArrowRight, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
@@ -22,6 +22,7 @@ export const ProductsPage = () => {
   const activeFiltersCount = useMemo(() => {
     let count = 0;
     if (searchParams.get('search')) count++;
+    if (searchParams.get('category')) count++;
     if (searchParams.get('brand')) count++;
     if (searchParams.get('minPrice')) count++;
     if (searchParams.get('maxPrice')) count++;
@@ -31,6 +32,7 @@ export const ProductsPage = () => {
   const { currency, convertToBase } = useCurrency();
   const apiParams = useMemo(() => {
     const next = { ...params };
+    delete next.page;
     if (params.minPrice) next.minPrice = convertToBase(params.minPrice);
     if (params.maxPrice) next.maxPrice = convertToBase(params.maxPrice);
     return next;
@@ -40,7 +42,7 @@ export const ProductsPage = () => {
     const next = new URLSearchParams(searchParams);
     if (debouncedSearch) next.set('search', debouncedSearch);
     else next.delete('search');
-    next.set('page', '1');
+    next.delete('page');
     if (next.toString() !== searchParams.toString()) {
       setSearchParams(next, { replace: true });
     }
@@ -63,9 +65,9 @@ export const ProductsPage = () => {
   });
 
   const { data, isLoading } = useQuery({
-    queryKey: ['products', apiParams],
+    queryKey: ['product-sections', apiParams],
     queryFn: async () => {
-      const { data } = await api.get('/products', { params: apiParams });
+      const { data } = await api.get('/products/sections', { params: apiParams });
       return data.data;
     }
   });
@@ -74,12 +76,13 @@ export const ProductsPage = () => {
     const next = new URLSearchParams(searchParams);
     if (value && value !== 'all') next.set(key, value);
     else next.delete(key);
-    next.set('page', '1');
+    next.delete('page');
     setSearchParams(next);
   };
 
-  const products = data?.products || [];
-  const pagination = data?.pagination || { page: 1, pages: 1 };
+  const sections = data?.sections || [];
+  const products = sections.flatMap((section) => section.products || []);
+  const totalProducts = data?.totalProducts ?? products.length;
   const fallbackBrandOptions = (data?.filters?.brands || []).map((brand) => ({ name: brand, slug: brand }));
   const brandOptions = brands.length ? brands : fallbackBrandOptions;
 
@@ -87,10 +90,18 @@ export const ProductsPage = () => {
   const currentBrand = searchParams.get('brand');
   const activeCategoryObj = categories.find((c) => c.slug === currentCategorySlug);
   const activeBrandObj = brandOptions.find((brand) => brand.slug === currentBrand || brand.name === currentBrand);
+  const sectionCategoryOptions = sections.map((section) => ({
+    ...section.category,
+    productCount: section.products?.length || 0
+  }));
+  const categoryFilterOptions = sectionCategoryOptions.length ? sectionCategoryOptions : categories;
+  const visibleCategoryOptions = currentCategorySlug && activeCategoryObj && !categoryFilterOptions.some((category) => category.slug === currentCategorySlug)
+    ? [activeCategoryObj, ...categoryFilterOptions]
+    : categoryFilterOptions;
   const categoryName = activeCategoryObj?.name || (currentCategorySlug ? currentCategorySlug.toUpperCase() : '');
   const brandName = activeBrandObj?.name || currentBrand || '';
 
-  let pageTitle = 'Luxury Watches & Smartwatches Collection';
+  let pageTitle = 'Shop watches by category';
   if (search) {
     pageTitle = `Search results for "${search}"`;
   } else if (brandName) {
@@ -116,6 +127,11 @@ export const ProductsPage = () => {
     }
   };
 
+  const jumpToCategory = (category) => {
+    const target = document.getElementById(`category-${category.slug || category._id}`);
+    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   return (
     <section className="catalog-page">
       <Seo
@@ -134,7 +150,7 @@ export const ProductsPage = () => {
           >
             All
           </button>
-          {categories.map((category) => (
+          {visibleCategoryOptions.map((category) => (
             <button
               type="button"
               className={`pill-button ${currentCategorySlug === category.slug ? 'active' : ''}`}
@@ -278,7 +294,7 @@ export const ProductsPage = () => {
           Category
           <select value={searchParams.get('category') || 'all'} onChange={(event) => updateFilter('category', event.target.value)}>
             <option value="all">All categories</option>
-            {categories.map((category) => (
+            {visibleCategoryOptions.map((category) => (
               <option value={category.slug} key={category._id}>
                 {category.name}
               </option>
@@ -321,7 +337,7 @@ export const ProductsPage = () => {
           <div>
             <p className="eyebrow">Catalog</p>
             <h1>{pageTitle || 'Shop watches'}</h1>
-            {params.search ? <span className="search-meta">{data?.pagination?.total || 0} result(s) for "{params.search}"</span> : null}
+            {params.search ? <span className="search-meta">{totalProducts} result(s) for "{params.search}"</span> : null}
           </div>
           <select value={searchParams.get('sort') || 'newest'} onChange={(event) => updateFilter('sort', event.target.value)} aria-label="Sort products" className="desktop-only">
             <option value="newest">Newest</option>
@@ -332,29 +348,67 @@ export const ProductsPage = () => {
           </select>
         </div>
 
+        {!isLoading && sections.length ? (
+          <>
+            <div className="catalog-insight-row">
+              <span>{totalProducts} item{totalProducts === 1 ? '' : 's'}</span>
+              <span>{sections.length} categor{sections.length === 1 ? 'y' : 'ies'}</span>
+              {brandName ? <span>{brandName}</span> : null}
+              {categoryName ? <span>{categoryName}</span> : null}
+            </div>
+
+            <div className="catalog-category-jump" aria-label="Product categories">
+              {sections.map((section) => (
+                <button
+                  type="button"
+                  key={section.category._id}
+                  className={currentCategorySlug === section.category.slug ? 'active' : ''}
+                  onClick={() => jumpToCategory(section.category)}
+                >
+                  <span>{section.category.name}</span>
+                  <strong>{section.products.length}</strong>
+                </button>
+              ))}
+            </div>
+          </>
+        ) : null}
+
         {isLoading ? (
           <div className="product-grid">
             {Array.from({ length: 8 }).map((_, index) => <div className="skeleton-card" key={index} />)}
           </div>
-        ) : products.length ? (
-          <>
-            <div className="product-grid">
-              {products.map((product) => (
-                <ProductCard key={product._id} product={product} />
-              ))}
-            </div>
-            <div className="pagination">
-              <button disabled={pagination.page <= 1} onClick={() => updateFilter('page', String(pagination.page - 1))}>
-                Previous
-              </button>
-              <span>
-                Page {pagination.page} of {pagination.pages || 1}
-              </span>
-              <button disabled={pagination.page >= pagination.pages} onClick={() => updateFilter('page', String(pagination.page + 1))}>
-                Next
-              </button>
-            </div>
-          </>
+        ) : sections.length ? (
+          <div className="catalog-sections-stack">
+            {sections.map((section) => (
+              <section
+                className="catalog-category-section"
+                id={`category-${section.category.slug || section.category._id}`}
+                key={section.category._id}
+              >
+                <div className="catalog-category-heading">
+                  <div>
+                    <p className="eyebrow">Category</p>
+                    <h2>{section.category.name}</h2>
+                    {section.category.description ? <p>{section.category.description}</p> : null}
+                  </div>
+                  <div className="catalog-category-actions">
+                    <span>{section.products.length} item{section.products.length === 1 ? '' : 's'}</span>
+                    {!currentCategorySlug ? (
+                      <button type="button" className="button secondary compact" onClick={() => updateFilter('category', section.category.slug)}>
+                        View category
+                        <ArrowRight size={15} />
+                      </button>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="product-grid catalog-section-grid">
+                  {section.products.map((product) => (
+                    <ProductCard key={product._id} product={product} />
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
         ) : (
           <EmptyState title="No products found" message="Try another search or clear a filter." actionLabel="Reset filters" actionTo="/products" />
         )}
