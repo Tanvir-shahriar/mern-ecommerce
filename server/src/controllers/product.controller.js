@@ -258,6 +258,7 @@ const buildProductFilter = async (query, includeInactive = false) => {
   if (query.rating) filter.ratingsAverage = { $gte: Number(query.rating) };
   if (query.inStock === 'true') filter['inventory.stock'] = { $gt: 0 };
   if (query.featured === 'true') filter.isFeatured = true;
+  if (query.topPicks === 'true' || query.isTopPick === 'true') filter.isTopPick = true;
 
   return filter;
 };
@@ -392,6 +393,21 @@ export const getProductSections = asyncHandler(async (req, res) => {
 export const getFeaturedProducts = asyncHandler(async (req, res) => {
   const limit = Math.min(Number(req.query.limit) || 8, 16);
   const products = await Product.find({ status: 'active', isFeatured: true })
+    .populate('category', 'name slug')
+    .populate('brandRef', 'name slug tagline image')
+    .sort('-ratingsAverage -salesCount')
+    .limit(limit)
+    .lean();
+
+  res.json({
+    status: 'success',
+    data: { products }
+  });
+});
+
+export const getTopPickProducts = asyncHandler(async (req, res) => {
+  const limit = Math.min(Number(req.query.limit) || 8, 16);
+  const products = await Product.find({ status: 'active', isTopPick: true })
     .populate('category', 'name slug')
     .populate('brandRef', 'name slug tagline image')
     .sort('-ratingsAverage -salesCount')

@@ -388,6 +388,7 @@ export class JsonModel {
       base.shipping = { freeShipping: false, ...(base.shipping || {}) };
       base.status ||= 'active';
       base.isFeatured = Boolean(base.isFeatured);
+      base.isTopPick = Boolean(base.isTopPick);
       base.salesCount ||= 0;
       base.ratingsAverage ||= 0;
       base.ratingsCount ||= 0;

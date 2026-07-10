@@ -72,6 +72,14 @@ export const ProductsPage = () => {
     }
   });
 
+  const { data: topPicks = [] } = useQuery({
+    queryKey: ['top-picks-products'],
+    queryFn: async () => {
+      const { data } = await api.get('/products/top-picks');
+      return data.data.products;
+    }
+  });
+
   const updateFilter = (key, value) => {
     const next = new URLSearchParams(searchParams);
     if (value && value !== 'all') next.set(key, value);
@@ -372,6 +380,31 @@ export const ProductsPage = () => {
             </div>
           </>
         ) : null}
+
+        {!isLoading && activeFiltersCount === 0 && topPicks && topPicks.length > 0 && (
+          <div className="top-picks-section" style={{ marginBottom: '40px' }}>
+            <div
+              className="top-picks-banner"
+              style={{
+                background: '#FAF6F0',
+                border: '1px solid rgba(194, 125, 56, 0.1)',
+                padding: '20px 20px',
+                textAlign: 'center',
+                borderRadius: '4px',
+                marginBottom: '24px'
+              }}
+            >
+              <h2 style={{ color: '#C27D38', margin: 0, textTransform: 'uppercase', letterSpacing: '4px', fontSize: '15px', fontWeight: 'bold' }}>
+                Our Top pick
+              </h2>
+            </div>
+            <div className="product-grid" style={{ marginBottom: '24px' }}>
+              {topPicks.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="product-grid">

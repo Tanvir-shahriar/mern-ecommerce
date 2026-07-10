@@ -106,6 +106,7 @@ const run = async () => {
       tags: ['automatic', 'dress-watch', 'leather'],
       inventory: { stock: 18, lowStockThreshold: 6, trackQuantity: true },
       isFeatured: true,
+      isTopPick: true,
       ratingsAverage: 4.6,
       ratingsCount: 18
     },
@@ -123,6 +124,7 @@ const run = async () => {
       tags: ['automatic', 'gmt', 'travel'],
       inventory: { stock: 24, lowStockThreshold: 5, trackQuantity: true },
       isFeatured: true,
+      isTopPick: true,
       ratingsAverage: 4.7,
       ratingsCount: 31
     },

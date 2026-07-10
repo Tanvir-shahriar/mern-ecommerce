@@ -57,6 +57,7 @@ const initialForm = {
   description: '',
   tags: '',
   isFeatured: false,
+  isTopPick: false,
   attributes: [],
   variants: [],
   shippingWeight: '',
@@ -92,6 +93,7 @@ const productToForm = (product, categories, brands = []) => ({
   description: product.description || '',
   tags: (product.tags || []).join(', '),
   isFeatured: Boolean(product.isFeatured),
+  isTopPick: Boolean(product.isTopPick),
   attributes: (product.attributes || []).map((attribute) => ({
     name: attribute.name || '',
     value: attribute.value || ''
@@ -345,6 +347,7 @@ export const AdminProductFormPage = () => {
         freeShipping: form.freeShipping
       },
       isFeatured: form.isFeatured,
+      isTopPick: form.isTopPick,
       seo: {
         title: form.seoTitle.trim() || undefined,
         description: form.seoDescription.trim() || undefined
@@ -519,6 +522,10 @@ export const AdminProductFormPage = () => {
               <label className="checkbox-row span-2">
                 <input type="checkbox" checked={form.isFeatured} onChange={(event) => updateField('isFeatured', event.target.checked)} />
                 Feature on storefront
+              </label>
+              <label className="checkbox-row span-2">
+                <input type="checkbox" checked={form.isTopPick} onChange={(event) => updateField('isTopPick', event.target.checked)} />
+                Our Top Pick
               </label>
             </div>
           </div>

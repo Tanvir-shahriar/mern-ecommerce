@@ -219,6 +219,10 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    isTopPick: {
+      type: Boolean,
+      default: false
+    },
     salesCount: {
       type: Number,
       default: 0
@@ -252,6 +256,7 @@ productSchema.index({ status: 1, category: 1, createdAt: -1 });
 productSchema.index({ status: 1, brand: 1, createdAt: -1 });
 productSchema.index({ status: 1, brandRef: 1, createdAt: -1 });
 productSchema.index({ status: 1, isFeatured: 1, ratingsAverage: -1, salesCount: -1 });
+productSchema.index({ status: 1, isTopPick: 1, ratingsAverage: -1, salesCount: -1 });
 productSchema.index({ status: 1, 'inventory.stock': 1 });
 
 productSchema.virtual('isInStock').get(function inStock() {
