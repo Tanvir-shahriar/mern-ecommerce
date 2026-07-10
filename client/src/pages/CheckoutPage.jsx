@@ -1,4 +1,4 @@
-import { Banknote, Building2, MapPin, Plus, Smartphone, Upload } from 'lucide-react';
+import { Banknote, Building2, MapPin, Plus, Smartphone, Upload, Copy, Check, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
@@ -110,6 +110,8 @@ export const CheckoutPage = () => {
   const [address, setAddress] = useState(initialAddress);
   const [paymentMethod, setPaymentMethod] = useState('cash_on_delivery');
   const [paymentDetails, setPaymentDetails] = useState(emptyPaymentDetails);
+  const [showInstructionsModal, setShowInstructionsModal] = useState(false);
+  const [copiedField, setCopiedField] = useState('');
   const [uploadingPaymentProof, setUploadingPaymentProof] = useState(false);
   const [customerNote, setCustomerNote] = useState('');
   const [order, setOrder] = useState(null);
@@ -172,6 +174,17 @@ export const CheckoutPage = () => {
       setPaymentMethod(paymentMethods[0].key);
     }
   }, [paymentMethod, paymentMethods]);
+
+  useEffect(() => {
+    if (showInstructionsModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showInstructionsModal]);
 
   if (order) {
     return <OrderSuccessAnimation order={order} />;
@@ -264,6 +277,15 @@ export const CheckoutPage = () => {
 
   const updatePaymentDetails = (key, value) => {
     setPaymentDetails((current) => ({ ...current, [key]: value }));
+  };
+
+  const handleCopy = (text, fieldName) => {
+    if (!text) return;
+    navigator.clipboard.writeText(text);
+    setCopiedField(fieldName);
+    setTimeout(() => {
+      setCopiedField('');
+    }, 1500);
   };
 
   const uploadPaymentProof = async (event) => {
@@ -405,51 +427,22 @@ export const CheckoutPage = () => {
             </div>
 
             {selectedPaymentMethod ? (
-              <div className="manual-payment-instructions">
+              <div
+                className="manual-payment-instructions"
+                onClick={() => setShowInstructionsModal(true)}
+                style={{ cursor: 'pointer', transition: 'all 0.2s', position: 'relative' }}
+              >
                 <strong>{selectedPaymentMethod.label}</strong>
                 {paymentMethodSummary(selectedPaymentMethod) ? <span>{paymentMethodSummary(selectedPaymentMethod)}</span> : null}
                 {selectedPaymentMethod.image?.url ? (
-                  <a className="manual-payment-image" href={mediaUrl(selectedPaymentMethod.image.url)} target="_blank" rel="noreferrer">
+                  <div className="manual-payment-image" style={{ pointerEvents: 'none' }}>
                     <img src={mediaUrl(selectedPaymentMethod.image.url)} alt={selectedPaymentMethod.image.alt || `${selectedPaymentMethod.label} payment image`} />
-                  </a>
-                ) : null}
-                {selectedPaymentMethod.instructions ? <p>{selectedPaymentMethod.instructions}</p> : null}
-              </div>
-            ) : null}
-
-            {isManualPayment ? (
-              <div className="manual-payment-form">
-                <div className="form-grid">
-                  <label>
-                    Sender account number
-                    <input
-                      value={paymentDetails.accountNumber}
-                      onChange={(event) => updatePaymentDetails('accountNumber', event.target.value)}
-                      placeholder="Your bank account or mobile wallet number"
-                    />
-                    <small>Required if you submit payment details now. You can also submit it from the order page later.</small>
-                  </label>
-                  <label>
-                    Transaction ID
-                    <input
-                      value={paymentDetails.transactionId}
-                      onChange={(event) => updatePaymentDetails('transactionId', event.target.value)}
-                      placeholder="Optional"
-                    />
-                  </label>
-                </div>
-                <label className="payment-proof-upload">
-                  <Upload size={17} />
-                  <span>{uploadingPaymentProof ? 'Uploading proof...' : 'Upload payment proof'}</span>
-                  <input type="file" accept="image/*" multiple onChange={uploadPaymentProof} disabled={uploadingPaymentProof} />
-                </label>
-                {paymentDetails.proofImages.length ? (
-                  <div className="payment-proof-list">
-                    {paymentDetails.proofImages.map((image) => (
-                      <img src={mediaUrl(image.url)} alt={image.alt || 'Payment proof'} key={image.publicId || image.url} />
-                    ))}
                   </div>
                 ) : null}
+                {selectedPaymentMethod.instructions ? <p>{selectedPaymentMethod.instructions}</p> : null}
+                <div style={{ marginTop: '12px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 'bold', color: 'var(--red, #c74132)' }}>
+                  <span>Click to view detailed payment info & copy details</span>
+                </div>
               </div>
             ) : null}
           </div>
@@ -508,6 +501,206 @@ export const CheckoutPage = () => {
           )}
         </aside>
       </div>
+
+      {showInstructionsModal && selectedPaymentMethod && (
+        <div className="modal-backdrop" onClick={() => setShowInstructionsModal(false)}>
+          <div className="modal-card manual-payment-details-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="modal-close"
+              onClick={() => setShowInstructionsModal(false)}
+              aria-label="Close"
+            >
+              <X size={18} />
+            </button>
+            <div className="social-modal-header" style={{ marginBottom: '20px' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: 'bold', margin: '0 0 6px 0' }}>
+                {selectedPaymentMethod.label} Details
+              </h2>
+              <p style={{ fontSize: '13px', color: 'var(--muted)', margin: 0 }}>
+                Copy info below to complete manual payment in your banking app.
+              </p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {selectedPaymentMethod.bankName && (
+                <div className="address-modal-field" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--muted)' }}>Bank Name</span>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      readOnly
+                      value={selectedPaymentMethod.bankName}
+                      style={{ flex: 1, padding: '8px 12px', background: '#f8fafc', border: '1px solid var(--line)', borderRadius: '6px' }}
+                    />
+                    <button
+                      type="button"
+                      className="button dark compact"
+                      onClick={() => handleCopy(selectedPaymentMethod.bankName, 'bankName')}
+                      style={{ minWidth: '80px', height: '38px' }}
+                    >
+                      {copiedField === 'bankName' ? <Check size={14} /> : <Copy size={14} />}
+                      {copiedField === 'bankName' ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedPaymentMethod.accountName && (
+                <div className="address-modal-field" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--muted)' }}>Account Name</span>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      readOnly
+                      value={selectedPaymentMethod.accountName}
+                      style={{ flex: 1, padding: '8px 12px', background: '#f8fafc', border: '1px solid var(--line)', borderRadius: '6px' }}
+                    />
+                    <button
+                      type="button"
+                      className="button dark compact"
+                      onClick={() => handleCopy(selectedPaymentMethod.accountName, 'accountName')}
+                      style={{ minWidth: '80px', height: '38px' }}
+                    >
+                      {copiedField === 'accountName' ? <Check size={14} /> : <Copy size={14} />}
+                      {copiedField === 'accountName' ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedPaymentMethod.accountNumber && (
+                <div className="address-modal-field" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--muted)' }}>
+                    {paymentMethod === 'mobile_banking' ? 'Wallet Number' : 'Account Number'}
+                  </span>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      readOnly
+                      value={selectedPaymentMethod.accountNumber}
+                      style={{ flex: 1, padding: '8px 12px', background: '#f8fafc', border: '1px solid var(--line)', borderRadius: '6px', fontWeight: 'bold' }}
+                    />
+                    <button
+                      type="button"
+                      className="button dark compact"
+                      onClick={() => handleCopy(selectedPaymentMethod.accountNumber, 'accountNumber')}
+                      style={{ minWidth: '80px', height: '38px' }}
+                    >
+                      {copiedField === 'accountNumber' ? <Check size={14} /> : <Copy size={14} />}
+                      {copiedField === 'accountNumber' ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedPaymentMethod.branchName && (
+                <div className="address-modal-field" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--muted)' }}>Branch Name</span>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      readOnly
+                      value={selectedPaymentMethod.branchName}
+                      style={{ flex: 1, padding: '8px 12px', background: '#f8fafc', border: '1px solid var(--line)', borderRadius: '6px' }}
+                    />
+                    <button
+                      type="button"
+                      className="button dark compact"
+                      onClick={() => handleCopy(selectedPaymentMethod.branchName, 'branchName')}
+                      style={{ minWidth: '80px', height: '38px' }}
+                    >
+                      {copiedField === 'branchName' ? <Check size={14} /> : <Copy size={14} />}
+                      {copiedField === 'branchName' ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedPaymentMethod.routingNumber && (
+                <div className="address-modal-field" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--muted)' }}>Routing Number</span>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      readOnly
+                      value={selectedPaymentMethod.routingNumber}
+                      style={{ flex: 1, padding: '8px 12px', background: '#f8fafc', border: '1px solid var(--line)', borderRadius: '6px' }}
+                    />
+                    <button
+                      type="button"
+                      className="button dark compact"
+                      onClick={() => handleCopy(selectedPaymentMethod.routingNumber, 'routingNumber')}
+                      style={{ minWidth: '80px', height: '38px' }}
+                    >
+                      {copiedField === 'routingNumber' ? <Check size={14} /> : <Copy size={14} />}
+                      {copiedField === 'routingNumber' ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedPaymentMethod.providerName && (
+                <div className="address-modal-field" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--muted)' }}>Provider</span>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      readOnly
+                      value={selectedPaymentMethod.providerName}
+                      style={{ flex: 1, padding: '8px 12px', background: '#f8fafc', border: '1px solid var(--line)', borderRadius: '6px' }}
+                    />
+                    <button
+                      type="button"
+                      className="button dark compact"
+                      onClick={() => handleCopy(selectedPaymentMethod.providerName, 'providerName')}
+                      style={{ minWidth: '80px', height: '38px' }}
+                    >
+                      {copiedField === 'providerName' ? <Check size={14} /> : <Copy size={14} />}
+                      {copiedField === 'providerName' ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedPaymentMethod.paymentType && (
+                <div className="address-modal-field" style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: '600', color: 'var(--muted)' }}>Account Type</span>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <input
+                      readOnly
+                      value={selectedPaymentMethod.paymentType}
+                      style={{ flex: 1, padding: '8px 12px', background: '#f8fafc', border: '1px solid var(--line)', borderRadius: '6px' }}
+                    />
+                    <button
+                      type="button"
+                      className="button dark compact"
+                      onClick={() => handleCopy(selectedPaymentMethod.paymentType, 'paymentType')}
+                      style={{ minWidth: '80px', height: '38px' }}
+                    >
+                      {copiedField === 'paymentType' ? <Check size={14} /> : <Copy size={14} />}
+                      {copiedField === 'paymentType' ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {selectedPaymentMethod.instructions && (
+                <div style={{ background: '#f8fafc', border: '1px solid var(--line)', borderRadius: '8px', padding: '12px', fontSize: '13px', lineHeight: '1.4', marginTop: '4px' }}>
+                  <strong>Instructions:</strong>
+                  <p style={{ margin: '4px 0 0 0', color: '#475569' }}>{selectedPaymentMethod.instructions}</p>
+                </div>
+              )}
+            </div>
+
+            {error ? <p className="form-error" style={{ marginTop: '12px', marginBottom: '0' }}>{error}</p> : null}
+
+            <button
+              type="button"
+              className="button primary full"
+              onClick={submit}
+              disabled={submitting}
+              style={{ marginTop: '20px' }}
+            >
+              {submitting ? 'Placing order...' : 'Place order'}
+            </button>
+          </div>
+        </div>
+      )}
     </section>
   );
 };
