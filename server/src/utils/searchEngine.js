@@ -1,23 +1,16 @@
 import { Category } from '../models/category.model.js';
 import { Product } from '../models/product.model.js';
 
-// Synonyms dictionary for watch/accessories e-commerce context
+// Synonyms dictionary for overall e-commerce context
 const SYNONYMS = {
-  'watch': ['timepiece', 'clock', 'chronograph', 'wearable'],
-  'timepiece': ['watch', 'clock', 'chronograph'],
-  'smartwatch': ['smart watch', 'tracker', 'wearable', 'fitness', 'pulse', 'apex'],
-  'smartwatches': ['smart watch', 'tracker', 'wearable', 'fitness', 'pulse', 'apex'],
-  'wearable': ['smartwatch', 'tracker', 'fitness'],
-  'wearables': ['smartwatch', 'tracker', 'fitness'],
+  'smart': ['intelligent', 'digital', 'connected', 'electronic'],
   'strap': ['band', 'bracelet', 'link'],
   'straps': ['band', 'bracelet', 'link'],
   'charger': ['cable', 'usb', 'charging', 'power'],
   'chargers': ['cable', 'usb', 'charging', 'power'],
   'glass': ['sunglass', 'eyewear', 'spectacles'],
   'glasses': ['sunglass', 'eyewear', 'spectacles'],
-  'sunglasses': ['sunglass', 'eyewear', 'glasses'],
-  'automatic': ['mechanical', 'self-winding', 'skeleton'],
-  'mechanical': ['automatic', 'winding', 'manual']
+  'sunglasses': ['sunglass', 'eyewear', 'glasses']
 };
 
 // Calculate Levenshtein Distance between two strings for fuzzy matching

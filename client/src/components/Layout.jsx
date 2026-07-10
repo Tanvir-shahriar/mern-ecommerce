@@ -386,7 +386,7 @@ export const Layout = () => {
                 <input
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search watches, brands, categories..."
+                  placeholder="Search products, brands, categories..."
                   autoFocus
                 />
                 <button type="submit" className="search-active-submit" aria-label="Submit search">

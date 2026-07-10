@@ -12,7 +12,7 @@ export const Seo = ({
 }) => {
   useEffect(() => {
     // 1. Dynamic Page Title
-    const defaultTitle = 'LahVenture Watches | Luxury Timepieces & Smartwatches';
+    const defaultTitle = 'LahVenture | Premium E-Commerce Shopping';
     document.title = title ? `${title} | LahVenture` : defaultTitle;
 
     // Helper to update meta tag by name or property
@@ -34,7 +34,7 @@ export const Seo = ({
     };
 
     // 2. Meta Description & Keywords
-    const defaultDescription = "LahVenture is Bangladesh's premier luxury watch and smartwatch destination featuring curated mechanical timepieces, Haute Horlogerie, and authentic smartwatches.";
+    const defaultDescription = "LahVenture is Bangladesh's premier e-commerce destination featuring a curated collection of premium products with guaranteed authenticity and fast delivery.";
     updateMeta('meta[name="description"]', description || defaultDescription);
 
     if (keywords) {

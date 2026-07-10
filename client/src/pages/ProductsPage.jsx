@@ -101,7 +101,7 @@ export const ProductsPage = () => {
   const categoryName = activeCategoryObj?.name || (currentCategorySlug ? currentCategorySlug.toUpperCase() : '');
   const brandName = activeBrandObj?.name || currentBrand || '';
 
-  let pageTitle = 'Shop watches by category';
+  let pageTitle = 'SHOP NOW';
   if (search) {
     pageTitle = `Search results for "${search}"`;
   } else if (brandName) {
@@ -114,7 +114,7 @@ export const ProductsPage = () => {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     'name': pageTitle,
-    'description': `Browse authentic ${brandName || categoryName || 'luxury'} timepieces and smartwatches at LahVenture.`,
+    'description': `Browse authentic ${brandName || categoryName || 'luxury'} products at LahVenture.`,
     'url': window.location.href,
     'mainEntity': {
       '@type': 'ItemList',
@@ -136,7 +136,7 @@ export const ProductsPage = () => {
     <section className="catalog-page">
       <Seo
         title={pageTitle}
-        description={`Explore our curated collection of ${brandName || categoryName || 'luxury mechanical and smartwatch'} timepieces with guaranteed authenticity and fast delivery.`}
+        description={`Explore our curated collection of ${brandName || categoryName || 'luxury'} products with guaranteed authenticity and fast delivery.`}
         schemaJson={catalogSchema}
       />
       {/* Mobile Filters UI */}
@@ -199,7 +199,7 @@ export const ProductsPage = () => {
                   type="search"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search watches, SKU, brand"
+                  placeholder="Search products, SKU, brand"
                 />
                 {search ? (
                   <button type="button" onClick={() => setSearch('')} aria-label="Clear search">
@@ -282,7 +282,7 @@ export const ProductsPage = () => {
           Search
           <div className="search-field">
             <Search size={16} />
-            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search watches, SKU, brand" />
+            <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search products, SKU, brand" />
             {search ? (
               <button type="button" onClick={() => setSearch('')} aria-label="Clear search">
                 <X size={15} />
