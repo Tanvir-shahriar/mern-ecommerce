@@ -527,6 +527,8 @@ export const HomePage = () => {
 
       <SpiderClock />
 
+      <PanoramicPhotoLibrary />
+
       <section className="perks-bar" aria-label="LahVenture service promises">
         <div className="perks-bar-header">
           <p className="eyebrow">LahVenture promise</p>
@@ -636,7 +638,6 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <PanoramicPhotoLibrary />
     </>
   );
 };
