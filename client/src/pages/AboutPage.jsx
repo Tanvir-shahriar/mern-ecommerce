@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import { Seo } from '../components/Seo.jsx';
 
 import img1 from '../assets/images/1.png';
@@ -6,7 +6,7 @@ import img2 from '../assets/images/2.png';
 import img3 from '../assets/images/3.png';
 
 export const AboutPage = () => {
-  useEffect(() => {
+  useLayoutEffect(() => {
     // 1. Add scroll-snap styles to html and body dynamically
     const originalHtmlScrollSnapType = document.documentElement.style.scrollSnapType;
     const originalHtmlScrollBehavior = document.documentElement.style.scrollBehavior;
@@ -33,32 +33,7 @@ export const AboutPage = () => {
     document.body.style.height = 'auto';
     document.body.style.overscrollBehaviorY = 'contain';
 
-    // 2. Load Tailwind CDN script dynamically
-    const script = document.createElement('script');
-    script.src = 'https://cdn.tailwindcss.com';
-    script.id = 'tailwind-cdn-script';
-
-    // Set Tailwind config before script loads
-    window.tailwind = {
-      config: {
-        theme: {
-          extend: {
-            colors: {
-              maroon: '#6b000b',
-              bglight: '#EAEAEA'
-            },
-            fontFamily: {
-              serif: ['"Playfair Display"', 'serif'],
-              sans: ['Inter', 'sans-serif']
-            }
-          }
-        }
-      }
-    };
-
-    document.head.appendChild(script);
-
-    // 3. Scroll Snap Intersection Observer
+    // 2. Scroll Snap Intersection Observer
     const triggers = document.querySelectorAll('.section-trigger');
     const slides = document.querySelectorAll('.slide');
     let currentIndex = -1;
@@ -158,21 +133,6 @@ export const AboutPage = () => {
       // Disconnect observer
       observer.disconnect();
 
-      // Remove Tailwind script
-      const tailwindScript = document.getElementById('tailwind-cdn-script');
-      if (tailwindScript) {
-        tailwindScript.remove();
-      }
-
-      // Remove tailwind style tags added dynamically
-      const styleTags = document.querySelectorAll('style');
-      styleTags.forEach(tag => {
-        if (tag.textContent && (tag.textContent.includes('--tw-') || tag.textContent.includes('tailwind'))) {
-          tag.remove();
-        }
-      });
-
-      delete window.tailwind;
     };
   }, []);
 
@@ -240,6 +200,7 @@ export const AboutPage = () => {
         .slide {
             position: absolute;
             inset: 0;
+            background: #EAEAEA;
             opacity: 0;
             visibility: hidden;
             pointer-events: none;
@@ -251,9 +212,137 @@ export const AboutPage = () => {
         }
 
         .about-slide-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100vh;
             gap: clamp(1rem, 3vh, 1.5rem);
+            padding: 5.75rem 1.5rem 1rem;
             padding-top: clamp(5.75rem, 12svh, 7rem);
             padding-bottom: clamp(1rem, 4svh, 2.5rem);
+        }
+
+        .slides-container :is(h1, h2, h3, p) {
+            margin: 0;
+        }
+
+        .about-intro {
+            position: relative;
+            z-index: 30;
+            text-align: center;
+        }
+
+        .slide .about-kicker,
+        .slide .about-name,
+        .slide .about-role,
+        .slide .about-thank-title,
+        .slide .about-thank-script {
+            font-family: "Playfair Display", Georgia, serif;
+        }
+
+        .slide .about-kicker {
+            margin-bottom: 0.25rem;
+        }
+
+        .slide .about-name {
+            margin-left: 0;
+            font-style: italic;
+        }
+
+        .slide .about-role {
+            margin-top: 0.5rem;
+        }
+
+        .about-profile-img {
+            position: relative;
+            z-index: 10;
+            width: auto;
+            object-fit: contain;
+            object-position: bottom;
+            filter: drop-shadow(0 25px 25px rgb(0 0 0 / 0.15));
+        }
+
+        .about-bio {
+            position: relative;
+            z-index: 30;
+            width: 100%;
+            font-family: Inter, sans-serif;
+            text-align: center;
+        }
+
+        .about-bio h3 {
+            margin-bottom: 0.5rem;
+            font-size: 0.625rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            line-height: 1.25;
+            text-transform: uppercase;
+        }
+
+        .about-bio-copy {
+            font-weight: 600;
+            line-height: 1.625;
+            text-transform: uppercase;
+        }
+
+        .about-bio br {
+            display: none;
+        }
+
+        #slide-3 {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .about-rings {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .about-rings > div {
+            position: absolute;
+            border-radius: 9999px;
+        }
+
+        .thank-you-text {
+            z-index: 10;
+            padding: 0 1.5rem;
+            text-align: center;
+            opacity: 0;
+        }
+
+        .slide .about-thank-title {
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .slide .about-thank-subtitle {
+            margin-top: 1.5rem;
+            font-family: Inter, sans-serif;
+            font-weight: 500;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .slide .about-thank-script {
+            margin-top: 1rem;
+            font-style: italic;
+        }
+
+        #scroll-track {
+            position: relative;
+            z-index: 0;
+            width: 100%;
         }
 
         .slide.active {
@@ -320,7 +409,9 @@ export const AboutPage = () => {
         }
 
         .slide .about-profile-img {
+            height: clamp(15rem, 36vh, 26rem) !important;
             height: clamp(15rem, 36svh, 26rem) !important;
+            max-height: calc(100vh - 18rem);
             max-height: calc(100svh - 18rem);
         }
 
@@ -358,12 +449,17 @@ export const AboutPage = () => {
 
         @media (min-width: 768px) {
             .about-slide-content {
+                display: block;
                 padding: 0;
             }
 
             .slide .about-intro {
+                position: absolute;
+                left: clamp(2rem, 10vw, 9rem) !important;
+                top: clamp(9rem, 28vh, 18rem) !important;
                 left: clamp(2rem, 10vw, 9rem) !important;
                 top: clamp(9rem, 28svh, 18rem) !important;
+                text-align: left;
             }
 
             .slide .about-kicker {
@@ -372,24 +468,45 @@ export const AboutPage = () => {
 
             .slide .about-name {
                 font-size: clamp(5.5rem, 8.8vw, 8rem) !important;
+                margin-left: 3rem;
             }
 
             .slide .about-role {
+                margin-top: clamp(4.5rem, 14vh, 8rem) !important;
                 margin-top: clamp(4.5rem, 14svh, 8rem) !important;
             }
 
             .slide .about-profile-img {
+                position: absolute;
+                bottom: 0;
+                left: 50%;
+                height: clamp(30rem, 80vh, 52rem) !important;
                 height: clamp(30rem, 80svh, 52rem) !important;
                 max-height: 88svh;
             }
 
             .slide .about-bio {
+                position: absolute;
                 right: clamp(2rem, 10vw, 9rem) !important;
+                bottom: clamp(4rem, 20vh, 10rem) !important;
                 bottom: clamp(4rem, 20svh, 10rem) !important;
+                width: 20rem;
+                text-align: right;
             }
 
             .slide .about-bio-sourav {
+                bottom: clamp(3rem, 15vh, 8.5rem) !important;
                 bottom: clamp(3rem, 15svh, 8.5rem) !important;
+                width: 24rem;
+            }
+
+            .about-bio h3 {
+                margin-bottom: 1.5rem;
+                font-size: 0.875rem;
+            }
+
+            .about-bio br {
+                display: inline;
             }
 
             .slide .about-bio-copy {
@@ -410,7 +527,12 @@ export const AboutPage = () => {
         }
 
         @media (min-width: 1024px) {
+            .slide .about-name {
+                margin-left: 6rem;
+            }
+
             .slide .about-profile-img {
+                height: clamp(34rem, 85vh, 56rem) !important;
                 height: clamp(34rem, 85svh, 56rem) !important;
             }
         }
@@ -619,7 +741,7 @@ export const AboutPage = () => {
 
       <div className="slides-container fixed inset-0 w-full h-full pointer-events-none z-40">
 
-        <div className="slide bg-bglight" id="slide-0">
+        <div className="slide active bg-bglight" id="slide-0">
           <div className="about-slide-content flex flex-col justify-center gap-6 md:gap-0 items-center h-full w-full px-6 pt-24 pb-4 md:block md:p-0">
             <div className="about-intro relative md:absolute md:left-[10%] md:top-[28%] text-center md:text-left dynamic-text">
               <h2 className="about-kicker text-3xl sm:text-4xl md:text-7xl font-serif text-maroon mb-1 md:mb-2">Hello, I Am</h2>
@@ -681,7 +803,7 @@ export const AboutPage = () => {
 
         <div className="slide bg-bglight flex flex-col items-center justify-center" id="slide-3">
           {/* Pulsing ring background */}
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
+          <div className="about-rings absolute inset-0 flex items-center justify-center pointer-events-none overflow-hidden">
             <div className="ring-1 absolute rounded-full" style={{ width: '30vw', height: '30vw', border: '1px solid rgba(107, 0, 11, 0.2)' }}></div>
             <div className="ring-2 absolute rounded-full" style={{ width: '50vw', height: '50vw', border: '1px solid rgba(107, 0, 11, 0.15)' }}></div>
             <div className="ring-3 absolute rounded-full" style={{ width: '70vw', height: '70vw', border: '1px solid rgba(107, 0, 11, 0.08)' }}></div>
