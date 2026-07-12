@@ -1,10 +1,7 @@
 import {
-  ArrowUpRight,
   Clock3,
   Globe2,
-  Heart,
   Mail,
-  MapPin,
   Menu,
   Package,
   Search,
@@ -577,103 +574,82 @@ export const Layout = () => {
       {!isAboutPage && (
         <footer className="site-footer">
           <div className="footer-inner">
-            <div className="footer-brand-panel">
-              <Link to="/" className="footer-brand" aria-label="lahVenture home">
-                <img className="footer-logo" src={logoPath} alt="" />
-              </Link>
-              <p>
-                Curated watches and smartwatches for Bangladesh, with clear product data,
-                secure checkout, saved delivery profiles, and order tracking.
-              </p>
-
-              <div className="footer-service-strip" aria-label="LahVenture service highlights">
+            <div className="footer-assurances" aria-label="Shopping assurances">
+              <div className="footer-assurance">
+                <ShieldCheck size={20} />
                 <span>
-                  <ShieldCheck size={17} />
-                  Verified listings
+                  <strong>Secure checkout</strong>
+                  <small>Protected purchase flow</small>
                 </span>
+              </div>
+              <div className="footer-assurance">
+                <Truck size={20} />
                 <span>
-                  <Truck size={17} />
-                  Tracked delivery
+                  <strong>Nationwide delivery</strong>
+                  <small>Shipping across Bangladesh</small>
                 </span>
+              </div>
+              <div className="footer-assurance">
+                <Clock3 size={20} />
                 <span>
-                  <Clock3 size={17} />
-                  After-order updates
+                  <strong>Order updates</strong>
+                  <small>Track every purchase</small>
                 </span>
               </div>
             </div>
 
-            <div className="footer-directory" aria-label="Footer navigation">
-              <div className="footer-column">
-                <h2>Collections</h2>
-                <Link to="/products">All watches</Link>
-                <Link to="/products?category=Smartwatch">Smartwatches</Link>
-                <Link to="/products?category=Automatic%20Watches">Automatic watches</Link>
-                <Link to="/products?category=Chronographs">Chronographs</Link>
-                <Link to="/products?category=Straps%20%26%20Accessories">Straps and accessories</Link>
-              </div>
-
-              <div className="footer-column">
-                <h2>Brands</h2>
-                <Link to="/products?brand=Sea-Gull">Sea-Gull</Link>
-                <Link to="/products?brand=San%20Martin">San Martin</Link>
-                <Link to="/products?brand=Sugess">Sugess</Link>
-                <Link to="/products?brand=Pagani%20Design">Pagani Design</Link>
-                <Link to="/brands">View all brands</Link>
-              </div>
-
-              <div className="footer-column">
-                <h2>Service</h2>
-                <Link to="/account">My account</Link>
-                <Link to="/cart">Cart</Link>
-                <Link to="/account">Order tracking</Link>
-                <Link to="/contact">Contact support</Link>
-                <Link to="/products">Search catalog</Link>
-              </div>
-
-              <div className="footer-column footer-contact-column">
-                <h2>Contact</h2>
-                <Link to="/contact">
+            <div className="footer-main">
+              <div className="footer-brand-summary">
+                <Link to="/" className="footer-brand" aria-label="lahVenture home">
+                  <img className="footer-logo" src={logoPath} alt="LahVenture" />
+                </Link>
+                <p>Curated watches and everyday essentials, delivered across Bangladesh.</p>
+                <Link className="footer-support-link" to="/contact">
                   <Mail size={16} />
                   Contact support
                 </Link>
-                <Link to="/account">
-                  <Truck size={16} />
-                  Track an order
-                </Link>
-                <span>
-                  <MapPin size={16} />
-                  Dhaka, Bangladesh
-                </span>
-                <Link className="footer-contact-cta" to="/contact">
-                  Get assistance
-                  <ArrowUpRight size={15} />
-                </Link>
               </div>
-            </div>
 
-            <div className="footer-newsletter">
-              <div>
-                <p className="footer-kicker">Collectors desk</p>
-                <h2>Receive new arrivals and watch-care notes.</h2>
+              <nav className="footer-nav" aria-label="Footer navigation">
+                <div className="footer-nav-column">
+                  <h2>Shop</h2>
+                  <Link to="/products">All products</Link>
+                  <Link to="/products?category=Smartwatch">Smartwatches</Link>
+                  <Link to="/products?category=Automatic%20Watches">Automatic watches</Link>
+                  <Link to="/brands">Brands</Link>
+                </div>
+
+                <div className="footer-nav-column">
+                  <h2>Help</h2>
+                  <Link to="/account?tab=orders">Track an order</Link>
+                  <Link to="/account">My account</Link>
+                  <Link to="/cart">Shopping cart</Link>
+                  <Link to="/contact">Customer support</Link>
+                </div>
+              </nav>
+
+              <div className="footer-subscribe">
+                <p className="footer-kicker">Stay in the loop</p>
+                <h2>New arrivals and offers</h2>
+                <p>Occasional product updates, straight to your inbox.</p>
+                <form
+                  className="footer-newsletter-form"
+                  onSubmit={(event) => event.preventDefault()}
+                  aria-label="Newsletter signup"
+                >
+                  <input type="email" placeholder="Email address" aria-label="Email address" />
+                  <button type="submit">Subscribe</button>
+                </form>
               </div>
-              <form
-                className="footer-newsletter-form"
-                onSubmit={(event) => event.preventDefault()}
-                aria-label="Newsletter signup"
-              >
-                <input type="email" placeholder="Email address" aria-label="Email address" />
-                <button type="submit">Notify me</button>
-              </form>
             </div>
 
             <div className="footer-bottom">
-              <span>© 2026 LahVenture. Time well lived.</span>
-              <div className="footer-legal">
-                <span>Secure checkout</span>
-                <span>Bangladesh delivery</span>
-                <span>Customer-first support</span>
+              <span>© 2026 LahVenture. All rights reserved.</span>
+              <div className="footer-meta">
+                <Link to="/about">About</Link>
+                <Link to="/contact">Contact</Link>
+                <span>Dhaka, Bangladesh</span>
               </div>
-              <Heart size={17} aria-hidden="true" />
             </div>
           </div>
         </footer>
