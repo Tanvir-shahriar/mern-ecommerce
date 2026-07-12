@@ -12846,3 +12846,391 @@ textarea:focus {
     animation-iteration-count: 1;
   }
 }
+
+/* Homepage-only warm light theme */
+.home-light-theme {
+  --home-cream: #fbf7ef;
+  --home-cream-deep: #eee8de;
+  --home-paper: #fffdf8;
+  --home-ink: #352f29;
+  --home-muted: #70675e;
+  --home-line: rgba(82, 67, 53, 0.16);
+  --home-accent: #6b000b;
+  color: var(--home-ink);
+  background: linear-gradient(180deg, #fffdf8 0%, #f3eee5 48%, #faf7f0 100%);
+}
+
+/* Hero */
+.home-light-theme .hero-section {
+  background:
+    radial-gradient(circle at 68% 24%, rgba(255, 255, 255, 0.98), transparent 27%),
+    radial-gradient(circle at 76% 62%, rgba(173, 158, 139, 0.13), transparent 34%),
+    linear-gradient(118deg, #fffdf8 0%, #f5f0e8 48%, #e8e2d8 100%) !important;
+}
+
+.home-light-theme .hero-section::before {
+  background: linear-gradient(90deg, rgba(255, 253, 248, 0.34), transparent 58%);
+}
+
+.home-light-theme .hero-section::after {
+  background:
+    radial-gradient(circle at 54% 48%, transparent 0%, rgba(112, 97, 80, 0.045) 72%, rgba(112, 97, 80, 0.08) 100%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.18), transparent 62%, rgba(109, 94, 78, 0.08));
+}
+
+.home-light-theme .hero-content-custom,
+.home-light-theme .hero-title-custom,
+.home-light-theme .hero-slogan-custom {
+  color: var(--home-ink);
+}
+
+.home-light-theme .hero-content-custom::before {
+  background: linear-gradient(180deg, transparent, rgba(83, 68, 54, 0.24) 16%, rgba(var(--accent-color-rgb, 122, 11, 23), 0.62) 76%, transparent);
+}
+
+.home-light-theme .hero-title-custom {
+  opacity: 0.94;
+}
+
+.home-light-theme .hero-slogan-custom {
+  text-shadow: 0 8px 24px rgba(83, 68, 54, 0.1);
+}
+
+.home-light-theme .hero-sku,
+.home-light-theme .hero-available-label {
+  color: rgba(53, 47, 41, 0.5);
+}
+
+.home-light-theme .hero-subtext-custom {
+  color: rgba(53, 47, 41, 0.78);
+}
+
+.home-light-theme .hero-badge-pill {
+  color: #5d5147;
+  background: rgba(255, 253, 248, 0.7);
+  border: 1px solid rgba(91, 75, 60, 0.14);
+  box-shadow: 0 10px 28px rgba(91, 75, 60, 0.1);
+}
+
+.home-light-theme .find-out-more-badge {
+  color: var(--home-accent);
+  background: rgba(107, 0, 11, 0.055);
+  border-color: rgba(107, 0, 11, 0.18);
+}
+
+.home-light-theme .hero-watch-container {
+  filter: drop-shadow(0 24px 42px rgba(77, 64, 51, 0.28));
+}
+
+.home-light-theme .hero-video-widget {
+  border-color: rgba(83, 68, 54, 0.18);
+  box-shadow: 0 14px 34px rgba(77, 64, 51, 0.2);
+}
+
+/* Full-bleed video, softened into the warm palette */
+.home-light-theme .patek-carousel-scroll-stage,
+.home-light-theme .patek-hero-carousel,
+.home-light-theme .patek-carousel-media-wrapper {
+  background: var(--home-cream-deep);
+}
+
+.home-light-theme .patek-video {
+  filter: saturate(0.82) sepia(0.08) brightness(1.08);
+}
+
+.home-light-theme .patek-carousel-overlay {
+  background:
+    linear-gradient(90deg, rgba(255, 252, 245, 0.94) 0%, rgba(251, 247, 239, 0.76) 36%, rgba(248, 243, 234, 0.16) 72%),
+    linear-gradient(180deg, rgba(255, 252, 245, 0.12), rgba(93, 78, 62, 0.2));
+}
+
+.home-light-theme .patek-carousel-content-container,
+.home-light-theme .patek-carousel-title {
+  color: var(--home-ink);
+}
+
+.home-light-theme .patek-carousel-description p {
+  color: rgba(53, 47, 41, 0.78);
+}
+
+.home-light-theme .patek-carousel-cta:hover {
+  color: var(--home-ink);
+  border-color: var(--home-ink);
+}
+
+.home-light-theme .patek-carousel-controls {
+  background: rgba(255, 252, 245, 0.82);
+  border-color: rgba(83, 68, 54, 0.16);
+  box-shadow: 0 10px 28px rgba(77, 64, 51, 0.12);
+}
+
+.home-light-theme .patek-play-pause-btn {
+  color: var(--home-ink);
+}
+
+.home-light-theme .patek-play-pause-btn:hover {
+  background: rgba(83, 68, 54, 0.09);
+}
+
+/* Signature section */
+.home-light-theme .lahv-signature-section {
+  color: var(--home-ink);
+  background:
+    radial-gradient(circle at 78% 34%, rgba(255, 255, 255, 0.88), transparent 30%),
+    linear-gradient(128deg, #f5efe5 0%, #fffdf8 54%, #ebe4d9 100%);
+}
+
+.home-light-theme .lahv-signature-section::before {
+  background:
+    linear-gradient(rgba(82, 67, 53, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(82, 67, 53, 0.04) 1px, transparent 1px);
+  opacity: 0.56;
+}
+
+.home-light-theme .lahv-signature-section::after {
+  background: linear-gradient(90deg, transparent, rgba(107, 0, 11, 0.24), transparent);
+}
+
+.home-light-theme .lahv-signature-section .signature-eyebrow,
+.home-light-theme .lahv-signature-index,
+.home-light-theme .lahv-signature-point svg {
+  color: var(--home-accent);
+}
+
+.home-light-theme .lahv-signature-copy h2,
+.home-light-theme .lahv-signature-point strong {
+  color: var(--home-ink);
+}
+
+.home-light-theme .lahv-signature-copy p:not(.eyebrow),
+.home-light-theme .lahv-signature-point span {
+  color: var(--home-muted);
+}
+
+.home-light-theme .lahv-signature-secondary {
+  color: var(--home-ink);
+  background: rgba(255, 253, 248, 0.62);
+  border-color: rgba(107, 0, 11, 0.24);
+}
+
+.home-light-theme .lahv-signature-secondary:hover {
+  background: rgba(107, 0, 11, 0.06);
+  border-color: rgba(107, 0, 11, 0.42);
+}
+
+.home-light-theme .lahv-signature-visual::before {
+  border-color: rgba(107, 0, 11, 0.14);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.14)),
+    rgba(224, 215, 203, 0.34);
+}
+
+.home-light-theme .lahv-signature-visual img {
+  filter: drop-shadow(0 30px 38px rgba(77, 64, 51, 0.24));
+}
+
+.home-light-theme .lahv-signature-caption {
+  border-left-color: var(--home-accent);
+  background: rgba(255, 253, 248, 0.78);
+  box-shadow: 0 14px 34px rgba(77, 64, 51, 0.1);
+}
+
+.home-light-theme .lahv-signature-caption span {
+  color: var(--home-muted);
+}
+
+.home-light-theme .lahv-signature-caption strong {
+  color: var(--home-ink);
+}
+
+.home-light-theme .lahv-signature-point {
+  border-color: var(--home-line);
+}
+
+/* Animated clock */
+.home-light-theme .spider-clock-section {
+  color: var(--home-ink);
+  background:
+    radial-gradient(circle at 50% 48%, rgba(255, 255, 255, 0.98) 0%, rgba(250, 246, 238, 0.9) 36%, transparent 67%),
+    linear-gradient(145deg, #ece5da 0%, #fbf8f1 52%, #e7dfd3 100%);
+}
+
+.home-light-theme .spider-clock-section .vline {
+  background: rgba(107, 0, 11, 0.42);
+}
+
+.home-light-theme .spider-clock-section svg :is(path, use) {
+  fill: #6b2024 !important;
+}
+
+/* Panoramic gallery */
+.home-light-theme .panoramic-library-section {
+  background:
+    radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.92), transparent 32%),
+    linear-gradient(126deg, #f6f0e7 0%, #fffaf2 48%, #e9e2d7 100%);
+}
+
+.home-light-theme .panoramic-custom-cursor {
+  background: rgba(255, 250, 242, 0.12);
+}
+
+.home-light-theme .panoramic-card {
+  background: #e7dfd4;
+}
+
+.home-light-theme .panoramic-loading,
+.home-light-theme .panoramic-empty {
+  color: rgba(83, 47, 43, 0.58);
+}
+
+/* Service promise */
+.home-light-theme .perks-bar {
+  color: var(--home-ink);
+  background:
+    radial-gradient(circle at 12% 20%, rgba(255, 255, 255, 0.84), transparent 28%),
+    linear-gradient(132deg, #eee7dc 0%, #fffdf8 48%, #ece5da 100%);
+  border-color: var(--home-line);
+}
+
+.home-light-theme .perks-bar::before {
+  background:
+    linear-gradient(rgba(82, 67, 53, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(82, 67, 53, 0.035) 1px, transparent 1px);
+  opacity: 0.64;
+}
+
+.home-light-theme .perks-bar::after {
+  background: linear-gradient(90deg, transparent, rgba(107, 0, 11, 0.2), transparent);
+}
+
+.home-light-theme .perks-bar-header .eyebrow,
+.home-light-theme .perk-card-number {
+  color: var(--home-accent);
+}
+
+.home-light-theme .perks-bar-header::after,
+.home-light-theme .perk-card-copy span,
+.home-light-theme .perk-card-copy p {
+  color: var(--home-muted);
+}
+
+.home-light-theme .perks-grid,
+.home-light-theme .perk-card {
+  border-color: var(--home-line);
+}
+
+.home-light-theme .perk-card {
+  background: rgba(255, 253, 248, 0.54);
+}
+
+.home-light-theme .perk-card:hover {
+  background: rgba(255, 255, 255, 0.86);
+  border-color: rgba(107, 0, 11, 0.2);
+  box-shadow: 0 18px 38px rgba(77, 64, 51, 0.08);
+}
+
+.home-light-theme .perk-card::before {
+  background: var(--home-accent);
+}
+
+.home-light-theme .perk-card-copy h3 {
+  color: var(--home-ink);
+}
+
+.home-light-theme .perk-icon-shell {
+  box-shadow: 0 14px 28px rgba(77, 64, 51, 0.14);
+}
+
+/* Brand showcase */
+.home-light-theme .brand-showcase-section {
+  color: var(--home-ink);
+  background:
+    radial-gradient(circle at 82% 16%, rgba(255, 255, 255, 0.92), transparent 30%),
+    linear-gradient(124deg, #f8f3eb 0%, #eee7dc 52%, #fffdf8 100%);
+}
+
+.home-light-theme .brand-showcase-section::before {
+  background:
+    linear-gradient(rgba(82, 67, 53, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(82, 67, 53, 0.035) 1px, transparent 1px);
+  opacity: 0.58;
+}
+
+.home-light-theme .brand-showcase-heading,
+.home-light-theme .brand-showcase-meta,
+.home-light-theme .brand-showcase-meta div {
+  border-color: var(--home-line);
+}
+
+.home-light-theme .brand-showcase-heading h2,
+.home-light-theme .brand-logo-card strong {
+  color: var(--home-ink);
+}
+
+.home-light-theme .brand-showcase-eyebrow,
+.home-light-theme .brand-showcase-meta strong,
+.home-light-theme .brand-card-index {
+  color: var(--home-accent);
+}
+
+.home-light-theme .brand-showcase-heading p:last-child,
+.home-light-theme .brand-showcase-meta span,
+.home-light-theme .brand-logo-card small,
+.home-light-theme .brand-showcase-footer > span {
+  color: var(--home-muted);
+}
+
+.home-light-theme .brand-logo-card {
+  color: var(--home-ink);
+  border-color: var(--home-line);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.86), rgba(245, 239, 230, 0.68)),
+    rgba(255, 253, 248, 0.82);
+  box-shadow: 0 12px 30px rgba(77, 64, 51, 0.06);
+}
+
+.home-light-theme .brand-logo-card::after {
+  background: linear-gradient(120deg, transparent 0%, rgba(107, 0, 11, 0.055) 42%, transparent 70%);
+}
+
+.home-light-theme .brand-logo-card:hover {
+  border-color: rgba(107, 0, 11, 0.28);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.96), rgba(239, 232, 222, 0.76)),
+    var(--home-paper);
+  box-shadow: 0 24px 48px rgba(77, 64, 51, 0.13);
+}
+
+/* Featured products section shell; product cards and their buttons remain unchanged */
+.home-light-theme .featured-watch-section {
+  color: var(--home-ink);
+  background:
+    radial-gradient(circle at 18% 16%, rgba(255, 255, 255, 0.94), transparent 28%),
+    linear-gradient(132deg, #eee7dc 0%, #fffdf8 50%, #e9e2d7 100%);
+  border-color: var(--home-line);
+}
+
+.home-light-theme .featured-watch-section::before {
+  background:
+    linear-gradient(rgba(82, 67, 53, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(82, 67, 53, 0.035) 1px, transparent 1px);
+  opacity: 0.58;
+}
+
+.home-light-theme .featured-watch-heading {
+  border-color: var(--home-line);
+}
+
+.home-light-theme .featured-watch-eyebrow,
+.home-light-theme .featured-watch-copy h2 .brand-v {
+  color: var(--home-accent);
+}
+
+.home-light-theme .featured-watch-copy h2,
+.home-light-theme .featured-watch-copy h2 .inline-brand {
+  color: var(--home-ink);
+}
+
+.home-light-theme .featured-watch-copy p:last-child {
+  color: var(--home-muted);
+}

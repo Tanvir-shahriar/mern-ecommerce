@@ -324,6 +324,7 @@ export const HomePage = () => {
         keywords="online shopping bangladesh, best e-commerce in bangladesh, luxury watches bangladesh, buy watch online dhaka, smartwatch price in bangladesh, original watches bd"
         schemaJson={homeSchema}
       />
+      <div className="home-page home-light-theme">
       <section 
         className="hero-section" 
         style={{ background: activeWatch.gradient || defaultHeroSlides[0].gradient }}
@@ -638,6 +639,7 @@ export const HomePage = () => {
         </div>
       </section>
 
+      </div>
     </>
   );
 };
