@@ -13299,3 +13299,190 @@ textarea:focus {
     min-height: 44px;
   }
 }
+
+/* Grouped admin navigation */
+.admin-navigation {
+  position: relative;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.admin-navigation .admin-tabs {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+.admin-section-switcher {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.admin-section-trigger {
+  min-width: 190px;
+  min-height: 48px;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px 6px 7px;
+  border: 1px solid #d8dee5;
+  border-radius: var(--radius);
+  color: var(--ink);
+  background: #ffffff;
+  text-align: left;
+  box-shadow: 0 8px 22px rgba(23, 32, 38, 0.06);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.admin-section-trigger:hover,
+.admin-section-trigger[aria-expanded="true"] {
+  border-color: rgba(102, 0, 12, 0.32);
+  box-shadow: 0 10px 26px rgba(102, 0, 12, 0.1);
+}
+
+.admin-section-trigger-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  color: #ffffff;
+  background: #66000c;
+}
+
+.admin-section-trigger-copy,
+.admin-section-trigger-copy small,
+.admin-section-trigger-copy strong {
+  display: block;
+}
+
+.admin-section-trigger-copy small {
+  margin-bottom: 1px;
+  color: var(--muted);
+  font-size: 0.66rem;
+  font-weight: 750;
+  letter-spacing: 0.07em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.admin-section-trigger-copy strong {
+  font-size: 0.9rem;
+  line-height: 1.25;
+}
+
+.admin-section-chevron {
+  color: var(--muted);
+  transition: transform 160ms ease;
+}
+
+.admin-section-chevron.open {
+  transform: rotate(180deg);
+}
+
+.admin-section-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  z-index: 100;
+  width: 270px;
+  display: grid;
+  gap: 5px;
+  padding: 7px;
+  border: 1px solid #d8dee5;
+  border-radius: var(--radius);
+  background: #ffffff;
+  box-shadow: 0 20px 46px rgba(23, 32, 38, 0.16);
+  animation: admin-section-menu-in 160ms ease both;
+}
+
+@keyframes admin-section-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.admin-section-option {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 0;
+  border-radius: 6px;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+  transition: color 150ms ease, background 150ms ease;
+}
+
+.admin-section-option > svg {
+  color: #66000c;
+}
+
+.admin-section-option span,
+.admin-section-option strong,
+.admin-section-option small {
+  display: block;
+}
+
+.admin-section-option strong {
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.admin-section-option small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.admin-section-option:hover,
+.admin-section-option.active {
+  color: #66000c;
+  background: #f9eef0;
+}
+
+.admin-section-option.active {
+  box-shadow: inset 3px 0 0 #66000c;
+}
+
+@media (max-width: 900px) {
+  .admin-navigation {
+    display: grid;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .admin-section-trigger {
+    width: 220px;
+  }
+}
+
+@media (max-width: 680px) {
+  .admin-section-switcher,
+  .admin-section-trigger {
+    width: 100%;
+  }
+
+  .admin-section-menu {
+    width: 100%;
+  }
+
+  .admin-page .admin-navigation .admin-tabs {
+    width: calc(100% + 24px);
+    margin-inline: -12px;
+    padding-inline: 12px;
+  }
+}
