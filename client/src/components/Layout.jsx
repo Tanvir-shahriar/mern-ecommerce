@@ -22,11 +22,19 @@ import { api, mediaUrl } from '../services/api.js';
 import lahventureLogo from '../assets/images/Lahventure Logo.png';
 
 const navClass = ({ isActive }) => (isActive ? 'nav-link active' : 'nav-link');
+const adminNavClass = ({ isActive }) => `${isActive ? 'nav-link active' : 'nav-link'} nav-admin-only`;
 const logoPath = lahventureLogo;
 
 export const Layout = () => {
   const location = useLocation();
   const isAboutPage = location.pathname === '/about';
+  const primaryNavSurfaceClass = location.pathname === '/'
+    ? 'nav-surface-home'
+    : location.pathname.startsWith('/about') || location.pathname.startsWith('/brands')
+      ? 'nav-surface-soft-gray'
+      : location.pathname.startsWith('/contact')
+        ? 'nav-surface-contact'
+        : 'nav-surface-default';
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const navigate = useNavigate();
@@ -200,7 +208,7 @@ export const Layout = () => {
   return (
     <div className="site-shell">
       {open && <div className="menu-backdrop" onClick={() => setOpen(false)} />}
-      <header className="site-header">
+      <header className={`site-header ${primaryNavSurfaceClass}`}>
         <div className="header-inner">
           <div className="brand-group">
             <button
@@ -371,7 +379,7 @@ export const Layout = () => {
               Contact
             </NavLink>
             {isAdmin ? (
-              <NavLink className={`${navClass} nav-admin-only`} to="/admin" onClick={() => setOpen(false)}>
+              <NavLink className={adminNavClass} to="/admin" onClick={() => setOpen(false)}>
                 Admin
               </NavLink>
             ) : null}

@@ -140,7 +140,7 @@ main {
   padding: 14px 0;
   background: linear-gradient(90deg, #6b000b 0%, #4a0006 100%) !important;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: none;
   backdrop-filter: blur(20px);
   color: white;
   transition: background 0.3s ease;
@@ -13484,5 +13484,88 @@ textarea:focus {
     width: calc(100% + 24px);
     margin-inline: -12px;
     padding-inline: 12px;
+  }
+}
+
+/* Connected active tab treatment for the primary desktop navigation */
+@media (min-width: 1061px) {
+  .site-header {
+    --primary-nav-active-surface: rgba(245, 247, 249, 0.95);
+  }
+
+  .site-header.nav-surface-home {
+    --primary-nav-active-surface: rgba(255, 253, 248, 0.95);
+  }
+
+  .site-header.nav-surface-soft-gray {
+    --primary-nav-active-surface: rgba(234, 234, 234, 0.95);
+  }
+
+  .site-header.nav-surface-contact {
+    --primary-nav-active-surface: rgba(249, 248, 248, 0.95);
+  }
+
+  .primary-nav {
+    height: 61px;
+    margin-bottom: -15px;
+    isolation: isolate;
+  }
+
+  .primary-nav .nav-link {
+    position: relative;
+    z-index: 1;
+    transform: translateY(-7px);
+  }
+
+  .primary-nav .nav-link:hover {
+    transform: translateY(-7px);
+  }
+
+  .primary-nav .nav-link.active {
+    z-index: 2;
+    align-self: stretch;
+    min-height: 61px;
+    padding: 8px 24px 23px;
+    border-radius: 30px 30px 0 0;
+    color: #66000c;
+    background: var(--primary-nav-active-surface);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
+    backdrop-filter: blur(16px) saturate(1.16);
+    -webkit-backdrop-filter: blur(16px) saturate(1.16);
+    transform: none;
+  }
+
+  .primary-nav .nav-link.active:hover {
+    color: #66000c;
+    background: var(--primary-nav-active-surface);
+    transform: none;
+  }
+
+  .primary-nav .nav-link.active::before,
+  .primary-nav .nav-link.active::after {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    width: 24px;
+    height: 24px;
+    pointer-events: none;
+  }
+
+  .primary-nav .nav-link.active::before {
+    left: -24px;
+    background: radial-gradient(
+      circle at 0 0,
+      transparent 0 23.5px,
+      var(--primary-nav-active-surface) 24px
+    );
+  }
+
+  .primary-nav .nav-link.active::after {
+    right: -24px;
+    background: radial-gradient(
+      circle at 100% 0,
+      transparent 0 23.5px,
+      var(--primary-nav-active-surface) 24px
+    );
   }
 }
