@@ -6768,7 +6768,7 @@ textarea:focus {
 .footer-inner {
   position: relative;
   z-index: 1;
-  width: min(1180px, calc(100% - 36px));
+  width: calc(100% - 48px);
   margin: 0 auto;
   padding: clamp(54px, 7vw, 84px) 0 24px;
   display: grid;
