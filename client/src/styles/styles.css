@@ -13388,7 +13388,6 @@ textarea:focus {
 .home-motion-ready .patek-carousel-scroll-stage.home-motion-section .patek-hero-carousel,
 .home-motion-ready .lahv-signature-section.home-motion-section .lahv-signature-inner,
 .home-motion-ready .spider-clock-section.home-motion-section,
-.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-viewport,
 .home-motion-ready .perks-bar.home-motion-section .perks-bar-header,
 .home-motion-ready .brand-showcase-section.home-motion-section .brand-showcase-heading,
 .home-motion-ready .featured-watch-section.home-motion-section .featured-watch-heading {
@@ -13401,7 +13400,6 @@ textarea:focus {
     transform 1050ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-controls-row,
 .home-motion-ready .perks-bar.home-motion-section .perks-grid,
 .home-motion-ready .brand-showcase-section.home-motion-section :is(.brand-showcase-meta, .brand-marquee, .brand-showcase-footer),
 .home-motion-ready .featured-watch-section.home-motion-section .featured-product-grid {
@@ -13412,35 +13410,9 @@ textarea:focus {
     transform 920ms cubic-bezier(0.16, 1, 0.3, 1) 180ms;
 }
 
-.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-card {
-  opacity: 0;
-  transform: translate3d(0, 46px, 0) scale(0.955) rotateY(-5deg);
-  transform-origin: center bottom;
-  transition:
-    opacity 720ms ease,
-    transform 1050ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.home-motion-ready .panoramic-library-section.home-motion-section:not(.home-motion-visible) .panoramic-card:nth-child(even) {
-  transform: translate3d(0, 58px, 0) scale(0.945) rotateY(5deg);
-}
-
-.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-card:nth-child(2) {
-  transition-delay: 90ms;
-}
-
-.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-card:nth-child(3) {
-  transition-delay: 170ms;
-}
-
-.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-card:nth-child(n + 4) {
-  transition-delay: 240ms;
-}
-
 .home-motion-ready .home-motion-section.home-motion-visible:is(.spider-clock-section),
 .home-motion-ready .patek-carousel-scroll-stage.home-motion-visible .patek-hero-carousel,
 .home-motion-ready .lahv-signature-section.home-motion-visible .lahv-signature-inner,
-.home-motion-ready .panoramic-library-section.home-motion-visible :is(.panoramic-viewport, .panoramic-controls-row, .panoramic-card),
 .home-motion-ready .perks-bar.home-motion-visible :is(.perks-bar-header, .perks-grid),
 .home-motion-ready .brand-showcase-section.home-motion-visible :is(.brand-showcase-heading, .brand-showcase-meta, .brand-marquee, .brand-showcase-footer),
 .home-motion-ready .featured-watch-section.home-motion-visible :is(.featured-watch-heading, .featured-product-grid) {

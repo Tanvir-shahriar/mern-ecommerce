@@ -628,7 +628,6 @@ export const HomePage = () => {
       '.patek-carousel-scroll-stage',
       '.lahv-signature-section',
       '.spider-clock-section',
-      '.panoramic-library-section',
       '.perks-bar',
       '.brand-showcase-section',
       '.featured-watch-section'
