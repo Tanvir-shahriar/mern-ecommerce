@@ -19,9 +19,10 @@ export const AboutPage = () => {
     const originalBodyOverflowX = document.body.style.overflowX;
     const originalBodyHeight = document.body.style.height;
     const originalBodyOverscrollBehaviorY = document.body.style.overscrollBehaviorY;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    document.documentElement.style.scrollSnapType = 'y proximity';
-    document.documentElement.style.scrollBehavior = 'smooth';
+    document.documentElement.style.scrollSnapType = 'y mandatory';
+    document.documentElement.style.scrollBehavior = prefersReducedMotion ? 'auto' : 'smooth';
     document.documentElement.style.height = '100%';
     document.documentElement.style.overscrollBehaviorY = 'contain';
     document.documentElement.style.overflowAnchor = 'none';
@@ -33,88 +34,153 @@ export const AboutPage = () => {
     document.body.style.height = 'auto';
     document.body.style.overscrollBehaviorY = 'contain';
 
-    // 2. Scroll Snap Intersection Observer
-    const triggers = document.querySelectorAll('.section-trigger');
-    const slides = document.querySelectorAll('.slide');
-    let currentIndex = -1;
-    let activationFrame = null;
-    const triggerRatios = new Map();
+    // 2. Drive the fixed slides from the scroll-snap sections. The reference
+    // completes the outgoing animation before it starts the next entrance.
+    const triggers = [...document.querySelectorAll('.section-trigger')];
+    const slides = [...document.querySelectorAll('.slide')];
+    const exitDuration = prefersReducedMotion ? 0 : 900;
+    let activeIndex = -1;
+    let requestedIndex = -1;
+    let isTransitioning = false;
+    let scrollFrame = null;
+    let entryFrame = null;
+    let transitionTimer = null;
 
-    const observerOptions = {
-      root: null,
-      rootMargin: '0px',
-      threshold: [0.25, 0.4, 0.55, 0.7] // Track more scroll progress for smoother handoff
+    const clearSlideState = (slide) => {
+      slide.classList.remove('active', 'exit-up', 'exit-down', 'enter-from-top', 'enter-from-bottom');
+      slide.setAttribute('aria-hidden', 'true');
     };
 
-    function activateSlide(newIndex) {
-      if (newIndex === currentIndex) return;
+    const cancelPendingEntry = () => {
+      if (entryFrame !== null) {
+        cancelAnimationFrame(entryFrame);
+        entryFrame = null;
+      }
+    };
 
-      // Handle Exit phase for the outgoing slide
-      if (currentIndex >= 0) {
-        const currentSlide = slides[currentIndex];
-        if (currentSlide) {
-          currentSlide.classList.remove('active');
+    slides.forEach(clearSlideState);
 
-          if (newIndex > currentIndex) {
-            // Scrolling down - Exits upward
-            currentSlide.classList.add('exit-up');
-            currentSlide.classList.remove('exit-down');
-          } else {
-            // Scrolling up - Exits downward
-            currentSlide.classList.add('exit-down');
-            currentSlide.classList.remove('exit-up');
+    const enterSlide = (index, direction) => {
+      cancelPendingEntry();
+
+      const slide = slides[index];
+      activeIndex = index;
+
+      // The extra end trigger intentionally resolves to no slide, letting the
+      // final screen leave just like it does in the reference.
+      if (!slide) return;
+
+      clearSlideState(slide);
+      slide.classList.add(direction < 0 ? 'enter-from-top' : 'enter-from-bottom');
+      slide.setAttribute('aria-hidden', 'false');
+
+      // Keep the starting pose on screen for one paint so every entrance,
+      // including the first one, reliably animates.
+      entryFrame = requestAnimationFrame(() => {
+        entryFrame = requestAnimationFrame(() => {
+          if (activeIndex === index && !isTransitioning) {
+            slide.classList.add('active');
+          }
+          entryFrame = null;
+        });
+      });
+    };
+
+    const finishTransition = (fromIndex) => {
+      const outgoingSlide = slides[fromIndex];
+      if (outgoingSlide) clearSlideState(outgoingSlide);
+
+      isTransitioning = false;
+      transitionTimer = null;
+
+      const targetIndex = requestedIndex;
+      enterSlide(targetIndex, targetIndex < fromIndex ? -1 : 1);
+    };
+
+    const requestSlide = (nextIndex) => {
+      if (!Number.isFinite(nextIndex) || nextIndex < 0 || nextIndex >= triggers.length) return;
+
+      requestedIndex = nextIndex;
+
+      if (isTransitioning) {
+        // If the user reverses before the exit has completed, restore the
+        // outgoing slide from its current position instead of flashing blank.
+        if (nextIndex === activeIndex) {
+          window.clearTimeout(transitionTimer);
+          transitionTimer = null;
+          isTransitioning = false;
+
+          const interruptedSlide = slides[activeIndex];
+          if (interruptedSlide) {
+            interruptedSlide.classList.remove('exit-up', 'exit-down');
+            interruptedSlide.classList.add('active');
+            interruptedSlide.setAttribute('aria-hidden', 'false');
           }
         }
+        return;
       }
 
-      // Handle Entry phase for incoming slide
-      const nextSlide = slides[newIndex];
-      if (nextSlide) {
-        nextSlide.classList.remove('exit-up', 'exit-down');
+      if (nextIndex === activeIndex) return;
 
-        requestAnimationFrame(() => {
-          nextSlide.classList.add('active');
-        });
+      const fromIndex = activeIndex;
+      const outgoingSlide = slides[fromIndex];
+
+      if (!outgoingSlide) {
+        enterSlide(nextIndex, nextIndex < fromIndex ? -1 : 1);
+        return;
       }
 
-      currentIndex = newIndex;
-    }
+      const direction = nextIndex > fromIndex ? 1 : -1;
+      isTransitioning = true;
+      cancelPendingEntry();
+      outgoingSlide.classList.remove('active', 'enter-from-top', 'enter-from-bottom');
+      outgoingSlide.classList.add(direction > 0 ? 'exit-up' : 'exit-down');
 
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        triggerRatios.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0);
-      });
+      transitionTimer = window.setTimeout(() => finishTransition(fromIndex), exitDuration);
+    };
 
-      if (activationFrame) {
-        cancelAnimationFrame(activationFrame);
-      }
+    const getNearestTriggerIndex = () => {
+      const viewportCenter = window.innerHeight / 2;
+      let nearestIndex = 0;
+      let nearestDistance = Number.POSITIVE_INFINITY;
 
-      activationFrame = requestAnimationFrame(() => {
-        let bestIndex = currentIndex;
-        let bestRatio = 0.34;
+      triggers.forEach((trigger) => {
+        const rect = trigger.getBoundingClientRect();
+        const distance = Math.abs(rect.top + rect.height / 2 - viewportCenter);
+        const index = Number.parseInt(trigger.dataset.index, 10);
 
-        triggerRatios.forEach((ratio, trigger) => {
-          const targetIndex = parseInt(trigger.getAttribute('data-index'), 10);
-          if (ratio > bestRatio && Number.isFinite(targetIndex)) {
-            bestRatio = ratio;
-            bestIndex = targetIndex;
-          }
-        });
-
-        if (bestIndex >= 0) {
-          activateSlide(bestIndex);
+        if (distance < nearestDistance && Number.isFinite(index)) {
+          nearestDistance = distance;
+          nearestIndex = index;
         }
       });
-    }, observerOptions);
 
-    triggers.forEach(trigger => observer.observe(trigger));
-    requestAnimationFrame(() => activateSlide(0));
+      return nearestIndex;
+    };
+
+    const syncSlideToScroll = () => {
+      scrollFrame = null;
+      requestSlide(getNearestTriggerIndex());
+    };
+
+    const queueScrollSync = () => {
+      if (scrollFrame === null) {
+        scrollFrame = requestAnimationFrame(syncSlideToScroll);
+      }
+    };
+
+    window.addEventListener('scroll', queueScrollSync, { passive: true });
+    window.addEventListener('resize', queueScrollSync);
+    queueScrollSync();
 
     // Cleanup
     return () => {
-      if (activationFrame) {
-        cancelAnimationFrame(activationFrame);
-      }
+      if (scrollFrame !== null) cancelAnimationFrame(scrollFrame);
+      cancelPendingEntry();
+      if (transitionTimer !== null) window.clearTimeout(transitionTimer);
+      window.removeEventListener('scroll', queueScrollSync);
+      window.removeEventListener('resize', queueScrollSync);
+      slides.forEach(clearSlideState);
 
       // Restore html and body styles
       document.documentElement.style.scrollSnapType = originalHtmlScrollSnapType;
@@ -129,9 +195,6 @@ export const AboutPage = () => {
       document.body.style.overflowX = originalBodyOverflowX;
       document.body.style.height = originalBodyHeight;
       document.body.style.overscrollBehaviorY = originalBodyOverscrollBehaviorY;
-
-      // Disconnect observer
-      observer.disconnect();
 
     };
   }, []);
@@ -150,6 +213,14 @@ export const AboutPage = () => {
             left: 0;
             right: 0;
             z-index: 200 !important;
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translate3d(0, 0, 0) !important;
+        }
+
+        /* The reference keeps this page presentation completely unobstructed. */
+        .scroll-to-top-button {
+            display: none !important;
         }
 
         .section-trigger {
@@ -167,6 +238,7 @@ export const AboutPage = () => {
             width: 100%;
             height: 100vh !important;
             min-height: 100vh;
+            background: #EAEAEA;
             color: var(--about-theme-red);
             pointer-events: auto !important;
             z-index: 40;
@@ -355,43 +427,78 @@ export const AboutPage = () => {
         .slide.exit-up {
             opacity: 1;
             visibility: visible;
-            z-index: 5;
+            z-index: 20;
         }
 
         .slide.exit-down {
             opacity: 1;
             visibility: visible;
-            z-index: 5;
+            z-index: 20;
         }
 
-        /* Animation Blueprint Elements Initial State */
+        /* Profile slides: staged entry poses */
         .profile-img {
-            transform: translate3d(0, 100%, 0);
-            opacity: 0;
-            transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1), opacity 1s ease;
-            will-change: transform, opacity;
+            transform: translate3d(0, 115%, 0);
+            opacity: 1;
+            transition: transform 860ms cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
             backface-visibility: hidden;
         }
 
         @media (min-width: 768px) {
             .profile-img {
-                transform: translate3d(-50%, 100%, 0);
+                transform: translate3d(-50%, 115%, 0);
             }
         }
 
-        .dynamic-text {
-            transform: translate3d(0, 30px, 0);
+        .slide .about-kicker,
+        .slide .about-name,
+        .slide .about-role,
+        .slide .about-bio h3,
+        .slide .about-bio-copy {
             opacity: 0;
-            transition: transform 1s cubic-bezier(0.25, 1, 0.5, 1) 0.1s, opacity 1s ease 0.1s;
+            transform: translate3d(0, 28px, 0);
             will-change: transform, opacity;
             backface-visibility: hidden;
         }
 
-        .bio-text {
-            opacity: 0;
-            transition: opacity 1s ease 0.4s;
-            will-change: opacity;
-            backface-visibility: hidden;
+        .slide .about-kicker {
+            transition: transform 560ms cubic-bezier(0.16, 1, 0.3, 1) 180ms,
+                        opacity 420ms ease 180ms;
+        }
+
+        .slide .about-bio h3 {
+            transition: transform 520ms cubic-bezier(0.16, 1, 0.3, 1) 360ms,
+                        opacity 400ms ease 360ms;
+        }
+
+        .slide .about-name {
+            transition: transform 620ms cubic-bezier(0.16, 1, 0.3, 1) 500ms,
+                        opacity 460ms ease 500ms;
+        }
+
+        .slide .about-bio-copy {
+            transition: transform 640ms cubic-bezier(0.16, 1, 0.3, 1) 720ms,
+                        opacity 480ms ease 720ms;
+        }
+
+        .slide .about-role {
+            transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1) 920ms,
+                        opacity 380ms ease 920ms;
+        }
+
+        .slide.enter-from-top .profile-img {
+            transform: translate3d(0, -115%, 0);
+        }
+
+        .slide.enter-from-top :is(.about-kicker, .about-name, .about-role, .about-bio h3, .about-bio-copy) {
+            transform: translate3d(0, -28px, 0);
+        }
+
+        @media (min-width: 768px) {
+            .slide.enter-from-top .profile-img {
+                transform: translate3d(-50%, -115%, 0);
+            }
         }
 
         .slide .about-kicker {
@@ -537,10 +644,9 @@ export const AboutPage = () => {
             }
         }
 
-        /* Phase 1 & 2: Entry and Rest (Active Class) */
+        /* Entry and rest */
         .slide.active .profile-img {
             transform: translate3d(0, 0%, 0);
-            opacity: 1;
         }
 
         @media (min-width: 768px) {
@@ -549,157 +655,220 @@ export const AboutPage = () => {
             }
         }
 
-        .slide.active .dynamic-text {
-            transform: translate3d(0, 0%, 0);
+        .slide.active :is(.about-kicker, .about-name, .about-role, .about-bio h3, .about-bio-copy) {
+            transform: translate3d(0, 0, 0);
             opacity: 1;
         }
 
-        .slide.active .bio-text {
-            opacity: 1;
-        }
-
-        /* Phase 3: Slide Exit (Exit-Up Class) */
+        /* Downward page movement: portrait leaves first, supporting copy trails. */
         .slide.exit-up .profile-img {
-            transform: translate3d(0, -120%, 0);
-            opacity: 0;
-            transition: transform 1s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.4s ease 0.1s;
+            transform: translate3d(0, -115%, 0);
+            transition: transform 680ms cubic-bezier(0.7, 0, 0.84, 0);
         }
 
         @media (min-width: 768px) {
             .slide.exit-up .profile-img {
-                transform: translate3d(-50%, -120%, 0);
+                transform: translate3d(-50%, -115%, 0);
             }
         }
 
-        .slide.exit-up .dynamic-text {
-            transform: translate3d(0, -80px, 0);
+        .slide.exit-up .about-kicker {
+            transform: translate3d(0, -46px, 0);
             opacity: 0;
-            transition: transform 1s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.4s ease;
+            transition: transform 380ms cubic-bezier(0.7, 0, 0.84, 0) 100ms,
+                        opacity 280ms ease 100ms;
         }
 
-        .slide.exit-up .bio-text {
+        .slide.exit-up .about-bio h3 {
+            transform: translate3d(0, -32px, 0);
             opacity: 0;
-            transition: opacity 0.4s ease;
+            transition: transform 380ms cubic-bezier(0.7, 0, 0.84, 0) 160ms,
+                        opacity 280ms ease 160ms;
         }
 
-        /* Reverse Scroll Exit (Exit-Down Class) */
+        .slide.exit-up .about-name {
+            transform: translate3d(0, -54px, 0);
+            opacity: 0;
+            transition: transform 420ms cubic-bezier(0.7, 0, 0.84, 0) 330ms,
+                        opacity 300ms ease 330ms;
+        }
+
+        .slide.exit-up .about-bio-copy {
+            transform: translate3d(0, -30px, 0);
+            opacity: 0;
+            transition: transform 420ms cubic-bezier(0.7, 0, 0.84, 0) 420ms,
+                        opacity 300ms ease 420ms;
+        }
+
+        .slide.exit-up .about-role {
+            transform: translate3d(0, -38px, 0);
+            opacity: 0;
+            transition: transform 380ms cubic-bezier(0.7, 0, 0.84, 0) 500ms,
+                        opacity 280ms ease 500ms;
+        }
+
+        /* Reverse scrolling mirrors the choreography. */
         .slide.exit-down .profile-img {
-            transform: translate3d(0, 100%, 0);
-            opacity: 0;
-            transition: transform 1s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.4s ease;
+            transform: translate3d(0, 115%, 0);
+            transition: transform 680ms cubic-bezier(0.7, 0, 0.84, 0);
         }
 
         @media (min-width: 768px) {
             .slide.exit-down .profile-img {
-                transform: translate3d(-50%, 100%, 0);
+                transform: translate3d(-50%, 115%, 0);
             }
         }
 
-        .slide.exit-down .dynamic-text {
-            transform: translate3d(0, 50px, 0);
+        .slide.exit-down .about-kicker {
+            transform: translate3d(0, 46px, 0);
             opacity: 0;
-            transition: transform 1s cubic-bezier(0.5, 0, 0.75, 0), opacity 0.4s ease;
+            transition: transform 380ms cubic-bezier(0.7, 0, 0.84, 0) 100ms,
+                        opacity 280ms ease 100ms;
         }
 
-        .slide.exit-down .bio-text {
+        .slide.exit-down .about-bio h3 {
+            transform: translate3d(0, 32px, 0);
             opacity: 0;
-            transition: opacity 0.4s ease;
+            transition: transform 380ms cubic-bezier(0.7, 0, 0.84, 0) 160ms,
+                        opacity 280ms ease 160ms;
+        }
+
+        .slide.exit-down .about-name {
+            transform: translate3d(0, 54px, 0);
+            opacity: 0;
+            transition: transform 420ms cubic-bezier(0.7, 0, 0.84, 0) 330ms,
+                        opacity 300ms ease 330ms;
+        }
+
+        .slide.exit-down .about-bio-copy {
+            transform: translate3d(0, 30px, 0);
+            opacity: 0;
+            transition: transform 420ms cubic-bezier(0.7, 0, 0.84, 0) 420ms,
+                        opacity 300ms ease 420ms;
+        }
+
+        .slide.exit-down .about-role {
+            transform: translate3d(0, 38px, 0);
+            opacity: 0;
+            transition: transform 380ms cubic-bezier(0.7, 0, 0.84, 0) 500ms,
+                        opacity 280ms ease 500ms;
         }
 
         /* Thank You Pulsing Ring Animations */
         @keyframes pulseRing {
             0% {
                 transform: scale(0.85);
-                opacity: 0.6;
             }
             50% {
                 transform: scale(1.05);
-                opacity: 0.15;
             }
             100% {
                 transform: scale(0.85);
-                opacity: 0.6;
             }
         }
 
         @keyframes pulseRingSlow {
             0% {
                 transform: scale(0.9);
-                opacity: 0.4;
             }
             50% {
                 transform: scale(1.08);
-                opacity: 0.08;
             }
             100% {
                 transform: scale(0.9);
-                opacity: 0.4;
             }
         }
 
         @keyframes pulseRingOuter {
             0% {
                 transform: scale(0.95);
-                opacity: 0.2;
             }
             50% {
                 transform: scale(1.03);
-                opacity: 0.05;
             }
             100% {
                 transform: scale(0.95);
-                opacity: 0.2;
             }
-        }
-
-        .ring-1 {
-            animation: pulseRing 4s ease-in-out infinite;
-        }
-
-        .ring-2 {
-            animation: pulseRingSlow 6s ease-in-out infinite 1s;
-        }
-
-        .ring-3 {
-            animation: pulseRingOuter 8s ease-in-out infinite 2s;
         }
 
         #slide-3 .ring-1,
         #slide-3 .ring-2,
         #slide-3 .ring-3 {
             opacity: 0;
+            transition: opacity 480ms ease;
+            will-change: transform, opacity;
         }
 
-        #slide-3.active .ring-1,
-        #slide-3.active .ring-2,
+        #slide-3.active .ring-1 {
+            opacity: 0.6;
+            animation: pulseRing 4s ease-in-out infinite;
+        }
+
+        #slide-3.active .ring-2 {
+            opacity: 0.4;
+            animation: pulseRingSlow 6s ease-in-out 100ms infinite;
+        }
+
         #slide-3.active .ring-3 {
+            opacity: 0.2;
+            animation: pulseRingOuter 8s ease-in-out 200ms infinite;
+        }
+
+        #slide-3:is(.exit-up, .exit-down) :is(.ring-1, .ring-2, .ring-3) {
+            opacity: 0;
+        }
+
+        /* The reference resolves the title from a soft overscale, then adds
+           the two supporting lines in sequence. */
+        #slide-3:is(.active, .exit-up, .exit-down) .thank-you-text {
             opacity: 1;
         }
 
-        /* Thank You Screen Text Scale Animation */
-        #slide-3.active .thank-you-text {
-            animation: scaleUp 1.2s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-        }
-
         #slide-3.active .thank-you-line-1 {
-            animation: fadeSlideUp 1s cubic-bezier(0.25, 1, 0.5, 1) 0.2s forwards;
+            animation: thankTitleIn 680ms cubic-bezier(0.16, 1, 0.3, 1) 80ms forwards;
         }
 
         #slide-3.active .thank-you-line-2 {
-            animation: fadeSlideUp 1s cubic-bezier(0.25, 1, 0.5, 1) 0.5s forwards;
+            animation: fadeSlideUp 560ms cubic-bezier(0.16, 1, 0.3, 1) 360ms forwards;
         }
 
         #slide-3.active .thank-you-line-3 {
-            animation: fadeSlideUp 1s cubic-bezier(0.25, 1, 0.5, 1) 0.8s forwards;
+            animation: fadeSlideUp 600ms cubic-bezier(0.16, 1, 0.3, 1) 620ms forwards;
         }
 
-        @keyframes scaleUp {
+        #slide-3.exit-up .thank-you-line-1 {
+            animation: thankLineOutUp 360ms cubic-bezier(0.7, 0, 0.84, 0) forwards;
+        }
+
+        #slide-3.exit-up .thank-you-line-2 {
+            animation: thankLineOutUp 360ms cubic-bezier(0.7, 0, 0.84, 0) 120ms forwards;
+        }
+
+        #slide-3.exit-up .thank-you-line-3 {
+            animation: thankLineOutUp 360ms cubic-bezier(0.7, 0, 0.84, 0) 220ms forwards;
+        }
+
+        #slide-3.exit-down .thank-you-line-1 {
+            animation: thankLineOutDown 360ms cubic-bezier(0.7, 0, 0.84, 0) forwards;
+        }
+
+        #slide-3.exit-down .thank-you-line-2 {
+            animation: thankLineOutDown 360ms cubic-bezier(0.7, 0, 0.84, 0) 120ms forwards;
+        }
+
+        #slide-3.exit-down .thank-you-line-3 {
+            animation: thankLineOutDown 360ms cubic-bezier(0.7, 0, 0.84, 0) 220ms forwards;
+        }
+
+        @keyframes thankTitleIn {
             from {
-                transform: scale(0.9);
+                transform: translateY(14px) scale(1.08);
+                filter: blur(10px);
                 opacity: 0;
             }
             to {
-                transform: scale(1);
+                transform: translateY(0) scale(1);
+                filter: blur(0);
                 opacity: 1;
             }
         }
@@ -715,6 +884,28 @@ export const AboutPage = () => {
             }
         }
 
+        @keyframes thankLineOutUp {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-28px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes thankLineOutDown {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(28px);
+                opacity: 0;
+            }
+        }
+
         /* Hide scrollbar for cleaner presentation */
         ::-webkit-scrollbar {
             width: 0px;
@@ -723,8 +914,11 @@ export const AboutPage = () => {
 
         @media (prefers-reduced-motion: reduce) {
             .profile-img,
-            .dynamic-text,
-            .bio-text,
+            .slide .about-kicker,
+            .slide .about-name,
+            .slide .about-role,
+            .slide .about-bio h3,
+            .slide .about-bio-copy,
             .thank-you-text,
             .thank-you-line-1,
             .thank-you-line-2,
@@ -733,15 +927,17 @@ export const AboutPage = () => {
             .ring-2,
             .ring-3 {
                 animation-duration: 0.01ms !important;
+                animation-delay: 0ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
+                transition-delay: 0ms !important;
             }
         }
       `}</style>
 
       <div className="slides-container fixed inset-0 w-full h-full pointer-events-none z-40">
 
-        <div className="slide active bg-bglight" id="slide-0">
+        <div className="slide bg-bglight" id="slide-0">
           <div className="about-slide-content flex flex-col justify-center gap-6 md:gap-0 items-center h-full w-full px-6 pt-24 pb-4 md:block md:p-0">
             <div className="about-intro relative md:absolute md:left-[10%] md:top-[28%] text-center md:text-left dynamic-text">
               <h2 className="about-kicker text-3xl sm:text-4xl md:text-7xl font-serif text-maroon mb-1 md:mb-2">Hello, I Am</h2>
@@ -823,6 +1019,7 @@ export const AboutPage = () => {
         <section id="section-sourav" className="h-screen w-full section-trigger" data-index="1"></section>
         <section id="section-tushar" className="h-screen w-full section-trigger" data-index="2"></section>
         <section id="section-thankyou" className="h-screen w-full section-trigger" data-index="3"></section>
+        <section id="section-about-exit" className="h-screen w-full section-trigger" data-index="4" aria-hidden="true"></section>
       </div>
     </>
   );
