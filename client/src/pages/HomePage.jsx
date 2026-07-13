@@ -725,6 +725,7 @@ export const HomePage = () => {
       return () => root.classList.remove('home-motion-ready');
     }
 
+    const isCompactViewport = window.matchMedia('(max-width: 680px)').matches;
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
@@ -732,8 +733,8 @@ export const HomePage = () => {
         observer.unobserve(entry.target);
       });
     }, {
-      threshold: 0.12,
-      rootMargin: '0px 0px -8% 0px'
+      threshold: isCompactViewport ? 0.055 : 0.12,
+      rootMargin: isCompactViewport ? '0px 0px -3% 0px' : '0px 0px -8% 0px'
     });
 
     sections.forEach((section) => observer.observe(section));

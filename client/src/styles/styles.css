@@ -27,13 +27,14 @@ body,
 #root {
   width: 100%;
   min-height: 100%;
-  overflow-x: hidden;
+  /* `hidden` makes these elements scroll containers and breaks the sticky header. */
+  overflow-x: clip;
 }
 
 body {
   margin: 0;
   min-width: 320px;
-  overflow-x: hidden;
+  overflow-x: clip;
   background: var(--wash);
   color: var(--ink);
   font-family:
@@ -7556,12 +7557,17 @@ textarea:focus {
     gap: 0;
   }
 
+  .patek-carousel-scroll-stage {
+    height: 100svh;
+    min-height: 560px;
+  }
+
   .hero-carousel_hero-carousel__bEV8J.patek-hero-carousel {
-    height: 100vh;
+    height: 100%;
   }
 
   .hero-carousel-item_hero-carousel-item__d5OPU.patek-carousel-item {
-    height: 100vh;
+    height: 100%;
   }
 
   .hero-carousel-item_container__iKRW4.patek-carousel-content-container {
@@ -10129,6 +10135,10 @@ textarea:focus {
     min-height: 0;
     display: grid;
     grid-template-columns: 1fr;
+    grid-template-areas:
+      "visual"
+      "copy";
+    grid-template-rows: auto auto;
     gap: 16px;
     text-align: center;
     padding: 20px 18px 34px;
@@ -10142,6 +10152,7 @@ textarea:focus {
 
   .hero-content-custom {
     position: relative;
+    grid-area: copy;
     left: auto;
     top: auto;
     bottom: auto;
@@ -10149,7 +10160,7 @@ textarea:focus {
     row-gap: 8px;
     justify-self: center;
     align-items: flex-start;
-    order: 2;
+    order: initial;
     min-height: auto;
     text-align: left;
   }
@@ -10186,8 +10197,9 @@ textarea:focus {
 
   .hero-visual-custom {
     position: relative;
+    grid-area: visual;
     inset: auto;
-    order: 1;
+    order: initial;
     width: 100%;
     min-height: clamp(276px, 44vw, 390px);
     overflow: hidden;
@@ -10226,6 +10238,88 @@ textarea:focus {
   .hero-dots-container {
     bottom: 14px;
   }
+
+  .hero-content-custom.hero-is-active > * {
+    animation-name: hero-copy-element-in-mobile;
+    animation-duration: 560ms;
+  }
+
+  .hero-content-custom.hero-is-leaving {
+    animation: hero-copy-out-mobile 480ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  .hero-watch-container.hero-watch-is-active {
+    animation: hero-watch-in-mobile 760ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero-watch-container.hero-watch-is-leaving {
+    animation: hero-watch-out-mobile 620ms cubic-bezier(0.4, 0, 0.2, 1) both;
+  }
+
+  .hero-watch-image {
+    animation-name: hero-watch-showcase-mobile;
+    animation-duration: 8s;
+  }
+}
+
+@keyframes hero-copy-element-in-mobile {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes hero-copy-out-mobile {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+@keyframes hero-watch-in-mobile {
+  from {
+    opacity: 0;
+    filter: drop-shadow(0 14px 28px rgba(77, 64, 51, 0.12));
+    transform: var(--watch-base-transform) translate3d(0, 16px, 0) scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    filter: drop-shadow(0 20px 34px rgba(77, 64, 51, 0.24));
+    transform: var(--watch-base-transform) translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes hero-watch-out-mobile {
+  from {
+    opacity: 1;
+    transform: var(--watch-base-transform) translate3d(0, 0, 0) scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: var(--watch-base-transform) translate3d(0, -12px, 0) scale(1.035);
+  }
+}
+
+@keyframes hero-watch-showcase-mobile {
+  0%, 100% {
+    transform: translate3d(0, 1px, 0) rotateZ(-0.2deg);
+  }
+
+  50% {
+    transform: translate3d(0, -6px, 0) rotateZ(0.2deg);
+  }
 }
 
 @media (max-width: 680px) {
@@ -10237,6 +10331,7 @@ textarea:focus {
   .hero-content-custom {
     width: 100%;
     max-width: 354px;
+    min-height: 462px;
     justify-self: center;
     align-items: center;
     justify-items: center;
@@ -13445,6 +13540,35 @@ textarea:focus {
   transform: translate3d(0, 0, 0) scale(1) rotateY(0);
 }
 
+@media (max-width: 680px) {
+  .home-motion-ready .patek-carousel-scroll-stage.home-motion-section .patek-hero-carousel,
+  .home-motion-ready .lahv-signature-section.home-motion-section .lahv-signature-inner,
+  .home-motion-ready .spider-clock-section.home-motion-section,
+  .home-motion-ready .perks-bar.home-motion-section .perks-bar-header,
+  .home-motion-ready .brand-showcase-section.home-motion-section .brand-showcase-heading,
+  .home-motion-ready .featured-watch-section.home-motion-section .featured-watch-heading {
+    clip-path: none;
+    transform: translate3d(0, 22px, 0) scale(0.992);
+    transition:
+      opacity 440ms ease,
+      transform 640ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .home-motion-ready .perks-bar.home-motion-section .perks-grid,
+  .home-motion-ready .brand-showcase-section.home-motion-section :is(.brand-showcase-meta, .brand-marquee, .brand-showcase-footer),
+  .home-motion-ready .featured-watch-section.home-motion-section .featured-product-grid {
+    transform: translate3d(0, 18px, 0);
+    transition:
+      opacity 420ms ease 70ms,
+      transform 600ms cubic-bezier(0.16, 1, 0.3, 1) 70ms;
+  }
+
+  .spider-clock-section {
+    min-height: clamp(560px, 78svh, 680px);
+    padding-block: 40px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-content-custom.hero-is-active > *,
   .hero-content-custom.hero-is-active::before,
@@ -14249,7 +14373,7 @@ textarea:focus {
 }
 
 @keyframes garmentPromoSlideIn {
-  0%, 34% {
+  0% {
     opacity: 0;
   }
   100% {
@@ -14258,7 +14382,7 @@ textarea:focus {
 }
 
 @keyframes garmentPromoSlideOut {
-  0%, 34% {
+  0%, 58% {
     opacity: 1;
   }
   100% {
@@ -14335,11 +14459,11 @@ textarea:focus {
 }
 
 @keyframes garmentPromoArtworkOut {
-  from {
+  0%, 52% {
     opacity: 1;
     transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0);
   }
-  to {
+  100% {
     opacity: 0;
     transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0);
   }
@@ -14433,26 +14557,78 @@ textarea:focus {
 
 @media (max-width: 480px) {
   .garment-promo-section {
+    height: clamp(700px, 188vw, 740px);
     min-height: 700px;
+    margin-block: 36px;
   }
+
   .garment-promo-slide {
-    padding-bottom: 300px;
+    padding: 44px 18px 280px;
   }
+
+  .garment-promo-content {
+    gap: 16px;
+  }
+
   .garment-promo-title {
-    font-size: 2.8rem;
+    font-size: clamp(2.3rem, 10.8vw, 2.7rem);
+  }
+
+  .garment-promo-desc {
+    max-width: 350px;
+    font-size: 0.96rem;
+    line-height: 1.5;
   }
 
   .garment-promo-middle-media {
-    height: 240px;
-    top: 76%;
+    height: 232px;
+    top: 71%;
   }
 
   .garment-promo-right-media {
-    height: 260px;
+    height: 250px;
   }
 
   .promo-slider-dots {
-    bottom: 265px;
+    bottom: 252px;
+    gap: 8px;
+  }
+
+  .garment-promo-slide.is-active:not(.is-initial),
+  .garment-promo-slide.is-leaving {
+    animation-duration: 720ms;
+  }
+
+  .garment-promo-slide.is-active:not(.is-initial) .garment-promo-middle-media {
+    animation: garmentPromoArtworkIn 480ms cubic-bezier(0.22, 0.61, 0.36, 1) 130ms both;
+  }
+
+  .garment-promo-slide.is-active:not(.is-initial) .garment-promo-right-media {
+    animation: garmentPromoModelIn 500ms cubic-bezier(0.2, 0.82, 0.24, 1) 150ms both;
+  }
+
+  .garment-promo-slide.is-active:not(.is-initial) .garment-promo-title {
+    animation: garmentPromoCopyIn 380ms ease-out 220ms both;
+  }
+
+  .garment-promo-slide.is-active:not(.is-initial) .garment-promo-desc {
+    animation: garmentPromoCopyIn 400ms ease-out 300ms both;
+  }
+
+  .garment-promo-slide.is-leaving .garment-promo-right-media {
+    animation-duration: 360ms;
+  }
+
+  .garment-promo-slide.is-leaving .garment-promo-title {
+    animation: garmentPromoCopyOut 280ms ease-in 220ms both;
+  }
+
+  .garment-promo-slide.is-leaving .garment-promo-desc {
+    animation: garmentPromoCopyOut 260ms ease-in 180ms both;
+  }
+
+  .garment-promo-slide.is-leaving .garment-promo-middle-media {
+    animation: garmentPromoArtworkOut 480ms ease-in 160ms both;
   }
 }
 
