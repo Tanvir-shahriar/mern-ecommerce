@@ -80,6 +80,14 @@ export const ProductsPage = () => {
     }
   });
 
+  const { data: hotDeals = [] } = useQuery({
+    queryKey: ['hot-deals-products'],
+    queryFn: async () => {
+      const { data } = await api.get('/products/hot-deals');
+      return data.data.products;
+    }
+  });
+
   const updateFilter = (key, value) => {
     const next = new URLSearchParams(searchParams);
     if (value && value !== 'all') next.set(key, value);
@@ -380,6 +388,31 @@ export const ProductsPage = () => {
             </div>
           </>
         ) : null}
+
+        {!isLoading && activeFiltersCount === 0 && hotDeals && hotDeals.length > 0 && (
+          <div className="hot-deals-section" style={{ marginBottom: '40px' }}>
+            <div
+              className="hot-deals-banner"
+              style={{
+                background: '#FAF6F0',
+                border: '1px solid rgba(194, 125, 56, 0.1)',
+                padding: '20px 20px',
+                textAlign: 'center',
+                borderRadius: '4px',
+                marginBottom: '24px'
+              }}
+            >
+              <h2 style={{ color: '#C27D38', margin: 0, textTransform: 'uppercase', letterSpacing: '4px', fontSize: '15px', fontWeight: 'bold' }}>
+                HOT DEALS
+              </h2>
+            </div>
+            <div className="product-grid" style={{ marginBottom: '24px' }}>
+              {hotDeals.map((product) => (
+                <ProductCard key={product._id} product={product} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {!isLoading && activeFiltersCount === 0 && topPicks && topPicks.length > 0 && (
           <div className="top-picks-section" style={{ marginBottom: '40px' }}>

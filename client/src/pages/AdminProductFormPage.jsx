@@ -58,6 +58,7 @@ const initialForm = {
   tags: '',
   isFeatured: false,
   isTopPick: false,
+  isHotDeal: false,
   attributes: [],
   variants: [],
   shippingWeight: '',
@@ -94,6 +95,7 @@ const productToForm = (product, categories, brands = []) => ({
   tags: (product.tags || []).join(', '),
   isFeatured: Boolean(product.isFeatured),
   isTopPick: Boolean(product.isTopPick),
+  isHotDeal: Boolean(product.isHotDeal),
   attributes: (product.attributes || []).map((attribute) => ({
     name: attribute.name || '',
     value: attribute.value || ''
@@ -348,6 +350,7 @@ export const AdminProductFormPage = () => {
       },
       isFeatured: form.isFeatured,
       isTopPick: form.isTopPick,
+      isHotDeal: form.isHotDeal,
       seo: {
         title: form.seoTitle.trim() || undefined,
         description: form.seoDescription.trim() || undefined
@@ -526,6 +529,10 @@ export const AdminProductFormPage = () => {
               <label className="checkbox-row span-2">
                 <input type="checkbox" checked={form.isTopPick} onChange={(event) => updateField('isTopPick', event.target.checked)} />
                 Our Top Pick
+              </label>
+              <label className="checkbox-row span-2">
+                <input type="checkbox" checked={form.isHotDeal} onChange={(event) => updateField('isHotDeal', event.target.checked)} />
+                Hot Deals
               </label>
             </div>
           </div>

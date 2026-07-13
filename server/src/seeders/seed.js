@@ -107,6 +107,7 @@ const run = async () => {
       inventory: { stock: 18, lowStockThreshold: 6, trackQuantity: true },
       isFeatured: true,
       isTopPick: true,
+      isHotDeal: true,
       ratingsAverage: 4.6,
       ratingsCount: 18
     },

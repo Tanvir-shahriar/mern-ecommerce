@@ -161,6 +161,7 @@ export const productSchema = z.object({
   status: z.enum(['active', 'draft', 'archived']).optional(),
   isFeatured: z.boolean().optional(),
   isTopPick: z.boolean().optional(),
+  isHotDeal: z.boolean().optional(),
   seo: z
     .object({
       title: z.string().optional(),

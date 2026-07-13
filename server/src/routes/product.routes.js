@@ -4,6 +4,7 @@ import {
   createProduct,
   deleteProduct,
   getFeaturedProducts,
+  getHotDealProducts,
   getTopPickProducts,
   getProduct,
   getProductSections,
@@ -29,6 +30,7 @@ const router = express.Router();
 router.get('/', optionalProtect, cachePublic(45), getProducts);
 router.get('/featured', cachePublic(90), getFeaturedProducts);
 router.get('/top-picks', cachePublic(90), getTopPickProducts);
+router.get('/hot-deals', cachePublic(90), getHotDealProducts);
 router.get('/sections', cachePublic(45), getProductSections);
 router.get('/:id/similar', validate({ params: idParamSchema }), cachePublic(60), getSimilarProducts);
 router.get('/:slugOrId', optionalProtect, validate({ params: slugOrIdParamSchema }), getProduct);

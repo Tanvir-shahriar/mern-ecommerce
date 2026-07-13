@@ -389,6 +389,7 @@ export class JsonModel {
       base.status ||= 'active';
       base.isFeatured = Boolean(base.isFeatured);
       base.isTopPick = Boolean(base.isTopPick);
+      base.isHotDeal = Boolean(base.isHotDeal);
       base.salesCount ||= 0;
       base.ratingsAverage ||= 0;
       base.ratingsCount ||= 0;
