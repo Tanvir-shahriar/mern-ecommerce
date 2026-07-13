@@ -849,13 +849,15 @@ export const HomePage = () => {
                 <p className="garment-promo-desc">{slide.description}</p>
               </div>
               <div className="garment-promo-middle-media" aria-hidden="true">
-                <img
-                  src={slide.middleImage}
-                  alt=""
-                  className="garment-promo-middle-img"
-                  loading={index < 2 ? 'eager' : 'lazy'}
-                  decoding="async"
-                />
+                <div className="garment-promo-middle-rotator">
+                  <img
+                    src={slide.middleImage}
+                    alt=""
+                    className="garment-promo-middle-img"
+                    loading={index < 2 ? 'eager' : 'lazy'}
+                    decoding="async"
+                  />
+                </div>
               </div>
               <div
                 className="garment-promo-right-media"

@@ -13572,6 +13572,7 @@ textarea:focus {
 
 /* Boston & Undici T-shirt promo section slider */
 .garment-promo-section {
+  --garment-promo-spin-duration: 24s;
   position: relative;
   isolation: isolate;
   width: 100%;
@@ -13801,9 +13802,16 @@ textarea:focus {
   z-index: 5;
   pointer-events: none;
   opacity: 0;
-  transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(0.94) rotate(-2deg);
+  transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0);
   transform-origin: center;
   will-change: transform, opacity;
+}
+
+.garment-promo-middle-rotator {
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  will-change: transform;
 }
 
 .garment-promo-middle-img {
@@ -13813,6 +13821,11 @@ textarea:focus {
   object-fit: contain;
   opacity: 0.96;
   transform-origin: center;
+}
+
+/* Every color layer begins on the same clock, so cross-fades stay aligned. */
+.garment-promo-section.has-entered .garment-promo-middle-rotator {
+  animation: garmentPromoArtworkSpin var(--garment-promo-spin-duration) linear infinite;
 }
 
 .garment-promo-right-media {
@@ -13886,11 +13899,6 @@ textarea:focus {
   animation: garmentPromoArtworkOut 640ms ease-in 310ms both;
 }
 
-.garment-promo-section.has-entered .garment-promo-slide.is-active .garment-promo-middle-img,
-.garment-promo-section.has-entered .garment-promo-slide.is-leaving .garment-promo-middle-img {
-  animation: garmentPromoArtworkDrift 4.8s ease-in-out infinite alternate;
-}
-
 @keyframes garmentPromoSlideIn {
   0%, 34% {
     opacity: 0;
@@ -13962,38 +13970,38 @@ textarea:focus {
 @keyframes garmentPromoArtworkReady {
   to {
     opacity: 1;
-    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(1) rotate(0deg);
+    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0);
   }
 }
 
 @keyframes garmentPromoArtworkIn {
   from {
     opacity: 0;
-    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(0.94) rotate(-2deg);
+    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0);
   }
   to {
     opacity: 1;
-    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(1) rotate(0deg);
+    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0);
   }
 }
 
 @keyframes garmentPromoArtworkOut {
   from {
     opacity: 1;
-    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(1) rotate(0deg);
+    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0);
   }
   to {
     opacity: 0;
-    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(1.04) rotate(2deg);
+    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0);
   }
 }
 
-@keyframes garmentPromoArtworkDrift {
+@keyframes garmentPromoArtworkSpin {
   from {
-    transform: translate3d(-1.5%, -1%, 0) rotate(-1.4deg) scale(0.985);
+    transform: rotate(0deg);
   }
   to {
-    transform: translate3d(1.5%, 1%, 0) rotate(1.4deg) scale(1.015);
+    transform: rotate(360deg);
   }
 }
 
@@ -14104,6 +14112,7 @@ textarea:focus {
   .garment-promo-title,
   .garment-promo-desc,
   .garment-promo-middle-media,
+  .garment-promo-middle-rotator,
   .garment-promo-middle-img,
   .garment-promo-right-media {
     animation: none !important;
