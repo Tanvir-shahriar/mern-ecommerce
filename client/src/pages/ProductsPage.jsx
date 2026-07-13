@@ -99,10 +99,32 @@ export const ProductsPage = () => {
   const sections = data?.sections || [];
   const products = sections.flatMap((section) => section.products || []);
   const totalProducts = data?.totalProducts ?? products.length;
+
   const fallbackBrandOptions = (data?.filters?.brands || []).map((brand) => ({ name: brand, slug: brand }));
   const brandOptions = brands.length ? brands : fallbackBrandOptions;
 
   const currentCategorySlug = searchParams.get('category');
+
+  const [cachedCounts, setCachedCounts] = useState({});
+
+  useEffect(() => {
+    if (!currentCategorySlug && sections.length > 0) {
+      const counts = {};
+      sections.forEach((section) => {
+        counts[section.category.slug] = section.products?.length || 0;
+      });
+      setCachedCounts(counts);
+    }
+  }, [sections, currentCategorySlug]);
+
+  const totalAllCount = useMemo(() => {
+    const values = Object.values(cachedCounts);
+    if (values.length > 0) {
+      return values.reduce((sum, val) => sum + val, 0);
+    }
+    return totalProducts;
+  }, [cachedCounts, totalProducts]);
+
   const currentBrand = searchParams.get('brand');
   const activeCategoryObj = categories.find((c) => c.slug === currentCategorySlug);
   const activeBrandObj = brandOptions.find((brand) => brand.slug === currentBrand || brand.name === currentBrand);
@@ -143,10 +165,7 @@ export const ProductsPage = () => {
     }
   };
 
-  const jumpToCategory = (category) => {
-    const target = document.getElementById(`category-${category.slug || category._id}`);
-    target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+
 
   return (
     <section className="catalog-page">
@@ -364,7 +383,7 @@ export const ProductsPage = () => {
           </select>
         </div>
 
-        {!isLoading && sections.length ? (
+        {!isLoading && categories.length > 0 && (
           <>
             <div className="catalog-insight-row">
               <span>{totalProducts} item{totalProducts === 1 ? '' : 's'}</span>
@@ -374,20 +393,31 @@ export const ProductsPage = () => {
             </div>
 
             <div className="catalog-category-jump" aria-label="Product categories">
-              {sections.map((section) => (
-                <button
-                  type="button"
-                  key={section.category._id}
-                  className={currentCategorySlug === section.category.slug ? 'active' : ''}
-                  onClick={() => jumpToCategory(section.category)}
-                >
-                  <span>{section.category.name}</span>
-                  <strong>{section.products.length}</strong>
-                </button>
-              ))}
+              <button
+                type="button"
+                className={!currentCategorySlug ? 'active' : ''}
+                onClick={() => updateFilter('category', 'all')}
+              >
+                <span>All</span>
+                {totalAllCount > 0 && <strong>{totalAllCount}</strong>}
+              </button>
+              {categories.map((category) => {
+                const count = cachedCounts[category.slug] || 0;
+                return (
+                  <button
+                    type="button"
+                    key={category._id}
+                    className={currentCategorySlug === category.slug ? 'active' : ''}
+                    onClick={() => updateFilter('category', category.slug)}
+                  >
+                    <span>{category.name}</span>
+                    {count > 0 && <strong>{count}</strong>}
+                  </button>
+                );
+              })}
             </div>
           </>
-        ) : null}
+        )}
 
         {!isLoading && activeFiltersCount === 0 && hotDeals && hotDeals.length > 0 && (
           <div className="hot-deals-section" style={{ marginBottom: '40px' }}>
