@@ -23,6 +23,10 @@ import rightGarmentImage2 from '../assets/garments/m-2.png';
 import middleGarmentImage3 from '../assets/garments/d-(4).png';
 import rightGarmentImage3 from '../assets/garments/m-3.png';
 import rightGarmentImage4 from '../assets/garments/m-4.png';
+import middleGarmentImage5 from '../assets/garments/d-6.png';
+import rightGarmentImage5 from '../assets/garments/m-5.png';
+import middleGarmentImage6 from '../assets/garments/d-(1).png';
+import rightGarmentImage6 from '../assets/garments/m-6.png';
 import { defaultHeroSlides } from '../data/heroDefaults.js';
 import { api, mediaUrl } from '../services/api.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
@@ -156,6 +160,38 @@ export const HomePage = () => {
       themeClass: 'promo-theme-athletic',
       altMiddle: 'Abstract green fibers',
       altRight: 'Model wearing Retro Athletic t-shirt'
+    },
+    {
+      id: 'eclipse',
+      title: (
+        <>
+          <span className="gradient-silver">Eclipse</span>
+          <span className="dark-silver">Two-Tone</span>
+          <span className="gradient-silver">Hoodie</span>
+        </>
+      ),
+      description: 'An ultra-thick, premium heavyweight fleece fabric designed to hold its dramatic shape. Comes with a structured, double-lined hood and a seamless kangaroo pocket.',
+      middleImage: middleGarmentImage5,
+      rightImage: rightGarmentImage5,
+      themeClass: 'promo-theme-eclipse',
+      altMiddle: 'Abstract silver fibers',
+      altRight: 'Model wearing Eclipse two-tone hoodie'
+    },
+    {
+      id: 'crimson',
+      title: (
+        <>
+          <span className="gradient-crimson">Crimson</span>
+          <span className="dark-crimson">Script</span>
+          <span className="gradient-crimson">Hoodie</span>
+        </>
+      ),
+      description: 'Designed with a structural, slouchy oversized silhouette featuring heavily dropped shoulders and extra-roomy sleeves. Equipped with a double-layered hood and a classic kangaroo pocket.',
+      middleImage: middleGarmentImage6,
+      rightImage: rightGarmentImage6,
+      themeClass: 'promo-theme-crimson',
+      altMiddle: 'Abstract crimson fibers',
+      altRight: 'Model wearing Crimson Script hoodie'
     }
   ];
 
@@ -670,8 +706,8 @@ export const HomePage = () => {
               aria-label={`Go to slide ${index + 1}`}
               style={{
                 background: activeSlide === index 
-                  ? (index === 0 || index === 3 ? '#123C24' : index === 1 ? '#59421A' : '#591437') 
-                  : (index === 0 || index === 3 ? 'rgba(18, 60, 36, 0.2)' : index === 1 ? 'rgba(89, 66, 26, 0.2)' : 'rgba(89, 20, 55, 0.2)')
+                  ? (index === 0 || index === 3 ? '#123C24' : index === 1 ? '#59421A' : index === 2 ? '#591437' : index === 4 ? '#6B6256' : '#58111A') 
+                  : (index === 0 || index === 3 ? 'rgba(18, 60, 36, 0.2)' : index === 1 ? 'rgba(89, 66, 26, 0.2)' : index === 2 ? 'rgba(89, 20, 55, 0.2)' : index === 4 ? 'rgba(107, 98, 86, 0.2)' : 'rgba(88, 17, 26, 0.2)')
               }}
             />
           ))}

@@ -13619,6 +13619,14 @@ textarea:focus {
   background: linear-gradient(180deg, #FAF6F0 0%, #EFEBE4 100%);
 }
 
+.promo-theme-eclipse {
+  background: linear-gradient(180deg, #F0ECE4 0%, #E3DDD3 100%);
+}
+
+.promo-theme-crimson {
+  background: linear-gradient(180deg, #FAF4EF 0%, #EFE5DD 100%);
+}
+
 .garment-promo-content {
   position: relative;
   z-index: 10;
@@ -13676,6 +13684,32 @@ textarea:focus {
   display: block;
 }
 
+/* Eclipse typography */
+.garment-promo-title .gradient-silver {
+  background: linear-gradient(90deg, #6B6256 0%, #BCAE9E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+}
+
+.garment-promo-title .dark-silver {
+  color: #6B6256;
+  display: block;
+}
+
+/* Crimson typography */
+.garment-promo-title .gradient-crimson {
+  background: linear-gradient(90deg, #58111A 0%, #C03241 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+}
+
+.garment-promo-title .dark-crimson {
+  color: #58111A;
+  display: block;
+}
+
 /* Descriptions */
 .garment-promo-desc {
   font-size: 1.15rem;
@@ -13699,6 +13733,14 @@ textarea:focus {
 
 .promo-theme-athletic .garment-promo-desc {
   color: #2D5A3E;
+}
+
+.promo-theme-eclipse .garment-promo-desc {
+  color: #7D7569;
+}
+
+.promo-theme-crimson .garment-promo-desc {
+  color: #A21C26;
 }
 
 /* Images */
