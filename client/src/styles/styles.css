@@ -13573,33 +13573,47 @@ textarea:focus {
 /* Boston & Undici T-shirt promo section slider */
 .garment-promo-section {
   position: relative;
+  isolation: isolate;
   width: 100%;
-  height: 520px;
+  height: 560px;
   overflow: hidden;
   margin: 60px 0;
+  background: #f3efe7;
   border-top: 1px solid rgba(18, 60, 36, 0.05);
   border-bottom: 1px solid rgba(18, 60, 36, 0.05);
+  touch-action: pan-y;
 }
 
 .garment-promo-slide {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   padding: 60px 8%;
   display: flex;
   align-items: center;
   opacity: 0;
+  visibility: hidden;
   pointer-events: none;
   z-index: 1;
-  transition: opacity 0.8s ease-in-out;
+  transform: translateZ(0);
+  will-change: opacity;
 }
 
-.garment-promo-slide.active {
+.garment-promo-slide.is-active {
   opacity: 1;
+  visibility: visible;
   pointer-events: auto;
+  z-index: 3;
+}
+
+.garment-promo-slide.is-active:not(.is-initial) {
+  animation: garmentPromoSlideIn 950ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+.garment-promo-slide.is-leaving {
+  opacity: 1;
+  visibility: visible;
   z-index: 2;
+  animation: garmentPromoSlideOut 950ms cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 
 /* Theme backgrounds */
@@ -13641,12 +13655,19 @@ textarea:focus {
 }
 
 .garment-promo-title {
-  font-family: 'Outfit', 'Inter', sans-serif;
+  font-family: "Playfair Display", "Bodoni 72", Didot, Georgia, serif;
   font-size: clamp(3.5rem, 6vw, 5.5rem);
-  font-weight: 300;
-  line-height: 0.95;
-  letter-spacing: -2px;
+  font-weight: 400;
+  line-height: 0.93;
+  letter-spacing: -0.045em;
   margin: 0;
+  opacity: 0;
+  transform: translate3d(-18px, 0, 0);
+  will-change: transform, opacity;
+}
+
+.garment-promo-title > span {
+  padding-right: 0.08em;
 }
 
 /* Boston typography */
@@ -13734,6 +13755,9 @@ textarea:focus {
   max-width: 460px;
   margin: 0;
   font-weight: 500;
+  opacity: 0;
+  transform: translate3d(-12px, 10px, 0);
+  will-change: transform, opacity;
 }
 
 .promo-theme-boston .garment-promo-desc {
@@ -13764,29 +13788,213 @@ textarea:focus {
   color: #4A6D8C;
 }
 
-/* Images */
-.garment-promo-middle-img {
+/* Layered media */
+.garment-promo-middle-media {
+  --promo-art-x: 0%;
+  --promo-art-y: -50%;
   position: absolute;
   left: 36%;
   top: 50%;
-  transform: translateY(-50%);
   height: 108%;
   width: auto;
+  aspect-ratio: 2653 / 3544;
   z-index: 5;
   pointer-events: none;
-  object-fit: contain;
-  opacity: 0.95;
+  opacity: 0;
+  transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(0.94) rotate(-2deg);
+  transform-origin: center;
+  will-change: transform, opacity;
 }
 
-.garment-promo-right-img {
+.garment-promo-middle-img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  opacity: 0.96;
+  transform-origin: center;
+}
+
+.garment-promo-right-media {
+  --promo-model-x: 0%;
   position: absolute;
   right: 6%;
   bottom: 0;
   height: 102%;
   width: auto;
+  aspect-ratio: var(--promo-model-ratio);
   z-index: 8;
+  opacity: 0;
+  transform: translate3d(var(--promo-model-x), -112%, 0);
+  will-change: transform, opacity;
+}
+
+.garment-promo-right-img {
+  width: 100%;
+  height: 100%;
+  max-width: none;
   object-fit: contain;
-  transform: translateY(2px);
+  object-position: bottom center;
+}
+
+/* The reference sequence: art first, model drop, then copy in two beats. */
+.garment-promo-section.has-entered .garment-promo-slide.is-initial .garment-promo-middle-media {
+  animation: garmentPromoArtworkReady 1ms linear both;
+}
+
+.garment-promo-section.has-entered .garment-promo-slide.is-initial .garment-promo-right-media {
+  animation: garmentPromoModelIn 560ms cubic-bezier(0.2, 0.82, 0.24, 1) 100ms both;
+}
+
+.garment-promo-section.has-entered .garment-promo-slide.is-initial .garment-promo-title {
+  animation: garmentPromoCopyIn 420ms ease-out 430ms both;
+}
+
+.garment-promo-section.has-entered .garment-promo-slide.is-initial .garment-promo-desc {
+  animation: garmentPromoCopyIn 440ms ease-out 680ms both;
+}
+
+.garment-promo-slide.is-active:not(.is-initial) .garment-promo-middle-media {
+  animation: garmentPromoArtworkIn 620ms cubic-bezier(0.22, 0.61, 0.36, 1) 330ms both;
+}
+
+.garment-promo-slide.is-active:not(.is-initial) .garment-promo-right-media {
+  animation: garmentPromoModelIn 600ms cubic-bezier(0.2, 0.82, 0.24, 1) 340ms both;
+}
+
+.garment-promo-slide.is-active:not(.is-initial) .garment-promo-title {
+  animation: garmentPromoCopyIn 440ms ease-out 570ms both;
+}
+
+.garment-promo-slide.is-active:not(.is-initial) .garment-promo-desc {
+  animation: garmentPromoCopyIn 460ms ease-out 790ms both;
+}
+
+.garment-promo-slide.is-leaving .garment-promo-right-media {
+  animation: garmentPromoModelOut 420ms cubic-bezier(0.55, 0.05, 0.78, 0.35) both;
+}
+
+.garment-promo-slide.is-leaving .garment-promo-title {
+  animation: garmentPromoCopyOut 340ms ease-in 310ms both;
+}
+
+.garment-promo-slide.is-leaving .garment-promo-desc {
+  animation: garmentPromoCopyOut 320ms ease-in 270ms both;
+}
+
+.garment-promo-slide.is-leaving .garment-promo-middle-media {
+  animation: garmentPromoArtworkOut 640ms ease-in 310ms both;
+}
+
+.garment-promo-section.has-entered .garment-promo-slide.is-active .garment-promo-middle-img,
+.garment-promo-section.has-entered .garment-promo-slide.is-leaving .garment-promo-middle-img {
+  animation: garmentPromoArtworkDrift 4.8s ease-in-out infinite alternate;
+}
+
+@keyframes garmentPromoSlideIn {
+  0%, 34% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes garmentPromoSlideOut {
+  0%, 34% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes garmentPromoModelIn {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--promo-model-x), -112%, 0);
+  }
+  16% {
+    opacity: 1;
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(var(--promo-model-x), 2px, 0);
+  }
+}
+
+@keyframes garmentPromoModelOut {
+  from {
+    opacity: 1;
+    transform: translate3d(var(--promo-model-x), 2px, 0);
+  }
+  78% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(var(--promo-model-x), 112%, 0);
+  }
+}
+
+@keyframes garmentPromoCopyIn {
+  from {
+    opacity: 0;
+    transform: translate3d(-18px, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes garmentPromoCopyOut {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(-16px, -6px, 0);
+  }
+}
+
+@keyframes garmentPromoArtworkReady {
+  to {
+    opacity: 1;
+    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes garmentPromoArtworkIn {
+  from {
+    opacity: 0;
+    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(0.94) rotate(-2deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes garmentPromoArtworkOut {
+  from {
+    opacity: 1;
+    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(1) rotate(0deg);
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) scale(1.04) rotate(2deg);
+  }
+}
+
+@keyframes garmentPromoArtworkDrift {
+  from {
+    transform: translate3d(-1.5%, -1%, 0) rotate(-1.4deg) scale(0.985);
+  }
+  to {
+    transform: translate3d(1.5%, 1%, 0) rotate(1.4deg) scale(1.015);
+  }
 }
 
 /* Slider dot indicators */
@@ -13800,25 +14008,36 @@ textarea:focus {
 }
 
 .promo-slider-dot {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
-  border: none;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--promo-dot-color) 24%, transparent);
   cursor: pointer;
   padding: 0;
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0.82;
+  transition: transform 180ms ease, opacity 180ms ease, background-color 180ms ease;
 }
 
-.promo-slider-dot:hover {
+.promo-slider-dot:hover,
+.promo-slider-dot.is-active {
+  background: var(--promo-dot-color);
+  opacity: 1;
   transform: scale(1.2);
+}
+
+.promo-slider-dot:focus-visible {
+  outline: 2px solid var(--promo-dot-color);
+  outline-offset: 4px;
 }
 
 /* Responsive adjustments */
 @media (max-width: 991px) {
   .garment-promo-section {
-    height: auto;
+    height: 800px;
     min-height: 800px;
   }
+
   .garment-promo-slide {
     flex-direction: column;
     padding: 60px 5% 380px 5%;
@@ -13829,21 +14048,25 @@ textarea:focus {
     max-width: 100%;
     align-items: center;
   }
+
   .garment-promo-desc {
     max-width: 100%;
   }
-  .garment-promo-middle-img {
+
+  .garment-promo-middle-media {
+    --promo-art-x: -50%;
     left: 50%;
-    transform: translate(-50%, -50%);
     height: 320px;
     top: 72%;
   }
-  .garment-promo-right-img {
+
+  .garment-promo-right-media {
+    --promo-model-x: 50%;
     right: 50%;
-    transform: translateX(50%);
     height: 340px;
     bottom: 0;
   }
+
   .promo-slider-dots {
     left: 50%;
     transform: translateX(-50%);
@@ -13861,15 +14084,55 @@ textarea:focus {
   .garment-promo-title {
     font-size: 2.8rem;
   }
-  .garment-promo-middle-img {
+
+  .garment-promo-middle-media {
     height: 240px;
     top: 76%;
   }
-  .garment-promo-right-img {
+
+  .garment-promo-right-media {
     height: 260px;
   }
+
   .promo-slider-dots {
     bottom: 265px;
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .garment-promo-slide,
+  .garment-promo-title,
+  .garment-promo-desc,
+  .garment-promo-middle-media,
+  .garment-promo-middle-img,
+  .garment-promo-right-media {
+    animation: none !important;
+    transition: none !important;
+  }
+
+  .garment-promo-slide.is-leaving {
+    opacity: 0 !important;
+    visibility: hidden !important;
+  }
+
+  .garment-promo-slide.is-active {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+
+  .garment-promo-slide.is-active .garment-promo-title,
+  .garment-promo-slide.is-active .garment-promo-desc {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .garment-promo-slide.is-active .garment-promo-middle-media {
+    opacity: 1 !important;
+    transform: translate3d(var(--promo-art-x), var(--promo-art-y), 0) !important;
+  }
+
+  .garment-promo-slide.is-active .garment-promo-right-media {
+    opacity: 1 !important;
+    transform: translate3d(var(--promo-model-x), 2px, 0) !important;
+  }
+}

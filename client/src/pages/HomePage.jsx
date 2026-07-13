@@ -1,6 +1,6 @@
 import { ArrowRight, Cpu, CreditCard, ShieldCheck, Timer, Truck, Play, Pause, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ProductCard } from '../components/ProductCard.jsx';
 import { PanoramicPhotoLibrary } from '../components/PanoramicPhotoLibrary.jsx';
@@ -79,6 +79,11 @@ const patekFeature = {
   video: watchGearsVideo
 };
 
+const PROMO_SLIDE_COUNT = 7;
+const PROMO_INITIAL_DELAY = 4000;
+const PROMO_SLIDE_DELAY = 5000;
+const PROMO_TRANSITION_DURATION = 1450;
+
 const heroMediaUrl = (asset, fallback = '') => {
   const url = typeof asset === 'string' ? asset : asset?.url;
   if (!url) return fallback;
@@ -111,8 +116,9 @@ export const HomePage = () => {
       description: 'Designed with a modern, relaxed fit and a classic crew neck. Perfect for a casual, drop-shoulder look that maximizes both style and comfort.',
       middleImage: middleGarmentImage,
       rightImage: rightGarmentImage,
+      modelAspectRatio: '822 / 1092',
       themeClass: 'promo-theme-boston',
-      altMiddle: 'Abstract green fibers',
+      accent: '#123C24',
       altRight: 'Model wearing Boston relaxed fit t-shirt'
     },
     {
@@ -127,8 +133,9 @@ export const HomePage = () => {
       description: 'A contemporary, relaxed silhouette with a classic crew neck and comfortable mid-length sleeves. Designed to offer a premium casual look for anyone.',
       middleImage: middleGarmentImage2,
       rightImage: rightGarmentImage2,
+      modelAspectRatio: '702 / 1257',
       themeClass: 'promo-theme-undici',
-      altMiddle: 'Abstract gold fibers',
+      accent: '#59421A',
       altRight: 'Model wearing Undici gothic t-shirt'
     },
     {
@@ -143,8 +150,9 @@ export const HomePage = () => {
       description: 'An ultra-modern, boxy oversized fit with wide mid-length sleeves and a thick, durable crew neck collar.',
       middleImage: middleGarmentImage3,
       rightImage: rightGarmentImage3,
+      modelAspectRatio: '2653 / 3544',
       themeClass: 'promo-theme-retro',
-      altMiddle: 'Abstract purple fibers',
+      accent: '#591437',
       altRight: 'Model wearing Retro Minimalist t-shirt'
     },
     {
@@ -159,8 +167,9 @@ export const HomePage = () => {
       description: 'Contemporary classic fit and a premium-quality jersey-style "07" block print in rich forest green, detailed with a clean white and silver outline and minimalist accent stripes.',
       middleImage: middleGarmentImage,
       rightImage: rightGarmentImage4,
+      modelAspectRatio: '705 / 1062',
       themeClass: 'promo-theme-athletic',
-      altMiddle: 'Abstract green fibers',
+      accent: '#123C24',
       altRight: 'Model wearing Retro Athletic t-shirt'
     },
     {
@@ -175,8 +184,9 @@ export const HomePage = () => {
       description: 'An ultra-thick, premium heavyweight fleece fabric designed to hold its dramatic shape. Comes with a structured, double-lined hood and a seamless kangaroo pocket.',
       middleImage: middleGarmentImage5,
       rightImage: rightGarmentImage5,
+      modelAspectRatio: '762 / 1146',
       themeClass: 'promo-theme-eclipse',
-      altMiddle: 'Abstract silver fibers',
+      accent: '#6B6256',
       altRight: 'Model wearing Eclipse two-tone hoodie'
     },
     {
@@ -191,8 +201,9 @@ export const HomePage = () => {
       description: 'Designed with a structural, slouchy oversized silhouette featuring heavily dropped shoulders and extra-roomy sleeves. Equipped with a double-layered hood and a classic kangaroo pocket.',
       middleImage: middleGarmentImage6,
       rightImage: rightGarmentImage6,
+      modelAspectRatio: '789 / 1182',
       themeClass: 'promo-theme-crimson',
-      altMiddle: 'Abstract crimson fibers',
+      accent: '#58111A',
       altRight: 'Model wearing Crimson Script hoodie'
     },
     {
@@ -207,20 +218,131 @@ export const HomePage = () => {
       description: 'A trendy drop-shoulder, oversized silhouette for a relaxed and comfortable feel. Comes with a spacious kangaroo pocket at the front.',
       middleImage: middleGarmentImage7,
       rightImage: rightGarmentImage7,
+      modelAspectRatio: '792 / 1188',
       themeClass: 'promo-theme-bluetech',
-      altMiddle: 'Abstract blue fibers',
+      accent: '#1F3E5A',
       altRight: 'Model wearing Oversized BlueTech hoodie'
     }
   ];
 
   const [activeSlide, setActiveSlide] = useState(0);
+  const [leavingSlide, setLeavingSlide] = useState(null);
+  const [promoSequence, setPromoSequence] = useState(0);
+  const [isPromoVisible, setIsPromoVisible] = useState(false);
+  const [hasPromoEntered, setHasPromoEntered] = useState(false);
+  const [isPromoPaused, setIsPromoPaused] = useState(false);
+  const [isDocumentVisible, setIsDocumentVisible] = useState(true);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const promoSectionRef = useRef(null);
+  const activeSlideRef = useRef(0);
+  const promoTransitionTimerRef = useRef(null);
+  const promoPointerStartRef = useRef(null);
+
+  const goToPromoSlide = useCallback((requestedIndex) => {
+    const nextIndex = (requestedIndex + PROMO_SLIDE_COUNT) % PROMO_SLIDE_COUNT;
+    const currentIndex = activeSlideRef.current;
+
+    if (nextIndex === currentIndex) return;
+
+    if (promoTransitionTimerRef.current) {
+      window.clearTimeout(promoTransitionTimerRef.current);
+    }
+
+    setLeavingSlide(currentIndex);
+    activeSlideRef.current = nextIndex;
+    setActiveSlide(nextIndex);
+    setPromoSequence((sequence) => sequence + 1);
+
+    promoTransitionTimerRef.current = window.setTimeout(() => {
+      setLeavingSlide(null);
+      promoTransitionTimerRef.current = null;
+    }, PROMO_TRANSITION_DURATION);
+  }, []);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % promoSlides.length);
-    }, 6000);
-    return () => clearInterval(timer);
+    const section = promoSectionRef.current;
+    if (!section || !('IntersectionObserver' in window)) {
+      setIsPromoVisible(true);
+      setHasPromoEntered(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsPromoVisible(entry.isIntersecting);
+        if (entry.isIntersecting) setHasPromoEntered(true);
+      },
+      { threshold: 0.18 }
+    );
+    observer.observe(section);
+    return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updateMotionPreference = () => setPrefersReducedMotion(mediaQuery.matches);
+    updateMotionPreference();
+    mediaQuery.addEventListener('change', updateMotionPreference);
+    return () => mediaQuery.removeEventListener('change', updateMotionPreference);
+  }, []);
+
+  useEffect(() => {
+    if (!isPromoVisible || isPromoPaused || !isDocumentVisible || prefersReducedMotion) {
+      return undefined;
+    }
+
+    const delay = promoSequence === 0 ? PROMO_INITIAL_DELAY : PROMO_SLIDE_DELAY;
+    const timer = window.setTimeout(() => {
+      goToPromoSlide(activeSlideRef.current + 1);
+    }, delay);
+
+    return () => window.clearTimeout(timer);
+  }, [activeSlide, goToPromoSlide, isDocumentVisible, isPromoPaused, isPromoVisible, prefersReducedMotion, promoSequence]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsDocumentVisible(!document.hidden);
+    };
+
+    handleVisibilityChange();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  useEffect(() => () => {
+    if (promoTransitionTimerRef.current) {
+      window.clearTimeout(promoTransitionTimerRef.current);
+    }
+  }, []);
+
+  const handlePromoPointerDown = (event) => {
+    if (event.pointerType === 'mouse') return;
+    promoPointerStartRef.current = { x: event.clientX, y: event.clientY };
+    setIsPromoPaused(true);
+  };
+
+  const handlePromoPointerUp = (event) => {
+    const start = promoPointerStartRef.current;
+    promoPointerStartRef.current = null;
+    setIsPromoPaused(false);
+    if (!start) return;
+
+    const distanceX = event.clientX - start.x;
+    const distanceY = event.clientY - start.y;
+    if (Math.abs(distanceX) < 46 || Math.abs(distanceX) <= Math.abs(distanceY)) return;
+    goToPromoSlide(activeSlideRef.current + (distanceX < 0 ? 1 : -1));
+  };
+
+  const handlePromoPointerCancel = () => {
+    promoPointerStartRef.current = null;
+    setIsPromoPaused(false);
+  };
+
+  const handlePromoKeyDown = (event) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    goToPromoSlide(activeSlideRef.current + (event.key === 'ArrowRight' ? 1 : -1));
+  };
 
   const patekVideoRef = useRef(null);
   const heroSlidesRef = useRef([]);
@@ -689,44 +811,77 @@ export const HomePage = () => {
         </div>
       </section>
 
-      <section className="garment-promo-section">
+      <section
+        ref={promoSectionRef}
+        className={`garment-promo-section ${hasPromoEntered ? 'has-entered' : ''} ${isPromoPaused ? 'is-paused' : ''}`}
+        aria-label="Featured garment collection"
+        aria-roledescription="carousel"
+        onKeyDown={handlePromoKeyDown}
+        onMouseEnter={() => setIsPromoPaused(true)}
+        onMouseLeave={(event) => {
+          if (!event.currentTarget.contains(document.activeElement)) setIsPromoPaused(false);
+        }}
+        onFocusCapture={() => setIsPromoPaused(true)}
+        onBlurCapture={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget) && !event.currentTarget.matches(':hover')) {
+            setIsPromoPaused(false);
+          }
+        }}
+        onPointerDown={handlePromoPointerDown}
+        onPointerUp={handlePromoPointerUp}
+        onPointerCancel={handlePromoPointerCancel}
+      >
         {promoSlides.map((slide, index) => {
           const isActive = activeSlide === index;
+          const isLeaving = leavingSlide === index;
+          const isInitial = promoSequence === 0 && isActive;
           return (
             <div
               key={slide.id}
-              className={`garment-promo-slide ${slide.themeClass} ${isActive ? 'active' : ''}`}
+              className={`garment-promo-slide ${slide.themeClass} ${isActive ? 'is-active' : ''} ${isLeaving ? 'is-leaving' : ''} ${isInitial ? 'is-initial' : ''}`}
+              role="group"
+              aria-roledescription="slide"
+              aria-label={`${index + 1} of ${promoSlides.length}`}
+              aria-hidden={!isActive}
             >
               <div className="garment-promo-content">
                 <h2 className="garment-promo-title">{slide.title}</h2>
                 <p className="garment-promo-desc">{slide.description}</p>
               </div>
-              <img
-                src={slide.middleImage}
-                alt={slide.altMiddle}
-                className="garment-promo-middle-img"
-              />
-              <img
-                src={slide.rightImage}
-                alt={slide.altRight}
-                className="garment-promo-right-img"
-              />
+              <div className="garment-promo-middle-media" aria-hidden="true">
+                <img
+                  src={slide.middleImage}
+                  alt=""
+                  className="garment-promo-middle-img"
+                  loading={index < 2 ? 'eager' : 'lazy'}
+                  decoding="async"
+                />
+              </div>
+              <div
+                className="garment-promo-right-media"
+                style={{ '--promo-model-ratio': slide.modelAspectRatio }}
+              >
+                <img
+                  src={slide.rightImage}
+                  alt={slide.altRight}
+                  className="garment-promo-right-img"
+                  loading={index < 2 ? 'eager' : 'lazy'}
+                  decoding="async"
+                />
+              </div>
             </div>
           );
         })}
-        <div className="promo-slider-dots">
-          {promoSlides.map((_, index) => (
+        <div className="promo-slider-dots" role="group" aria-label="Choose garment slide">
+          {promoSlides.map((slide, index) => (
             <button
-              key={index}
+              key={slide.id}
               type="button"
-              className={`promo-slider-dot ${activeSlide === index ? 'active' : ''}`}
-              onClick={() => setActiveSlide(index)}
-              aria-label={`Go to slide ${index + 1}`}
-              style={{
-                background: activeSlide === index 
-                  ? (index === 0 || index === 3 ? '#123C24' : index === 1 ? '#59421A' : index === 2 ? '#591437' : index === 4 ? '#6B6256' : index === 5 ? '#58111A' : '#1F3E5A') 
-                  : (index === 0 || index === 3 ? 'rgba(18, 60, 36, 0.2)' : index === 1 ? 'rgba(89, 66, 26, 0.2)' : index === 2 ? 'rgba(89, 20, 55, 0.2)' : index === 4 ? 'rgba(107, 98, 86, 0.2)' : index === 5 ? 'rgba(88, 17, 26, 0.2)' : 'rgba(31, 62, 90, 0.2)')
-              }}
+              className={`promo-slider-dot ${activeSlide === index ? 'is-active' : ''}`}
+              onClick={() => goToPromoSlide(index)}
+              aria-label={`Show ${slide.id} garment slide`}
+              aria-current={activeSlide === index ? 'true' : undefined}
+              style={{ '--promo-dot-color': slide.accent }}
             />
           ))}
         </div>
