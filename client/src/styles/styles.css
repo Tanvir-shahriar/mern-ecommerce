@@ -13569,3 +13569,244 @@ textarea:focus {
     );
   }
 }
+
+/* Boston & Undici T-shirt promo section slider */
+.garment-promo-section {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  overflow: hidden;
+  margin: 60px 0;
+  border-top: 1px solid rgba(18, 60, 36, 0.05);
+  border-bottom: 1px solid rgba(18, 60, 36, 0.05);
+}
+
+.garment-promo-slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 60px 8%;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.8s ease-in-out;
+}
+
+.garment-promo-slide.active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+/* Theme backgrounds */
+.promo-theme-boston {
+  background: linear-gradient(180deg, #FAF6F0 0%, #EFEBE4 100%);
+}
+
+.promo-theme-undici {
+  background: linear-gradient(180deg, #EADEC9 0%, #DCD0B7 100%);
+}
+
+.promo-theme-retro {
+  background: linear-gradient(180deg, #F5EAE6 0%, #E8DAD4 100%);
+}
+
+.promo-theme-athletic {
+  background: linear-gradient(180deg, #FAF6F0 0%, #EFEBE4 100%);
+}
+
+.garment-promo-content {
+  position: relative;
+  z-index: 10;
+  max-width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.garment-promo-title {
+  font-family: 'Outfit', 'Inter', sans-serif;
+  font-size: clamp(3.5rem, 6vw, 5.5rem);
+  font-weight: 300;
+  line-height: 0.95;
+  letter-spacing: -2px;
+  margin: 0;
+}
+
+/* Boston typography */
+.garment-promo-title .gradient-green {
+  background: linear-gradient(90deg, #123C24 0%, #34D399 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+}
+
+.garment-promo-title .dark-green {
+  color: #123C24;
+  display: block;
+}
+
+/* Undici typography */
+.garment-promo-title .gradient-gold {
+  background: linear-gradient(90deg, #59421A 0%, #C49F5A 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+}
+
+.garment-promo-title .dark-gold {
+  color: #59421A;
+  display: block;
+}
+
+/* Retro typography */
+.garment-promo-title .gradient-plum {
+  background: linear-gradient(90deg, #591437 0%, #BD3371 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+}
+
+.garment-promo-title .dark-plum {
+  color: #591437;
+  display: block;
+}
+
+/* Descriptions */
+.garment-promo-desc {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  max-width: 460px;
+  margin: 0;
+  font-weight: 500;
+}
+
+.promo-theme-boston .garment-promo-desc {
+  color: #2D5A3E;
+}
+
+.promo-theme-undici .garment-promo-desc {
+  color: #7A5B1D;
+}
+
+.promo-theme-retro .garment-promo-desc {
+  color: #8C2E5E;
+}
+
+.promo-theme-athletic .garment-promo-desc {
+  color: #2D5A3E;
+}
+
+/* Images */
+.garment-promo-middle-img {
+  position: absolute;
+  left: 36%;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 108%;
+  width: auto;
+  z-index: 5;
+  pointer-events: none;
+  object-fit: contain;
+  opacity: 0.95;
+}
+
+.garment-promo-right-img {
+  position: absolute;
+  right: 6%;
+  bottom: 0;
+  height: 102%;
+  width: auto;
+  z-index: 8;
+  object-fit: contain;
+  transform: translateY(2px);
+}
+
+/* Slider dot indicators */
+.promo-slider-dots {
+  position: absolute;
+  bottom: 30px;
+  left: 8%;
+  display: flex;
+  gap: 10px;
+  z-index: 20;
+}
+
+.promo-slider-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.promo-slider-dot:hover {
+  transform: scale(1.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 991px) {
+  .garment-promo-section {
+    height: auto;
+    min-height: 800px;
+  }
+  .garment-promo-slide {
+    flex-direction: column;
+    padding: 60px 5% 380px 5%;
+    text-align: center;
+    justify-content: flex-start;
+  }
+  .garment-promo-content {
+    max-width: 100%;
+    align-items: center;
+  }
+  .garment-promo-desc {
+    max-width: 100%;
+  }
+  .garment-promo-middle-img {
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 320px;
+    top: 72%;
+  }
+  .garment-promo-right-img {
+    right: 50%;
+    transform: translateX(50%);
+    height: 340px;
+    bottom: 0;
+  }
+  .promo-slider-dots {
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: 345px;
+  }
+}
+
+@media (max-width: 480px) {
+  .garment-promo-section {
+    min-height: 700px;
+  }
+  .garment-promo-slide {
+    padding-bottom: 300px;
+  }
+  .garment-promo-title {
+    font-size: 2.8rem;
+  }
+  .garment-promo-middle-img {
+    height: 240px;
+    top: 76%;
+  }
+  .garment-promo-right-img {
+    height: 260px;
+  }
+  .promo-slider-dots {
+    bottom: 265px;
+  }
+}
+

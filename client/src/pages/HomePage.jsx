@@ -16,6 +16,13 @@ import maxlordLogo from '../assets/Logo/images (2).jpg';
 import soberLogo from '../assets/Logo/Gemini_Generated_Image_4hnyq84hnyq84hny.png';
 import successWayBrandLogo from '../assets/Logo/Success way logo.jpg';
 import watchGearsVideo from '../assets/video/Watch face gears ticking.mp4';
+import middleGarmentImage from '../assets/garments/d-(3).png';
+import rightGarmentImage from '../assets/garments/m-1.png';
+import middleGarmentImage2 from '../assets/garments/d-(5).png';
+import rightGarmentImage2 from '../assets/garments/m-2.png';
+import middleGarmentImage3 from '../assets/garments/d-(4).png';
+import rightGarmentImage3 from '../assets/garments/m-3.png';
+import rightGarmentImage4 from '../assets/garments/m-4.png';
 import { defaultHeroSlides } from '../data/heroDefaults.js';
 import { api, mediaUrl } from '../services/api.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
@@ -84,6 +91,82 @@ export const HomePage = () => {
   const [isPatekPlaying, setIsPatekPlaying] = useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
+
+  const promoSlides = [
+    {
+      id: 'boston',
+      title: (
+        <>
+          <span className="gradient-green">Boston</span>
+          <span className="dark-green">Relaxed</span>
+          <span className="gradient-green">Fit T-shirt</span>
+        </>
+      ),
+      description: 'Designed with a modern, relaxed fit and a classic crew neck. Perfect for a casual, drop-shoulder look that maximizes both style and comfort.',
+      middleImage: middleGarmentImage,
+      rightImage: rightGarmentImage,
+      themeClass: 'promo-theme-boston',
+      altMiddle: 'Abstract green fibers',
+      altRight: 'Model wearing Boston relaxed fit t-shirt'
+    },
+    {
+      id: 'undici',
+      title: (
+        <>
+          <span className="gradient-gold">"Undici"</span>
+          <span className="dark-gold">Gothic</span>
+          <span className="gradient-gold">T-Shirt</span>
+        </>
+      ),
+      description: 'A contemporary, relaxed silhouette with a classic crew neck and comfortable mid-length sleeves. Designed to offer a premium casual look for anyone.',
+      middleImage: middleGarmentImage2,
+      rightImage: rightGarmentImage2,
+      themeClass: 'promo-theme-undici',
+      altMiddle: 'Abstract gold fibers',
+      altRight: 'Model wearing Undici gothic t-shirt'
+    },
+    {
+      id: 'retro',
+      title: (
+        <>
+          <span className="gradient-plum">Retro</span>
+          <span className="dark-plum">Minimalist</span>
+          <span className="gradient-plum">T-Shirt</span>
+        </>
+      ),
+      description: 'An ultra-modern, boxy oversized fit with wide mid-length sleeves and a thick, durable crew neck collar.',
+      middleImage: middleGarmentImage3,
+      rightImage: rightGarmentImage3,
+      themeClass: 'promo-theme-retro',
+      altMiddle: 'Abstract purple fibers',
+      altRight: 'Model wearing Retro Minimalist t-shirt'
+    },
+    {
+      id: 'athletic',
+      title: (
+        <>
+          <span className="gradient-green">Retro</span>
+          <span className="dark-green">Athletic</span>
+          <span className="gradient-green">T-Shirt</span>
+        </>
+      ),
+      description: 'Contemporary classic fit and a premium-quality jersey-style "07" block print in rich forest green, detailed with a clean white and silver outline and minimalist accent stripes.',
+      middleImage: middleGarmentImage,
+      rightImage: rightGarmentImage4,
+      themeClass: 'promo-theme-athletic',
+      altMiddle: 'Abstract green fibers',
+      altRight: 'Model wearing Retro Athletic t-shirt'
+    }
+  ];
+
+  const [activeSlide, setActiveSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActiveSlide((prev) => (prev + 1) % promoSlides.length);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, []);
 
   const patekVideoRef = useRef(null);
   const heroSlidesRef = useRef([]);
@@ -548,6 +631,49 @@ export const HomePage = () => {
                 <p>{detail}</p>
               </div>
             </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="garment-promo-section">
+        {promoSlides.map((slide, index) => {
+          const isActive = activeSlide === index;
+          return (
+            <div
+              key={slide.id}
+              className={`garment-promo-slide ${slide.themeClass} ${isActive ? 'active' : ''}`}
+            >
+              <div className="garment-promo-content">
+                <h2 className="garment-promo-title">{slide.title}</h2>
+                <p className="garment-promo-desc">{slide.description}</p>
+              </div>
+              <img
+                src={slide.middleImage}
+                alt={slide.altMiddle}
+                className="garment-promo-middle-img"
+              />
+              <img
+                src={slide.rightImage}
+                alt={slide.altRight}
+                className="garment-promo-right-img"
+              />
+            </div>
+          );
+        })}
+        <div className="promo-slider-dots">
+          {promoSlides.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              className={`promo-slider-dot ${activeSlide === index ? 'active' : ''}`}
+              onClick={() => setActiveSlide(index)}
+              aria-label={`Go to slide ${index + 1}`}
+              style={{
+                background: activeSlide === index 
+                  ? (index === 0 || index === 3 ? '#123C24' : index === 1 ? '#59421A' : '#591437') 
+                  : (index === 0 || index === 3 ? 'rgba(18, 60, 36, 0.2)' : index === 1 ? 'rgba(89, 66, 26, 0.2)' : 'rgba(89, 20, 55, 0.2)')
+              }}
+            />
           ))}
         </div>
       </section>
