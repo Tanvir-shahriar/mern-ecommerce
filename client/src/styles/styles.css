@@ -13627,6 +13627,10 @@ textarea:focus {
   background: linear-gradient(180deg, #FAF4EF 0%, #EFE5DD 100%);
 }
 
+.promo-theme-bluetech {
+  background: linear-gradient(180deg, #F2F5F8 0%, #DFE4EC 100%);
+}
+
 .garment-promo-content {
   position: relative;
   z-index: 10;
@@ -13710,6 +13714,19 @@ textarea:focus {
   display: block;
 }
 
+/* BlueTech typography */
+.garment-promo-title .gradient-bluetech {
+  background: linear-gradient(90deg, #1C354E 0%, #688FA8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: block;
+}
+
+.garment-promo-title .dark-bluetech {
+  color: #1C354E;
+  display: block;
+}
+
 /* Descriptions */
 .garment-promo-desc {
   font-size: 1.15rem;
@@ -13741,6 +13758,10 @@ textarea:focus {
 
 .promo-theme-crimson .garment-promo-desc {
   color: #A21C26;
+}
+
+.promo-theme-bluetech .garment-promo-desc {
+  color: #4A6D8C;
 }
 
 /* Images */

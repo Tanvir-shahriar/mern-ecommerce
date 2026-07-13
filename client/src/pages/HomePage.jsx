@@ -27,6 +27,8 @@ import middleGarmentImage5 from '../assets/garments/d-6.png';
 import rightGarmentImage5 from '../assets/garments/m-5.png';
 import middleGarmentImage6 from '../assets/garments/d-(1).png';
 import rightGarmentImage6 from '../assets/garments/m-6.png';
+import middleGarmentImage7 from '../assets/garments/d-2.png';
+import rightGarmentImage7 from '../assets/garments/m-7.png';
 import { defaultHeroSlides } from '../data/heroDefaults.js';
 import { api, mediaUrl } from '../services/api.js';
 import { directCheckoutUrl, startDirectCheckout } from '../utils/directCheckout.js';
@@ -192,6 +194,22 @@ export const HomePage = () => {
       themeClass: 'promo-theme-crimson',
       altMiddle: 'Abstract crimson fibers',
       altRight: 'Model wearing Crimson Script hoodie'
+    },
+    {
+      id: 'bluetech',
+      title: (
+        <>
+          <span className="gradient-bluetech">Oversized</span>
+          <span className="dark-bluetech">BlueTech</span>
+          <span className="gradient-bluetech">Hoodie</span>
+        </>
+      ),
+      description: 'A trendy drop-shoulder, oversized silhouette for a relaxed and comfortable feel. Comes with a spacious kangaroo pocket at the front.',
+      middleImage: middleGarmentImage7,
+      rightImage: rightGarmentImage7,
+      themeClass: 'promo-theme-bluetech',
+      altMiddle: 'Abstract blue fibers',
+      altRight: 'Model wearing Oversized BlueTech hoodie'
     }
   ];
 
@@ -706,8 +724,8 @@ export const HomePage = () => {
               aria-label={`Go to slide ${index + 1}`}
               style={{
                 background: activeSlide === index 
-                  ? (index === 0 || index === 3 ? '#123C24' : index === 1 ? '#59421A' : index === 2 ? '#591437' : index === 4 ? '#6B6256' : '#58111A') 
-                  : (index === 0 || index === 3 ? 'rgba(18, 60, 36, 0.2)' : index === 1 ? 'rgba(89, 66, 26, 0.2)' : index === 2 ? 'rgba(89, 20, 55, 0.2)' : index === 4 ? 'rgba(107, 98, 86, 0.2)' : 'rgba(88, 17, 26, 0.2)')
+                  ? (index === 0 || index === 3 ? '#123C24' : index === 1 ? '#59421A' : index === 2 ? '#591437' : index === 4 ? '#6B6256' : index === 5 ? '#58111A' : '#1F3E5A') 
+                  : (index === 0 || index === 3 ? 'rgba(18, 60, 36, 0.2)' : index === 1 ? 'rgba(89, 66, 26, 0.2)' : index === 2 ? 'rgba(89, 20, 55, 0.2)' : index === 4 ? 'rgba(107, 98, 86, 0.2)' : index === 5 ? 'rgba(88, 17, 26, 0.2)' : 'rgba(31, 62, 90, 0.2)')
               }}
             />
           ))}
