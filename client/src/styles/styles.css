@@ -9846,6 +9846,16 @@ textarea:focus {
   z-index: 6;
 }
 
+.hero-visual-custom.hero-is-preparing {
+  z-index: 4;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.hero-visual-custom.hero-is-preparing .hero-watch-image {
+  animation: none;
+}
+
 .hero-visual-custom.hero-is-active .hero-available-label {
   animation: hero-widget-in 560ms cubic-bezier(0.16, 1, 0.3, 1) 280ms backwards;
 }

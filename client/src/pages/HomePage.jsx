@@ -137,26 +137,47 @@ const HeroCopy = ({ slide, state }) => {
   );
 };
 
-const HeroVisual = ({ slide, imageUrl, state, onImageLoad, onPlayVideo }) => {
+const HeroVisual = ({ slide, imageUrl, state, onImageReady, onPlayVideo }) => {
+  const isActive = state === 'active';
   const isLeaving = state === 'leaving';
   const videoUrl = slide.video?.url ? heroMediaUrl(slide.video.url) : '';
   const thumbnail = heroMediaUrl(slide.video?.thumbnail, imageUrl);
   const lines = titleLines(slide.title);
 
+  const confirmImageReady = async (event) => {
+    if (!onImageReady) return;
+
+    const image = event.currentTarget;
+    try {
+      if (typeof image.decode === 'function') {
+        await image.decode();
+      }
+    } catch {
+      // A cached image can occasionally reject decode() despite being complete.
+    }
+
+    if (image.complete && image.naturalWidth > 0) {
+      onImageReady();
+    }
+  };
+
   return (
-    <div className={`hero-visual-custom hero-is-${state}`} aria-hidden={isLeaving ? 'true' : undefined}>
-      {!isLeaving ? <span className="hero-available-label">AVAILABLE</span> : null}
+    <div className={`hero-visual-custom hero-is-${state}`} aria-hidden={isActive ? undefined : 'true'}>
+      {isActive ? <span className="hero-available-label">AVAILABLE</span> : null}
 
       <div className={`hero-watch-container hero-watch-is-${state}`}>
         <img
           src={imageUrl}
-          alt={isLeaving ? '' : (slide.image?.alt || lines.join(' ') || 'Featured watch')}
+          alt={isActive ? (slide.image?.alt || lines.join(' ') || 'Featured watch') : ''}
           className="hero-watch-image"
-          onLoad={onImageLoad}
+          loading="eager"
+          decoding="async"
+          fetchPriority={isLeaving ? 'auto' : 'high'}
+          onLoad={onImageReady ? confirmImageReady : undefined}
         />
       </div>
 
-      {!isLeaving && videoUrl ? (
+      {isActive && videoUrl ? (
         <button
           type="button"
           className="hero-video-widget"
@@ -182,6 +203,8 @@ export const HomePage = () => {
   const [heroSequence, setHeroSequence] = useState(0);
   const [heroDirection, setHeroDirection] = useState(1);
   const [leavingHero, setLeavingHero] = useState(null);
+  const [pendingHero, setPendingHero] = useState(null);
+  const [readyHeroImageUrl, setReadyHeroImageUrl] = useState('');
   const [activeHeroVideo, setActiveHeroVideo] = useState(null);
   const [purchaseId, setPurchaseId] = useState('');
   const [isPatekPlaying, setIsPatekPlaying] = useState(true);
@@ -436,6 +459,7 @@ export const HomePage = () => {
   const heroImageLoadRequestsRef = useRef(new Map());
   const loadedHeroImagesRef = useRef(new Set());
   const heroTransitionRequestRef = useRef(0);
+  const pendingHeroRef = useRef(null);
   const heroExitTimerRef = useRef(null);
   const isHeroMountedRef = useRef(true);
 
@@ -499,17 +523,32 @@ export const HomePage = () => {
     const request = new Promise((resolve) => {
       const preloadImage = new Image();
 
-      preloadImage.onload = () => {
-        rememberHeroImageLoaded(imageUrl);
+      const settleRequest = (isLoaded) => {
         heroImageLoadRequestsRef.current.delete(imageUrl);
-        resolve(true);
+        if (isLoaded) rememberHeroImageLoaded(imageUrl);
+        resolve(isLoaded);
+      };
+
+      preloadImage.onload = async () => {
+        try {
+          if (typeof preloadImage.decode === 'function') {
+            await preloadImage.decode();
+          }
+
+          settleRequest(preloadImage.complete && preloadImage.naturalWidth > 0);
+        } catch {
+          // Some browsers can reject decode() for an already complete image.
+          // The intrinsic dimensions still provide a safe loaded-image fallback.
+          settleRequest(preloadImage.complete && preloadImage.naturalWidth > 0);
+        }
       };
 
       preloadImage.onerror = () => {
-        heroImageLoadRequestsRef.current.delete(imageUrl);
-        resolve(false);
+        settleRequest(false);
       };
 
+      preloadImage.decoding = 'async';
+      preloadImage.fetchPriority = 'high';
       preloadImage.src = imageUrl;
     });
 
@@ -535,32 +574,67 @@ export const HomePage = () => {
       const currentIndex = heroIndexRef.current;
       if (normalizedIndex === currentIndex) return;
 
-      const outgoingSlide = slides[currentIndex];
       const forwardDistance = (normalizedIndex - currentIndex + slides.length) % slides.length;
       const direction = forwardDistance <= slides.length / 2 ? 1 : -1;
 
-      if (heroExitTimerRef.current) {
-        window.clearTimeout(heroExitTimerRef.current);
-      }
+      const preparedHero = {
+        index: normalizedIndex,
+        slide: slides[normalizedIndex],
+        imageUrl: targetImageUrl,
+        direction,
+        sequence: requestId
+      };
 
-      if (outgoingSlide) {
-        setLeavingHero({
-          slide: outgoingSlide,
-          imageUrl: heroMediaUrl(outgoingSlide.image),
-          sequence: requestId
-        });
-      }
-
-      setHeroDirection(direction);
-      heroIndexRef.current = normalizedIndex;
-      setHeroIndex(normalizedIndex);
-      setHeroSequence((sequence) => sequence + 1);
-
-      heroExitTimerRef.current = window.setTimeout(() => {
-        setLeavingHero(null);
-        heroExitTimerRef.current = null;
-      }, 1200);
+      pendingHeroRef.current = preparedHero;
+      setPendingHero(preparedHero);
     });
+  };
+
+  const commitPreparedHero = (requestId) => {
+    const preparedHero = pendingHeroRef.current;
+    if (
+      !isHeroMountedRef.current
+      || !preparedHero
+      || preparedHero.sequence !== requestId
+      || requestId !== heroTransitionRequestRef.current
+    ) {
+      return;
+    }
+
+    const slides = heroSlidesRef.current;
+    const currentIndex = heroIndexRef.current;
+    const outgoingSlide = slides[currentIndex];
+
+    if (preparedHero.index === currentIndex) {
+      pendingHeroRef.current = null;
+      setPendingHero(null);
+      return;
+    }
+
+    if (heroExitTimerRef.current) {
+      window.clearTimeout(heroExitTimerRef.current);
+    }
+
+    if (outgoingSlide) {
+      setLeavingHero({
+        slide: outgoingSlide,
+        imageUrl: heroMediaUrl(outgoingSlide.image),
+        sequence: requestId
+      });
+    }
+
+    setHeroDirection(preparedHero.direction);
+    setReadyHeroImageUrl(preparedHero.imageUrl);
+    heroIndexRef.current = preparedHero.index;
+    setHeroIndex(preparedHero.index);
+    setHeroSequence(requestId);
+    pendingHeroRef.current = null;
+    setPendingHero(null);
+
+    heroExitTimerRef.current = window.setTimeout(() => {
+      setLeavingHero(null);
+      heroExitTimerRef.current = null;
+    }, 1200);
   };
 
   useEffect(() => {
@@ -568,6 +642,7 @@ export const HomePage = () => {
 
     return () => {
       isHeroMountedRef.current = false;
+      pendingHeroRef.current = null;
       heroImageLoadRequestsRef.current.clear();
       if (heroExitTimerRef.current) {
         window.clearTimeout(heroExitTimerRef.current);
@@ -608,6 +683,8 @@ export const HomePage = () => {
   useEffect(() => {
     if (heroIndex >= heroSlides.length) setHeroIndex(0);
   }, [heroIndex, heroSlides.length]);
+
+  const isActiveHeroImageReady = readyHeroImageUrl === activeImageUrl;
 
   useEffect(() => {
     if (!activeHeroVideo) return undefined;
@@ -748,17 +825,19 @@ export const HomePage = () => {
       />
       <div className="home-page home-light-theme" ref={homePageRef}>
       <section 
-        className={`hero-section ${heroDirection > 0 ? 'hero-direction-forward' : 'hero-direction-backward'}`}
+        className={`hero-section ${heroDirection > 0 ? 'hero-direction-forward' : 'hero-direction-backward'} ${isActiveHeroImageReady ? 'hero-image-ready' : 'hero-image-loading'}`}
         style={{
           background: activeWatch.gradient || defaultHeroSlides[0].gradient,
           '--hero-direction': heroDirection
         }}
       >
-        <HeroCopy
-          key={`hero-copy-${activeWatch.id || activeWatchIndex}-${heroSequence}`}
-          slide={activeWatch}
-          state="active"
-        />
+        {isActiveHeroImageReady ? (
+          <HeroCopy
+            key={`hero-copy-${activeWatch.id || activeWatchIndex}-${heroSequence}`}
+            slide={activeWatch}
+            state="active"
+          />
+        ) : null}
 
         {leavingHero ? (
           <HeroCopy
@@ -772,10 +851,21 @@ export const HomePage = () => {
           key={`hero-visual-${activeWatch.id || activeWatchIndex}-${heroSequence}`}
           slide={activeWatch}
           imageUrl={activeImageUrl}
-          state="active"
-          onImageLoad={() => rememberHeroImageLoaded(activeImageUrl)}
+          state={isActiveHeroImageReady ? 'active' : 'preparing'}
+          onImageReady={isActiveHeroImageReady ? undefined : () => setReadyHeroImageUrl(activeImageUrl)}
           onPlayVideo={setActiveHeroVideo}
         />
+
+        {pendingHero ? (
+          <HeroVisual
+            key={`hero-visual-${pendingHero.slide.id || pendingHero.index}-${pendingHero.sequence}`}
+            slide={pendingHero.slide}
+            imageUrl={pendingHero.imageUrl}
+            state="preparing"
+            onImageReady={() => commitPreparedHero(pendingHero.sequence)}
+            onPlayVideo={setActiveHeroVideo}
+          />
+        ) : null}
 
         {leavingHero ? (
           <HeroVisual
