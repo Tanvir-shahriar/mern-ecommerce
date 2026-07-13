@@ -95,11 +95,97 @@ const titleLines = (title) => {
   return String(title || '').split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
 };
 
+const heroThemeVariables = (slide) => ({
+  '--accent-color': slide.accentColor || defaultHeroSlides[0].accentColor,
+  '--accent-color-rgb': slide.accentColorRgb || defaultHeroSlides[0].accentColorRgb,
+  '--badge-color': slide.badgeColor || defaultHeroSlides[0].badgeColor,
+  '--badge-bg': slide.badgeBg || defaultHeroSlides[0].badgeBg,
+  '--badge-bg-trans': slide.badgeBgTrans || defaultHeroSlides[0].badgeBgTrans,
+  '--badge-border-trans': slide.badgeBorderTrans || defaultHeroSlides[0].badgeBorderTrans
+});
+
+const HeroCopy = ({ slide, state }) => {
+  const lines = titleLines(slide.title);
+  const isLeaving = state === 'leaving';
+
+  return (
+    <div
+      className={`hero-content-custom hero-is-${state}`}
+      style={heroThemeVariables(slide)}
+      aria-hidden={isLeaving ? 'true' : undefined}
+    >
+      {slide.badge ? <span className="hero-badge-pill">{slide.badge}</span> : null}
+      {slide.sku ? <span className="hero-sku">{slide.sku}</span> : null}
+      <h1 className="hero-title-custom">
+        {lines.map((line, index) => <span key={index}>{line}</span>)}
+      </h1>
+      {slide.slogan ? <h2 className="hero-slogan-custom">{slide.slogan}</h2> : null}
+      {slide.subtext ? (
+        <div className="hero-subtext-container">
+          <span className="find-out-more-badge">FIND OUT MORE</span>
+          <p className="hero-subtext-custom">{slide.subtext}</p>
+        </div>
+      ) : null}
+      <Link
+        to={slide.ctaUrl || '/products'}
+        className="hero-shop-btn"
+        tabIndex={isLeaving ? -1 : undefined}
+      >
+        {slide.ctaText || 'SHOP'}
+      </Link>
+    </div>
+  );
+};
+
+const HeroVisual = ({ slide, imageUrl, state, onImageLoad, onPlayVideo }) => {
+  const isLeaving = state === 'leaving';
+  const videoUrl = slide.video?.url ? heroMediaUrl(slide.video.url) : '';
+  const thumbnail = heroMediaUrl(slide.video?.thumbnail, imageUrl);
+  const lines = titleLines(slide.title);
+
+  return (
+    <div className={`hero-visual-custom hero-is-${state}`} aria-hidden={isLeaving ? 'true' : undefined}>
+      {!isLeaving ? <span className="hero-available-label">AVAILABLE</span> : null}
+
+      <div className={`hero-watch-container hero-watch-is-${state}`}>
+        <img
+          src={imageUrl}
+          alt={isLeaving ? '' : (slide.image?.alt || lines.join(' ') || 'Featured watch')}
+          className="hero-watch-image"
+          onLoad={onImageLoad}
+        />
+      </div>
+
+      {!isLeaving && videoUrl ? (
+        <button
+          type="button"
+          className="hero-video-widget"
+          onClick={() => onPlayVideo({
+            url: videoUrl,
+            thumbnail,
+            title: slide.video?.title || slide.slogan || lines.join(' ')
+          })}
+          aria-label={`Play ${slide.video?.title || lines.join(' ') || 'hero'} video`}
+        >
+          <img src={thumbnail} alt={slide.video?.alt || 'Watch video preview'} />
+          <span className="play-button-custom" aria-hidden="true">
+            <span className="play-icon-circle"></span>
+          </span>
+        </button>
+      ) : null}
+    </div>
+  );
+};
+
 export const HomePage = () => {
   const [heroIndex, setHeroIndex] = useState(0);
+  const [heroSequence, setHeroSequence] = useState(0);
+  const [heroDirection, setHeroDirection] = useState(1);
+  const [leavingHero, setLeavingHero] = useState(null);
   const [activeHeroVideo, setActiveHeroVideo] = useState(null);
   const [purchaseId, setPurchaseId] = useState('');
   const [isPatekPlaying, setIsPatekPlaying] = useState(true);
+  const homePageRef = useRef(null);
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -350,6 +436,7 @@ export const HomePage = () => {
   const heroImageLoadRequestsRef = useRef(new Map());
   const loadedHeroImagesRef = useRef(new Set());
   const heroTransitionRequestRef = useRef(0);
+  const heroExitTimerRef = useRef(null);
   const isHeroMountedRef = useRef(true);
 
   const togglePatekVideo = () => {
@@ -391,10 +478,7 @@ export const HomePage = () => {
   const heroSlides = visibleHeroSlides.length ? visibleHeroSlides : defaultHeroSlides;
   const activeWatchIndex = heroSlides.length ? heroIndex % heroSlides.length : 0;
   const activeWatch = heroSlides[activeWatchIndex] || defaultHeroSlides[0];
-  const activeTitleLines = titleLines(activeWatch.title);
   const activeImageUrl = heroMediaUrl(activeWatch.image);
-  const activeVideoUrl = activeWatch.video?.url ? heroMediaUrl(activeWatch.video.url) : '';
-  const activeVideoThumbnail = heroMediaUrl(activeWatch.video?.thumbnail, activeImageUrl);
 
   const rememberHeroImageLoaded = (imageUrl) => {
     if (imageUrl) {
@@ -438,6 +522,8 @@ export const HomePage = () => {
     if (!slides.length) return;
 
     const normalizedIndex = ((targetIndex % slides.length) + slides.length) % slides.length;
+    if (normalizedIndex === heroIndexRef.current) return;
+
     const targetImageUrl = heroMediaUrl(slides[normalizedIndex]?.image);
     const requestId = ++heroTransitionRequestRef.current;
 
@@ -446,7 +532,34 @@ export const HomePage = () => {
         return;
       }
 
+      const currentIndex = heroIndexRef.current;
+      if (normalizedIndex === currentIndex) return;
+
+      const outgoingSlide = slides[currentIndex];
+      const forwardDistance = (normalizedIndex - currentIndex + slides.length) % slides.length;
+      const direction = forwardDistance <= slides.length / 2 ? 1 : -1;
+
+      if (heroExitTimerRef.current) {
+        window.clearTimeout(heroExitTimerRef.current);
+      }
+
+      if (outgoingSlide) {
+        setLeavingHero({
+          slide: outgoingSlide,
+          imageUrl: heroMediaUrl(outgoingSlide.image),
+          sequence: requestId
+        });
+      }
+
+      setHeroDirection(direction);
+      heroIndexRef.current = normalizedIndex;
       setHeroIndex(normalizedIndex);
+      setHeroSequence((sequence) => sequence + 1);
+
+      heroExitTimerRef.current = window.setTimeout(() => {
+        setLeavingHero(null);
+        heroExitTimerRef.current = null;
+      }, 1200);
     });
   };
 
@@ -456,6 +569,9 @@ export const HomePage = () => {
     return () => {
       isHeroMountedRef.current = false;
       heroImageLoadRequestsRef.current.clear();
+      if (heroExitTimerRef.current) {
+        window.clearTimeout(heroExitTimerRef.current);
+      }
     };
   }, []);
 
@@ -503,6 +619,54 @@ export const HomePage = () => {
     window.addEventListener('keydown', closeOnEscape);
     return () => window.removeEventListener('keydown', closeOnEscape);
   }, [activeHeroVideo]);
+
+  useEffect(() => {
+    const root = homePageRef.current;
+    if (!root) return undefined;
+
+    const sections = [...root.querySelectorAll([
+      '.patek-carousel-scroll-stage',
+      '.lahv-signature-section',
+      '.spider-clock-section',
+      '.panoramic-library-section',
+      '.perks-bar',
+      '.brand-showcase-section',
+      '.featured-watch-section'
+    ].join(','))];
+
+    root.classList.add('home-motion-ready');
+    sections.forEach((section) => section.classList.add('home-motion-section'));
+
+    const revealAll = () => {
+      sections.forEach((section) => section.classList.add('home-motion-visible'));
+    };
+
+    if (
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      || !('IntersectionObserver' in window)
+    ) {
+      revealAll();
+      return () => root.classList.remove('home-motion-ready');
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add('home-motion-visible');
+        observer.unobserve(entry.target);
+      });
+    }, {
+      threshold: 0.12,
+      rootMargin: '0px 0px -8% 0px'
+    });
+
+    sections.forEach((section) => observer.observe(section));
+
+    return () => {
+      observer.disconnect();
+      root.classList.remove('home-motion-ready');
+    };
+  }, []);
 
   const purchaseNow = (product) => {
     setPurchaseId(product._id);
@@ -583,72 +747,46 @@ export const HomePage = () => {
         keywords="online shopping bangladesh, best e-commerce in bangladesh, luxury watches bangladesh, buy watch online dhaka, smartwatch price in bangladesh, original watches bd"
         schemaJson={homeSchema}
       />
-      <div className="home-page home-light-theme">
+      <div className="home-page home-light-theme" ref={homePageRef}>
       <section 
-        className="hero-section" 
-        style={{ background: activeWatch.gradient || defaultHeroSlides[0].gradient }}
+        className={`hero-section ${heroDirection > 0 ? 'hero-direction-forward' : 'hero-direction-backward'}`}
+        style={{
+          background: activeWatch.gradient || defaultHeroSlides[0].gradient,
+          '--hero-direction': heroDirection
+        }}
       >
-        <div 
-          key={activeWatchIndex} 
-          className="hero-content-custom animate-slide-up"
-          style={{
-            '--accent-color': activeWatch.accentColor || defaultHeroSlides[0].accentColor,
-            '--accent-color-rgb': activeWatch.accentColorRgb || defaultHeroSlides[0].accentColorRgb,
-            '--badge-color': activeWatch.badgeColor || defaultHeroSlides[0].badgeColor,
-            '--badge-bg': activeWatch.badgeBg || defaultHeroSlides[0].badgeBg,
-            '--badge-bg-trans': activeWatch.badgeBgTrans || defaultHeroSlides[0].badgeBgTrans,
-            '--badge-border-trans': activeWatch.badgeBorderTrans || defaultHeroSlides[0].badgeBorderTrans
-          }}
-        >
-          {activeWatch.badge ? <span className="hero-badge-pill">{activeWatch.badge}</span> : null}
-          {activeWatch.sku ? <span className="hero-sku">{activeWatch.sku}</span> : null}
-          <h1 className="hero-title-custom">
-            {activeTitleLines.map((line, idx) => (
-              <span key={idx}>{line}</span>
-            ))}
-          </h1>
-          {activeWatch.slogan ? <h2 className="hero-slogan-custom">{activeWatch.slogan}</h2> : null}
-          
-          {activeWatch.subtext ? <div className="hero-subtext-container">
-            <span className="find-out-more-badge">FIND OUT MORE</span>
-            <p className="hero-subtext-custom">{activeWatch.subtext}</p>
-          </div> : null}
-          
-          <Link to={activeWatch.ctaUrl || '/products'} className="hero-shop-btn">
-            {activeWatch.ctaText || 'SHOP'}
-          </Link>
-        </div>
+        <HeroCopy
+          key={`hero-copy-${activeWatch.id || activeWatchIndex}-${heroSequence}`}
+          slide={activeWatch}
+          state="active"
+        />
 
-        <div className="hero-visual-custom">
-          <span className="hero-available-label">AVAILABLE</span>
-          
-          <div key={activeWatchIndex} className="hero-watch-container animate-fade-in-scale">
-            <img 
-              src={activeImageUrl} 
-              alt={activeWatch.image?.alt || activeTitleLines.join(' ') || 'Featured watch'} 
-              className="hero-watch-image" 
-              onLoad={() => rememberHeroImageLoaded(activeImageUrl)}
-            />
-          </div>
+        {leavingHero ? (
+          <HeroCopy
+            key={`hero-copy-leaving-${leavingHero.sequence}`}
+            slide={leavingHero.slide}
+            state="leaving"
+          />
+        ) : null}
 
-          {activeVideoUrl ? (
-            <button
-              type="button"
-              className="hero-video-widget"
-              onClick={() => setActiveHeroVideo({
-                url: activeVideoUrl,
-                thumbnail: activeVideoThumbnail,
-                title: activeWatch.video?.title || activeWatch.slogan || activeTitleLines.join(' ')
-              })}
-              aria-label={`Play ${activeWatch.video?.title || activeTitleLines.join(' ') || 'hero'} video`}
-            >
-              <img src={activeVideoThumbnail} alt={activeWatch.video?.alt || 'Watch video preview'} />
-              <span className="play-button-custom" aria-hidden="true">
-                <span className="play-icon-circle"></span>
-              </span>
-            </button>
-          ) : null}
-        </div>
+        <HeroVisual
+          key={`hero-visual-${activeWatch.id || activeWatchIndex}-${heroSequence}`}
+          slide={activeWatch}
+          imageUrl={activeImageUrl}
+          state="active"
+          onImageLoad={() => rememberHeroImageLoaded(activeImageUrl)}
+          onPlayVideo={setActiveHeroVideo}
+        />
+
+        {leavingHero ? (
+          <HeroVisual
+            key={`hero-visual-leaving-${leavingHero.sequence}`}
+            slide={leavingHero.slide}
+            imageUrl={leavingHero.imageUrl}
+            state="leaving"
+            onPlayVideo={setActiveHeroVideo}
+          />
+        ) : null}
 
         <div className="hero-dots-container">
           {heroSlides.map((slide, idx) => (

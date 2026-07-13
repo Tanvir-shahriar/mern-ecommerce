@@ -9602,6 +9602,88 @@ textarea:focus {
   }
 }
 
+.hero-content-custom.hero-is-active {
+  z-index: 10;
+}
+
+.hero-content-custom.hero-is-active::before {
+  animation: hero-accent-line-in 720ms cubic-bezier(0.16, 1, 0.3, 1) 180ms backwards;
+}
+
+.hero-content-custom.hero-is-active > * {
+  animation: hero-copy-element-in 720ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+.hero-content-custom.hero-is-active > .hero-badge-pill {
+  animation-delay: 40ms;
+}
+
+.hero-content-custom.hero-is-active > .hero-sku {
+  animation-delay: 120ms;
+}
+
+.hero-content-custom.hero-is-active > .hero-title-custom {
+  animation-delay: 190ms;
+}
+
+.hero-content-custom.hero-is-active > .hero-slogan-custom {
+  animation-delay: 300ms;
+}
+
+.hero-content-custom.hero-is-active > .hero-subtext-container {
+  animation-delay: 410ms;
+}
+
+.hero-content-custom.hero-is-active > .hero-shop-btn {
+  animation-delay: 520ms;
+}
+
+.hero-content-custom.hero-is-leaving {
+  z-index: 12;
+  pointer-events: none;
+  animation: hero-copy-out 760ms cubic-bezier(0.7, 0, 0.84, 0) both;
+}
+
+@keyframes hero-copy-element-in {
+  from {
+    opacity: 0;
+    filter: blur(7px);
+    transform: translate3d(calc(var(--hero-direction, 1) * 30px), 20px, 0);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes hero-accent-line-in {
+  from {
+    opacity: 0;
+    transform: scaleY(0.2);
+  }
+
+  to {
+    opacity: 0.55;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes hero-copy-out {
+  from {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    opacity: 0;
+    filter: blur(9px);
+    transform: translate3d(calc(var(--hero-direction, 1) * -42px), -12px, 0);
+  }
+}
+
 .hero-badge-pill {
   font-family: Inter, sans-serif;
   font-size: clamp(0.62rem, 0.68vw, 0.72rem);
@@ -9753,6 +9835,23 @@ textarea:focus {
   inset: 0;
   z-index: 5;
   pointer-events: none;
+  perspective: 1800px;
+}
+
+.hero-visual-custom.hero-is-active {
+  z-index: 5;
+}
+
+.hero-visual-custom.hero-is-leaving {
+  z-index: 6;
+}
+
+.hero-visual-custom.hero-is-active .hero-available-label {
+  animation: hero-widget-in 560ms cubic-bezier(0.16, 1, 0.3, 1) 280ms backwards;
+}
+
+.hero-visual-custom.hero-is-active .hero-video-widget {
+  animation: hero-widget-in 680ms cubic-bezier(0.16, 1, 0.3, 1) 460ms backwards;
 }
 
 .hero-available-label {
@@ -9786,6 +9885,14 @@ textarea:focus {
   animation: watchFadeIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+.hero-watch-container.hero-watch-is-active {
+  animation: hero-watch-in 1080ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hero-watch-container.hero-watch-is-leaving {
+  animation: hero-watch-out 920ms cubic-bezier(0.7, 0, 0.84, 0) both;
+}
+
 .hero-watch-image {
   max-width: none;
   max-height: none;
@@ -9793,8 +9900,10 @@ textarea:focus {
   height: calc(100% - 24px);
   object-fit: contain;
   object-position: center;
-  animation: floatWatch 6s ease-in-out infinite;
+  animation: hero-watch-showcase 7.5s ease-in-out infinite;
   transform-origin: center;
+  transform-style: preserve-3d;
+  will-change: transform;
 }
 
 @keyframes watchFadeIn {
@@ -9805,6 +9914,64 @@ textarea:focus {
   to {
     opacity: 1;
     transform: var(--watch-base-transform) scale(1) translateY(0);
+  }
+}
+
+@keyframes hero-watch-in {
+  from {
+    opacity: 0;
+    filter: drop-shadow(0 20px 45px rgba(77, 64, 51, 0.08)) blur(12px);
+    transform: var(--watch-base-transform)
+      translate3d(calc(var(--hero-direction, 1) * 84px), 22px, 0)
+      scale(0.82)
+      rotateY(calc(var(--hero-direction, 1) * -16deg));
+  }
+
+  to {
+    opacity: 1;
+    filter: drop-shadow(0 24px 42px rgba(77, 64, 51, 0.28)) blur(0);
+    transform: var(--watch-base-transform) translate3d(0, 0, 0) scale(1) rotateY(0);
+  }
+}
+
+@keyframes hero-watch-out {
+  from {
+    opacity: 1;
+    filter: drop-shadow(0 24px 42px rgba(77, 64, 51, 0.28)) blur(0);
+    transform: var(--watch-base-transform) translate3d(0, 0, 0) scale(1) rotateY(0);
+  }
+
+  to {
+    opacity: 0;
+    filter: drop-shadow(0 20px 34px rgba(77, 64, 51, 0.08)) blur(10px);
+    transform: var(--watch-base-transform)
+      translate3d(calc(var(--hero-direction, 1) * -96px), -12px, 0)
+      scale(1.08)
+      rotateY(calc(var(--hero-direction, 1) * 18deg));
+  }
+}
+
+@keyframes hero-widget-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translate3d(calc(var(--hero-direction, 1) * 24px), 8px, 0) scale(0.94);
+  }
+
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes hero-watch-showcase {
+  0%, 100% {
+    transform: translate3d(0, 2px, 0) rotateY(-2.5deg) rotateZ(-0.35deg);
+  }
+
+  50% {
+    transform: translate3d(0, -12px, 12px) rotateY(3.5deg) rotateZ(0.45deg);
   }
 }
 
@@ -13215,6 +13382,90 @@ textarea:focus {
 
 .home-light-theme .featured-watch-copy p:last-child {
   color: var(--home-muted);
+}
+
+/* Homepage motion system: sections reveal only when their own viewport turn begins. */
+.home-motion-ready .patek-carousel-scroll-stage.home-motion-section .patek-hero-carousel,
+.home-motion-ready .lahv-signature-section.home-motion-section .lahv-signature-inner,
+.home-motion-ready .spider-clock-section.home-motion-section,
+.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-viewport,
+.home-motion-ready .perks-bar.home-motion-section .perks-bar-header,
+.home-motion-ready .brand-showcase-section.home-motion-section .brand-showcase-heading,
+.home-motion-ready .featured-watch-section.home-motion-section .featured-watch-heading {
+  opacity: 0;
+  clip-path: inset(9% 0 8% 0 round 12px);
+  transform: translate3d(0, 54px, 0) scale(0.975);
+  transition:
+    opacity 760ms ease,
+    clip-path 1050ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1050ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-controls-row,
+.home-motion-ready .perks-bar.home-motion-section .perks-grid,
+.home-motion-ready .brand-showcase-section.home-motion-section :is(.brand-showcase-meta, .brand-marquee, .brand-showcase-footer),
+.home-motion-ready .featured-watch-section.home-motion-section .featured-product-grid {
+  opacity: 0;
+  transform: translate3d(0, 42px, 0);
+  transition:
+    opacity 720ms ease 180ms,
+    transform 920ms cubic-bezier(0.16, 1, 0.3, 1) 180ms;
+}
+
+.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-card {
+  opacity: 0;
+  transform: translate3d(0, 46px, 0) scale(0.955) rotateY(-5deg);
+  transform-origin: center bottom;
+  transition:
+    opacity 720ms ease,
+    transform 1050ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.home-motion-ready .panoramic-library-section.home-motion-section:not(.home-motion-visible) .panoramic-card:nth-child(even) {
+  transform: translate3d(0, 58px, 0) scale(0.945) rotateY(5deg);
+}
+
+.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-card:nth-child(2) {
+  transition-delay: 90ms;
+}
+
+.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-card:nth-child(3) {
+  transition-delay: 170ms;
+}
+
+.home-motion-ready .panoramic-library-section.home-motion-section .panoramic-card:nth-child(n + 4) {
+  transition-delay: 240ms;
+}
+
+.home-motion-ready .home-motion-section.home-motion-visible:is(.spider-clock-section),
+.home-motion-ready .patek-carousel-scroll-stage.home-motion-visible .patek-hero-carousel,
+.home-motion-ready .lahv-signature-section.home-motion-visible .lahv-signature-inner,
+.home-motion-ready .panoramic-library-section.home-motion-visible :is(.panoramic-viewport, .panoramic-controls-row, .panoramic-card),
+.home-motion-ready .perks-bar.home-motion-visible :is(.perks-bar-header, .perks-grid),
+.home-motion-ready .brand-showcase-section.home-motion-visible :is(.brand-showcase-heading, .brand-showcase-meta, .brand-marquee, .brand-showcase-footer),
+.home-motion-ready .featured-watch-section.home-motion-visible :is(.featured-watch-heading, .featured-product-grid) {
+  opacity: 1;
+  clip-path: inset(0 0 0 0 round 0);
+  transform: translate3d(0, 0, 0) scale(1) rotateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-content-custom.hero-is-active > *,
+  .hero-content-custom.hero-is-active::before,
+  .hero-content-custom.hero-is-leaving,
+  .hero-watch-container.hero-watch-is-active,
+  .hero-watch-container.hero-watch-is-leaving,
+  .hero-watch-image,
+  .hero-visual-custom.hero-is-active .hero-available-label,
+  .hero-visual-custom.hero-is-active .hero-video-widget,
+  .home-motion-ready .home-motion-section,
+  .home-motion-ready .home-motion-section * {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
 }
 
 @media (max-width: 1060px) {
