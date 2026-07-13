@@ -11,7 +11,7 @@ import {
   User,
   X
 } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
@@ -49,7 +49,7 @@ export const Layout = () => {
   const [primaryNavTransitionPhase, setPrimaryNavTransitionPhase] = useState('idle');
 
   const searchContainerRef = useRef(null);
-  const primaryNavTransitionRef = useRef(null);
+  const primaryNavRef = useRef(null);
   const primaryNavFallbackTimerRef = useRef(null);
   const debouncedSearch = useDebouncedValue(search, 300);
 
@@ -114,6 +114,51 @@ export const Layout = () => {
       setActiveCategory(null);
     }
   }, [open]);
+
+  useLayoutEffect(() => {
+    const nav = primaryNavRef.current;
+    if (!nav) return undefined;
+
+    let isMounted = true;
+    let animationFrame = null;
+
+    const positionIndicator = () => {
+      const activeLink = nav.querySelector('.nav-link.active');
+      if (!activeLink) {
+        nav.classList.remove('primary-nav-indicator-ready');
+        return;
+      }
+
+      nav.style.setProperty('--primary-nav-indicator-x', `${activeLink.offsetLeft}px`);
+      nav.style.setProperty('--primary-nav-indicator-width', `${activeLink.offsetWidth}px`);
+
+      if (!nav.classList.contains('primary-nav-indicator-ready') && animationFrame === null) {
+        animationFrame = window.requestAnimationFrame(() => {
+          animationFrame = null;
+          if (isMounted) nav.classList.add('primary-nav-indicator-ready');
+        });
+      }
+    };
+
+    positionIndicator();
+
+    const resizeObserver = typeof ResizeObserver === 'function'
+      ? new ResizeObserver(positionIndicator)
+      : null;
+    resizeObserver?.observe(nav);
+    window.addEventListener('resize', positionIndicator, { passive: true });
+
+    document.fonts?.ready.then(() => {
+      if (isMounted) positionIndicator();
+    });
+
+    return () => {
+      isMounted = false;
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', positionIndicator);
+    };
+  }, [isAdmin, location.pathname]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -233,11 +278,6 @@ export const Layout = () => {
     if (prefersReducedMotion) return;
 
     event.preventDefault();
-    if (primaryNavTransitionRef.current) {
-      const activeTransition = primaryNavTransitionRef.current;
-      primaryNavTransitionRef.current = null;
-      activeTransition.skipTransition();
-    }
     if (primaryNavFallbackTimerRef.current) {
       window.clearTimeout(primaryNavFallbackTimerRef.current);
       primaryNavFallbackTimerRef.current = null;
@@ -251,42 +291,23 @@ export const Layout = () => {
       root.style.scrollBehavior = previousScrollBehavior;
     };
 
-    if (typeof document.startViewTransition !== 'function') {
-      setPrimaryNavTransitionPhase('fallback-leaving');
+    setPrimaryNavTransitionPhase('fallback-leaving');
 
-      primaryNavFallbackTimerRef.current = window.setTimeout(() => {
-        flushSync(() => {
-          navigate(targetPath);
-          setPrimaryNavTransitionPhase('fallback-entering');
-        });
-        scrollPageToTop();
-
-        primaryNavFallbackTimerRef.current = window.setTimeout(() => {
-          setPrimaryNavTransitionPhase('idle');
-          primaryNavFallbackTimerRef.current = null;
-        }, 540);
-      }, 170);
-      return;
-    }
-
-    const transition = document.startViewTransition(() => {
+    primaryNavFallbackTimerRef.current = window.setTimeout(() => {
       flushSync(() => {
-        setPrimaryNavTransitionPhase('native');
         navigate(targetPath);
+        setPrimaryNavTransitionPhase('fallback-entering');
       });
       scrollPageToTop();
-    });
 
-    primaryNavTransitionRef.current = transition;
-    transition.finished.finally(() => {
-      if (primaryNavTransitionRef.current !== transition) return;
-      primaryNavTransitionRef.current = null;
-      setPrimaryNavTransitionPhase('idle');
-    });
+      primaryNavFallbackTimerRef.current = window.setTimeout(() => {
+        setPrimaryNavTransitionPhase('idle');
+        primaryNavFallbackTimerRef.current = null;
+      }, 540);
+    }, 170);
   };
 
   useEffect(() => () => {
-    primaryNavTransitionRef.current?.skipTransition();
     if (primaryNavFallbackTimerRef.current) {
       window.clearTimeout(primaryNavFallbackTimerRef.current);
     }
@@ -295,7 +316,7 @@ export const Layout = () => {
   return (
     <div className={`site-shell primary-nav-${primaryNavTransitionPhase}`}>
       {open && <div className="menu-backdrop" onClick={() => setOpen(false)} />}
-      <header className={`site-header ${primaryNavSurfaceClass}${primaryNavTransitionPhase !== 'idle' ? ' primary-nav-transitioning' : ''}`}>
+      <header className={`site-header ${primaryNavSurfaceClass}`}>
         <div className="header-inner">
           <div className="brand-group">
             <button
@@ -449,7 +470,8 @@ export const Layout = () => {
             )}
           </div>
 
-          <nav className={open ? 'primary-nav open' : 'primary-nav'}>
+          <nav className={open ? 'primary-nav open' : 'primary-nav'} ref={primaryNavRef}>
+            <span className="primary-nav-indicator" aria-hidden="true" />
             <NavLink className={navClass} to="/" onClick={handlePrimaryNavClick('/')}>
               Home
             </NavLink>

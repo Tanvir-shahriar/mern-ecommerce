@@ -131,7 +131,6 @@ img {
 
 main {
   flex: 1;
-  view-transition-name: primary-page-content;
 }
 
 .site-header {
@@ -145,70 +144,6 @@ main {
   backdrop-filter: blur(20px);
   color: white;
   transition: background 0.3s ease;
-  view-transition-name: primary-page-header;
-}
-
-::view-transition-old(root),
-::view-transition-new(root) {
-  animation: none;
-}
-
-::view-transition-group(primary-page-header) {
-  animation-duration: 460ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-::view-transition-old(primary-page-header) {
-  animation: primary-header-out 190ms ease-out both;
-}
-
-::view-transition-new(primary-page-header) {
-  animation: primary-header-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-::view-transition-group(primary-page-content) {
-  animation-duration: 560ms;
-  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-::view-transition-old(primary-page-content),
-::view-transition-new(primary-page-content) {
-  width: 100%;
-  height: 100%;
-  mix-blend-mode: normal;
-  backface-visibility: hidden;
-}
-
-::view-transition-old(primary-page-content) {
-  animation: primary-page-out 260ms cubic-bezier(0.4, 0, 1, 1) both;
-}
-
-::view-transition-new(primary-page-content) {
-  animation: primary-page-in 560ms cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes primary-header-out {
-  to {
-    opacity: 0.82;
-  }
-}
-
-@keyframes primary-header-in {
-  from {
-    opacity: 0.82;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes primary-page-out {
-  to {
-    opacity: 0;
-    filter: blur(3px);
-    transform: translate3d(0, -12px, 0) scale(0.994);
-  }
 }
 
 @keyframes primary-page-in {
@@ -13799,10 +13734,11 @@ textarea:focus {
   }
 }
 
-/* Connected active tab treatment for the primary desktop navigation */
+/* Measured, reflow-free primary navigation */
 @media (min-width: 1061px) {
   .site-header {
     --primary-nav-active-surface: rgba(245, 247, 249, 0.95);
+    --primary-nav-active-ink: #66000c;
   }
 
   .site-header.nav-surface-home {
@@ -13818,93 +13754,141 @@ textarea:focus {
   }
 
   .primary-nav {
+    --primary-nav-indicator-x: 0px;
+    --primary-nav-indicator-width: 0px;
+    position: relative;
     height: 61px;
     margin-bottom: -15px;
+    gap: 2px;
+    padding-inline: 4px;
     isolation: isolate;
   }
 
   .primary-nav .nav-link {
     position: relative;
-    z-index: 1;
-    transform: translateY(-7px);
-  }
-
-  .primary-nav .nav-link:hover {
-    transform: translateY(-7px);
-  }
-
-  .primary-nav .nav-link.active {
     z-index: 2;
     align-self: stretch;
     min-height: 61px;
-    padding: 8px 24px 23px;
-    border-radius: 30px 30px 0 0;
-    color: #66000c;
-    background: var(--primary-nav-active-surface);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.58);
-    backdrop-filter: blur(16px) saturate(1.16);
-    -webkit-backdrop-filter: blur(16px) saturate(1.16);
+    padding: 8px clamp(14px, 1.15vw, 19px) 23px;
+    border-radius: 26px 26px 0 0;
+    color: rgba(255, 255, 255, 0.78);
+    background: transparent !important;
+    box-shadow: none;
+    transform: none;
+    transition:
+      color 280ms ease,
+      opacity 280ms ease,
+      text-shadow 280ms ease;
+  }
+
+  .primary-nav .nav-link::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 17px;
+    width: 0;
+    height: 1px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.72);
+    opacity: 0;
+    transform: translateX(-50%);
+    transition:
+      width 300ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 220ms ease;
+  }
+
+  .primary-nav .nav-link:not(.active):hover {
+    color: #ffffff;
+    background: transparent !important;
+    text-shadow: 0 4px 18px rgba(255, 255, 255, 0.28);
     transform: none;
   }
 
+  .primary-nav .nav-link:not(.active):hover::after {
+    width: 18px;
+    opacity: 1;
+  }
+
+  .primary-nav .nav-link.active,
   .primary-nav .nav-link.active:hover {
-    color: #66000c;
-    background: var(--primary-nav-active-surface);
+    color: var(--primary-nav-active-ink);
+    background: transparent !important;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.72);
     transform: none;
   }
 
-  .site-shell.primary-nav-native .site-header .primary-nav .nav-link.active,
-  .site-shell.primary-nav-fallback-entering .site-header .primary-nav .nav-link.active {
-    will-change: opacity, filter, transform;
-    animation: primary-nav-active-settle 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  .primary-nav .nav-link.active::after {
+    display: none;
   }
 
-  .primary-nav .nav-link.active::before,
-  .primary-nav .nav-link.active::after {
+  .primary-nav .nav-link:focus-visible {
+    outline: none;
+    text-decoration-line: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+    text-decoration-color: currentColor;
+  }
+
+  .primary-nav-indicator {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 1;
+    width: var(--primary-nav-indicator-width);
+    height: 61px;
+    border: 1px solid rgba(255, 255, 255, 0.34);
+    border-bottom: 0;
+    border-radius: 30px 30px 0 0;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 34%),
+      var(--primary-nav-active-surface);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.72),
+      0 -10px 32px rgba(22, 0, 3, 0.13);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate3d(var(--primary-nav-indicator-x), 0, 0);
+    transform-origin: center bottom;
+    transition:
+      width 520ms cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 180ms ease,
+      background 360ms ease,
+      transform 580ms cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(18px) saturate(1.12);
+    -webkit-backdrop-filter: blur(18px) saturate(1.12);
+    will-change: width, transform;
+  }
+
+  .primary-nav.primary-nav-indicator-ready .primary-nav-indicator {
+    opacity: 1;
+  }
+
+  .primary-nav-indicator::before,
+  .primary-nav-indicator::after {
     content: "";
     position: absolute;
     bottom: 0;
-    width: 24px;
-    height: 24px;
+    width: 20px;
+    height: 20px;
     pointer-events: none;
   }
 
-  .primary-nav .nav-link.active::before {
-    left: -24px;
+  .primary-nav-indicator::before {
+    left: -20px;
     background: radial-gradient(
       circle at 0 0,
-      transparent 0 23.5px,
-      var(--primary-nav-active-surface) 24px
+      transparent 0 19.4px,
+      var(--primary-nav-active-surface) 20px
     );
   }
 
-  .primary-nav .nav-link.active::after {
-    right: -24px;
+  .primary-nav-indicator::after {
+    right: -20px;
     background: radial-gradient(
       circle at 100% 0,
-      transparent 0 23.5px,
-      var(--primary-nav-active-surface) 24px
+      transparent 0 19.4px,
+      var(--primary-nav-active-surface) 20px
     );
-  }
-}
-
-@keyframes primary-nav-active-settle {
-  0% {
-    opacity: 0.56;
-    filter: blur(4px);
-    transform: translate3d(0, 7px, 0) scale(0.92);
-  }
-
-  62% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate3d(0, -1px, 0) scale(1.018);
-  }
-
-  100% {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
@@ -13926,22 +13910,13 @@ textarea:focus {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .site-shell.primary-nav-native .site-header .primary-nav .nav-link.active,
-  .site-shell.primary-nav-fallback-entering .site-header .primary-nav .nav-link.active,
+  .primary-nav-indicator,
   .site-shell.primary-nav-fallback-leaving main,
   .site-shell.primary-nav-fallback-entering main {
     animation: none !important;
+    transition: none !important;
   }
 
-  ::view-transition-group(primary-page-header),
-  ::view-transition-group(primary-page-content),
-  ::view-transition-old(primary-page-header),
-  ::view-transition-new(primary-page-header),
-  ::view-transition-old(primary-page-content),
-  ::view-transition-new(primary-page-content) {
-    animation-duration: 0.01ms !important;
-    animation-delay: 0ms !important;
-  }
 }
 
 /* Boston & Undici T-shirt promo section slider */
