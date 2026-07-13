@@ -12,6 +12,7 @@ import {
   X
 } from 'lucide-react';
 import { useState, useEffect, useRef } from 'react';
+import { flushSync } from 'react-dom';
 import { Link, NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '../contexts/AuthContext.jsx';
@@ -45,8 +46,11 @@ export const Layout = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState([]);
+  const [primaryNavTransitionPhase, setPrimaryNavTransitionPhase] = useState('idle');
 
   const searchContainerRef = useRef(null);
+  const primaryNavTransitionRef = useRef(null);
+  const primaryNavFallbackTimerRef = useRef(null);
   const debouncedSearch = useDebouncedValue(search, 300);
 
   // Autocomplete Suggestions Query
@@ -205,10 +209,93 @@ export const Layout = () => {
     navigate('/');
   };
 
+  const handlePrimaryNavClick = (targetPath) => (event) => {
+    setOpen(false);
+
+    const isPlainLeftClick = event.button === 0
+      && !event.metaKey
+      && !event.ctrlKey
+      && !event.shiftKey
+      && !event.altKey;
+
+    if (!isPlainLeftClick || event.defaultPrevented) return;
+
+    const targetUrl = new URL(targetPath, window.location.href);
+    const currentUrl = `${location.pathname}${location.search}${location.hash}`;
+    const nextUrl = `${targetUrl.pathname}${targetUrl.search}${targetUrl.hash}`;
+
+    if (currentUrl === nextUrl) {
+      event.preventDefault();
+      return;
+    }
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    event.preventDefault();
+    if (primaryNavTransitionRef.current) {
+      const activeTransition = primaryNavTransitionRef.current;
+      primaryNavTransitionRef.current = null;
+      activeTransition.skipTransition();
+    }
+    if (primaryNavFallbackTimerRef.current) {
+      window.clearTimeout(primaryNavFallbackTimerRef.current);
+      primaryNavFallbackTimerRef.current = null;
+    }
+
+    const scrollPageToTop = () => {
+      const root = document.documentElement;
+      const previousScrollBehavior = root.style.scrollBehavior;
+      root.style.scrollBehavior = 'auto';
+      window.scrollTo(0, 0);
+      root.style.scrollBehavior = previousScrollBehavior;
+    };
+
+    if (typeof document.startViewTransition !== 'function') {
+      setPrimaryNavTransitionPhase('fallback-leaving');
+
+      primaryNavFallbackTimerRef.current = window.setTimeout(() => {
+        flushSync(() => {
+          navigate(targetPath);
+          setPrimaryNavTransitionPhase('fallback-entering');
+        });
+        scrollPageToTop();
+
+        primaryNavFallbackTimerRef.current = window.setTimeout(() => {
+          setPrimaryNavTransitionPhase('idle');
+          primaryNavFallbackTimerRef.current = null;
+        }, 540);
+      }, 170);
+      return;
+    }
+
+    const transition = document.startViewTransition(() => {
+      flushSync(() => {
+        setPrimaryNavTransitionPhase('native');
+        navigate(targetPath);
+      });
+      scrollPageToTop();
+    });
+
+    primaryNavTransitionRef.current = transition;
+    transition.finished.finally(() => {
+      if (primaryNavTransitionRef.current !== transition) return;
+      primaryNavTransitionRef.current = null;
+      setPrimaryNavTransitionPhase('idle');
+    });
+  };
+
+  useEffect(() => () => {
+    primaryNavTransitionRef.current?.skipTransition();
+    if (primaryNavFallbackTimerRef.current) {
+      window.clearTimeout(primaryNavFallbackTimerRef.current);
+    }
+  }, []);
+
   return (
-    <div className="site-shell">
+    <div className={`site-shell primary-nav-${primaryNavTransitionPhase}`}>
       {open && <div className="menu-backdrop" onClick={() => setOpen(false)} />}
-      <header className={`site-header ${primaryNavSurfaceClass}`}>
+      <header className={`site-header ${primaryNavSurfaceClass}${primaryNavTransitionPhase !== 'idle' ? ' primary-nav-transitioning' : ''}`}>
         <div className="header-inner">
           <div className="brand-group">
             <button
@@ -363,23 +450,23 @@ export const Layout = () => {
           </div>
 
           <nav className={open ? 'primary-nav open' : 'primary-nav'}>
-            <NavLink className={navClass} to="/" onClick={() => setOpen(false)}>
+            <NavLink className={navClass} to="/" onClick={handlePrimaryNavClick('/')}>
               Home
             </NavLink>
-            <NavLink className={navClass} to="/products" onClick={() => setOpen(false)}>
+            <NavLink className={navClass} to="/products" onClick={handlePrimaryNavClick('/products')}>
               Shop
             </NavLink>
-            <NavLink className={navClass} to="/brands" onClick={() => setOpen(false)}>
+            <NavLink className={navClass} to="/brands" onClick={handlePrimaryNavClick('/brands')}>
               Brands
             </NavLink>
-            <NavLink className={navClass} to="/about" onClick={() => setOpen(false)}>
+            <NavLink className={navClass} to="/about" onClick={handlePrimaryNavClick('/about')}>
               About
             </NavLink>
-            <NavLink className={navClass} to="/contact" onClick={() => setOpen(false)}>
+            <NavLink className={navClass} to="/contact" onClick={handlePrimaryNavClick('/contact')}>
               Contact
             </NavLink>
             {isAdmin ? (
-              <NavLink className={adminNavClass} to="/admin" onClick={() => setOpen(false)}>
+              <NavLink className={adminNavClass} to="/admin" onClick={handlePrimaryNavClick('/admin')}>
                 Admin
               </NavLink>
             ) : null}
