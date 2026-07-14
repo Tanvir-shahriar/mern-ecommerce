@@ -14649,7 +14649,7 @@ textarea:focus {
 
   .garment-promo-slide {
     flex-direction: column;
-    padding: 60px 5% 380px 5%;
+    padding: 60px 5% 300px 5%;
     text-align: center;
     justify-content: flex-start;
   }
@@ -14666,7 +14666,7 @@ textarea:focus {
     --promo-art-x: -50%;
     left: 50%;
     height: 320px;
-    top: 72%;
+    top: 57%;
   }
 
   .garment-promo-right-media {
@@ -14679,7 +14679,7 @@ textarea:focus {
   .promo-slider-dots {
     left: 50%;
     transform: translateX(-50%);
-    bottom: 345px;
+    bottom: 18px;
   }
 }
 
@@ -14691,7 +14691,7 @@ textarea:focus {
   }
 
   .garment-promo-slide {
-    padding: 44px 18px 280px;
+    padding: 44px 18px 230px;
   }
 
   .garment-promo-content {
@@ -14710,7 +14710,7 @@ textarea:focus {
 
   .garment-promo-middle-media {
     height: 232px;
-    top: 71%;
+    top: 56%;
   }
 
   .garment-promo-right-media {
@@ -14718,7 +14718,7 @@ textarea:focus {
   }
 
   .promo-slider-dots {
-    bottom: 252px;
+    bottom: 18px;
     gap: 8px;
   }
 
