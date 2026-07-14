@@ -246,8 +246,8 @@ export const ProductDetailPage = () => {
   return (
     <section className="product-detail">
       <Seo
-        title={product.seo?.title || `${product.name} | ${brandName}`}
-        description={product.seo?.description || product.description?.slice(0, 155) || `Buy ${product.name} online with reliable checkout and delivery.`}
+        title={product.seo?.title || `${product.name} - Price in Bangladesh`}
+        description={product.seo?.description || `Buy authentic ${product.name} at the best price in Bangladesh. Order original ${brandName} watch with cash on delivery and brand warranty from LahVenture.`}
         ogImage={mainImageUrl}
         ogType="product"
         schemaJson={productSchema}

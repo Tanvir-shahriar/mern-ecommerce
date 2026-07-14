@@ -79,7 +79,7 @@ export const RegisterPage = () => {
           {registerSlides.map((slide, index) => (
             <div className="login-slide" style={{ '--slide-index': index }} key={slide.title}>
               <span className="login-slide-media">
-                <img src={slide.image} alt="" />
+                <img src={slide.image} alt={slide.title || 'LahVenture registration preview'} />
               </span>
               <div>
                 <strong>{slide.title}</strong>

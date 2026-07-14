@@ -14,19 +14,23 @@ import watchSix from '../assets/watches/6.png';
 const loginHeroWatches = [
   {
     src: watchOne,
-    className: 'primary'
+    className: 'primary',
+    label: 'LahVenture Mechanical Chronograph'
   },
   {
     src: watchTwo,
-    className: 'floating top'
+    className: 'floating top',
+    label: 'LahVenture Luxury Gold Watch'
   },
   {
     src: watchFour,
-    className: 'floating bottom'
+    className: 'floating bottom',
+    label: 'LahVenture Sapphire Automatic Watch'
   },
   {
     src: watchSix,
-    className: 'thumb'
+    className: 'thumb',
+    label: 'LahVenture Rose Gold Timepiece'
   }
 ];
 
@@ -92,13 +96,13 @@ export const LoginPage = () => {
           <div className="login-watch-stage">
             <span className="login-watch-ring" />
             {loginHeroWatches.slice(0, 3).map((watch) => (
-              <img className={`login-watch-image ${watch.className}`} src={watch.src} alt="" key={watch.className} />
+              <img className={`login-watch-image ${watch.className}`} src={watch.src} alt={watch.label} key={watch.className} />
             ))}
           </div>
           <div className="login-watch-rail">
             {loginHeroWatches.map((watch) => (
               <span className={`login-watch-thumb ${watch.className}`} key={`thumb-${watch.className}`}>
-                <img src={watch.src} alt="" />
+                <img src={watch.src} alt={`${watch.label} thumbnail`} />
               </span>
             ))}
           </div>

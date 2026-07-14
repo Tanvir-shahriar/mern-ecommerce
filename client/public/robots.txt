@@ -1,9 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /checkout
-Disallow: /account
-Disallow: /admin
-Disallow: /login
-Disallow: /register
-
-Sitemap: https://lahventure.com/sitemap.xml

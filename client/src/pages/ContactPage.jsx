@@ -147,7 +147,7 @@ export const ContactPage = () => {
   return (
     <section className="contact-page">
       <Seo
-        title="Contact"
+        title="Contact Us"
         description="Contact LahVenture for watch orders, customer support, delivery questions, and product assistance in Bangladesh."
         canonicalUrl={`${window.location.origin}/contact`}
         schemaJson={contactSchema}

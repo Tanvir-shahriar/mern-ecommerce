@@ -810,6 +810,14 @@ export const HomePage = () => {
               '@type': 'Answer',
               'text': 'All mechanical timepieces, luxury chronographs, and smartwatches sold by LahVenture come with 100% authenticity guarantee and brand warranty.'
             }
+          },
+          {
+            '@type': 'Question',
+            'name': 'How can I order a watch online in Dhaka?',
+            'acceptedAnswer': {
+              '@type': 'Answer',
+              'text': 'Simply select your preferred watch, add it to your shopping cart, and complete your order using our secure checkout page. Our customer support team will contact you to verify details and arrange fast delivery.'
+            }
           }
         ]
       }
@@ -819,9 +827,9 @@ export const HomePage = () => {
   return (
     <>
       <Seo
-        title="LahVenture Watches | #1 Luxury Timepiece & Smartwatch Shop in Bangladesh"
-        description="Bangladesh's #1 luxury watch and smartwatch e-commerce shop featuring original mechanical timepieces, Haute Horlogerie, and authentic smartwatches with cash on delivery."
-        keywords="online shopping bangladesh, best e-commerce in bangladesh, luxury watches bangladesh, buy watch online dhaka, smartwatch price in bangladesh, original watches bd"
+        title="LahVenture | #1 E-Commerce Watch Website & Online Shop in Bangladesh"
+        description="LahVenture is Bangladesh's premier watch and smartwatch e-commerce shop. Explore authentic luxury mechanical timepieces, Swiss watches, and original smartwatches with cash on delivery."
+        keywords="e-commerce watch website in bangladesh, watches bangladesh, original watch shop bd, luxury watches bangladesh, smartwatch price in bangladesh, buy watch online dhaka, authentic watches bd, lahventure watches"
         schemaJson={homeSchema}
       />
       <div className="home-page home-light-theme" ref={homePageRef}>
@@ -980,7 +988,7 @@ export const HomePage = () => {
 
           <div className="lahv-signature-visual" aria-hidden="true">
             <span className="lahv-signature-index">LV-01</span>
-            <img src="/jupiter_watch.png" alt="" loading="lazy" />
+            <img src="/jupiter_watch.png" alt="LahVenture Premium Jupiter Watch - Mechanical Edition" loading="lazy" />
             <div className="lahv-signature-caption">
               <span>Precision selected</span>
               <strong>Mechanical and connected timepieces</strong>
@@ -1200,6 +1208,66 @@ export const HomePage = () => {
             {isLoading
               ? Array.from({ length: 4 }).map((_, index) => <div className="skeleton-card" key={index} />)
               : featuredData?.map((product) => <ProductCard key={product._id} product={product} />)}
+          </div>
+        </div>
+      </section>
+
+      {/* 1. Visible Watch FAQ Section (Matches JSON-LD Schema) */}
+      <section className="home-faq-section" aria-labelledby="home-faq-heading">
+        <div className="home-faq-inner">
+          <div className="home-faq-title">
+            <h2 id="home-faq-heading">Frequently Asked Questions</h2>
+          </div>
+          <div className="home-faq-list">
+            <div className="home-faq-item">
+              <h3 className="home-faq-question">Is Cash on Delivery available across Bangladesh?</h3>
+              <p className="home-faq-answer">
+                Yes, LahVenture provides Cash on Delivery (COD) for luxury watches and smartwatches across Dhaka and all districts in Bangladesh.
+              </p>
+            </div>
+            <div className="home-faq-item">
+              <h3 className="home-faq-question">Are all luxury watches at LahVenture 100% authentic?</h3>
+              <p className="home-faq-answer">
+                All mechanical timepieces, luxury chronographs, and smartwatches sold by LahVenture come with a 100% authenticity guarantee and brand warranty.
+              </p>
+            </div>
+            <div className="home-faq-item">
+              <h3 className="home-faq-question">How can I order a watch online in Dhaka?</h3>
+              <p className="home-faq-answer">
+                Simply select your preferred watch, add it to your shopping cart, and complete your order using our secure checkout page. Our customer support team will contact you to verify details and arrange fast delivery.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Horological SEO Footer Article Section */}
+      <section className="home-seo-article-section" aria-labelledby="home-seo-heading">
+        <div className="home-seo-article-inner">
+          <div className="home-seo-article-heading">
+            <h2 id="home-seo-heading">LahVenture: The Premier E-Commerce Watch Website in Bangladesh</h2>
+            <p>Your ultimate destination for authentic premium timepieces, luxury mechanical watches, and digital smartwatches.</p>
+          </div>
+          <div className="home-seo-grid">
+            <div className="home-seo-col">
+              <h3>Buy Original Watches Online in Bangladesh</h3>
+              <p>
+                Finding authentic luxury and premium timepieces can be challenging. At LahVenture, we solve this by curating an exclusive catalog of watches from world-renowned manufactures. Whether you are searching for Swiss chronometers, classic automatic watches, or contemporary Japanese mechanical pieces, our collection is curated with horological passion.
+              </p>
+              <p>
+                Every watch we list goes through strict verification. We verify the watch movement, casing serial numbers, and packaging to guarantee 100% authenticity, making us the most trusted e-commerce watch website in Bangladesh.
+              </p>
+            </div>
+            <div className="home-seo-col">
+              <h3>Best Smartwatch Prices & Brands in BD</h3>
+              <p>
+                Stay connected with style. We offer the latest original smartwatches and luxury connected watches at competitive prices in Bangladesh. From fitness trackers to premium smartwatches, explore original models equipped with cutting-edge tech, official warranty coverage, and reliable user support.
+              </p>
+              <h3>Secure Checkout & Islandwide Cash on Delivery</h3>
+              <p>
+                Shopping at LahVenture is simple and secure. We offer flexible payment choices including credit/debit cards, mobile banking (bKash, Nagad), and cash on delivery (COD) across Dhaka, Chittagong, Sylhet, and all other districts in Bangladesh. Discover your next timekeeper today.
+              </p>
+            </div>
           </div>
         </div>
       </section>

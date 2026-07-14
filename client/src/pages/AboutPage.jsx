@@ -201,7 +201,23 @@ export const AboutPage = () => {
 
   return (
     <>
-      <Seo title="Lahventure - Team Profiles" />
+      <Seo
+        title="Meet the Team"
+        description="Meet the core founders and visionaries behind LahVenture Watches Bangladesh. Learn about our story, mission, and dedication to authentic premium timepieces."
+        schemaJson={{
+          '@context': 'https://schema.org',
+          '@type': 'AboutPage',
+          'name': 'About Our Team | LahVenture',
+          'description': 'Meet the founders and team of LahVenture Watches.',
+          'url': window.location.href,
+          'publisher': {
+            '@type': 'Organization',
+            'name': 'LahVenture',
+            'logo': `${window.location.origin}/Lahventure%20Logo.png`
+          }
+        }}
+      />
+      <h1 className="sr-only">About LahVenture Founders & Co-founders Team</h1>
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap');
@@ -941,7 +957,7 @@ export const AboutPage = () => {
           <div className="about-slide-content flex flex-col justify-center gap-6 md:gap-0 items-center h-full w-full px-6 pt-24 pb-4 md:block md:p-0">
             <div className="about-intro relative md:absolute md:left-[10%] md:top-[28%] text-center md:text-left dynamic-text">
               <h2 className="about-kicker text-3xl sm:text-4xl md:text-7xl font-serif text-maroon mb-1 md:mb-2">Hello, I Am</h2>
-              <h1 className="about-name text-5xl sm:text-6xl md:text-9xl font-serif italic text-maroon ml-0 md:ml-12 lg:ml-24">Laham !</h1>
+              <h2 className="about-name text-5xl sm:text-6xl md:text-9xl font-serif italic text-maroon ml-0 md:ml-12 lg:ml-24">Laham !</h2>
               <p className="about-role text-lg sm:text-xl md:text-3xl font-serif text-maroon mt-2 md:mt-32">Founder</p>
             </div>
 
@@ -961,7 +977,7 @@ export const AboutPage = () => {
           <div className="about-slide-content flex flex-col justify-center gap-6 md:gap-0 items-center h-full w-full px-6 pt-24 pb-4 md:block md:p-0">
             <div className="about-intro relative md:absolute md:left-[10%] md:top-[28%] text-center md:text-left dynamic-text">
               <h2 className="about-kicker text-3xl sm:text-4xl md:text-7xl font-serif text-maroon mb-1 md:mb-2">Hello, I Am</h2>
-              <h1 className="about-name text-5xl sm:text-6xl md:text-9xl font-serif italic text-maroon ml-0 md:ml-12 lg:ml-24">Sourav!</h1>
+              <h2 className="about-name text-5xl sm:text-6xl md:text-9xl font-serif italic text-maroon ml-0 md:ml-12 lg:ml-24">Sourav!</h2>
               <p className="about-role text-lg sm:text-xl md:text-3xl font-serif text-maroon mt-2 md:mt-32">Co-founder</p>
             </div>
 
@@ -981,7 +997,7 @@ export const AboutPage = () => {
           <div className="about-slide-content flex flex-col justify-center gap-6 md:gap-0 items-center h-full w-full px-6 pt-24 pb-4 md:block md:p-0">
             <div className="about-intro relative md:absolute md:left-[10%] md:top-[28%] text-center md:text-left dynamic-text">
               <h2 className="about-kicker text-3xl sm:text-4xl md:text-7xl font-serif text-maroon mb-1 md:mb-2">Hello, I Am</h2>
-              <h1 className="about-name text-5xl sm:text-6xl md:text-9xl font-serif italic text-maroon ml-0 md:ml-12 lg:ml-24">Tushar!</h1>
+              <h2 className="about-name text-5xl sm:text-6xl md:text-9xl font-serif italic text-maroon ml-0 md:ml-12 lg:ml-24">Tushar!</h2>
               <p className="about-role text-lg sm:text-xl md:text-3xl font-serif text-maroon mt-2 md:mt-32">Co-founder</p>
             </div>
 
@@ -1006,7 +1022,7 @@ export const AboutPage = () => {
           </div>
 
           <div className="text-center thank-you-text opacity-0 z-10 px-6">
-            <h1 className="about-thank-title thank-you-line-1 text-6xl md:text-9xl font-serif font-bold text-maroon uppercase tracking-widest" style={{ opacity: 0 }}>Thank You</h1>
+            <h2 className="about-thank-title thank-you-line-1 text-6xl md:text-9xl font-serif font-bold text-maroon uppercase tracking-widest" style={{ opacity: 0 }}>Thank You</h2>
             <h2 className="about-thank-subtitle thank-you-line-2 text-2xl md:text-4xl font-sans font-medium text-maroon mt-6 uppercase tracking-wider" style={{ opacity: 0 }}>For Visiting</h2>
             <h3 className="about-thank-script thank-you-line-3 text-4xl md:text-6xl font-serif italic text-maroon mt-4" style={{ opacity: 0 }}>Our Website</h3>
           </div>

@@ -140,19 +140,28 @@ export const ProductsPage = () => {
   const brandName = activeBrandObj?.name || currentBrand || '';
 
   let pageTitle = 'SHOP NOW';
+  let seoTitle = 'Original Watches & Smartwatches in Bangladesh';
+  let seoDescription = 'Buy original luxury watches, automatic mechanical timepieces, and authentic smartwatches in Bangladesh with cash on delivery and official warranty from LahVenture.';
+
   if (search) {
     pageTitle = `Search results for "${search}"`;
+    seoTitle = `Search Results for "${search}"`;
+    seoDescription = `Explore search results for "${search}" at LahVenture. Find original premium watches and smartwatches in Bangladesh.`;
   } else if (brandName) {
     pageTitle = `${brandName} Collection`;
+    seoTitle = `${brandName} Watches in Bangladesh`;
+    seoDescription = `Explore original ${brandName} watches at LahVenture Bangladesh. Featuring authentic mechanical, automatic, and smartwatch series with cash on delivery.`;
   } else if (categoryName) {
     pageTitle = `${categoryName} Collection`;
+    seoTitle = `${categoryName} Prices in Bangladesh`;
+    seoDescription = `Browse authentic ${categoryName} models and prices in Bangladesh. Order original timepieces at LahVenture with cash on delivery and brand warranty.`;
   }
 
   const catalogSchema = {
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
     'name': pageTitle,
-    'description': `Browse authentic ${brandName || categoryName || 'luxury'} products at LahVenture.`,
+    'description': seoDescription,
     'url': window.location.href,
     'mainEntity': {
       '@type': 'ItemList',
@@ -170,8 +179,8 @@ export const ProductsPage = () => {
   return (
     <section className="catalog-page">
       <Seo
-        title={pageTitle}
-        description={`Explore our curated collection of ${brandName || categoryName || 'luxury'} products with guaranteed authenticity and fast delivery.`}
+        title={seoTitle}
+        description={seoDescription}
         schemaJson={catalogSchema}
       />
       {/* Mobile Filters UI */}
