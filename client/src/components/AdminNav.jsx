@@ -26,7 +26,7 @@ const adminSections = {
     tabs: [
       { label: 'Dashboard', path: '/admin', icon: BarChart3, end: true },
       { label: 'Products', path: '/admin/products', icon: Boxes },
-      { label: 'Brands', path: '/admin/brands', icon: Tags },
+      { label: 'Collections', path: '/admin/brands', icon: Tags },
       { label: 'Orders', path: '/admin/orders', icon: ClipboardList },
       { label: 'Messages', path: '/admin/contact-messages', icon: Mail },
       { label: 'Users', path: '/admin/users', icon: Users },

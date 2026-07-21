@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, ImagePlus, Plus, Save, Star, Trash2, Upload, X } from 'lucide-react';
+import { AlertTriangle, ArrowDown, ArrowUp, CheckCircle2, ImagePlus, Plus, Save, Star, Trash2, Upload, X, Layers, Boxes } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useMemo, useState } from 'react';
 import { AdminLoadingState } from '../components/AdminLoadingState.jsx';
@@ -6,47 +6,64 @@ import { AdminNav } from '../components/AdminNav.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 
-const emptyBrand = {
-  name: '',
-  tagline: '',
-  description: '',
-  filterGroup: 'Swiss Heritage',
-  origin: '',
-  founded: '',
-  image: null,
-  spotlightImage: null,
-  spotlightTitle: '',
-  spotlightDescription: '',
-  ctaText: 'Explore Collection',
-  isActive: true,
-  isSpotlight: false,
-  order: 0
-};
-
-const normalizeBrand = (brand = {}) => ({
-  ...emptyBrand,
-  ...brand,
-  image: brand.image || null,
-  spotlightImage: brand.spotlightImage || null,
-  order: brand.order ?? 0
-});
-
-const serializeBrand = (brand) => ({
-  name: brand.name.trim(),
-  tagline: brand.tagline.trim() || undefined,
-  description: brand.description.trim() || undefined,
-  filterGroup: brand.filterGroup.trim() || 'All Brands',
-  origin: brand.origin.trim() || undefined,
-  founded: brand.founded.trim() || undefined,
-  image: brand.image?.url ? brand.image : null,
-  spotlightImage: brand.spotlightImage?.url ? brand.spotlightImage : null,
-  spotlightTitle: brand.spotlightTitle.trim() || undefined,
-  spotlightDescription: brand.spotlightDescription.trim() || undefined,
-  ctaText: brand.ctaText.trim() || 'Explore Collection',
-  isActive: brand.isActive,
-  isSpotlight: brand.isSpotlight,
-  order: Number(brand.order || 0)
-});
+const defaultCollections = [
+  {
+    categoryKey: 'fashion',
+    title: 'FASHION COLLECTION',
+    kicker: 'SPRING / SUMMER 2026',
+    stampText: 'FASHION • EXCLUSIVE COLLECTION • 2026',
+    tagline: 'Curated Haute Couture, Modern Apparel & Luxury Styling',
+    bannerImage: {
+      url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80',
+      alt: 'Fashion Collection'
+    },
+    productIds: [],
+    isActive: true,
+    order: 0
+  },
+  {
+    categoryKey: 'electronics',
+    title: 'ELECTRONICS COLLECTION',
+    kicker: 'NEXT-GEN TECH & WEARABLES',
+    stampText: 'ELECTRONICS • INNOVATION & TECH • 2026',
+    tagline: 'State-of-the-art Audio, Smartwatches & Cutting Edge Devices',
+    bannerImage: {
+      url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80',
+      alt: 'Electronics Collection'
+    },
+    productIds: [],
+    isActive: true,
+    order: 1
+  },
+  {
+    categoryKey: 'home-living',
+    title: 'HOME & LIVING COLLECTION',
+    kicker: 'MODERN INTERIORS & DECOR',
+    stampText: 'HOME & LIVING • ELEGANT DESIGN • 2026',
+    tagline: 'Refined Home Aesthetics, Minimalist Furniture & Living Gear',
+    bannerImage: {
+      url: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1200&q=80',
+      alt: 'Home Living Collection'
+    },
+    productIds: [],
+    isActive: true,
+    order: 2
+  },
+  {
+    categoryKey: 'beauty-care',
+    title: 'BEAUTY & PERSONAL CARE',
+    kicker: 'ESSENTIAL CARE & LUXURY BEAUTY',
+    stampText: 'BEAUTY • LUXURY CARE • 2026',
+    tagline: 'Botanical Skincare, Fragrance Masterpieces & Organic Self-Care',
+    bannerImage: {
+      url: 'https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=80',
+      alt: 'Beauty Collection'
+    },
+    productIds: [],
+    isActive: true,
+    order: 3
+  }
+];
 
 const newFaq = () => ({
   id: `brand-faq-${Date.now()}`,
@@ -69,38 +86,21 @@ const normalizeFaqForm = (settings) => {
   return [newFaq()];
 };
 
-const serializeFaq = (faq) => ({
-  id: faq.id,
-  question: faq.question.trim(),
-  answer: faq.answer.trim(),
-  isActive: faq.isActive !== false
-});
-
 export const AdminBrandsPage = () => {
   const queryClient = useQueryClient();
-  const [selectedId, setSelectedId] = useState('new');
-  const [form, setForm] = useState(emptyBrand);
+  const [activeTab, setActiveTab] = useState('collections'); // 'collections' | 'faqs'
+  const [collectionsForm, setCollectionsForm] = useState(defaultCollections);
   const [faqForm, setFaqForm] = useState(() => [newFaq()]);
   const [saving, setSaving] = useState(false);
-  const [faqSaving, setFaqSaving] = useState(false);
   const [uploading, setUploading] = useState('');
   const [message, setMessage] = useState({ text: '', type: 'success' });
-  const [faqMessage, setFaqMessage] = useState({ text: '', type: 'success' });
 
-  const { data: brands = [], isLoading, isFetching, isError, error } = useQuery({
-    queryKey: ['admin-brands'],
-    queryFn: async () => {
-      const { data } = await api.get('/brands/admin');
-      return data.data.brands;
-    }
-  });
-
+  // Query Settings
   const {
     data: brandPageSettings,
-    isLoading: faqLoading,
-    isFetching: faqFetching,
-    isError: faqIsError,
-    error: faqError
+    isLoading: settingsLoading,
+    isError: settingsIsError,
+    error: settingsError
   } = useQuery({
     queryKey: ['admin-brand-page-settings'],
     queryFn: async () => {
@@ -109,65 +109,41 @@ export const AdminBrandsPage = () => {
     }
   });
 
-  const selectedBrand = useMemo(
-    () => brands.find((brand) => brand._id === selectedId),
-    [brands, selectedId]
-  );
-
-  useEffect(() => {
-    if (selectedId === 'new') {
-      setForm({ ...emptyBrand, order: brands.length });
-      return;
+  // Query All Products for manual selection in collections
+  const { data: allProducts = [] } = useQuery({
+    queryKey: ['admin-all-products'],
+    queryFn: async () => {
+      const { data } = await api.get('/products', { params: { limit: 100 } });
+      return data.data.products || [];
     }
-
-    if (selectedBrand) setForm(normalizeBrand(selectedBrand));
-  }, [selectedId, selectedBrand?._id, brands.length]);
+  });
 
   useEffect(() => {
-    if (brandPageSettings) setFaqForm(normalizeFaqForm(brandPageSettings));
+    if (brandPageSettings) {
+      if (brandPageSettings.collections && brandPageSettings.collections.length > 0) {
+        setCollectionsForm(brandPageSettings.collections);
+      }
+      setFaqForm(normalizeFaqForm(brandPageSettings));
+    }
   }, [brandPageSettings]);
 
-  const updateField = (key, value) => {
-    setForm((current) => ({ ...current, [key]: value }));
-  };
-
-  const updateImage = (key, image) => {
-    setForm((current) => ({ ...current, [key]: image }));
-  };
-
-  const updateFaq = (index, patch) => {
-    setFaqForm((current) => current.map((faq, faqIndex) => (
-      faqIndex === index ? { ...faq, ...patch } : faq
+  const updateCollectionField = (index, field, value) => {
+    setCollectionsForm((current) => current.map((col, idx) => (
+      idx === index ? { ...col, [field]: value } : col
     )));
   };
 
-  const addFaq = () => {
-    setFaqForm((current) => [...current, newFaq()]);
+  const updateCollectionImage = (index, imageObj) => {
+    setCollectionsForm((current) => current.map((col, idx) => (
+      idx === index ? { ...col, bannerImage: imageObj } : col
+    )));
   };
 
-  const removeFaq = (index) => {
-    setFaqForm((current) => {
-      const next = current.filter((_, faqIndex) => faqIndex !== index);
-      return next.length ? next : [newFaq()];
-    });
-  };
-
-  const moveFaq = (index, direction) => {
-    const nextIndex = index + direction;
-    if (nextIndex < 0 || nextIndex >= faqForm.length) return;
-    setFaqForm((current) => {
-      const next = [...current];
-      const [moved] = next.splice(index, 1);
-      next.splice(nextIndex, 0, moved);
-      return next;
-    });
-  };
-
-  const uploadBrandImage = async (target, event) => {
+  const uploadCollectionBanner = async (index, event) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    setUploading(target);
+    setUploading(`collection-${index}`);
     setMessage({ text: '', type: 'success' });
 
     try {
@@ -178,12 +154,12 @@ export const AdminBrandsPage = () => {
       });
       const image = data.data.images?.[0];
       if (image) {
-        updateImage(target, {
+        updateCollectionImage(index, {
           url: image.url,
-          alt: image.alt || form.name || 'Brand image',
+          alt: image.alt || collectionsForm[index].title || 'Banner',
           publicId: image.publicId
         });
-        setMessage({ text: 'Image uploaded. Save the brand to publish it.', type: 'success' });
+        setMessage({ text: 'Banner image uploaded. Click Save to publish.', type: 'success' });
       }
     } catch (uploadError) {
       setMessage({ text: apiErrorMessage(uploadError), type: 'error' });
@@ -193,116 +169,65 @@ export const AdminBrandsPage = () => {
     }
   };
 
-  const saveBrand = async (event) => {
+  const toggleProductInCollection = (colIndex, productId) => {
+    setCollectionsForm((current) => current.map((col, idx) => {
+      if (idx !== colIndex) return col;
+      const currentIds = col.productIds || [];
+      const exists = currentIds.includes(productId);
+      const nextIds = exists
+        ? currentIds.filter((id) => id !== productId)
+        : [...currentIds, productId];
+      return { ...col, productIds: nextIds };
+    }));
+  };
+
+  const saveSettings = async (event) => {
     event.preventDefault();
     setSaving(true);
     setMessage({ text: '', type: 'success' });
 
     try {
-      const payload = serializeBrand(form);
-      const response = selectedId === 'new'
-        ? await api.post('/brands', payload)
-        : await api.patch(`/brands/${selectedId}`, payload);
+      const payload = {
+        collections: collectionsForm,
+        faqs: faqForm.filter((faq) => faq.question || faq.answer)
+      };
 
-      const savedBrand = response.data.data.brand;
-      setSelectedId(savedBrand._id);
-      setMessage({ text: selectedId === 'new' ? 'Brand created' : 'Brand saved', type: 'success' });
-      queryClient.invalidateQueries({ queryKey: ['admin-brands'] });
-      queryClient.invalidateQueries({ queryKey: ['brands'] });
-      queryClient.invalidateQueries({ queryKey: ['products'] });
-    } catch (saveError) {
-      setMessage({ text: apiErrorMessage(saveError), type: 'error' });
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const saveFaqSettings = async (event) => {
-    event.preventDefault();
-    setFaqSaving(true);
-    setFaqMessage({ text: '', type: 'success' });
-
-    const faqs = faqForm
-      .map(serializeFaq)
-      .filter((faq) => faq.question || faq.answer);
-
-    if (faqs.some((faq) => !faq.question || !faq.answer)) {
-      setFaqMessage({ text: 'Each saved FAQ needs both a question and an answer.', type: 'error' });
-      setFaqSaving(false);
-      return;
-    }
-
-    try {
-      const { data } = await api.patch('/admin/brand-page', { faqs });
-      setFaqForm(normalizeFaqForm(data.data));
-      setFaqMessage({ text: data.message || 'Brand FAQ section saved', type: 'success' });
+      const { data } = await api.patch('/admin/brand-page', payload);
+      setMessage({ text: data.message || 'Collections settings saved successfully!', type: 'success' });
       queryClient.setQueryData(['admin-brand-page-settings'], data.data);
       queryClient.invalidateQueries({ queryKey: ['brand-page-settings'] });
-    } catch (saveError) {
-      setFaqMessage({ text: apiErrorMessage(saveError), type: 'error' });
-    } finally {
-      setFaqSaving(false);
-    }
-  };
-
-  const deleteBrand = async () => {
-    if (selectedId === 'new') return;
-    setSaving(true);
-    setMessage({ text: '', type: 'success' });
-
-    try {
-      await api.delete(`/brands/${selectedId}`);
-      setSelectedId('new');
-      setMessage({ text: 'Brand deleted', type: 'success' });
-      queryClient.invalidateQueries({ queryKey: ['admin-brands'] });
-      queryClient.invalidateQueries({ queryKey: ['brands'] });
-    } catch (deleteError) {
-      setMessage({ text: apiErrorMessage(deleteError), type: 'error' });
+      queryClient.invalidateQueries({ queryKey: ['brand-page-public'] });
+    } catch (err) {
+      setMessage({ text: apiErrorMessage(err), type: 'error' });
     } finally {
       setSaving(false);
     }
   };
 
-  if (isLoading) {
+  if (settingsLoading) {
     return (
       <section className="admin-page section">
-        <Seo title="Admin Brands" noIndex />
+        <Seo title="Admin Collections" noIndex />
         <AdminNav />
-        <AdminLoadingState label="Loading brands" />
-      </section>
-    );
-  }
-
-  if (isError) {
-    return (
-      <section className="admin-page section">
-        <Seo title="Admin Brands" noIndex />
-        <AdminNav />
-        <div className="panel">
-          <p className="form-error">
-            <AlertTriangle size={16} />
-            {apiErrorMessage(error)}
-          </p>
-        </div>
+        <AdminLoadingState label="Loading collections configuration" />
       </section>
     );
   }
 
   return (
     <section className="admin-page admin-brands-page section">
-      <Seo title="Admin Brands" noIndex />
+      <Seo title="Admin Collections" noIndex />
       <AdminNav />
 
       <div className="section-heading compact">
         <div>
-          <p className="eyebrow">Catalog</p>
-          <h1>Brands</h1>
+          <p className="eyebrow">Storefront Content</p>
+          <h1>Collections & Category Heros</h1>
         </div>
         <div className="toolbar-actions">
-          {isFetching ? <span className="admin-fetching"><span className="spinner tiny" /> Syncing</span> : null}
-          <button className="button primary" type="submit" form="admin-brand-form" disabled={saving}>
+          <button className="button primary" type="submit" form="admin-collections-form" disabled={saving}>
             <Save size={17} />
-            {saving ? 'Saving...' : selectedId === 'new' ? 'Create brand' : 'Save brand'}
+            {saving ? 'Saving...' : 'Save Collections'}
           </button>
         </div>
       </div>
@@ -314,239 +239,143 @@ export const AdminBrandsPage = () => {
         </p>
       ) : null}
 
-      <div className="admin-brands-layout">
-        <aside className="panel admin-brand-list-panel">
+      <form id="admin-collections-form" onSubmit={saveSettings}>
+        <div className="admin-collections-manager">
           <div className="editor-card-heading">
             <div>
-              <p className="eyebrow">Saved brands</p>
-              <h2>Brand categories</h2>
-            </div>
-            <button className="button compact" type="button" onClick={() => setSelectedId('new')}>
-              <Plus size={15} />
-              New
-            </button>
-          </div>
-
-          <div className="admin-brand-list">
-            {brands.map((brand) => (
-              <button
-                type="button"
-                className={`admin-brand-row${selectedId === brand._id ? ' active' : ''}`}
-                onClick={() => setSelectedId(brand._id)}
-                key={brand._id}
-              >
-                <span className="admin-brand-row-image">
-                  {brand.image?.url ? <img src={mediaUrl(brand.image.url)} alt={brand.image.alt || brand.name} /> : <ImagePlus size={18} />}
-                </span>
-                <span>
-                  <strong>{brand.name}</strong>
-                  <small>{brand.productCount || 0} product(s)</small>
-                </span>
-                {brand.isSpotlight ? <Star size={15} fill="currentColor" /> : null}
-              </button>
-            ))}
-          </div>
-        </aside>
-
-        <form id="admin-brand-form" className="panel admin-brand-editor" onSubmit={saveBrand}>
-          <div className="editor-card-heading">
-            <div>
-              <p className="eyebrow">{selectedId === 'new' ? 'New brand' : 'Edit brand'}</p>
-              <h2>Brand details</h2>
-            </div>
-            {selectedId !== 'new' ? (
-              <button className="button compact secondary danger-soft" type="button" onClick={deleteBrand} disabled={saving || (selectedBrand?.productCount || 0) > 0}>
-                <Trash2 size={15} />
-                Delete
-              </button>
-            ) : null}
-          </div>
-
-          <div className="admin-brand-form-grid">
-            <label>
-              Brand name
-              <input required value={form.name} onChange={(event) => updateField('name', event.target.value)} />
-            </label>
-            <label>
-              Display group
-              <input value={form.filterGroup} onChange={(event) => updateField('filterGroup', event.target.value)} placeholder="Swiss Heritage" />
-            </label>
-            <label>
-              Tagline
-              <input value={form.tagline} onChange={(event) => updateField('tagline', event.target.value)} placeholder="Haute Horlogerie" />
-            </label>
-            <label>
-              Order
-              <input type="number" value={form.order} onChange={(event) => updateField('order', event.target.value)} />
-            </label>
-            <label>
-              Founded
-              <input value={form.founded} onChange={(event) => updateField('founded', event.target.value)} placeholder="1839" />
-            </label>
-            <label>
-              Origin
-              <input value={form.origin} onChange={(event) => updateField('origin', event.target.value)} placeholder="Geneva" />
-            </label>
-            <label className="span-2">
-              Description
-              <textarea value={form.description} onChange={(event) => updateField('description', event.target.value)} />
-            </label>
-            <label className="checkbox-row">
-              <input type="checkbox" checked={form.isActive} onChange={(event) => updateField('isActive', event.target.checked)} />
-              Show on public brands page
-            </label>
-            <label className="checkbox-row">
-              <input type="checkbox" checked={form.isSpotlight} onChange={(event) => updateField('isSpotlight', event.target.checked)} />
-              Use as brand spotlight
-            </label>
-          </div>
-
-          <div className="admin-brand-media-grid">
-            <div className="admin-brand-media-card">
-              <div className="editor-card-heading compact-heading">
-                <div>
-                  <p className="eyebrow">Card image</p>
-                  <h3>Brand grid media</h3>
-                </div>
-              </div>
-              {form.image?.url ? (
-                <div className="admin-brand-image-preview">
-                  <img src={mediaUrl(form.image.url)} alt={form.image.alt || form.name || 'Brand'} />
-                  <button type="button" onClick={() => updateImage('image', null)} aria-label="Remove card image">
-                    <X size={15} />
-                  </button>
-                </div>
-              ) : null}
-              <label>
-                Image URL
-                <input value={form.image?.url || ''} onChange={(event) => updateImage('image', { ...(form.image || {}), url: event.target.value, alt: form.image?.alt || form.name })} />
-              </label>
-              <label className="payment-method-image-upload admin-brand-upload">
-                <Upload size={17} />
-                <span>{uploading === 'image' ? 'Uploading...' : 'Upload image'}</span>
-                <input type="file" accept="image/*" disabled={uploading === 'image'} onChange={(event) => uploadBrandImage('image', event)} />
-              </label>
-            </div>
-
-            <div className="admin-brand-media-card">
-              <div className="editor-card-heading compact-heading">
-                <div>
-                  <p className="eyebrow">Spotlight</p>
-                  <h3>Feature section</h3>
-                </div>
-              </div>
-              <label>
-                Spotlight title
-                <input value={form.spotlightTitle} onChange={(event) => updateField('spotlightTitle', event.target.value)} />
-              </label>
-              <label>
-                Spotlight image URL
-                <input value={form.spotlightImage?.url || ''} onChange={(event) => updateImage('spotlightImage', { ...(form.spotlightImage || {}), url: event.target.value, alt: form.spotlightImage?.alt || form.name })} />
-              </label>
-              {form.spotlightImage?.url ? (
-                <div className="admin-brand-image-preview">
-                  <img src={mediaUrl(form.spotlightImage.url)} alt={form.spotlightImage.alt || form.name || 'Brand spotlight'} />
-                  <button type="button" onClick={() => updateImage('spotlightImage', null)} aria-label="Remove spotlight image">
-                    <X size={15} />
-                  </button>
-                </div>
-              ) : null}
-              <label>
-                Spotlight description
-                <textarea value={form.spotlightDescription} onChange={(event) => updateField('spotlightDescription', event.target.value)} />
-              </label>
-              <label className="payment-method-image-upload admin-brand-upload">
-                <Upload size={17} />
-                <span>{uploading === 'spotlightImage' ? 'Uploading...' : 'Upload spotlight image'}</span>
-                <input type="file" accept="image/*" disabled={uploading === 'spotlightImage'} onChange={(event) => uploadBrandImage('spotlightImage', event)} />
-              </label>
+              <p className="eyebrow">4 Category Hero Sections</p>
+              <h2>Fashion, Electronics, Home & Living, Beauty & Personal Care</h2>
             </div>
           </div>
-        </form>
-      </div>
 
-      <form id="admin-brand-faq-form" className="panel admin-brand-faq-editor" onSubmit={saveFaqSettings}>
-        <div className="editor-card-heading">
-          <div>
-            <p className="eyebrow">Brands page</p>
-            <h2>FAQ section</h2>
-          </div>
-          <div className="admin-faq-heading-actions">
-            {faqFetching ? <span className="admin-fetching"><span className="spinner tiny" /> Syncing</span> : null}
-            <button className="button compact" type="button" onClick={addFaq}>
-              <Plus size={15} />
-              Add FAQ
-            </button>
-            <button className="button primary compact" type="submit" disabled={faqSaving || faqLoading || faqIsError}>
-              <Save size={16} />
-              {faqSaving ? 'Saving...' : 'Save FAQ'}
-            </button>
-          </div>
-        </div>
+          <div className="admin-collections-grid" style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', marginTop: '1.5rem' }}>
+            {collectionsForm.map((col, colIdx) => (
+              <article className="panel admin-collection-hero-card" key={col.categoryKey || colIdx} style={{ padding: '2rem' }}>
+                <div className="editor-card-heading compact-heading" style={{ marginBottom: '1.5rem' }}>
+                  <div>
+                    <span className="eyebrow" style={{ textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: '700', color: '#a1a1aa' }}>
+                      Category Section {colIdx + 1}
+                    </span>
+                    <h3 style={{ margin: '0.25rem 0', fontSize: '1.4rem', textTransform: 'uppercase' }}>{col.title}</h3>
+                  </div>
+                  <label className="checkbox-row compact-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={col.isActive !== false}
+                      onChange={(e) => updateCollectionField(colIdx, 'isActive', e.target.checked)}
+                    />
+                    Section Active
+                  </label>
+                </div>
 
-        {faqMessage.text ? (
-          <p className={faqMessage.type === 'error' ? 'form-error admin-currency-message' : 'form-note admin-currency-message'}>
-            {faqMessage.type === 'error' ? <AlertTriangle size={16} /> : <CheckCircle2 size={16} />}
-            {faqMessage.text}
-          </p>
-        ) : null}
+                <div className="admin-brand-form-grid">
+                  <label>
+                    Section Title
+                    <input
+                      value={col.title}
+                      onChange={(e) => updateCollectionField(colIdx, 'title', e.target.value)}
+                      placeholder="FASHION COLLECTION"
+                    />
+                  </label>
+                  <label>
+                    Kicker / Season Subtitle
+                    <input
+                      value={col.kicker}
+                      onChange={(e) => updateCollectionField(colIdx, 'kicker', e.target.value)}
+                      placeholder="SPRING / SUMMER 2026"
+                    />
+                  </label>
+                  <label>
+                    Rotating Stamp Text
+                    <input
+                      value={col.stampText}
+                      onChange={(e) => updateCollectionField(colIdx, 'stampText', e.target.value)}
+                      placeholder="FASHION • EXCLUSIVE COLLECTION • 2026"
+                    />
+                  </label>
+                  <label>
+                    Tagline
+                    <input
+                      value={col.tagline}
+                      onChange={(e) => updateCollectionField(colIdx, 'tagline', e.target.value)}
+                      placeholder="Curated Luxury Apparel & High-End Couture"
+                    />
+                  </label>
+                </div>
 
-        {faqLoading ? (
-          <AdminLoadingState label="Loading brand FAQs" />
-        ) : faqIsError ? (
-          <p className="form-error">
-            <AlertTriangle size={16} />
-            {apiErrorMessage(faqError)}
-          </p>
-        ) : (
-          <div className="admin-faq-list">
-            {faqForm.map((faq, index) => (
-              <article className="admin-faq-item" key={faq.id || index}>
-                <div className="admin-faq-item-heading">
-                  <strong>FAQ {index + 1}</strong>
-                  <div className="admin-faq-item-actions">
-                    <label className="checkbox-row compact-checkbox">
+                {/* Banner Media */}
+                <div style={{ marginTop: '1.5rem', background: 'rgba(255,255,255,0.02)', padding: '1.25rem', borderRadius: '4px', border: '1px solid rgba(255,255,255,0.06)' }}>
+                  <p className="eyebrow" style={{ marginBottom: '0.75rem' }}>Hero Banner Image</p>
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                    {col.bannerImage?.url ? (
+                      <div className="admin-brand-image-preview" style={{ width: '120px', height: '80px' }}>
+                        <img src={mediaUrl(col.bannerImage.url)} alt={col.title} />
+                      </div>
+                    ) : null}
+                    <div style={{ flex: 1 }}>
                       <input
-                        type="checkbox"
-                        checked={faq.isActive}
-                        onChange={(event) => updateFaq(index, { isActive: event.target.checked })}
+                        value={col.bannerImage?.url || ''}
+                        onChange={(e) => updateCollectionImage(colIdx, { ...(col.bannerImage || {}), url: e.target.value })}
+                        placeholder="Image URL"
+                        style={{ width: '100%', marginBottom: '0.5rem' }}
                       />
-                      Active
-                    </label>
-                    <button type="button" className="button icon-button" onClick={() => moveFaq(index, -1)} disabled={index === 0} aria-label="Move FAQ up">
-                      <ArrowUp size={15} />
-                    </button>
-                    <button type="button" className="button icon-button" onClick={() => moveFaq(index, 1)} disabled={index === faqForm.length - 1} aria-label="Move FAQ down">
-                      <ArrowDown size={15} />
-                    </button>
-                    <button type="button" className="button icon-button danger-soft" onClick={() => removeFaq(index)} aria-label="Remove FAQ">
-                      <Trash2 size={15} />
-                    </button>
+                      <label className="payment-method-image-upload admin-brand-upload">
+                        <Upload size={15} />
+                        <span>{uploading === `collection-${colIdx}` ? 'Uploading...' : 'Upload Image'}</span>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          disabled={uploading === `collection-${colIdx}`}
+                          onChange={(e) => uploadCollectionBanner(colIdx, e)}
+                        />
+                      </label>
+                    </div>
                   </div>
                 </div>
 
-                <div className="admin-faq-fields">
-                  <label>
-                    Question
-                    <input
-                      value={faq.question}
-                      onChange={(event) => updateFaq(index, { question: event.target.value })}
-                      placeholder="Are all brand watches genuine?"
-                    />
-                  </label>
-                  <label>
-                    Answer
-                    <textarea
-                      value={faq.answer}
-                      onChange={(event) => updateFaq(index, { answer: event.target.value })}
-                      placeholder="Write the customer-facing answer."
-                    />
-                  </label>
+                {/* Manually Featured Products */}
+                <div style={{ marginTop: '1.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <p className="eyebrow" style={{ margin: 0 }}>Featured Products in Hero Carousel</p>
+                    <small style={{ color: '#71717a' }}>Select products to display (auto-fills from store if none selected)</small>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '0.75rem', maxHeight: '240px', overflowY: 'auto', padding: '0.75rem', background: '#09090b', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '4px' }}>
+                    {allProducts.map((product) => {
+                      const isSelected = (col.productIds || []).includes(String(product._id || product.id));
+                      return (
+                        <div
+                          key={product._id || product.id}
+                          onClick={() => toggleProductInCollection(colIdx, String(product._id || product.id))}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.5rem',
+                            padding: '0.5rem',
+                            borderRadius: '3px',
+                            cursor: 'pointer',
+                            background: isSelected ? 'rgba(255, 255, 255, 0.12)' : 'rgba(255, 255, 255, 0.02)',
+                            border: isSelected ? '1px solid #ffffff' : '1px solid transparent'
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => {}}
+                            style={{ cursor: 'pointer' }}
+                          />
+                          <span style={{ fontSize: '0.8rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', color: isSelected ? '#fff' : '#a1a1aa' }}>
+                            {product.name}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </article>
             ))}
           </div>
-        )}
+        </div>
       </form>
     </section>
   );

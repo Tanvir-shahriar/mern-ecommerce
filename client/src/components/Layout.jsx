@@ -342,7 +342,7 @@ export const Layout = () => {
                 </Link>
 
                 <Link to="/brands" className="hamburger-item" onClick={() => setOpen(false)}>
-                  Brands
+                  Collections
                 </Link>
                 
                 <div className={`hamburger-item-has-submenu ${activeCategory === 'watch' ? 'active' : ''}`}>
@@ -479,7 +479,7 @@ export const Layout = () => {
               Shop
             </NavLink>
             <NavLink className={navClass} to="/brands" onClick={handlePrimaryNavClick('/brands')}>
-              Brands
+              Collections
             </NavLink>
             <NavLink className={navClass} to="/about" onClick={handlePrimaryNavClick('/about')}>
               About
@@ -733,7 +733,7 @@ export const Layout = () => {
                   <Link to="/products">All products</Link>
                   <Link to="/products?category=Smartwatch">Smartwatches</Link>
                   <Link to="/products?category=Automatic%20Watches">Automatic watches</Link>
-                  <Link to="/brands">Brands</Link>
+                  <Link to="/brands">Collections</Link>
                 </div>
 
                 <div className="footer-nav-column">

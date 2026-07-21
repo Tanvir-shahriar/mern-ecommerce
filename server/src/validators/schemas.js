@@ -363,4 +363,20 @@ export const brandPageSettingsSchema = z.object({
       })
     )
     .max(12)
+    .optional(),
+  collections: z
+    .array(
+      z.object({
+        categoryKey: z.string().trim().min(1).max(80),
+        title: z.string().trim().min(1).max(160),
+        kicker: z.string().trim().max(160).optional(),
+        stampText: z.string().trim().max(200).optional(),
+        tagline: z.string().trim().max(300).optional(),
+        bannerImage: imageSchema.nullable().optional(),
+        productIds: z.array(z.string()).optional(),
+        isActive: z.boolean().optional(),
+        order: z.coerce.number().optional()
+      })
+    )
+    .optional()
 });
