@@ -17,6 +17,9 @@ import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 import editorialHero from '../assets/collections/editorial-hero.jpg';
+import electronicsHero from '../assets/collections/electronics-hero.jpg';
+import homeLivingHero from '../assets/collections/home-living-hero.jpg';
+import beautyCareHero from '../assets/collections/beauty-care-hero.jpg';
 import lahventureLogo from '../assets/images/Lahventure Logo.png';
 import lahventureMark from '../assets/images/Lahventure fav.png';
 import modelOne from '../assets/garments/m-1.png';
@@ -79,8 +82,58 @@ const fallbackCollections = [
       alt: 'Editorial model in a black coat with a crimson lapel'
     },
     products: fallbackProducts
+  },
+  {
+    categoryKey: 'electronics',
+    title: 'ELECTRONICS COLLECTION',
+    kicker: 'NEXT-GEN TECH & WEARABLES',
+    stampText: 'ELECTRONICS • INNOVATION & TECH • 2026',
+    tagline: 'State-of-the-art audio, smartwatches and considered everyday technology.',
+    bannerImage: {
+      url: electronicsHero,
+      alt: 'Indian editorial model in a black coat with a cobalt lapel'
+    },
+    products: fallbackProducts
+  },
+  {
+    categoryKey: 'home-living',
+    title: 'HOME & LIVING COLLECTION',
+    kicker: 'MODERN INTERIORS & DECOR',
+    stampText: 'HOME & LIVING • ELEGANT DESIGN • 2026',
+    tagline: 'Refined home aesthetics, practical objects and quiet modern design.',
+    bannerImage: {
+      url: homeLivingHero,
+      alt: 'Editorial model in a black coat with warm terracotta detailing'
+    },
+    products: fallbackProducts
+  },
+  {
+    categoryKey: 'beauty-care',
+    title: 'BEAUTY & PERSONAL CARE',
+    kicker: 'ESSENTIAL CARE & LUXURY BEAUTY',
+    stampText: 'BEAUTY • LUXURY CARE • 2026',
+    tagline: 'Daily grooming, botanical care and expressive personal rituals.',
+    bannerImage: {
+      url: beautyCareHero,
+      alt: 'Middle Eastern editorial model in a black coat with a plum lapel'
+    },
+    products: fallbackProducts
   }
 ];
+
+const fallbackHeroByCategory = {
+  fashion: editorialHero,
+  electronics: electronicsHero,
+  'home-living': homeLivingHero,
+  'beauty-care': beautyCareHero
+};
+
+const collectionCategoryAliases = {
+  fashion: ['fashion', 'apparel', 'clothing-mens'],
+  electronics: ['electronics'],
+  'home-living': ['home-living', 'home'],
+  'beauty-care': ['beauty-personal-care', 'beauty-care', 'wellness']
+};
 
 const defaultStockBannerIds = [
   'photo-1490481651871',
@@ -92,27 +145,47 @@ const defaultStockBannerIds = [
 
 const productIdentity = (product) => product?._id || product?.id || product?.slug || product?.sku || product?.name;
 
-const editorialProductFillers = (products = [], collectionIndex = 0) => {
-  const availableProducts = products.filter(Boolean);
-  if (availableProducts.length >= 7) return availableProducts;
+const editorialProductFillers = (products = [], productPool = [], collectionIndex = 0) => {
+  const selected = [];
+  const identities = new Set();
+  const append = (product) => {
+    const identity = productIdentity(product);
+    if (!product || !identity || identities.has(String(identity))) return;
+    identities.add(String(identity));
+    selected.push(product);
+  };
 
-  const missingCount = 7 - availableProducts.length;
-  const fillers = fallbackProducts.slice(0, missingCount).map((product, productIndex) => ({
-    ...product,
-    _id: `${product._id}-${collectionIndex}-${productIndex}`,
-    id: `${product.id}-${collectionIndex}-${productIndex}`
-  }));
+  products.filter(Boolean).forEach(append);
 
-  return [...availableProducts, ...fillers];
+  const pool = productPool.filter(Boolean);
+  const rotation = pool.length ? collectionIndex % pool.length : 0;
+  [...pool.slice(rotation), ...pool.slice(0, rotation)].forEach((product) => {
+    if (selected.length < 7) append(product);
+  });
+
+  fallbackProducts.forEach((product, productIndex) => {
+    if (selected.length >= 7) return;
+    append({
+      ...product,
+      _id: `${product._id}-${collectionIndex}-${productIndex}`,
+      id: `${product.id}-${collectionIndex}-${productIndex}`
+    });
+  });
+
+  return selected.slice(0, 9);
 };
 
 const collectionHeroSource = (collection) => {
   const source = collection?.bannerImage?.url || '';
-  const isDefaultFashionImage = collection?.categoryKey === 'fashion'
-    && defaultStockBannerIds.some((identifier) => source.includes(identifier));
+  const fallbackHero = fallbackHeroByCategory[collection?.categoryKey] || editorialHero;
+  const isDefaultStockImage = defaultStockBannerIds.some((identifier) => source.includes(identifier));
 
-  return isDefaultFashionImage || !source ? editorialHero : mediaUrl(source);
+  return isDefaultStockImage || !source ? fallbackHero : mediaUrl(source);
 };
+
+const collectionFallbackHero = (collection) => (
+  fallbackHeroByCategory[collection?.categoryKey] || editorialHero
+);
 
 const collectionHeading = (collection) => {
   const kicker = String(collection?.kicker || 'SEASONAL').trim();
@@ -133,9 +206,10 @@ const collectionHeading = (collection) => {
 
 const productUrl = (product) => `/products/${product?.slug || product?._id || product?.id}`;
 
-const categoryUrl = (collection, product) => {
-  const category = product?.category;
-  const value = category?.slug || category?.name || collection?.categoryKey;
+const collectionUrl = (collection) => {
+  const value = collection?.categorySlug
+    || collectionCategoryAliases[collection?.categoryKey]?.[0]
+    || collection?.categoryKey;
   return value ? `/products?category=${encodeURIComponent(value)}` : '/products';
 };
 
@@ -162,6 +236,41 @@ const EditorialLogo = ({ dark = false }) => (
     <img src={lahventureLogo} alt="LahVenture" />
     <span>Signature edit</span>
   </span>
+);
+
+const EditorialCollectionsHeader = ({ inactive, itemCount, navigate, onOpenMenu }) => (
+  <header
+    className="editorial-collections__header"
+    inert={inactive ? true : undefined}
+    aria-hidden={inactive ? 'true' : undefined}
+  >
+    <Link to="/" aria-label="LahVenture home"><EditorialLogo /></Link>
+    <div className="editorial-collections__header-actions">
+      <button type="button" onClick={() => navigate('/products')} aria-label="Search products">
+        <Search size={18} strokeWidth={1.7} />
+      </button>
+      <button type="button" className="editorial-collections__bag-button" onClick={() => navigate('/cart')} aria-label="Shopping bag">
+        <ShoppingBag size={18} strokeWidth={1.7} />
+        {itemCount ? <span>{itemCount}</span> : null}
+      </button>
+      <button type="button" onClick={(event) => onOpenMenu(event.currentTarget)} aria-label="Open menu">
+        <Menu size={19} strokeWidth={1.7} />
+      </button>
+    </div>
+  </header>
+);
+
+const EditorialCollectionsHeroRail = ({ inactive }) => (
+  <aside
+    className="editorial-collections__hero-rail"
+    aria-label="Collection social links"
+    inert={inactive ? true : undefined}
+    aria-hidden={inactive ? 'true' : undefined}
+  >
+    <SocialLinks />
+    <span>Contact us</span>
+    <Mouse size={18} strokeWidth={1.4} aria-hidden="true" />
+  </aside>
 );
 
 const SocialLinks = ({ dark = false }) => (
@@ -199,50 +308,140 @@ const StampBadge = ({ text }) => {
   );
 };
 
-const ProductRail = ({ products, onOpenProduct, onNudge, railViewportRef }) => (
-  <div className="editorial-collections__rail-area">
-    <div className="editorial-collections__rail-viewport" ref={railViewportRef}>
-      <div className="editorial-collections__rail-motion">
-        <div className="editorial-collections__rail-group">
-          {products.map((product, productIndex) => (
-            <button
-              type="button"
-              className="editorial-collections__product-card"
-              key={`${productIdentity(product)}-${productIndex}`}
-              onClick={(event) => onOpenProduct(product, event.currentTarget)}
-              aria-label={`Open ${product.name}`}
-            >
-              <img
-                src={mediaUrl(product.images?.[0]?.url)}
-                alt={product.images?.[0]?.alt || product.name}
-                loading={productIndex < 5 ? 'eager' : 'lazy'}
-                decoding="async"
-                onError={(event) => {
-                  if (event.currentTarget.dataset.fallbackApplied) return;
-                  event.currentTarget.dataset.fallbackApplied = 'true';
-                  event.currentTarget.src = fallbackModelImages[productIndex % fallbackModelImages.length].url;
-                }}
-              />
-              <span aria-hidden="true"><ArrowRight size={14} /></span>
-            </button>
-          ))}
+const ProductRail = ({ collection, collectionIndex, products, onOpenProduct }) => {
+  const railViewportRef = useRef(null);
+
+  const nudgeRail = (direction) => {
+    const viewport = railViewportRef.current;
+    const firstCard = viewport?.querySelector('.editorial-collections__product-card');
+    if (!viewport || !firstCard) return;
+
+    const group = firstCard.parentElement;
+    const gap = Number.parseFloat(window.getComputedStyle(group).columnGap || '0');
+    const step = firstCard.getBoundingClientRect().width + gap;
+    const maximum = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+    let target = viewport.scrollLeft + direction * step;
+
+    if (target > maximum - 2) target = 0;
+    if (target < 0) target = maximum;
+    viewport.scrollTo({
+      left: target,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
+    });
+  };
+
+  return (
+    <div className="editorial-collections__rail-area">
+      <div className="editorial-collections__rail-viewport" ref={railViewportRef}>
+        <div className="editorial-collections__rail-motion">
+          <div className="editorial-collections__rail-group">
+            {products.map((product, productIndex) => (
+              <button
+                type="button"
+                className="editorial-collections__product-card"
+                key={`${productIdentity(product)}-${productIndex}`}
+                onClick={(event) => onOpenProduct(product, collection, event.currentTarget, railViewportRef.current)}
+                aria-label={`Open ${product.name} from ${collection.title}`}
+              >
+                <img
+                  src={mediaUrl(product.images?.[0]?.url)}
+                  alt={product.images?.[0]?.alt || product.name}
+                  loading={collectionIndex === 0 && productIndex < 5 ? 'eager' : 'lazy'}
+                  decoding="async"
+                  onError={(event) => {
+                    if (event.currentTarget.dataset.fallbackApplied) return;
+                    event.currentTarget.dataset.fallbackApplied = 'true';
+                    event.currentTarget.src = fallbackModelImages[(collectionIndex + productIndex) % fallbackModelImages.length].url;
+                  }}
+                />
+                <span aria-hidden="true"><ArrowRight size={14} /></span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
-    </div>
 
-    <div className="editorial-collections__rail-controls">
-      <div>
-        <button type="button" onClick={() => onNudge(-1)} aria-label="Previous products">
-          <ChevronLeft size={17} />
-        </button>
-        <button type="button" onClick={() => onNudge(1)} aria-label="Next products">
-          <ChevronRight size={17} />
-        </button>
+      <div className="editorial-collections__rail-controls">
+        <div>
+          <button type="button" onClick={() => nudgeRail(-1)} aria-label={`Previous products in ${collection.title}`}>
+            <ChevronLeft size={17} />
+          </button>
+          <button type="button" onClick={() => nudgeRail(1)} aria-label={`Next products in ${collection.title}`}>
+            <ChevronRight size={17} />
+          </button>
+        </div>
+        <span aria-hidden="true"><i /></span>
       </div>
-      <span aria-hidden="true"><i /></span>
     </div>
-  </div>
-);
+  );
+};
+
+const EditorialCollectionSection = ({
+  collection,
+  collectionIndex,
+  detailContext,
+  detailPhase,
+  isActive,
+  onOpenProduct,
+  onSectionRef,
+  totalCollections
+}) => {
+  const heading = collectionHeading(collection);
+  const headingId = `editorial-collection-heading-${collection.uiKey}`;
+  const HeadingTag = collectionIndex === 0 ? 'h1' : 'h2';
+  const isDetailSource = detailContext?.collectionKey === collection.uiKey;
+
+  return (
+    <section
+      ref={(node) => onSectionRef(collectionIndex, node)}
+      id={`collection-${collection.uiKey}`}
+      className={`editorial-collections${isActive ? ' is-active' : ''}${isDetailSource ? ' has-detail-open' : ''}`}
+      aria-labelledby={headingId}
+      data-collection-key={collection.categoryKey}
+    >
+      <div className={`editorial-collections__showcase${isDetailSource && detailPhase === 'closing' ? ' is-returning' : ''}`}>
+        <img
+          className="editorial-collections__hero-image"
+          src={collectionHeroSource(collection)}
+          alt={collection.bannerImage?.alt || collection.title}
+          loading={collectionIndex === 0 ? 'eager' : 'lazy'}
+          decoding="async"
+          fetchPriority={collectionIndex === 0 ? 'high' : 'auto'}
+          onError={(event) => {
+            if (event.currentTarget.dataset.fallbackApplied) return;
+            event.currentTarget.dataset.fallbackApplied = 'true';
+            event.currentTarget.src = collectionFallbackHero(collection);
+          }}
+        />
+        <div className="editorial-collections__hero-shade" aria-hidden="true" />
+
+        <StampBadge text={collection.stampText} />
+
+        <div className="editorial-collections__headline" key={collection.uiKey}>
+          <p>{heading.firstLine}</p>
+          <HeadingTag id={headingId} tabIndex={-1}>{heading.secondLine}</HeadingTag>
+        </div>
+
+        <ProductRail
+          collection={collection}
+          collectionIndex={collectionIndex}
+          products={collection.products}
+          onOpenProduct={onOpenProduct}
+        />
+
+        <Link className="editorial-collections__visit-link" to={collectionUrl(collection)}>
+          Visit the Collection <ArrowRight size={14} />
+        </Link>
+
+        <div className="editorial-collections__collection-count" aria-label={`Collection ${collectionIndex + 1} of ${totalCollections}`}>
+          <span>{String(collectionIndex + 1).padStart(2, '0')}</span>
+          <i />
+          <span>{String(totalCollections).padStart(2, '0')}</span>
+        </div>
+      </div>
+    </section>
+  );
+};
 
 export const BrandsPage = () => {
   const navigate = useNavigate();
@@ -250,7 +449,7 @@ export const BrandsPage = () => {
   const { user, refreshUser } = useAuth();
 
   const [activeCollectionIndex, setActiveCollectionIndex] = useState(0);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [detailContext, setDetailContext] = useState(null);
   const [detailPhase, setDetailPhase] = useState('idle');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [previousImageIndex, setPreviousImageIndex] = useState(null);
@@ -267,7 +466,13 @@ export const BrandsPage = () => {
   const menuCloseButtonRef = useRef(null);
   const menuTriggerRef = useRef(null);
   const triggerRef = useRef(null);
-  const railViewportRef = useRef(null);
+  const sourceRailRef = useRef(null);
+  const scrollerRef = useRef(null);
+  const sectionRefs = useRef([]);
+  const scrollPositionRef = useRef(0);
+  const scrollTargetRef = useRef(0);
+  const scrollAnimationRef = useRef(null);
+  const activeUpdateFrameRef = useRef(null);
   const openTimerRef = useRef(null);
   const closeTimerRef = useRef(null);
   const focusTimerRef = useRef(null);
@@ -285,35 +490,68 @@ export const BrandsPage = () => {
 
   const collections = useMemo(() => {
     const configuredCollections = brandPageData?.collections?.filter((collection) => collection.isActive !== false) || [];
-    if (!configuredCollections.length) return fallbackCollections;
+    const configuredByCategory = new Map(
+      configuredCollections.map((collection) => [collection.categoryKey, collection])
+    );
+    const hasConfiguredCollections = configuredCollections.length > 0;
+    const sourceCollections = fallbackCollections.map((canonical) => {
+      const configured = configuredByCategory.get(canonical.categoryKey);
 
-    return configuredCollections.map((collection, collectionIndex) => ({
-      ...collection,
-      products: editorialProductFillers(collection.products, collectionIndex)
-    }));
+      if (!configured) {
+        return {
+          ...canonical,
+          products: hasConfiguredCollections ? [] : canonical.products
+        };
+      }
+
+      return {
+        ...canonical,
+        ...configured,
+        bannerImage: configured.bannerImage || canonical.bannerImage
+      };
+    });
+    const productPool = (hasConfiguredCollections ? configuredCollections : sourceCollections)
+      .flatMap((collection) => collection.products || []);
+
+    return sourceCollections.map((collection, collectionIndex) => {
+      const aliases = collectionCategoryAliases[collection.categoryKey] || [];
+      const categorySlug = (collection.products || [])
+        .filter((product) => !product.isEditorialPlaceholder)
+        .map((product) => product.category?.slug)
+        .find((slug) => slug && aliases.includes(slug))
+        || productPool
+          .filter((product) => !product.isEditorialPlaceholder)
+          .map((product) => product.category?.slug)
+          .find((slug) => slug && aliases.includes(slug));
+
+      return {
+        ...collection,
+        categorySlug: categorySlug || aliases[0] || collection.categoryKey,
+        uiKey: `${collection.categoryKey || 'collection'}-${collectionIndex + 1}`,
+        products: editorialProductFillers(collection.products, productPool, collectionIndex)
+      };
+    });
   }, [brandPageData]);
 
   useEffect(() => {
     if (activeCollectionIndex > collections.length - 1) setActiveCollectionIndex(0);
   }, [activeCollectionIndex, collections.length]);
 
-  useEffect(() => {
-    railViewportRef.current?.scrollTo({ left: 0, behavior: 'auto' });
-  }, [activeCollectionIndex]);
-
   const activeCollection = collections[activeCollectionIndex] || fallbackCollections[0];
-  const heading = collectionHeading(activeCollection);
-  const products = activeCollection.products?.length ? activeCollection.products.slice(0, 9) : fallbackProducts;
+  const selectedProduct = detailContext?.product || null;
+  const selectedCollection = detailContext?.collection || activeCollection;
   const selectedImages = useMemo(() => {
     const images = selectedProduct?.images?.filter((image) => image?.url) || [];
     if (images.length >= 5) return images.slice(0, 5);
-
-    const supplementaryImages = fallbackModelImages.filter((candidate) => (
-      !images.some((image) => image.url === candidate.url)
-    ));
-
-    return [...images, ...supplementaryImages].slice(0, 5);
+    if (images.length) {
+      return Array.from({ length: 5 }, (_, index) => images[index % images.length]);
+    }
+    return fallbackModelImages.slice(0, 5);
   }, [selectedProduct]);
+
+  const setSectionRef = useCallback((index, node) => {
+    sectionRefs.current[index] = node;
+  }, []);
 
   const isSelectedProductWishlisted = useCallback((product) => user?.wishlist?.some((item) => {
     const wishlistId = typeof item === 'string' ? item : item?._id;
@@ -330,6 +568,149 @@ export const BrandsPage = () => {
     window.requestAnimationFrame(() => menuTriggerRef.current?.focus?.({ preventScroll: true }));
   }, []);
 
+  const cancelSmoothScroll = useCallback(() => {
+    if (scrollAnimationRef.current !== null) {
+      window.cancelAnimationFrame(scrollAnimationRef.current);
+      scrollAnimationRef.current = null;
+    }
+
+    const scroller = scrollerRef.current;
+    if (scroller) {
+      scrollPositionRef.current = scroller.scrollTop;
+      scrollTargetRef.current = scroller.scrollTop;
+    }
+  }, []);
+
+  const startSmoothScroll = useCallback(() => {
+    if (scrollAnimationRef.current !== null || !scrollerRef.current) return;
+
+    const tick = () => {
+      const scroller = scrollerRef.current;
+      if (!scroller) {
+        scrollAnimationRef.current = null;
+        return;
+      }
+
+      const distance = scrollTargetRef.current - scrollPositionRef.current;
+      if (Math.abs(distance) < 0.45) {
+        scrollPositionRef.current = scrollTargetRef.current;
+        scroller.scrollTop = scrollTargetRef.current;
+        scrollAnimationRef.current = null;
+        return;
+      }
+
+      scrollPositionRef.current += distance * 0.105;
+      scroller.scrollTop = scrollPositionRef.current;
+      scrollAnimationRef.current = window.requestAnimationFrame(tick);
+    };
+
+    scrollAnimationRef.current = window.requestAnimationFrame(tick);
+  }, []);
+
+  const scrollToCollection = useCallback((index, focusHeading = false) => {
+    const scroller = scrollerRef.current;
+    const section = sectionRefs.current[index];
+    if (!scroller || !section) return;
+
+    const destination = section.offsetTop;
+    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    cancelSmoothScroll();
+    setActiveCollectionIndex(index);
+
+    if (reducedMotion) {
+      scroller.scrollTo({ top: destination, behavior: 'auto' });
+      scrollPositionRef.current = destination;
+      scrollTargetRef.current = destination;
+    } else {
+      scrollPositionRef.current = scroller.scrollTop;
+      scrollTargetRef.current = destination;
+      startSmoothScroll();
+    }
+
+    if (focusHeading) {
+      window.requestAnimationFrame(() => {
+        section.querySelector('.editorial-collections__headline h1, .editorial-collections__headline h2')
+          ?.focus({ preventScroll: true });
+      });
+    }
+  }, [cancelSmoothScroll, startSmoothScroll]);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller) return undefined;
+
+    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    const updateActiveCollection = () => {
+      activeUpdateFrameRef.current = null;
+      const viewportMidpoint = scroller.scrollTop + scroller.clientHeight / 2;
+      let nextIndex = 0;
+
+      sectionRefs.current.forEach((section, index) => {
+        if (section && section.offsetTop <= viewportMidpoint) nextIndex = index;
+      });
+
+      setActiveCollectionIndex((current) => (current === nextIndex ? current : nextIndex));
+    };
+
+    const scheduleActiveCollectionUpdate = () => {
+      if (activeUpdateFrameRef.current === null) {
+        activeUpdateFrameRef.current = window.requestAnimationFrame(updateActiveCollection);
+      }
+    };
+
+    const onScroll = () => {
+      if (scrollAnimationRef.current === null) {
+        scrollPositionRef.current = scroller.scrollTop;
+        scrollTargetRef.current = scroller.scrollTop;
+      }
+      scheduleActiveCollectionUpdate();
+    };
+
+    const onTouchStart = () => cancelSmoothScroll();
+
+    const onWheel = (event) => {
+      if (reducedMotionQuery.matches || selectedProduct || menuOpen || event.ctrlKey || event.shiftKey) return;
+      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+
+      event.preventDefault();
+      if (scrollAnimationRef.current === null) {
+        scrollPositionRef.current = scroller.scrollTop;
+        scrollTargetRef.current = scroller.scrollTop;
+      }
+
+      const multiplier = event.deltaMode === 1
+        ? 18
+        : event.deltaMode === 2
+          ? scroller.clientHeight
+          : 1;
+      const maximum = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+      scrollTargetRef.current = Math.min(
+        maximum,
+        Math.max(0, scrollTargetRef.current + event.deltaY * multiplier)
+      );
+      startSmoothScroll();
+    };
+
+    scrollPositionRef.current = scroller.scrollTop;
+    scrollTargetRef.current = scroller.scrollTop;
+    scheduleActiveCollectionUpdate();
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    scroller.addEventListener('touchstart', onTouchStart, { passive: true });
+    scroller.addEventListener('wheel', onWheel, { passive: false });
+
+    return () => {
+      scroller.removeEventListener('scroll', onScroll);
+      scroller.removeEventListener('touchstart', onTouchStart);
+      scroller.removeEventListener('wheel', onWheel);
+      cancelSmoothScroll();
+      if (activeUpdateFrameRef.current !== null) {
+        window.cancelAnimationFrame(activeUpdateFrameRef.current);
+        activeUpdateFrameRef.current = null;
+      }
+    };
+  }, [cancelSmoothScroll, collections.length, menuOpen, selectedProduct, startSmoothScroll]);
+
   const closeDetail = useCallback(() => {
     if (!selectedProduct || detailPhase === 'closing') return;
 
@@ -339,23 +720,28 @@ export const BrandsPage = () => {
     setDetailPhase('closing');
 
     closeTimerRef.current = window.setTimeout(() => {
-      setSelectedProduct(null);
+      setDetailContext(null);
       setDetailPhase('idle');
       setPreviousImageIndex(null);
       setDetailMessage('');
-      railViewportRef.current?.scrollTo({ left: 0, behavior: 'auto' });
-      triggerRef.current?.focus?.({ preventScroll: true });
+      sourceRailRef.current?.scrollTo({ left: 0, behavior: 'auto' });
+      window.requestAnimationFrame(() => triggerRef.current?.focus?.({ preventScroll: true }));
     }, CLOSE_SEQUENCE_MS);
   }, [detailPhase, selectedProduct]);
 
-  const openProduct = useCallback((product, trigger) => {
+  const openProduct = useCallback((product, collection, trigger, railViewport) => {
     window.clearTimeout(closeTimerRef.current);
     window.clearTimeout(openTimerRef.current);
     window.clearTimeout(focusTimerRef.current);
     window.clearTimeout(galleryTimerRef.current);
 
     triggerRef.current = trigger || document.activeElement;
-    setSelectedProduct(product);
+    sourceRailRef.current = railViewport;
+    setDetailContext({
+      product,
+      collection,
+      collectionKey: collection.uiKey
+    });
     setActiveImageIndex(0);
     setPreviousImageIndex(null);
     setGallerySequence(0);
@@ -476,27 +862,11 @@ export const BrandsPage = () => {
     setWishlistSaved(Boolean(isSelectedProductWishlisted(selectedProduct)));
   }, [isSelectedProductWishlisted, selectedProduct]);
 
-  const nudgeRail = (direction) => {
-    const viewport = railViewportRef.current;
-    const firstCard = viewport?.querySelector('.editorial-collections__product-card');
-    if (!viewport || !firstCard) return;
-
-    const group = firstCard.parentElement;
-    const gap = Number.parseFloat(window.getComputedStyle(group).columnGap || '0');
-    const step = firstCard.getBoundingClientRect().width + gap;
-    const maximum = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
-    let target = viewport.scrollLeft + direction * step;
-
-    if (target > maximum - 2) target = 0;
-    if (target < 0) target = maximum;
-    viewport.scrollTo({ left: target, behavior: 'smooth' });
-  };
-
   const handleShopNow = async () => {
     if (!selectedProduct) return;
 
     if (selectedProduct.isEditorialPlaceholder) {
-      navigate('/products');
+      navigate(collectionUrl(selectedCollection));
       return;
     }
 
@@ -563,92 +933,72 @@ export const BrandsPage = () => {
     ];
   }, [selectedProduct]);
 
-  const schema = useMemo(() => ({
-    '@context': 'https://schema.org',
-    '@type': 'CollectionPage',
-    name: `${heading.firstLine} ${heading.secondLine}`,
-    description: activeCollection.tagline,
-    mainEntity: {
-      '@type': 'ItemList',
-      numberOfItems: products.length,
-      itemListElement: products.filter((product) => !product.isEditorialPlaceholder).map((product, index) => ({
-        '@type': 'ListItem',
-        position: index + 1,
-        url: `${window.location.origin}${productUrl(product)}`
-      }))
-    }
-  }), [activeCollection.tagline, heading.firstLine, heading.secondLine, products]);
+  const schema = useMemo(() => {
+    const uniqueProducts = [];
+    const identities = new Set();
+
+    collections.flatMap((collection) => collection.products || []).forEach((product) => {
+      const identity = productIdentity(product);
+      if (!identity || product.isEditorialPlaceholder || identities.has(String(identity))) return;
+      identities.add(String(identity));
+      uniqueProducts.push(product);
+    });
+
+    return {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: 'LahVenture Collections',
+      description: 'Explore fashion, electronics, home and living, and beauty collections through an immersive editorial experience.',
+      mainEntity: {
+        '@type': 'ItemList',
+        numberOfItems: uniqueProducts.length,
+        itemListElement: uniqueProducts.map((product, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          url: `${window.location.origin}${productUrl(product)}`
+        }))
+      }
+    };
+  }, [collections]);
 
   return (
-    <section className={`editorial-collections${selectedProduct ? ' has-detail-open' : ''}`} aria-label="Collections">
+    <div className={`editorial-collections-page${selectedProduct ? ' has-detail-open' : ''}${menuOpen ? ' has-menu-open' : ''}`}>
       <Seo
         title="Collections | LahVenture"
-        description="Explore LahVenture collections through an immersive editorial product experience."
+        description="Explore LahVenture fashion, electronics, home and living, and beauty collections."
         schemaJson={schema}
       />
 
-      <div className={`editorial-collections__showcase${detailPhase === 'closing' ? ' is-returning' : ''}`}>
-        <img
-          className="editorial-collections__hero-image"
-          src={collectionHeroSource(activeCollection)}
-          alt={activeCollection.bannerImage?.alt || activeCollection.title}
-          loading="eager"
-          decoding="async"
-          fetchPriority="high"
-          onError={(event) => {
-            if (event.currentTarget.src.endsWith(editorialHero)) return;
-            event.currentTarget.src = editorialHero;
-          }}
-        />
-        <div className="editorial-collections__hero-shade" aria-hidden="true" />
+      <EditorialCollectionsHeader
+        inactive={Boolean(selectedProduct || menuOpen)}
+        itemCount={itemCount}
+        navigate={navigate}
+        onOpenMenu={openMenu}
+      />
 
-        <header className="editorial-collections__header">
-          <Link to="/" aria-label="LahVenture home"><EditorialLogo /></Link>
-          <div className="editorial-collections__header-actions">
-            <button type="button" onClick={() => navigate('/products')} aria-label="Search products">
-              <Search size={18} strokeWidth={1.7} />
-            </button>
-            <button type="button" className="editorial-collections__bag-button" onClick={() => navigate('/cart')} aria-label="Shopping bag">
-              <ShoppingBag size={18} strokeWidth={1.7} />
-              {itemCount ? <span>{itemCount}</span> : null}
-            </button>
-            <button type="button" onClick={(event) => openMenu(event.currentTarget)} aria-label="Open menu">
-              <Menu size={19} strokeWidth={1.7} />
-            </button>
-          </div>
-        </header>
+      <EditorialCollectionsHeroRail inactive={Boolean(selectedProduct || menuOpen)} />
 
-        <aside className="editorial-collections__hero-rail" aria-label="Collection social links">
-          <SocialLinks />
-          <span>Contact us</span>
-          <Mouse size={18} strokeWidth={1.4} aria-hidden="true" />
-        </aside>
-
-        <StampBadge text={activeCollection.stampText} />
-
-        <div className="editorial-collections__headline" key={activeCollection.categoryKey}>
-          <p>{heading.firstLine}</p>
-          <h1>{heading.secondLine}</h1>
-        </div>
-
-        <ProductRail
-          products={products}
-          onOpenProduct={openProduct}
-          onNudge={nudgeRail}
-          railViewportRef={railViewportRef}
-        />
-
-        <Link className="editorial-collections__visit-link" to={categoryUrl(activeCollection, products[0])}>
-          Visit the Collection <ArrowRight size={14} />
-        </Link>
-
-        {collections.length > 1 ? (
-          <div className="editorial-collections__collection-count" aria-label="Current collection">
-            <span>{String(activeCollectionIndex + 1).padStart(2, '0')}</span>
-            <i />
-            <span>{String(collections.length).padStart(2, '0')}</span>
-          </div>
-        ) : null}
+      <div
+        ref={scrollerRef}
+        className="editorial-collections-page__scroller"
+        tabIndex={0}
+        aria-label="Collection stories"
+        inert={selectedProduct || menuOpen ? true : undefined}
+        aria-hidden={selectedProduct || menuOpen ? 'true' : undefined}
+      >
+        {collections.map((collection, collectionIndex) => (
+          <EditorialCollectionSection
+            key={collection.uiKey}
+            collection={collection}
+            collectionIndex={collectionIndex}
+            detailContext={detailContext}
+            detailPhase={detailPhase}
+            isActive={activeCollectionIndex === collectionIndex}
+            onOpenProduct={openProduct}
+            onSectionRef={setSectionRef}
+            totalCollections={collections.length}
+          />
+        ))}
       </div>
 
       {selectedProduct ? (
@@ -658,6 +1008,8 @@ export const BrandsPage = () => {
           role="dialog"
           aria-modal="true"
           aria-labelledby="editorial-detail-title"
+          inert={menuOpen ? true : undefined}
+          aria-hidden={menuOpen ? 'true' : undefined}
         >
           <aside className="editorial-detail__rail">
             <Link to="/" aria-label="LahVenture home"><EditorialLogo dark /></Link>
@@ -715,7 +1067,7 @@ export const BrandsPage = () => {
                 <X size={17} strokeWidth={1.8} />
               </button>
 
-              <Link to={categoryUrl(activeCollection, selectedProduct)}>
+              <Link to={collectionUrl(selectedCollection)}>
                 Visit the Collection <ArrowRight size={12} />
               </Link>
 
@@ -736,7 +1088,7 @@ export const BrandsPage = () => {
               <p>{(selectedProduct.brand || 'LahVenture').toUpperCase()} — CURATED COLLECTION EDIT</p>
               <h2 id="editorial-detail-title">“{selectedProduct.name}”</h2>
               <span>{selectedProduct.sku || 'LIMITED EDITION'}</span>
-              <p>{selectedProduct.description || activeCollection.tagline}</p>
+              <p>{selectedProduct.description || selectedCollection.tagline}</p>
               <div className="editorial-detail__actions">
                 <button type="button" onClick={handleShopNow} disabled={addingToCart}>
                   {addingToCart ? 'ADDING…' : selectedProduct.isEditorialPlaceholder ? 'SHOP COLLECTION' : 'SHOP NOW'}
@@ -793,9 +1145,11 @@ export const BrandsPage = () => {
                     type="button"
                     className={index === activeCollectionIndex ? 'is-active' : ''}
                     key={collection.categoryKey || collection.title}
+                    aria-current={index === activeCollectionIndex ? 'true' : undefined}
                     onClick={() => {
-                      setActiveCollectionIndex(index);
                       setMenuOpen(false);
+                      menuTriggerRef.current = null;
+                      window.requestAnimationFrame(() => scrollToCollection(index, true));
                     }}
                   >
                     <span>{String(index + 1).padStart(2, '0')}</span>
@@ -807,6 +1161,6 @@ export const BrandsPage = () => {
           </aside>
         </div>
       ) : null}
-    </section>
+    </div>
   );
 };
