@@ -13,6 +13,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Seo } from '../components/Seo.jsx';
+import { SiteFooter } from '../components/SiteFooter.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
@@ -459,6 +460,7 @@ export const BrandsPage = () => {
   const [detailMessage, setDetailMessage] = useState('');
   const [addingToCart, setAddingToCart] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [footerVisible, setFooterVisible] = useState(false);
 
   const detailRef = useRef(null);
   const closeButtonRef = useRef(null);
@@ -962,7 +964,7 @@ export const BrandsPage = () => {
   }, [collections]);
 
   return (
-    <div className={`editorial-collections-page${selectedProduct ? ' has-detail-open' : ''}${menuOpen ? ' has-menu-open' : ''}`}>
+    <div className={`editorial-collections-page${selectedProduct ? ' has-detail-open' : ''}${menuOpen ? ' has-menu-open' : ''}${footerVisible ? ' is-footer-visible' : ''}`}>
       <Seo
         title="Collections | LahVenture"
         description="Explore LahVenture fashion, electronics, home and living, and beauty collections."
@@ -970,13 +972,13 @@ export const BrandsPage = () => {
       />
 
       <EditorialCollectionsHeader
-        inactive={Boolean(selectedProduct || menuOpen)}
+        inactive={Boolean(selectedProduct || menuOpen || footerVisible)}
         itemCount={itemCount}
         navigate={navigate}
         onOpenMenu={openMenu}
       />
 
-      <EditorialCollectionsHeroRail inactive={Boolean(selectedProduct || menuOpen)} />
+      <EditorialCollectionsHeroRail inactive={Boolean(selectedProduct || menuOpen || footerVisible)} />
 
       <div
         ref={scrollerRef}
@@ -999,6 +1001,8 @@ export const BrandsPage = () => {
             totalCollections={collections.length}
           />
         ))}
+
+        <SiteFooter variant="immersive" onVisibilityChange={setFooterVisible} />
       </div>
 
       {selectedProduct ? (

@@ -1,13 +1,10 @@
 import {
   Clock3,
   Globe2,
-  Mail,
   Menu,
   Package,
   Search,
-  ShieldCheck,
   ShoppingBag,
-  Truck,
   User,
   X
 } from 'lucide-react';
@@ -21,6 +18,7 @@ import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { useDebouncedValue } from '../hooks/useDebouncedValue.js';
 import { api, mediaUrl } from '../services/api.js';
 import lahventureLogo from '../assets/images/Lahventure Logo.png';
+import { SiteFooter } from './SiteFooter.jsx';
 
 const navClass = ({ isActive }) => (isActive ? 'nav-link active' : 'nav-link');
 const adminNavClass = ({ isActive }) => `${isActive ? 'nav-link active' : 'nav-link'} nav-admin-only`;
@@ -694,89 +692,7 @@ export const Layout = () => {
         <Outlet />
       </main>
 
-      {!isAboutPage && !isCollectionsPage && (
-        <footer className="site-footer">
-          <div className="footer-inner">
-            <div className="footer-assurances" aria-label="Shopping assurances">
-              <div className="footer-assurance">
-                <ShieldCheck size={20} />
-                <span>
-                  <strong>Secure checkout</strong>
-                  <small>Protected purchase flow</small>
-                </span>
-              </div>
-              <div className="footer-assurance">
-                <Truck size={20} />
-                <span>
-                  <strong>Nationwide delivery</strong>
-                  <small>Shipping across Bangladesh</small>
-                </span>
-              </div>
-              <div className="footer-assurance">
-                <Clock3 size={20} />
-                <span>
-                  <strong>Order updates</strong>
-                  <small>Track every purchase</small>
-                </span>
-              </div>
-            </div>
-
-            <div className="footer-main">
-              <div className="footer-brand-summary">
-                <Link to="/" className="footer-brand" aria-label="lahVenture home">
-                  <img className="footer-logo" src={logoPath} alt="LahVenture" />
-                </Link>
-                <p>Curated watches and everyday essentials, delivered across Bangladesh.</p>
-                <Link className="footer-support-link" to="/contact">
-                  <Mail size={16} />
-                  Contact support
-                </Link>
-              </div>
-
-              <nav className="footer-nav" aria-label="Footer navigation">
-                <div className="footer-nav-column">
-                  <h2>Shop</h2>
-                  <Link to="/products">All products</Link>
-                  <Link to="/products?category=Smartwatch">Smartwatches</Link>
-                  <Link to="/products?category=Automatic%20Watches">Automatic watches</Link>
-                  <Link to="/collections">Collections</Link>
-                </div>
-
-                <div className="footer-nav-column">
-                  <h2>Help</h2>
-                  <Link to="/account?tab=orders">Track an order</Link>
-                  <Link to="/account">My account</Link>
-                  <Link to="/cart">Shopping cart</Link>
-                  <Link to="/contact">Customer support</Link>
-                </div>
-              </nav>
-
-              <div className="footer-subscribe">
-                <p className="footer-kicker">Stay in the loop</p>
-                <h2>New arrivals and offers</h2>
-                <p>Occasional product updates, straight to your inbox.</p>
-                <form
-                  className="footer-newsletter-form"
-                  onSubmit={(event) => event.preventDefault()}
-                  aria-label="Newsletter signup"
-                >
-                  <input type="email" placeholder="Email address" aria-label="Email address" />
-                  <button type="submit">Subscribe</button>
-                </form>
-              </div>
-            </div>
-
-            <div className="footer-bottom">
-              <span>© 2026 LahVenture. All rights reserved.</span>
-              <div className="footer-meta">
-                <Link to="/about">About</Link>
-                <Link to="/contact">Contact</Link>
-                <span>Dhaka, Bangladesh</span>
-              </div>
-            </div>
-          </div>
-        </footer>
-      )}
+      {!isAboutPage && !isCollectionsPage ? <SiteFooter key={normalizedPath} /> : null}
     </div>
   );
 };
