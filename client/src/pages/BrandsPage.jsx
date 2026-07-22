@@ -1,245 +1,278 @@
-import { ArrowRight, ChevronLeft, ChevronRight, Heart, ShoppingBag, X, Sun, Moon, Search, Menu } from 'lucide-react';
+import {
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Heart,
+  Menu,
+  Mouse,
+  Search,
+  ShoppingBag,
+  X
+} from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Seo } from '../components/Seo.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
-import { useCurrency } from '../contexts/CurrencyContext.jsx';
-import { api, mediaUrl } from '../services/api.js';
+import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
+import editorialHero from '../assets/collections/editorial-hero.jpg';
+import lahventureLogo from '../assets/images/Lahventure Logo.png';
+import lahventureMark from '../assets/images/Lahventure fav.png';
+import modelOne from '../assets/garments/m-1.png';
+import modelTwo from '../assets/garments/m-2.png';
+import modelThree from '../assets/garments/m-3.png';
+import modelFour from '../assets/garments/m-4.png';
+import modelFive from '../assets/garments/m-5.png';
+import modelSix from '../assets/garments/m-6.png';
+import modelSeven from '../assets/garments/m-7.png';
 
-const IconFacebook = () => (
-  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 4.84 3.44 8.87 8 9.8V15H7.5v-3H10V9.5C10 7.01 11.49 5.65 13.75 5.65c1.08 0 2.21.19 2.21.19v2.43h-1.25c-1.23 0-1.61.77-1.61 1.56V12h2.74l-.44 3h-2.3v6.8c4.56-.93 8-4.96 8-9.8z"/>
+const OPEN_SEQUENCE_MS = 2120;
+const CLOSE_SEQUENCE_MS = 760;
+const GALLERY_SEQUENCE_MS = 330;
+
+const fallbackModelImages = [
+  { url: modelOne, alt: 'Model wearing a black Boston graphic T-shirt' },
+  { url: modelTwo, alt: 'Model wearing a black typographic T-shirt' },
+  { url: modelThree, alt: 'Model wearing an oxblood relaxed-fit T-shirt' },
+  { url: modelFour, alt: 'Model wearing a black varsity graphic T-shirt' },
+  { url: modelFive, alt: 'Model wearing a charcoal oversized hoodie' },
+  { url: modelSix, alt: 'Model wearing a crimson oversized hoodie' },
+  { url: modelSeven, alt: 'Model wearing a slate-blue oversized hoodie' }
+];
+
+const fallbackProductCopy = [
+  ['Boston Relaxed Fit T-Shirt', 'LV-TS-001', 4200, 'Heavyweight cotton jersey cut with a relaxed shoulder and a clean, architectural drape.'],
+  ['Undici Gothic T-Shirt', 'LV-TS-002', 4600, 'A minimal black jersey with a compact typographic mark and a soft, oversized silhouette.'],
+  ['Archive Oxblood T-Shirt', 'LV-TS-003', 4400, 'Washed oxblood cotton with a boxy proportion, wide sleeve and subtle archive detailing.'],
+  ['Varsity 07 T-Shirt', 'LV-TS-004', 4800, 'A bold varsity graphic balanced by an easy unisex cut and premium combed cotton.'],
+  ['Eclipse Two-Tone Hoodie', 'LV-HD-005', 7600, 'Dense brushed fleece with a sculpted double hood, deep cuff and generous everyday volume.'],
+  ['Crimson Script Hoodie', 'LV-HD-006', 7200, 'A rich crimson fleece hoodie with dropped shoulders and restrained tonal embroidery.'],
+  ['BlueTech Oversized Hoodie', 'LV-HD-007', 7400, 'A cool slate hoodie with a structured hood, soft brushed interior and relaxed technical shape.']
+];
+
+const fallbackProducts = fallbackProductCopy.map(([name, sku, price, description], index) => ({
+  _id: `editorial-placeholder-${index + 1}`,
+  id: `editorial-placeholder-${index + 1}`,
+  name,
+  sku,
+  price,
+  description,
+  brand: 'LahVenture',
+  material: index < 4 ? '100% heavyweight cotton' : 'Premium brushed fleece',
+  isEditorialPlaceholder: true,
+  category: { name: 'Clothing', slug: 'clothing-mens' },
+  images: Array.from({ length: 5 }, (_, imageIndex) => (
+    fallbackModelImages[(index + imageIndex) % fallbackModelImages.length]
+  ))
+}));
+
+const fallbackCollections = [
+  {
+    categoryKey: 'fashion',
+    title: 'FASHION COLLECTION',
+    kicker: 'SPRING / SUMMER 2026',
+    stampText: 'LAHVENTURE COLLECTION • MADE FOR EVERYDAY MOVEMENT',
+    tagline: 'A study in relaxed proportions, precise detail and practical daily luxury.',
+    bannerImage: {
+      url: editorialHero,
+      alt: 'Editorial model in a black coat with a crimson lapel'
+    },
+    products: fallbackProducts
+  }
+];
+
+const defaultStockBannerIds = [
+  'photo-1490481651871',
+  'photo-1505740420928',
+  'photo-1513694203232',
+  'photo-1522337360788',
+  'photo-1509631179647'
+];
+
+const productIdentity = (product) => product?._id || product?.id || product?.slug || product?.sku || product?.name;
+
+const editorialProductFillers = (products = [], collectionIndex = 0) => {
+  const availableProducts = products.filter(Boolean);
+  if (availableProducts.length >= 7) return availableProducts;
+
+  const missingCount = 7 - availableProducts.length;
+  const fillers = fallbackProducts.slice(0, missingCount).map((product, productIndex) => ({
+    ...product,
+    _id: `${product._id}-${collectionIndex}-${productIndex}`,
+    id: `${product.id}-${collectionIndex}-${productIndex}`
+  }));
+
+  return [...availableProducts, ...fillers];
+};
+
+const collectionHeroSource = (collection) => {
+  const source = collection?.bannerImage?.url || '';
+  const isDefaultFashionImage = collection?.categoryKey === 'fashion'
+    && defaultStockBannerIds.some((identifier) => source.includes(identifier));
+
+  return isDefaultFashionImage || !source ? editorialHero : mediaUrl(source);
+};
+
+const collectionHeading = (collection) => {
+  const kicker = String(collection?.kicker || 'SEASONAL').trim();
+  const year = kicker.match(/\b20\d{2}\b/)?.[0];
+
+  if (year) {
+    return {
+      firstLine: kicker.replace(year, '').replace(/[-–—]\s*$/, '').trim(),
+      secondLine: `${year} COLLECTION`
+    };
+  }
+
+  return {
+    firstLine: kicker,
+    secondLine: collection?.title || 'COLLECTION'
+  };
+};
+
+const productUrl = (product) => `/products/${product?.slug || product?._id || product?.id}`;
+
+const categoryUrl = (collection, product) => {
+  const category = product?.category;
+  const value = category?.slug || category?.name || collection?.categoryKey;
+  return value ? `/products?category=${encodeURIComponent(value)}` : '/products';
+};
+
+const SocialFacebookIcon = ({ size = 14 }) => (
+  <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M22 12a10 10 0 1 0-11.56 9.88v-6.99H7.9V12h2.54V9.8c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.2 2.23.2v2.45h-1.26c-1.24 0-1.63.77-1.63 1.56V12h2.77l-.44 2.89h-2.33v6.99A10 10 0 0 0 22 12Z" />
   </svg>
 );
 
-const IconInstagram = () => (
-  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+const SocialInstagramIcon = ({ size = 14 }) => (
+  <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M7.8 2h8.4A5.8 5.8 0 0 1 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8A5.8 5.8 0 0 1 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2Zm-.2 2A3.6 3.6 0 0 0 4 7.6v8.8A3.6 3.6 0 0 0 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6A3.6 3.6 0 0 0 16.4 4H7.6Zm9.65 1.5a1.25 1.25 0 1 1 0 2.5 1.25 1.25 0 0 1 0-2.5ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z" />
   </svg>
 );
 
-const IconTwitter = () => (
-  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">
-    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+const SocialXIcon = ({ size = 15 }) => (
+  <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231Zm-1.161 17.52h1.833L7.084 4.126H5.117Z" />
   </svg>
 );
 
-// SVG Rotating Stamp Badge Component with Red Quarter-Circle Wedge Accent (Exact Video 00:01 - 00:07)
-const StampBadge = ({ text, logo = "Y's" }) => {
-  const pathId = `stamp-circle-path-${Math.random().toString(36).substring(2, 9)}`;
+const EditorialLogo = ({ dark = false }) => (
+  <span className={`editorial-collections__logo${dark ? ' is-dark' : ''}`}>
+    <img src={lahventureLogo} alt="LahVenture" />
+    <span>Signature edit</span>
+  </span>
+);
+
+const SocialLinks = ({ dark = false }) => (
+  <div className={`editorial-collections__socials${dark ? ' is-dark' : ''}`} aria-label="Social media">
+    <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
+      <SocialFacebookIcon />
+    </a>
+    <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
+      <SocialInstagramIcon />
+    </a>
+    <a href="https://x.com" target="_blank" rel="noreferrer" aria-label="X">
+      <SocialXIcon size={13} />
+    </a>
+  </div>
+);
+
+const StampBadge = ({ text }) => {
+  const generatedId = useId();
+  const pathId = `editorial-stamp-${generatedId.replace(/:/g, '')}`;
+
   return (
-    <div className="collection-stamp-wrapper">
-      {/* Red Quarter-Circle Sector Accent behind the badge */}
-      <div className="collection-stamp-red-wedge" />
-      <div className="collection-stamp-badge">
-        <svg className="collection-stamp-svg" viewBox="0 0 160 160">
-          <path
-            id={pathId}
-            d="M 80, 80 m -62, 0 a 62,62 0 1,1 124,0 a 62,62 0 1,1 -124,0"
-            fill="none"
-          />
-          <text className="collection-stamp-text">
-            <textPath href={`#${pathId}`} startOffset="0%">
-              {text} • {text} •
-            </textPath>
-          </text>
-        </svg>
-        <span className="collection-stamp-center-logo">{logo}</span>
-      </div>
+    <div className="editorial-collections__stamp" aria-hidden="true">
+      <svg viewBox="0 0 160 160">
+        <defs>
+          <path id={pathId} d="M80,80 m-61,0 a61,61 0 1,1 122,0 a61,61 0 1,1 -122,0" />
+        </defs>
+        <text>
+          <textPath href={`#${pathId}`} startOffset="0%">
+            {`${text || 'LAHVENTURE COLLECTION'} • `}
+          </textPath>
+        </text>
+      </svg>
+      <img src={lahventureMark} alt="" />
     </div>
   );
 };
 
-// Fallback high quality products curated for website policy & e-commerce categories
-const fallbackCollections = [
-  {
-    categoryKey: 'fashion',
-    title: 'SPRING / SUMMER COLLECTION',
-    kicker: 'YOHJI YAMAMOTO SPECIAL SELECTION',
-    stampText: 'YOHJI YAMAMOTO SHOP • FOR THE SAKE OF FREEDOM AND HUMAN DIGNITY',
-    tagline: 'High-end architectural draping, avant-garde graphics, and practical daily luxury.',
-    bannerImage: {
-      url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=80',
-      alt: 'Spring Summer Collection'
-    },
-    products: [
-      {
-        _id: 'fash-1',
-        name: 'Jubilant Buddha Graphic Cut & Sewn',
-        brand: 'Yohji Yamamoto',
-        sku: 'GZ-T21-076-2-03',
-        price: 45000,
-        mensModel: '185 cm',
-        ladysModel: '168 cm',
-        material: '100% Premium Cotton',
-        description: 'Collaboration series with contemporary artist "Yasuto Sasada". Featuring original artwork drawn with fine 0.3mm technical pen details, expressing cosmic energy and modern graphic strength.',
-        images: [
-          { url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80', alt: 'Jubilant Buddha Front' },
-          { url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=80', alt: 'Jubilant Buddha Full Outfit' },
-          { url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80', alt: 'Jubilant Buddha Detail' },
-          { url: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1200&q=80', alt: 'Jubilant Buddha Back' }
-        ]
-      },
-      {
-        _id: 'fash-2',
-        name: 'Avant-Garde Pleated Layered Skirt Coat',
-        brand: 'Yohji Yamamoto',
-        sku: 'GZ-P12-104-1-01',
-        price: 38000,
-        mensModel: '182 cm',
-        ladysModel: '165 cm',
-        material: 'Tropical Wool Drape',
-        description: 'Tailored from tropical wool drape with double forward pleats, wide relaxed silhouette, subtle coin pocket, and concealed horn buttons.',
-        images: [
-          { url: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1200&q=80', alt: 'Pleated Trousers' },
-          { url: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=1200&q=80', alt: 'Pleated Angle' }
-        ]
-      },
-      {
-        _id: 'fash-3',
-        name: 'Deconstructed Drape Oversized Trench',
-        brand: 'Yohji Yamamoto',
-        sku: 'GZ-C05-890-3-02',
-        price: 58000,
-        mensModel: '188 cm',
-        ladysModel: '170 cm',
-        material: '100% Japanese Cotton Twill',
-        description: 'An iconic deconstructed trench coat engineered with asymmetric storm flaps, deep welt pockets, and custom belt buckle detailing.',
-        images: [
-          { url: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=1200&q=80', alt: 'Trench Coat Front' },
-          { url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80', alt: 'Trench Coat Side' }
-        ]
-      },
-      {
-        _id: 'fash-4',
-        name: 'Architectural Asymmetric Kimono Robe',
-        brand: 'Yohji Yamamoto',
-        sku: 'GZ-K09-440-2-04',
-        price: 49000,
-        mensModel: '185 cm',
-        ladysModel: '168 cm',
-        material: 'Silk Blend Twill',
-        description: 'Fluid silhouette kimono robe with relaxed shoulders, extended cuffs, and signature calligraphy embroidery.',
-        images: [
-          { url: 'https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1200&q=80', alt: 'Kimono Robe' }
-        ]
-      }
-    ]
-  },
-  {
-    categoryKey: 'electronics',
-    title: 'NEXT-GEN TECH & WEARABLES',
-    kicker: 'HIGH-END DIGITAL ESSENTIALS',
-    stampText: 'LAHVENTURE TECH • INNOVATION & ELEGANCE • 2026',
-    tagline: 'State-of-the-art Audio, Smartwatches & Cutting Edge Devices designed for seamless daily performance.',
-    bannerImage: {
-      url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80',
-      alt: 'Electronics Collection'
-    },
-    products: [
-      {
-        _id: 'elec-1',
-        name: 'Acoustique Studio Noise-Cancelling Headphones',
-        brand: 'Acoustique',
-        sku: 'AC-AUDIO-PRO-99',
-        price: 38500,
-        mensModel: 'Studio Pro',
-        ladysModel: 'Active ANC',
-        material: 'Beryllium & Anodized Aluminum',
-        description: 'Engineered with custom 45mm beryllium drivers, active noise cancellation, low-latency Bluetooth 5.3, and 40-hour battery stamina.',
-        images: [
-          { url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=1200&q=80', alt: 'Studio Headphones' }
-        ]
-      },
-      {
-        _id: 'elec-2',
-        name: 'lahVenture Apex S9 Smartwatch',
-        brand: 'lahVenture',
-        sku: 'LV-SMART-APEX-S9',
-        price: 22900,
-        mensModel: '44mm Titanium Case',
-        ladysModel: '40mm Titanium Case',
-        material: 'Grade 5 Titanium & Sapphire Glass',
-        description: 'A polished everyday smartwatch with GPS workouts, Bluetooth calling, health metrics, sleep reports, and a bright always-on AMOLED display.',
-        images: [
-          { url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1200&q=80', alt: 'Apex Smartwatch' }
-        ]
-      },
-      {
-        _id: 'elec-3',
-        name: 'Vortex Portable Spatial Speaker',
-        brand: 'Vortex Audio',
-        sku: 'VX-SPK-360',
-        price: 26000,
-        mensModel: 'Spatial Sound System',
-        ladysModel: 'Compact Edition',
-        material: 'Acoustic Mesh & Brushed Steel',
-        description: 'An acoustic masterpiece with dual passive radiators, room calibration, IP67 dust/waterproofing, and magnetic charging dock.',
-        images: [
-          { url: 'https://images.unsplash.com/photo-1545454675-3531b543be5d?auto=format&fit=crop&w=1200&q=80', alt: 'Spatial Speaker' }
-        ]
-      }
-    ]
-  },
-  {
-    categoryKey: 'watches',
-    title: 'LUXURY TIMEPIECE COLLECTION',
-    kicker: 'PRECISION HOROLOGY & CRAFTSMANSHIP',
-    stampText: 'LAHVENTURE HOROLOGY • SWISS & MODERN MECHANICS • 2026',
-    tagline: 'Exquisite automatic watches, tourbillons, and chronographs built with uncompromising heritage.',
-    bannerImage: {
-      url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80',
-      alt: 'Luxury Watches'
-    },
-    products: [
-      {
-        _id: 'watch-1',
-        name: 'Chrono-Skeleton Automatic Tourbillon',
-        brand: 'Patek & Co',
-        sku: 'PT-SKELETON-01',
-        price: 185000,
-        mensModel: '41mm Case',
-        ladysModel: 'Automatic Movement',
-        material: '18k Rose Gold & Alligator Leather',
-        description: 'A horological masterpiece featuring skeletonized bridges, sapphire crystal caseback, 72-hour power reserve, and hand-finished guilloché dial.',
-        images: [
-          { url: 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=1200&q=80', alt: 'Tourbillon Watch' }
-        ]
-      },
-      {
-        _id: 'watch-2',
-        name: 'Nautilus Ocean Diver Chronograph',
-        brand: 'Venture Marine',
-        sku: 'VM-DIVER-300M',
-        price: 94000,
-        mensModel: '300m Waterproof',
-        ladysModel: 'LumiBrite Dial',
-        material: '904L Stainless Steel',
-        description: 'Professional diving chronograph with ceramic unidirectional rotating bezel, helium escape valve, and high-beat automatic movement.',
-        images: [
-          { url: 'https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=1200&q=80', alt: 'Ocean Diver Watch' }
-        ]
-      }
-    ]
-  }
-];
+const ProductRail = ({ products, onOpenProduct, onNudge, railViewportRef }) => (
+  <div className="editorial-collections__rail-area">
+    <div className="editorial-collections__rail-viewport" ref={railViewportRef}>
+      <div className="editorial-collections__rail-motion">
+        <div className="editorial-collections__rail-group">
+          {products.map((product, productIndex) => (
+            <button
+              type="button"
+              className="editorial-collections__product-card"
+              key={`${productIdentity(product)}-${productIndex}`}
+              onClick={(event) => onOpenProduct(product, event.currentTarget)}
+              aria-label={`Open ${product.name}`}
+            >
+              <img
+                src={mediaUrl(product.images?.[0]?.url)}
+                alt={product.images?.[0]?.alt || product.name}
+                loading={productIndex < 5 ? 'eager' : 'lazy'}
+                decoding="async"
+                onError={(event) => {
+                  if (event.currentTarget.dataset.fallbackApplied) return;
+                  event.currentTarget.dataset.fallbackApplied = 'true';
+                  event.currentTarget.src = fallbackModelImages[productIndex % fallbackModelImages.length].url;
+                }}
+              />
+              <span aria-hidden="true"><ArrowRight size={14} /></span>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div className="editorial-collections__rail-controls">
+      <div>
+        <button type="button" onClick={() => onNudge(-1)} aria-label="Previous products">
+          <ChevronLeft size={17} />
+        </button>
+        <button type="button" onClick={() => onNudge(1)} aria-label="Next products">
+          <ChevronRight size={17} />
+        </button>
+      </div>
+      <span aria-hidden="true"><i /></span>
+    </div>
+  </div>
+);
 
 export const BrandsPage = () => {
   const navigate = useNavigate();
-  const { formatMoney } = useCurrency();
-  const { addItem } = useCart();
+  const { addItem, itemCount } = useCart();
+  const { user, refreshUser } = useAuth();
 
-  // Light Theme Default (Matching Reference Video) & Theme Switcher
-  const [theme, setTheme] = useState('light'); // 'light' | 'dark'
-
-  // Modal State for Split Screen Detail View (Video 00:08 - 00:16)
+  const [activeCollectionIndex, setActiveCollectionIndex] = useState(0);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [detailPhase, setDetailPhase] = useState('idle');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [addingToCart, setAddingToCart] = useState(false);
+  const [previousImageIndex, setPreviousImageIndex] = useState(null);
+  const [imageDirection, setImageDirection] = useState(1);
+  const [gallerySequence, setGallerySequence] = useState(0);
   const [wishlistSaved, setWishlistSaved] = useState(false);
+  const [detailMessage, setDetailMessage] = useState('');
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Fetch Public Collection & FAQ Settings
+  const detailRef = useRef(null);
+  const closeButtonRef = useRef(null);
+  const menuRef = useRef(null);
+  const menuCloseButtonRef = useRef(null);
+  const menuTriggerRef = useRef(null);
+  const triggerRef = useRef(null);
+  const railViewportRef = useRef(null);
+  const openTimerRef = useRef(null);
+  const closeTimerRef = useRef(null);
+  const focusTimerRef = useRef(null);
+  const galleryTimerRef = useRef(null);
+
   const { data: brandPageData } = useQuery({
     queryKey: ['brand-page-public'],
     queryFn: async () => {
@@ -250,331 +283,530 @@ export const BrandsPage = () => {
     retry: 1
   });
 
-  const collections = brandPageData?.collections && brandPageData.collections.length > 0
-    ? brandPageData.collections
-    : fallbackCollections;
+  const collections = useMemo(() => {
+    const configuredCollections = brandPageData?.collections?.filter((collection) => collection.isActive !== false) || [];
+    if (!configuredCollections.length) return fallbackCollections;
 
-  // Open Product Overlay Modal (Exact Video Animation & UI 00:09-00:16)
-  const openProductModal = (product) => {
+    return configuredCollections.map((collection, collectionIndex) => ({
+      ...collection,
+      products: editorialProductFillers(collection.products, collectionIndex)
+    }));
+  }, [brandPageData]);
+
+  useEffect(() => {
+    if (activeCollectionIndex > collections.length - 1) setActiveCollectionIndex(0);
+  }, [activeCollectionIndex, collections.length]);
+
+  useEffect(() => {
+    railViewportRef.current?.scrollTo({ left: 0, behavior: 'auto' });
+  }, [activeCollectionIndex]);
+
+  const activeCollection = collections[activeCollectionIndex] || fallbackCollections[0];
+  const heading = collectionHeading(activeCollection);
+  const products = activeCollection.products?.length ? activeCollection.products.slice(0, 9) : fallbackProducts;
+  const selectedImages = useMemo(() => {
+    const images = selectedProduct?.images?.filter((image) => image?.url) || [];
+    if (images.length >= 5) return images.slice(0, 5);
+
+    const supplementaryImages = fallbackModelImages.filter((candidate) => (
+      !images.some((image) => image.url === candidate.url)
+    ));
+
+    return [...images, ...supplementaryImages].slice(0, 5);
+  }, [selectedProduct]);
+
+  const isSelectedProductWishlisted = useCallback((product) => user?.wishlist?.some((item) => {
+    const wishlistId = typeof item === 'string' ? item : item?._id;
+    return wishlistId === product?._id;
+  }), [user]);
+
+  const openMenu = useCallback((trigger) => {
+    menuTriggerRef.current = trigger || document.activeElement;
+    setMenuOpen(true);
+  }, []);
+
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false);
+    window.requestAnimationFrame(() => menuTriggerRef.current?.focus?.({ preventScroll: true }));
+  }, []);
+
+  const closeDetail = useCallback(() => {
+    if (!selectedProduct || detailPhase === 'closing') return;
+
+    window.clearTimeout(openTimerRef.current);
+    window.clearTimeout(focusTimerRef.current);
+    setMenuOpen(false);
+    setDetailPhase('closing');
+
+    closeTimerRef.current = window.setTimeout(() => {
+      setSelectedProduct(null);
+      setDetailPhase('idle');
+      setPreviousImageIndex(null);
+      setDetailMessage('');
+      railViewportRef.current?.scrollTo({ left: 0, behavior: 'auto' });
+      triggerRef.current?.focus?.({ preventScroll: true });
+    }, CLOSE_SEQUENCE_MS);
+  }, [detailPhase, selectedProduct]);
+
+  const openProduct = useCallback((product, trigger) => {
+    window.clearTimeout(closeTimerRef.current);
+    window.clearTimeout(openTimerRef.current);
+    window.clearTimeout(focusTimerRef.current);
+    window.clearTimeout(galleryTimerRef.current);
+
+    triggerRef.current = trigger || document.activeElement;
     setSelectedProduct(product);
     setActiveImageIndex(0);
-    setWishlistSaved(false);
+    setPreviousImageIndex(null);
+    setGallerySequence(0);
+    setImageDirection(1);
+    setWishlistSaved(Boolean(isSelectedProductWishlisted(product)));
+    setDetailMessage('');
+    setDetailPhase('opening');
+
+    openTimerRef.current = window.setTimeout(() => setDetailPhase('open'), OPEN_SEQUENCE_MS);
+    focusTimerRef.current = window.setTimeout(() => closeButtonRef.current?.focus({ preventScroll: true }), 820);
+  }, [isSelectedProductWishlisted]);
+
+  const selectDetailImage = useCallback((nextIndex) => {
+    if (nextIndex === activeImageIndex || nextIndex < 0 || nextIndex >= selectedImages.length) return;
+
+    window.clearTimeout(galleryTimerRef.current);
+    setPreviousImageIndex(activeImageIndex);
+    setImageDirection(nextIndex > activeImageIndex ? 1 : -1);
+    setActiveImageIndex(nextIndex);
+    setGallerySequence((sequence) => sequence + 1);
+
+    galleryTimerRef.current = window.setTimeout(() => {
+      setPreviousImageIndex(null);
+    }, GALLERY_SEQUENCE_MS);
+  }, [activeImageIndex, selectedImages.length]);
+
+  useEffect(() => {
+    document.body.classList.add('collections-immersive-active');
+    return () => document.body.classList.remove('collections-immersive-active');
+  }, []);
+
+  useEffect(() => () => {
+    window.clearTimeout(openTimerRef.current);
+    window.clearTimeout(closeTimerRef.current);
+    window.clearTimeout(focusTimerRef.current);
+    window.clearTimeout(galleryTimerRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (!selectedProduct) return undefined;
+
+    const onKeyDown = (event) => {
+      if (menuOpen) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeDetail();
+        return;
+      }
+
+      if (event.key === 'ArrowLeft' && selectedImages.length > 1) {
+        event.preventDefault();
+        selectDetailImage((activeImageIndex - 1 + selectedImages.length) % selectedImages.length);
+        return;
+      }
+
+      if (event.key === 'ArrowRight' && selectedImages.length > 1) {
+        event.preventDefault();
+        selectDetailImage((activeImageIndex + 1) % selectedImages.length);
+        return;
+      }
+
+      if (event.key !== 'Tab' || !detailRef.current) return;
+      const focusable = [...detailRef.current.querySelectorAll('a[href], button:not([disabled])')]
+        .filter((element) => element.offsetParent !== null);
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [activeImageIndex, closeDetail, menuOpen, selectDetailImage, selectedImages.length, selectedProduct]);
+
+  useEffect(() => {
+    if (!menuOpen) return undefined;
+
+    menuCloseButtonRef.current?.focus({ preventScroll: true });
+
+    const onMenuKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        event.stopPropagation();
+        closeMenu();
+        return;
+      }
+
+      if (event.key !== 'Tab' || !menuRef.current) return;
+      const focusable = [...menuRef.current.querySelectorAll('a[href], button:not([disabled])')]
+        .filter((element) => element.offsetParent !== null);
+      if (!focusable.length) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onMenuKeyDown);
+    return () => document.removeEventListener('keydown', onMenuKeyDown);
+  }, [closeMenu, menuOpen]);
+
+  useEffect(() => {
+    if (!selectedProduct || selectedProduct.isEditorialPlaceholder) return;
+    setWishlistSaved(Boolean(isSelectedProductWishlisted(selectedProduct)));
+  }, [isSelectedProductWishlisted, selectedProduct]);
+
+  const nudgeRail = (direction) => {
+    const viewport = railViewportRef.current;
+    const firstCard = viewport?.querySelector('.editorial-collections__product-card');
+    if (!viewport || !firstCard) return;
+
+    const group = firstCard.parentElement;
+    const gap = Number.parseFloat(window.getComputedStyle(group).columnGap || '0');
+    const step = firstCard.getBoundingClientRect().width + gap;
+    const maximum = Math.max(0, viewport.scrollWidth - viewport.clientWidth);
+    let target = viewport.scrollLeft + direction * step;
+
+    if (target > maximum - 2) target = 0;
+    if (target < 0) target = maximum;
+    viewport.scrollTo({ left: target, behavior: 'smooth' });
   };
 
-  const closeModal = () => {
-    setSelectedProduct(null);
-  };
+  const handleShopNow = async () => {
+    if (!selectedProduct) return;
 
-  const handleShopNow = async (product) => {
-    if (!product) return;
+    if (selectedProduct.isEditorialPlaceholder) {
+      navigate('/products');
+      return;
+    }
+
+    const hasOptions = selectedProduct.variants?.some((variant) => variant.name && variant.options?.length);
+    if (hasOptions) {
+      navigate(productUrl(selectedProduct));
+      return;
+    }
+
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
     setAddingToCart(true);
+    setDetailMessage('');
     try {
-      await addItem(product._id || product.id, 1);
-      closeModal();
+      await addItem(selectedProduct._id || selectedProduct.id, 1);
+      refreshUser?.();
       navigate('/cart');
-    } catch (err) {
-      console.error('Add to cart failed:', err);
-      navigate(`/products/${product.slug || product._id || product.id}`);
+    } catch (error) {
+      setDetailMessage(apiErrorMessage(error));
     } finally {
       setAddingToCart(false);
     }
   };
 
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'light' ? 'dark' : 'light'));
+  const handleWishlist = async () => {
+    if (!selectedProduct) return;
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    if (selectedProduct.isEditorialPlaceholder) {
+      setWishlistSaved((saved) => !saved);
+      return;
+    }
+
+    setDetailMessage('');
+    try {
+      const { data } = await api.post(`/users/wishlist/${selectedProduct._id}`);
+      await refreshUser?.();
+      setWishlistSaved(Boolean(data?.data?.added));
+    } catch (error) {
+      setDetailMessage(apiErrorMessage(error));
+    }
   };
 
-  const schema = {
+  const detailAttributeLines = useMemo(() => {
+    if (!selectedProduct) return [];
+    const productAttributes = (selectedProduct.attributes || [])
+      .map((attribute) => {
+        const value = Array.isArray(attribute.value) ? attribute.value.join(', ') : attribute.value;
+        return value ? `${attribute.name}: ${value}` : '';
+      })
+      .filter(Boolean)
+      .slice(0, 3);
+
+    if (productAttributes.length) return productAttributes;
+    return [
+      selectedProduct.material || 'Premium everyday construction',
+      selectedProduct.brand ? `By ${selectedProduct.brand}` : 'LahVenture editorial selection',
+      'Curated in Dhaka, Bangladesh'
+    ];
+  }, [selectedProduct]);
+
+  const schema = useMemo(() => ({
     '@context': 'https://schema.org',
     '@type': 'CollectionPage',
-    name: 'Curated Seasonal Collections | LahVenture',
-    description: 'Explore light editorial high-fashion, technology, home living, and luxury timepieces at LahVenture.'
-  };
+    name: `${heading.firstLine} ${heading.secondLine}`,
+    description: activeCollection.tagline,
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: products.length,
+      itemListElement: products.filter((product) => !product.isEditorialPlaceholder).map((product, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `${window.location.origin}${productUrl(product)}`
+      }))
+    }
+  }), [activeCollection.tagline, heading.firstLine, heading.secondLine, products]);
 
   return (
-    <main className={`collections-page ${theme === 'light' ? 'collections-light-theme' : 'collections-dark-theme'}`}>
+    <section className={`editorial-collections${selectedProduct ? ' has-detail-open' : ''}`} aria-label="Collections">
       <Seo
         title="Collections | LahVenture"
-        description="Discover exclusive seasonal collections inspired by high-fashion editorial styling and modern luxury."
+        description="Explore LahVenture collections through an immersive editorial product experience."
         schemaJson={schema}
       />
 
+      <div className={`editorial-collections__showcase${detailPhase === 'closing' ? ' is-returning' : ''}`}>
+        <img
+          className="editorial-collections__hero-image"
+          src={collectionHeroSource(activeCollection)}
+          alt={activeCollection.bannerImage?.alt || activeCollection.title}
+          loading="eager"
+          decoding="async"
+          fetchPriority="high"
+          onError={(event) => {
+            if (event.currentTarget.src.endsWith(editorialHero)) return;
+            event.currentTarget.src = editorialHero;
+          }}
+        />
+        <div className="editorial-collections__hero-shade" aria-hidden="true" />
 
-
-      {/* MAIN LAYOUT WITH LEFT VERTICAL SIDEBAR & HERO SHOWCASE */}
-      <div className="collections-main-container">
-        
-        {/* LEFT VERTICAL SIDEBAR WITH SOCIALS & ROTATING STAMP (EXACT VIDEO 00:01 - 00:07) */}
-        <aside className="collections-left-sidebar">
-          <div className="sidebar-social-links">
-            <a href="https://facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
-              <IconFacebook />
-            </a>
-            <a href="https://instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
-              <IconInstagram />
-            </a>
-            <a href="https://twitter.com" target="_blank" rel="noreferrer" aria-label="Twitter">
-              <IconTwitter />
-            </a>
+        <header className="editorial-collections__header">
+          <Link to="/" aria-label="LahVenture home"><EditorialLogo /></Link>
+          <div className="editorial-collections__header-actions">
+            <button type="button" onClick={() => navigate('/products')} aria-label="Search products">
+              <Search size={18} strokeWidth={1.7} />
+            </button>
+            <button type="button" className="editorial-collections__bag-button" onClick={() => navigate('/cart')} aria-label="Shopping bag">
+              <ShoppingBag size={18} strokeWidth={1.7} />
+              {itemCount ? <span>{itemCount}</span> : null}
+            </button>
+            <button type="button" onClick={(event) => openMenu(event.currentTarget)} aria-label="Open menu">
+              <Menu size={19} strokeWidth={1.7} />
+            </button>
           </div>
+        </header>
 
-          <div className="sidebar-vertical-text">Follow us</div>
+        <aside className="editorial-collections__hero-rail" aria-label="Collection social links">
+          <SocialLinks />
+          <span>Contact us</span>
+          <Mouse size={18} strokeWidth={1.4} aria-hidden="true" />
         </aside>
 
-        {/* HERO SHOWCASE SECTIONS */}
-        <div className="collections-content-wrapper">
-          <div className="collections-page-header">
-            <p className="eyebrow">SPRING / SUMMER COLLECTION</p>
-            <h1>CREATIVE WAYS TO STYLE YOUR LUXURY ESSENTIALS</h1>
-            <p>
-              High-end aesthetic designs crafted to feel inspiring, useful, and practically luxurious.
-            </p>
-          </div>
+        <StampBadge text={activeCollection.stampText} />
 
-          <div className="collections-hero-list">
-            {collections.map((collection, index) => (
-              <HeroSection
-                key={collection.categoryKey || index}
-                collection={collection}
-                onOpenProduct={openProductModal}
-                formatMoney={formatMoney}
-              />
-            ))}
-          </div>
+        <div className="editorial-collections__headline" key={activeCollection.categoryKey}>
+          <p>{heading.firstLine}</p>
+          <h1>{heading.secondLine}</h1>
         </div>
 
-      </div>
-
-      {/* SPLIT PRODUCT DETAIL OVERLAY MODAL / EXPANDED PAGE VIEW (VIDEO 00:08 - 00:16 ACCURATE) */}
-      {selectedProduct ? (
-        <div className="collection-modal-backdrop" onClick={closeModal}>
-          <div className="collection-modal-container" onClick={(e) => e.stopPropagation()}>
-            
-            {/* Top Bar with Close X and Visit Link */}
-            <div className="modal-top-bar-overlay">
-              <button
-                type="button"
-                className="modal-close-btn"
-                onClick={closeModal}
-                aria-label="Close detail modal"
-              >
-                <X size={22} />
-              </button>
-
-              <div className="modal-top-bar-actions">
-                <Link
-                  to={`/products?category=${encodeURIComponent(selectedProduct.category?.name || '')}`}
-                  className="modal-visit-link"
-                  onClick={closeModal}
-                >
-                  Visit the Collection &gt;
-                </Link>
-                <button type="button" className="modal-top-icon-btn" onClick={() => navigate('/products')}>
-                  <Search size={18} />
-                </button>
-                <button type="button" className="modal-top-icon-btn" onClick={() => navigate('/cart')}>
-                  <ShoppingBag size={18} />
-                </button>
-              </div>
-            </div>
-
-            {/* Main Split Grid */}
-            <div className="modal-split-grid">
-              
-              {/* Left Column: Full Product Model Image & Vertical Specifications Overlay */}
-              <div className="modal-left-column">
-                <img
-                  src={mediaUrl(selectedProduct.images?.[activeImageIndex]?.url || selectedProduct.images?.[0]?.url)}
-                  alt={selectedProduct.name}
-                  className="modal-left-product-image"
-                />
-
-                {/* Frame-by-Frame Video Spec Box Overlay on photo */}
-                <div className="modal-vertical-specs">
-                  <span className="spec-title">"{selectedProduct.name}"</span>
-                  <span className="spec-sku">{selectedProduct.sku || 'GZ-T21-076-2-03'}</span>
-                  <div className="spec-details-list">
-                    {selectedProduct.mensModel ? <div>Men's Model: {selectedProduct.mensModel}</div> : <div>Men's Model: 185 cm</div>}
-                    {selectedProduct.ladysModel ? <div>Lady's Model: {selectedProduct.ladysModel}</div> : <div>Lady's Model: 168 cm</div>}
-                    {selectedProduct.material ? <div>{selectedProduct.material}</div> : <div>100% Cotton</div>}
-                  </div>
-                </div>
-              </div>
-
-              {/* Right Column: Information, Actions & Thumbnails (Clean Light Background) */}
-              <div className="modal-right-column">
-                
-                <div className="modal-body-content">
-                  <p className="modal-collab-subtitle">
-                    {selectedProduct.brand
-                      ? `${selectedProduct.brand.toUpperCase()} COLLABORATION GRAPHIC CUT AND SEWN`
-                      : 'YASUTO SASADA COLLABORATION GRAPHIC CUT AND SEWN'}
-                  </p>
-
-                  <h2 className="modal-product-title">"{selectedProduct.name.toUpperCase()}"</h2>
-                  <p className="modal-sku-tag">{selectedProduct.sku || 'GZ-T21-076-2-03'}</p>
-
-                  <p className="modal-product-desc">
-                    {selectedProduct.description ||
-                      'Collaboration series with contemporary artist. Featuring original artwork drawn with technical power and complex cosmic energy.'}
-                  </p>
-
-                  <div className="modal-price-tag">
-                    {formatMoney(selectedProduct.price)}
-                  </div>
-
-                  <div className="modal-action-row">
-                    <button
-                      type="button"
-                      className="modal-shop-now-btn"
-                      onClick={() => handleShopNow(selectedProduct)}
-                      disabled={addingToCart}
-                    >
-                      {addingToCart ? 'ADDING...' : 'SHOP NOW'} &gt;
-                    </button>
-
-                    <button
-                      type="button"
-                      className="modal-wishlist-btn"
-                      onClick={() => setWishlistSaved(!wishlistSaved)}
-                    >
-                      <Heart size={16} fill={wishlistSaved ? 'currentColor' : 'none'} />
-                      {wishlistSaved ? 'In Wish List' : '+ Add to Wish List'}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Horizontal Alternate Thumbnail Image Switcher (Video 00:11-00:15) */}
-                {selectedProduct.images && selectedProduct.images.length > 0 ? (
-                  <div className="modal-thumbnail-row">
-                    {selectedProduct.images.map((img, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        className={`modal-thumb-btn ${idx === activeImageIndex ? 'active' : ''}`}
-                        onClick={() => setActiveImageIndex(idx)}
-                      >
-                        <img src={mediaUrl(img.url)} alt={img.alt || selectedProduct.name} />
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-
-              </div>
-
-            </div>
-
-          </div>
-        </div>
-      ) : null}
-    </main>
-  );
-};
-
-// Sub-Component: Individual Category Hero Section (Matching Video Layout)
-const HeroSection = ({ collection, onOpenProduct, formatMoney }) => {
-  const trackRef = useRef(null);
-
-  const scrollTrack = (direction) => {
-    if (!trackRef.current) return;
-    const distance = 260;
-    trackRef.current.scrollBy({
-      left: direction === 'left' ? -distance : distance,
-      behavior: 'smooth'
-    });
-  };
-
-  const products = collection.products || [];
-
-  return (
-    <section className="collection-hero-section">
-      {/* Left Editorial Showcase Image */}
-      <div className="collection-hero-showcase">
-        <div className="collection-hero-image-wrap">
-          <img
-            src={mediaUrl(collection.bannerImage?.url)}
-            alt={collection.bannerImage?.alt || collection.title}
-            className="collection-hero-image"
-          />
-          <div className="collection-hero-overlay-gradient" />
-        </div>
-
-        {/* Circular Rotating Stamp Badge with Red Wedge Accent */}
-        <StampBadge
-          text={collection.stampText || 'YOHJI YAMAMOTO SHOP • FOR THE SAKE OF FREEDOM AND HUMAN DIGNITY'}
-          logo={collection.categoryKey === 'fashion' ? "Y's" : collection.title?.substring(0, 2) || 'LV'}
+        <ProductRail
+          products={products}
+          onOpenProduct={openProduct}
+          onNudge={nudgeRail}
+          railViewportRef={railViewportRef}
         />
 
-        <div className="collection-hero-side-slogan">
-          {collection.kicker || 'SPRING / SUMMER COLLECTION'}
-        </div>
+        <Link className="editorial-collections__visit-link" to={categoryUrl(activeCollection, products[0])}>
+          Visit the Collection <ArrowRight size={14} />
+        </Link>
+
+        {collections.length > 1 ? (
+          <div className="editorial-collections__collection-count" aria-label="Current collection">
+            <span>{String(activeCollectionIndex + 1).padStart(2, '0')}</span>
+            <i />
+            <span>{String(collections.length).padStart(2, '0')}</span>
+          </div>
+        ) : null}
       </div>
 
-      {/* Right Content & Product Carousel */}
-      <div className="collection-hero-content">
-        <div className="collection-hero-header-meta">
-          <h2 className="collection-hero-title">{collection.title}</h2>
-          {collection.tagline ? <p className="collection-tagline">{collection.tagline}</p> : null}
-        </div>
+      {selectedProduct ? (
+        <div
+          ref={detailRef}
+          className={`editorial-detail editorial-detail--${detailPhase}`}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="editorial-detail-title"
+        >
+          <aside className="editorial-detail__rail">
+            <Link to="/" aria-label="LahVenture home"><EditorialLogo dark /></Link>
 
-        {/* Product Carousel with Tall Vertical Cards (Exact Video 00:01 - 00:07) */}
-        <div className="collection-product-carousel-wrapper">
-          <div className="collection-carousel-controls">
-            <span className="collection-carousel-heading">SPRING / SUMMER COLLECTION</span>
-            <div className="collection-carousel-arrows">
-              <button
-                type="button"
-                className="collection-arrow-btn"
-                onClick={() => scrollTrack('left')}
-                aria-label="Previous items"
-              >
-                <ChevronLeft size={18} />
-              </button>
-              <button
-                type="button"
-                className="collection-arrow-btn"
-                onClick={() => scrollTrack('right')}
-                aria-label="Next items"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
-
-          <div className="collection-carousel-track" ref={trackRef}>
-            {products.map((product) => (
-              <div
-                key={product._id || product.id}
-                className="collection-product-card"
-                onClick={() => onOpenProduct(product)}
-              >
-                <div className="collection-card-img-wrap">
-                  <img
-                    src={mediaUrl(product.images?.[0]?.url)}
-                    alt={product.images?.[0]?.alt || product.name}
-                  />
-                </div>
-                <div className="collection-card-info">
-                  <span className="collection-card-brand">{product.brand || 'Yohji Yamamoto'}</span>
-                  <h3 className="collection-card-name">{product.name}</h3>
-                  <span className="collection-card-price">{formatMoney(product.price)}</span>
-                </div>
+            <div className="editorial-detail__rail-copy">
+              <strong>“{selectedProduct.name}”</strong>
+              <span>{selectedProduct.sku || 'CURATED EDITION'}</span>
+              <div>
+                {detailAttributeLines.map((line) => <small key={line}>{line}</small>)}
               </div>
-            ))}
-          </div>
-        </div>
+              <b>{selectedProduct.material || selectedProduct.brand || 'LahVenture'}</b>
+            </div>
 
-        {/* Hero Footer Link */}
-        <div className="collection-hero-footer">
-          <button
-            type="button"
-            className="collection-explore-btn"
-            onClick={() => products.length > 0 && onOpenProduct(products[0])}
-          >
-            Visit the Collection &gt;
-          </button>
+            <SocialLinks dark />
+            <span className="editorial-detail__contact-label">Contact us</span>
+            <Mouse className="editorial-detail__mouse" size={18} strokeWidth={1.4} aria-hidden="true" />
+          </aside>
+
+          <div className={`editorial-detail__gallery direction-${imageDirection > 0 ? 'forward' : 'backward'}`}>
+            {previousImageIndex !== null ? (
+              <img
+                className="editorial-detail__model-image is-exiting"
+                src={mediaUrl(selectedImages[previousImageIndex]?.url)}
+                alt=""
+                aria-hidden="true"
+              />
+            ) : null}
+            <img
+              key={`${productIdentity(selectedProduct)}-${activeImageIndex}-${gallerySequence}`}
+              className={`editorial-detail__model-image${previousImageIndex !== null ? ' is-entering' : ''}`}
+              src={mediaUrl(selectedImages[activeImageIndex]?.url)}
+              alt={selectedImages[activeImageIndex]?.alt || selectedProduct.name}
+              loading="eager"
+              decoding="async"
+              onError={(event) => {
+                if (event.currentTarget.dataset.fallbackApplied) return;
+                event.currentTarget.dataset.fallbackApplied = 'true';
+                event.currentTarget.src = fallbackModelImages[activeImageIndex % fallbackModelImages.length].url;
+              }}
+            />
+            <span className="editorial-detail__gallery-index" aria-hidden="true">
+              {String(activeImageIndex + 1).padStart(2, '0')} / {String(selectedImages.length).padStart(2, '0')}
+            </span>
+          </div>
+
+          <section className="editorial-detail__content">
+            <header className="editorial-detail__topbar">
+              <button
+                ref={closeButtonRef}
+                type="button"
+                className="editorial-detail__close"
+                onClick={closeDetail}
+                aria-label="Close product details"
+              >
+                <X size={17} strokeWidth={1.8} />
+              </button>
+
+              <Link to={categoryUrl(activeCollection, selectedProduct)}>
+                Visit the Collection <ArrowRight size={12} />
+              </Link>
+
+              <div>
+                <button type="button" onClick={() => navigate('/products')} aria-label="Search products">
+                  <Search size={17} strokeWidth={1.6} />
+                </button>
+                <button type="button" onClick={() => navigate('/cart')} aria-label="Shopping bag">
+                  <ShoppingBag size={17} strokeWidth={1.6} />
+                </button>
+                <button type="button" onClick={(event) => openMenu(event.currentTarget)} aria-label="Open menu">
+                  <Menu size={18} strokeWidth={1.6} />
+                </button>
+              </div>
+            </header>
+
+            <div className="editorial-detail__copy">
+              <p>{(selectedProduct.brand || 'LahVenture').toUpperCase()} — CURATED COLLECTION EDIT</p>
+              <h2 id="editorial-detail-title">“{selectedProduct.name}”</h2>
+              <span>{selectedProduct.sku || 'LIMITED EDITION'}</span>
+              <p>{selectedProduct.description || activeCollection.tagline}</p>
+              <div className="editorial-detail__actions">
+                <button type="button" onClick={handleShopNow} disabled={addingToCart}>
+                  {addingToCart ? 'ADDING…' : selectedProduct.isEditorialPlaceholder ? 'SHOP COLLECTION' : 'SHOP NOW'}
+                  <ArrowRight size={16} />
+                </button>
+                <button type="button" onClick={handleWishlist} aria-pressed={wishlistSaved}>
+                  <Heart size={16} fill={wishlistSaved ? 'currentColor' : 'none'} />
+                  {wishlistSaved ? 'Saved to Wish List' : 'Add to Wish List'}
+                </button>
+              </div>
+
+              <p className="editorial-detail__message" aria-live="polite">{detailMessage}</p>
+            </div>
+
+            <div className="editorial-detail__thumbnails" aria-label="Product images">
+              {selectedImages.map((image, index) => (
+                <button
+                  type="button"
+                  key={`${image.url}-${index}`}
+                  className={index === activeImageIndex ? 'is-active' : ''}
+                  onClick={() => selectDetailImage(index)}
+                  aria-label={`Show image ${index + 1} of ${selectedImages.length}`}
+                  aria-pressed={index === activeImageIndex}
+                >
+                  <img src={mediaUrl(image.url)} alt="" loading="eager" decoding="async" />
+                  <span>{String(index + 1).padStart(2, '0')}</span>
+                </button>
+              ))}
+            </div>
+          </section>
         </div>
-      </div>
+      ) : null}
+
+      {menuOpen ? (
+        <div className="editorial-menu-layer">
+          <button type="button" className="editorial-menu-layer__scrim" onClick={closeMenu} aria-label="Close menu" />
+          <aside ref={menuRef} className="editorial-menu" role="dialog" aria-modal="true" aria-label="Site menu">
+            <div>
+              <EditorialLogo dark />
+              <button ref={menuCloseButtonRef} type="button" onClick={closeMenu} aria-label="Close menu"><X size={20} /></button>
+            </div>
+            <nav>
+              <Link to="/" onClick={() => setMenuOpen(false)}>Home</Link>
+              <Link to="/products" onClick={() => setMenuOpen(false)}>Shop</Link>
+              <Link to="/collections" onClick={() => setMenuOpen(false)}>Collections</Link>
+              <Link to="/about" onClick={() => setMenuOpen(false)}>About</Link>
+              <Link to="/contact" onClick={() => setMenuOpen(false)}>Contact</Link>
+            </nav>
+            {collections.length > 1 ? (
+              <div className="editorial-menu__collections">
+                <p>Collection stories</p>
+                {collections.map((collection, index) => (
+                  <button
+                    type="button"
+                    className={index === activeCollectionIndex ? 'is-active' : ''}
+                    key={collection.categoryKey || collection.title}
+                    onClick={() => {
+                      setActiveCollectionIndex(index);
+                      setMenuOpen(false);
+                    }}
+                  >
+                    <span>{String(index + 1).padStart(2, '0')}</span>
+                    {collection.title}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </aside>
+        </div>
+      ) : null}
     </section>
   );
 };

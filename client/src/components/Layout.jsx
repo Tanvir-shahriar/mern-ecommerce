@@ -28,12 +28,16 @@ const logoPath = lahventureLogo;
 
 export const Layout = () => {
   const location = useLocation();
-  const isAboutPage = location.pathname === '/about';
-  const primaryNavSurfaceClass = location.pathname === '/'
+  const normalizedPath = location.pathname.length > 1
+    ? location.pathname.replace(/\/+$/, '')
+    : location.pathname;
+  const isAboutPage = normalizedPath === '/about';
+  const isCollectionsPage = normalizedPath === '/brands' || normalizedPath === '/collections';
+  const primaryNavSurfaceClass = normalizedPath === '/'
     ? 'nav-surface-home'
-    : location.pathname.startsWith('/about') || location.pathname.startsWith('/brands')
+    : normalizedPath.startsWith('/about') || isCollectionsPage
       ? 'nav-surface-soft-gray'
-      : location.pathname.startsWith('/contact')
+      : normalizedPath.startsWith('/contact')
         ? 'nav-surface-contact'
         : 'nav-surface-default';
   const [open, setOpen] = useState(false);
@@ -315,8 +319,9 @@ export const Layout = () => {
 
   return (
     <div className={`site-shell primary-nav-${primaryNavTransitionPhase}`}>
-      {open && <div className="menu-backdrop" onClick={() => setOpen(false)} />}
-      <header className={`site-header ${primaryNavSurfaceClass}`}>
+      {open && !isCollectionsPage && <div className="menu-backdrop" onClick={() => setOpen(false)} />}
+      {!isCollectionsPage && (
+        <header className={`site-header ${primaryNavSurfaceClass}`}>
         <div className="header-inner">
           <div className="brand-group">
             <button
@@ -341,7 +346,7 @@ export const Layout = () => {
                   Shop
                 </Link>
 
-                <Link to="/brands" className="hamburger-item" onClick={() => setOpen(false)}>
+                <Link to="/collections" className="hamburger-item" onClick={() => setOpen(false)}>
                   Collections
                 </Link>
                 
@@ -478,7 +483,7 @@ export const Layout = () => {
             <NavLink className={navClass} to="/products" onClick={handlePrimaryNavClick('/products')}>
               Shop
             </NavLink>
-            <NavLink className={navClass} to="/brands" onClick={handlePrimaryNavClick('/brands')}>
+            <NavLink className={navClass} to="/collections" onClick={handlePrimaryNavClick('/collections')}>
               Collections
             </NavLink>
             <NavLink className={navClass} to="/about" onClick={handlePrimaryNavClick('/about')}>
@@ -682,13 +687,14 @@ export const Layout = () => {
             </Link>
           </div>
         </div>
-      </header>
+        </header>
+      )}
 
       <main>
         <Outlet />
       </main>
 
-      {!isAboutPage && (
+      {!isAboutPage && !isCollectionsPage && (
         <footer className="site-footer">
           <div className="footer-inner">
             <div className="footer-assurances" aria-label="Shopping assurances">
@@ -733,7 +739,7 @@ export const Layout = () => {
                   <Link to="/products">All products</Link>
                   <Link to="/products?category=Smartwatch">Smartwatches</Link>
                   <Link to="/products?category=Automatic%20Watches">Automatic watches</Link>
-                  <Link to="/brands">Collections</Link>
+                  <Link to="/collections">Collections</Link>
                 </div>
 
                 <div className="footer-nav-column">
