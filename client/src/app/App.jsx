@@ -27,6 +27,7 @@ import { ScrollToTop } from '../components/ScrollToTop.jsx';
 import { OrderRealtimeSync } from '../components/OrderRealtimeSync.jsx';
 import { AboutPage } from '../pages/AboutPage.jsx';
 import { BrandsPage } from '../pages/BrandsPage.jsx';
+import { AltHomePage } from '../pages/AltHomePage.jsx';
 
 export const App = () => (
   <>
@@ -35,6 +36,8 @@ export const App = () => (
     <Routes>
       <Route element={<Layout />}>
       <Route index element={<HomePage />} />
+      <Route path="alt-home" element={<AltHomePage />} />
+      <Route path="althome" element={<AltHomePage />} />
       <Route path="about" element={<AboutPage />} />
       <Route path="brands" element={<BrandsPage />} />
       <Route path="collections" element={<BrandsPage />} />

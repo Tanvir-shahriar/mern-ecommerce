@@ -478,6 +478,9 @@ export const Layout = () => {
             <NavLink className={navClass} to="/" onClick={handlePrimaryNavClick('/')}>
               Home
             </NavLink>
+            <NavLink className={navClass} to="/alt-home" onClick={handlePrimaryNavClick('/alt-home')}>
+              ALT Home
+            </NavLink>
             <NavLink className={navClass} to="/products" onClick={handlePrimaryNavClick('/products')}>
               Shop
             </NavLink>
