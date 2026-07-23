@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import heroFinalFrame from '../assets/images/hero-female-model-final.avif';
 import heroMotionFrame from '../assets/images/hero-female-model-motion.avif';
 import heroOpeningFrame from '../assets/images/hero-female-model-opening.avif';
+import { LiquidHoverCanvas } from '../components/LiquidHoverCanvas.jsx';
 import { Seo } from '../components/Seo.jsx';
 
 const WORDMARK = 'LAHVENTURE';
@@ -11,6 +12,16 @@ const HERO_FRAMES = [
   heroOpeningFrame,
   heroMotionFrame,
   heroFinalFrame
+];
+const DESKTOP_FOCAL_POINTS = [
+  [0.5, 0.1],
+  [0.5, 0.1],
+  [0.5, 0.42]
+];
+const MOBILE_FOCAL_POINTS = [
+  [0.38, 0.08],
+  [0.38, 0.08],
+  [0.5, 0.45]
 ];
 const MARQUEE_ITEMS = [
   'Outerwear',
@@ -33,6 +44,7 @@ const easeInOutQuad = (value) => (
 export const AltHomePage = () => {
   const trackRef = useRef(null);
   const pinnedRef = useRef(null);
+  const liquidProgressRef = useRef(0);
   const eyebrowRef = useRef(null);
   const wordmarkRef = useRef(null);
   const copyRef = useRef(null);
@@ -77,6 +89,7 @@ export const AltHomePage = () => {
     const letters = Array.from(WORDMARK);
 
     const applyProgress = (progress) => {
+      liquidProgressRef.current = progress;
       const frameCount = frameRefs.current.length;
       if (frameCount) {
         const frameProgress = progress * (frameCount - 1);
@@ -136,6 +149,7 @@ export const AltHomePage = () => {
     };
 
     const applyReducedMotionState = () => {
+      liquidProgressRef.current = 1;
       frameRefs.current.forEach((frame, index) => {
         if (!frame) return;
         frame.style.opacity = String(index === frameRefs.current.length - 1 ? 1 : 0);
@@ -353,8 +367,19 @@ export const AltHomePage = () => {
         className={`alt-home-hero${reduceMotion ? ' alt-home-hero--reduced' : ''}`}
         aria-labelledby="alt-home-wordmark"
       >
-        <div ref={pinnedRef} className="alt-home-hero__viewport">
-          <div className="alt-home-hero__frames" aria-hidden="true">
+        <div
+          ref={pinnedRef}
+          className="alt-home-hero__viewport"
+          style={{
+            backgroundImage: `url(${heroOpeningFrame})`,
+            backgroundPosition: isMobile ? '38% 8%' : '50% 10%',
+            backgroundSize: 'cover'
+          }}
+        >
+          <div
+            className="alt-home-hero__frames"
+            aria-hidden="true"
+          >
             {HERO_FRAMES.map((frame, index) => (
               <img
                 key={frame}
@@ -373,6 +398,19 @@ export const AltHomePage = () => {
                 }}
               />
             ))}
+            <LiquidHoverCanvas
+              images={HERO_FRAMES}
+              progressRef={liquidProgressRef}
+              focalPoints={
+                isMobile ? MOBILE_FOCAL_POINTS : DESKTOP_FOCAL_POINTS
+              }
+              disabled={reduceMotion}
+              mobile={isMobile}
+              resolution={4}
+              cursorSize={0.5}
+              cursorPower={1}
+              distortionPower={0.8}
+            />
           </div>
 
           <div className="alt-home-hero__vignette" aria-hidden="true" />

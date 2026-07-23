@@ -18767,6 +18767,30 @@ body.collections-immersive-active .scroll-to-top-button {
 
 .alt-home-hero__frames {
   z-index: 0;
+  pointer-events: none;
+}
+
+.alt-home-hero__liquid {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.alt-home-hero__liquid-canvas {
+  position: absolute;
+  top: -10%;
+  left: -10%;
+  display: block;
+  width: 120%;
+  height: 120%;
+  max-width: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.alt-home-hero__liquid-canvas[data-ready="true"] {
+  opacity: 1;
 }
 
 .alt-home-hero__frame {
