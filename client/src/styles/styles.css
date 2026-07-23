@@ -18699,3 +18699,448 @@ body.collections-immersive-active .scroll-to-top-button {
   color: #94a3b8;
 }
 
+/* ==========================================================================
+   ALT HOME — SCRUBBED CAMPAIGN HERO
+   ========================================================================== */
+@font-face {
+  font-family: "Bodoni Moda";
+  src: url("https://fonts.gstatic.com/s/bodonimoda/v28/aFTQ7PxzY382XsXX63LUYKSIQqn0X0BO.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Alt Satoshi";
+  src: url("https://framerusercontent.com/third-party-assets/fontshare/wf/TTX2Z3BF3P6Y5BQT3IV2VNOK6FL22KUT/7QYRJOI3JIMYHGY6CH7SOIFRQLZOLNJ6/KFIAZD4RUMEZIYV6FQ3T3GP5PDBDB6JY.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Alt Satoshi";
+  src: url("https://framerusercontent.com/third-party-assets/fontshare/wf/P2LQKHE6KA6ZP4AAGN72KDWMHH6ZH3TA/ZC32TK2P7FPS5GFTL46EU6KQJA24ZYDB/7AHDUZ4A7LFLVFUIFSARGIWCRQJHISQP.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 500 700;
+  font-display: swap;
+}
+
+.alt-home-wrapper {
+  min-height: 100vh;
+  padding: 0;
+  background: #1a1714;
+  color: #f6f3ee;
+  font-family: "Alt Satoshi", ui-sans-serif, system-ui, sans-serif;
+}
+
+.alt-home-hero {
+  position: relative;
+  width: 100%;
+  height: 300vh;
+  min-height: 1860px;
+  background: #1a1714;
+}
+
+.alt-home-hero--reduced {
+  height: 100svh;
+  min-height: 620px;
+}
+
+.alt-home-hero__viewport {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100vh;
+  min-height: 620px;
+  overflow: hidden;
+  background: #1a1714;
+}
+
+.alt-home-hero__frames,
+.alt-home-hero__vignette,
+.alt-home-hero__content {
+  position: absolute;
+  inset: 0;
+}
+
+.alt-home-hero__frames {
+  z-index: 0;
+}
+
+.alt-home-hero__frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.055);
+  transform-origin: center;
+  will-change: opacity, transform;
+}
+
+.alt-home-hero__frame:nth-child(-n + 2) {
+  transform-origin: center top;
+}
+
+.alt-home-hero__frame:first-child {
+  opacity: 1;
+}
+
+.alt-home-hero__vignette {
+  z-index: 1;
+  pointer-events: none;
+  background:
+    radial-gradient(
+      120% 90% at 50% 42%,
+      rgba(0, 0, 0, 0) 45%,
+      rgba(20, 17, 14, 0.34) 100%
+    );
+}
+
+.alt-home-hero__content {
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4vw;
+  text-align: center;
+  pointer-events: none;
+}
+
+.alt-home-hero__eyebrow {
+  margin: 0 0 min(3vh, 30px);
+  color: rgba(246, 243, 238, 0.85);
+  font-size: clamp(11px, 1vw, 13px);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.36em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 16px rgba(26, 23, 20, 0.24);
+  will-change: opacity;
+}
+
+.alt-home-hero__wordmark-wrap {
+  display: flex;
+  justify-content: center;
+  transform-origin: center;
+  will-change: opacity, transform;
+}
+
+.alt-home-hero__wordmark {
+  display: flex;
+  margin: 0;
+  color: #f6f3ee;
+  font-family: "Bodoni Moda", "Bodoni 72", Didot, serif;
+  font-size: clamp(64px, 13vw, 300px);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  text-shadow: 0 2px 30px rgba(26, 23, 20, 0.14);
+}
+
+.alt-home-hero__letter-clip {
+  display: inline-block;
+  overflow: hidden;
+  margin-bottom: -0.12em;
+  padding-bottom: 0.12em;
+}
+
+.alt-home-hero__letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(100%);
+  white-space: pre;
+  will-change: opacity, transform;
+}
+
+.alt-home-hero__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: min(3.4vh, 30px);
+  opacity: 0;
+  transform: translateY(26px);
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+.alt-home-hero__copy p {
+  max-width: 440px;
+  margin: 0 0 26px;
+  color: rgba(246, 243, 238, 0.88);
+  font-size: clamp(14px, 1.15vw, 17px);
+  line-height: 1.6;
+  text-shadow: 0 1px 18px rgba(26, 23, 20, 0.42);
+}
+
+.alt-home-hero__cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  padding: 15px 30px;
+  border-radius: 999px;
+  background: #f6f3ee;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+  color: #1a1714;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1;
+  text-transform: uppercase;
+  transition:
+    transform 300ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 300ms ease;
+}
+
+.alt-home-hero__cta > :not(.alt-home-hero__cta-sweep) {
+  position: relative;
+  z-index: 1;
+}
+
+.alt-home-hero__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 56px rgba(0, 0, 0, 0.34);
+}
+
+.alt-home-hero__cta:focus-visible {
+  outline: 2px solid #f6f3ee;
+  outline-offset: 5px;
+}
+
+.alt-home-hero__cta-sweep {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 55%;
+  height: 100%;
+  background:
+    linear-gradient(
+      105deg,
+      transparent,
+      rgba(255, 255, 255, 0.72),
+      transparent
+    );
+  transform: translateX(-160%) skewX(-18deg);
+  pointer-events: none;
+}
+
+.alt-home-hero__cta:hover .alt-home-hero__cta-sweep {
+  animation: alt-home-cta-shine 900ms ease;
+}
+
+.alt-home-hero__scroll-hint {
+  position: absolute;
+  z-index: 3;
+  bottom: 22px;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  will-change: opacity;
+}
+
+.alt-home-hero__scroll-hint span {
+  color: rgba(246, 243, 238, 0.7);
+  font-size: 10px;
+  font-style: normal;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.alt-home-hero__scroll-hint i {
+  width: 1px;
+  height: 44px;
+  background: rgba(246, 243, 238, 0.4);
+}
+
+.alt-home-marquee {
+  position: relative;
+  height: 172px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  background: #1a1714;
+  border-top: 1px solid rgba(246, 243, 238, 0.08);
+}
+
+.alt-home-marquee__track {
+  display: flex;
+  width: max-content;
+  animation: alt-home-marquee 28s linear infinite;
+  will-change: transform;
+}
+
+.alt-home-marquee__set {
+  display: flex;
+  flex: none;
+  align-items: center;
+}
+
+.alt-home-marquee__set > span {
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(30px, 3.2vw, 58px);
+  padding-left: clamp(30px, 3.2vw, 58px);
+  white-space: nowrap;
+}
+
+.alt-home-marquee a {
+  color: #f6f3ee;
+  font-family: "Bodoni Moda", "Bodoni 72", Didot, serif;
+  font-size: clamp(48px, 5.3vw, 88px);
+  font-style: italic;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.alt-home-marquee i {
+  color: #a6855b;
+  font-family: Georgia, serif;
+  font-size: clamp(22px, 2vw, 34px);
+  font-style: normal;
+}
+
+@keyframes alt-home-cta-shine {
+  from {
+    transform: translateX(-160%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(260%) skewX(-18deg);
+  }
+}
+
+@keyframes alt-home-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-width: 809px) {
+  .alt-home-hero {
+    height: 210vh;
+    min-height: 1302px;
+  }
+
+  .alt-home-hero--reduced {
+    height: 100svh;
+    min-height: 620px;
+  }
+
+  .alt-home-hero__content {
+    padding: 0 5vw;
+  }
+
+  .alt-home-hero__frame {
+    transform: scale(1.035);
+  }
+
+  .alt-home-hero__vignette {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(20, 17, 14, 0.3) 0%,
+        rgba(20, 17, 14, 0.04) 42%,
+        rgba(20, 17, 14, 0.48) 100%
+      );
+  }
+
+  .alt-home-hero__eyebrow {
+    margin-bottom: 20px;
+    font-size: 10px;
+    letter-spacing: 0.29em;
+  }
+
+  .alt-home-hero__wordmark {
+    font-size: clamp(42px, 12.4vw, 72px);
+  }
+
+  .alt-home-hero__copy {
+    width: min(100%, 420px);
+    margin-top: 22px;
+  }
+
+  .alt-home-hero__copy p {
+    margin-bottom: 22px;
+    padding-inline: 16px;
+    font-size: 14px;
+  }
+
+  .alt-home-hero__cta {
+    gap: 10px;
+    padding: 14px 22px;
+    font-size: 11px;
+    letter-spacing: 0.13em;
+  }
+
+  .alt-home-hero__scroll-hint {
+    bottom: 16px;
+    gap: 8px;
+  }
+
+  .alt-home-hero__scroll-hint i {
+    height: 34px;
+  }
+
+  .alt-home-marquee {
+    height: 138px;
+  }
+
+  .alt-home-marquee a {
+    font-size: clamp(42px, 13vw, 64px);
+  }
+}
+
+@media (max-height: 700px) and (min-width: 810px) {
+  .alt-home-hero__eyebrow {
+    margin-bottom: 14px;
+  }
+
+  .alt-home-hero__wordmark {
+    font-size: clamp(64px, 12vw, 180px);
+  }
+
+  .alt-home-hero__copy {
+    margin-top: 14px;
+  }
+
+  .alt-home-hero__copy p {
+    margin-bottom: 16px;
+  }
+
+  .alt-home-hero__cta {
+    padding-block: 13px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alt-home-hero__frame,
+  .alt-home-hero__eyebrow,
+  .alt-home-hero__wordmark-wrap,
+  .alt-home-hero__letter,
+  .alt-home-hero__copy,
+  .alt-home-hero__scroll-hint,
+  .alt-home-hero__cta {
+    transition: none !important;
+  }
+
+  .alt-home-hero__cta-sweep {
+    display: none;
+  }
+
+  .alt-home-marquee__track {
+    animation-play-state: paused;
+  }
+}

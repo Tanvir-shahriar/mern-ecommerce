@@ -9,6 +9,10 @@ import { useLocation } from 'react-router-dom';
  */
 export const ScrollToTop = () => {
   const { pathname } = useLocation();
+  const normalizedPath = pathname.length > 1
+    ? pathname.replace(/\/+$/, '')
+    : pathname;
+  const isAltHomePage = normalizedPath === '/alt-home' || normalizedPath === '/althome';
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -48,7 +52,7 @@ export const ScrollToTop = () => {
     });
   };
 
-  return (
+  return isAltHomePage ? null : (
     <button
       type="button"
       className={`scroll-to-top-button${isVisible ? ' visible' : ''}`}
