@@ -19168,3 +19168,1422 @@ body.collections-immersive-active .scroll-to-top-button {
     animation-play-state: paused;
   }
 }
+
+/* ==========================================================================
+   ALT HOME — NEW IN
+   ========================================================================== */
+.alt-home-new-in {
+  position: relative;
+  width: 100%;
+  overflow: clip;
+  background: #f6f3ee;
+  color: #1a1714;
+}
+
+.alt-home-new-in__inner {
+  display: flex;
+  width: min(100%, 1280px);
+  margin: 0 auto;
+  padding: 70px 48px 0;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.alt-home-new-in__header {
+  display: flex;
+  min-height: 86px;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 32px;
+  opacity: 0;
+  transform: translateY(20px);
+  will-change: opacity, transform;
+}
+
+.alt-home-new-in__heading {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.alt-home-new-in__eyebrow {
+  margin: 0;
+  color: #6b6258;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.alt-home-new-in__title {
+  margin: 0;
+  color: #1a1714;
+  font-family: "Bodoni Moda", "Bodoni 72", Didot, serif;
+  font-size: 58px;
+  font-weight: 400;
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+}
+
+.alt-home-new-in__title span {
+  display: inline-block;
+  opacity: 0.001;
+  filter: blur(10px);
+  transform: translateY(48px);
+  will-change: opacity, filter, transform;
+}
+
+.alt-home-new-in__view-all {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 2px;
+  color: #1a1714;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.alt-home-new-in__view-all svg {
+  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.alt-home-new-in__view-all:hover svg,
+.alt-home-new-in__view-all:focus-visible svg {
+  transform: translateX(4px);
+}
+
+.alt-home-new-in__view-all:focus-visible,
+.alt-home-new-in__name:focus-visible,
+.alt-home-new-in__media-link:focus-visible,
+.alt-home-new-in__media-action:focus-visible,
+.alt-home-new-in__bag:focus-visible {
+  outline: 2px solid #1a1714;
+  outline-offset: 4px;
+}
+
+.alt-home-new-in__grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 28px;
+}
+
+.alt-home-new-in__card-stage {
+  position: relative;
+  min-width: 0;
+  perspective: 900px;
+}
+
+.alt-home-new-in__card {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  opacity: 0;
+  color: #1a1714;
+  transform:
+    translateY(-140px)
+    translateZ(-260px)
+    scale(0.9)
+    rotateX(-42deg);
+  transform-style: preserve-3d;
+  transform-origin: center top;
+  will-change: opacity, transform;
+}
+
+.alt-home-new-in--visible .alt-home-new-in__header {
+  animation:
+    alt-home-new-in-header 760ms cubic-bezier(0.16, 1, 0.3, 1)
+    60ms both;
+}
+
+.alt-home-new-in--visible .alt-home-new-in__title span {
+  animation:
+    alt-home-new-in-word 820ms cubic-bezier(0.16, 1, 0.3, 1)
+    90ms both;
+}
+
+.alt-home-new-in--visible .alt-home-new-in__title span:nth-child(2) {
+  animation-delay: 140ms;
+}
+
+.alt-home-new-in--visible .alt-home-new-in__card {
+  animation: alt-home-new-in-card-enter 1260ms linear 80ms both;
+}
+
+.alt-home-new-in__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #efeae1;
+  box-shadow: 0 0 0 rgba(20, 17, 14, 0);
+  transform: translateY(0);
+  transition:
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1),
+    box-shadow 600ms ease;
+}
+
+.alt-home-new-in__media-link {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  color: inherit;
+}
+
+.alt-home-new-in__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  object-fit: cover;
+  will-change: opacity, transform;
+  transition:
+    opacity 520ms ease,
+    transform 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.alt-home-new-in__image--primary {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.alt-home-new-in__image--secondary {
+  opacity: 0;
+  transform: scale(1.08);
+}
+
+.alt-home-new-in__badge {
+  position: absolute;
+  z-index: 2;
+  top: 14px;
+  left: 14px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(246, 243, 238, 0.92);
+  backdrop-filter: blur(4px);
+  color: #1a1714;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.alt-home-new-in__media-action {
+  position: absolute;
+  z-index: 4;
+  top: 12px;
+  display: flex;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  opacity: 0;
+  background: rgba(246, 243, 238, 0.82);
+  backdrop-filter: blur(4px);
+  color: #1a1714;
+  transform: translateY(-6px);
+  transition:
+    opacity 400ms ease,
+    transform 400ms ease;
+}
+
+.alt-home-new-in__media-action--view {
+  left: 12px;
+}
+
+.alt-home-new-in__media-action--wishlist {
+  right: 12px;
+}
+
+.alt-home-new-in__media-action:disabled {
+  opacity: 0.58;
+}
+
+.alt-home-new-in__bag-wrap {
+  position: absolute;
+  z-index: 4;
+  right: 12px;
+  bottom: 12px;
+  left: 12px;
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition:
+    opacity 450ms ease,
+    transform 450ms ease;
+}
+
+.alt-home-new-in__bag {
+  width: 100%;
+  overflow: hidden;
+  padding: 13px 18px;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(26, 23, 20, 0.92);
+  backdrop-filter: blur(6px);
+  color: #f6f3ee;
+  font-family: "Alt Satoshi", ui-sans-serif, system-ui, sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.alt-home-new-in__bag:disabled {
+  opacity: 0.72;
+}
+
+.alt-home-new-in__card:hover .alt-home-new-in__media,
+.alt-home-new-in__card:focus-within .alt-home-new-in__media {
+  box-shadow: 0 34px 60px -20px rgba(20, 17, 14, 0.34);
+  transform: translateY(-8px);
+}
+
+.alt-home-new-in__card:hover .alt-home-new-in__image--primary,
+.alt-home-new-in__card:focus-within .alt-home-new-in__image--primary {
+  transform: scale(1.05);
+}
+
+.alt-home-new-in__card:hover .alt-home-new-in__image--secondary,
+.alt-home-new-in__card:focus-within .alt-home-new-in__image--secondary {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.alt-home-new-in__card:hover .alt-home-new-in__media-action,
+.alt-home-new-in__card:focus-within .alt-home-new-in__media-action,
+.alt-home-new-in__card:hover .alt-home-new-in__bag-wrap,
+.alt-home-new-in__card:focus-within .alt-home-new-in__bag-wrap {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.alt-home-new-in__card:hover .alt-home-new-in__media-action:disabled,
+.alt-home-new-in__card:focus-within .alt-home-new-in__media-action:disabled {
+  opacity: 0.58;
+}
+
+.alt-home-new-in__card:hover .alt-home-new-in__bag-wrap,
+.alt-home-new-in__card:focus-within .alt-home-new-in__bag-wrap {
+  pointer-events: auto;
+}
+
+.alt-home-new-in__details {
+  display: flex;
+  min-width: 0;
+  padding-top: 16px;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.alt-home-new-in__name {
+  min-width: 0;
+  color: #1a1714;
+  font-family: "Bodoni Moda", "Bodoni 72", Didot, serif;
+  font-size: 17px;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.01em;
+}
+
+.alt-home-new-in__meta-row {
+  display: flex;
+  min-width: 0;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.alt-home-new-in__price {
+  flex: none;
+  color: #1a1714;
+  font-size: 14px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+
+.alt-home-new-in__meta {
+  overflow: hidden;
+  color: #6b6258;
+  font-size: 12px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.alt-home-new-in__card--skeleton {
+  pointer-events: none;
+}
+
+.alt-home-new-in__skeleton-media {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: 2px;
+  background:
+    linear-gradient(
+      100deg,
+      #ebe6dd 18%,
+      #f5f1ea 36%,
+      #ebe6dd 54%
+    );
+  background-size: 220% 100%;
+  animation: alt-home-new-in-shimmer 1.4s linear infinite;
+}
+
+.alt-home-new-in__skeleton-copy {
+  display: flex;
+  padding-top: 16px;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alt-home-new-in__skeleton-copy i {
+  display: block;
+  width: 68%;
+  height: 13px;
+  border-radius: 999px;
+  background: #e4ded4;
+}
+
+.alt-home-new-in__skeleton-copy i:last-child {
+  width: 38%;
+  height: 10px;
+}
+
+.alt-home-new-in__cursor-layer {
+  position: fixed;
+  z-index: 2147483000;
+  inset: 0;
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+.alt-home-new-in__cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  width: 46px;
+  height: 46px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #fff;
+  border-radius: 999px;
+  opacity: 0;
+  background: transparent;
+  transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
+  transition:
+    opacity 180ms ease,
+    background 300ms ease,
+    border-color 300ms ease;
+  will-change: opacity, transform;
+}
+
+.alt-home-new-in__cursor > span {
+  color: #1a1714;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0.14em;
+  opacity: 0;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: opacity 250ms ease;
+}
+
+.alt-home-new-in__cursor--visible,
+.alt-home-new-in__cursor-dot--visible {
+  opacity: 1;
+}
+
+.alt-home-new-in__cursor--active {
+  border-color: transparent;
+  background: #fff;
+}
+
+.alt-home-new-in__cursor--active > span {
+  opacity: 1;
+}
+
+.alt-home-new-in__cursor-dot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  opacity: 0;
+  background: #fff;
+  transform: translate3d(-100px, -100px, 0) translate(-50%, -50%);
+  transition: opacity 180ms ease;
+  will-change: opacity, transform;
+}
+
+@keyframes alt-home-new-in-header {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes alt-home-new-in-word {
+  from {
+    opacity: 0.001;
+    filter: blur(10px);
+    transform: translateY(48px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+
+@keyframes alt-home-new-in-card-enter {
+  0% {
+    opacity: 0;
+    transform:
+      translateY(-140px)
+      translateZ(-260px)
+      scale(0.9)
+      rotateX(-42deg);
+  }
+  6% {
+    opacity: 0.044;
+    transform:
+      translateY(-133px)
+      translateZ(-247px)
+      scale(0.905)
+      rotateX(-39.94deg);
+  }
+  12% {
+    opacity: 0.21;
+    transform:
+      translateY(-104px)
+      translateZ(-194px)
+      scale(0.925)
+      rotateX(-31.32deg);
+  }
+  18% {
+    opacity: 0.42;
+    transform:
+      translateY(-75px)
+      translateZ(-139px)
+      scale(0.946)
+      rotateX(-22.49deg);
+  }
+  25% {
+    opacity: 0.615;
+    transform:
+      translateY(-49px)
+      translateZ(-92px)
+      scale(0.965)
+      rotateX(-14.83deg);
+  }
+  31% {
+    opacity: 0.774;
+    transform:
+      translateY(-27px)
+      translateZ(-50px)
+      scale(0.981)
+      rotateX(-8.14deg);
+  }
+  37% {
+    opacity: 0.911;
+    transform:
+      translateY(-11px)
+      translateZ(-21px)
+      scale(0.992)
+      rotateX(-3.42deg);
+  }
+  43% {
+    opacity: 1;
+    transform:
+      translateY(1px)
+      translateZ(2px)
+      scale(1.001)
+      rotateX(0.32deg);
+  }
+  50% {
+    opacity: 1;
+    transform:
+      translateY(3.9px)
+      translateZ(7.3px)
+      scale(1.003)
+      rotateX(1.18deg);
+  }
+  57% {
+    opacity: 1;
+    transform:
+      translateY(4.5px)
+      translateZ(8.4px)
+      scale(1)
+      rotateX(1.35deg);
+  }
+  63% {
+    opacity: 1;
+    transform:
+      translateY(3.8px)
+      translateZ(7px)
+      scale(1)
+      rotateX(1.14deg);
+  }
+  70% {
+    opacity: 1;
+    transform:
+      translateY(1.9px)
+      translateZ(3.6px)
+      scale(1)
+      rotateX(0.58deg);
+  }
+  76% {
+    opacity: 1;
+    transform:
+      translateY(1.15px)
+      translateZ(2.1px)
+      scale(1)
+      rotateX(0.34deg);
+  }
+  82% {
+    opacity: 1;
+    transform:
+      translateY(0.28px)
+      translateZ(0.53px)
+      scale(1)
+      rotateX(0deg);
+  }
+  88% {
+    opacity: 1;
+    transform:
+      translateY(0.05px)
+      translateZ(0.1px)
+      scale(1)
+      rotateX(0deg);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes alt-home-new-in-shimmer {
+  to {
+    background-position: -220% 0;
+  }
+}
+
+@media (max-width: 1199px) {
+  .alt-home-new-in__inner {
+    width: 100%;
+    padding: 76px 24px 0;
+    gap: 44px;
+  }
+
+  .alt-home-new-in__header {
+    min-height: 74px;
+  }
+
+  .alt-home-new-in__title {
+    font-size: 46px;
+    line-height: 1.05;
+  }
+
+  .alt-home-new-in__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 14px;
+    row-gap: 34px;
+  }
+}
+
+@media (max-width: 809px) {
+  .alt-home-new-in__inner {
+    padding-top: 76px;
+  }
+
+  .alt-home-new-in__header {
+    min-height: 62px;
+    gap: 16px;
+  }
+
+  .alt-home-new-in__title {
+    font-size: 34px;
+    line-height: 1.06;
+  }
+}
+
+@media
+  (hover: hover)
+  and (pointer: fine)
+  and (prefers-reduced-motion: no-preference) {
+  .alt-home-cursor-engaged,
+  .alt-home-cursor-engaged a,
+  .alt-home-cursor-engaged button {
+    cursor: none;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .alt-home-new-in__cursor-layer {
+    display: none;
+  }
+}
+
+/* ==========================================================================
+   ALT HOME — CAMPAIGN MOMENT
+   ========================================================================== */
+.alt-home-campaign {
+  position: relative;
+  width: 100%;
+  height: 94vh;
+  min-height: 580px;
+  box-sizing: border-box;
+  padding: 0;
+  overflow: hidden;
+  background: #1a1714;
+  color: #f6f3ee;
+}
+
+.alt-home-campaign__stage {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  overflow: hidden;
+  background: #1a1714;
+}
+
+.alt-home-campaign__image {
+  position: absolute;
+  inset: -8%;
+  width: 116%;
+  height: 116%;
+  object-fit: cover;
+  object-position: 18% 42%;
+  transform: translateY(-6%) scale(1.25);
+  transform-origin: center;
+  will-change: transform;
+}
+
+.alt-home-campaign__shade {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(20, 17, 14, 0.4) 0%,
+      rgba(20, 17, 14, 0.05) 40%,
+      rgba(20, 17, 14, 0.55) 100%
+    );
+}
+
+.alt-home-campaign__content {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: flex;
+  padding: 8vh 6vw;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #f6f3ee;
+  text-align: center;
+}
+
+.alt-home-campaign__eyebrow {
+  margin: 0 0 min(3vh, 28px);
+  color: rgba(246, 243, 238, 0.82);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.34em;
+  opacity: 0;
+  text-transform: uppercase;
+  transform: translateY(10px);
+  transition:
+    opacity 900ms ease 100ms,
+    transform 900ms ease 100ms;
+}
+
+.alt-home-campaign__title {
+  margin: 0;
+  color: #f6f3ee;
+  font-family: "Bodoni Moda", "Bodoni 72", Didot, serif;
+  font-size: clamp(40px, 8vw, 132px);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.01em;
+}
+
+.alt-home-campaign__line {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.08em;
+}
+
+.alt-home-campaign__line > span {
+  display: inline-block;
+  color: #f6f3ee;
+  font-style: normal;
+  transform: translateY(108%);
+  transition:
+    transform 1150ms cubic-bezier(0.16, 1, 0.3, 1) 100ms;
+  will-change: transform;
+}
+
+.alt-home-campaign__line:nth-child(2) > span {
+  transition-delay: 220ms;
+}
+
+.alt-home-campaign__cta,
+.alt-home-look__cta {
+  display: inline-flex;
+  padding-bottom: 6px;
+  align-items: center;
+  gap: 10px;
+  border-bottom: 1px solid #a6855b;
+  color: #f6f3ee;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.alt-home-campaign__cta {
+  margin-top: min(4vh, 38px);
+  opacity: 0;
+  transition: opacity 900ms ease 500ms;
+}
+
+.alt-home-campaign__cta svg,
+.alt-home-look__cta svg {
+  transition: transform 400ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.alt-home-campaign__cta:hover svg,
+.alt-home-campaign__cta:focus-visible svg,
+.alt-home-look__cta:hover svg,
+.alt-home-look__cta:focus-visible svg {
+  transform: translateX(4px);
+}
+
+.alt-home-campaign__cta:active,
+.alt-home-look__cta:active {
+  transform: scale(0.97);
+}
+
+.alt-home-campaign__cta:focus-visible,
+.alt-home-look__cta:focus-visible,
+.alt-home-look__hotspot-button:focus-visible,
+.alt-home-look__popover:focus-visible {
+  outline: 2px solid #f6f3ee;
+  outline-offset: 5px;
+}
+
+.alt-home-campaign--visible .alt-home-campaign__eyebrow {
+  opacity: 1;
+  transform: none;
+}
+
+.alt-home-campaign--visible .alt-home-campaign__line > span {
+  transform: translateY(0);
+}
+
+.alt-home-campaign--visible .alt-home-campaign__cta {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   ALT HOME — SHOP THE LOOK
+   ========================================================================== */
+.alt-home-look {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: auto;
+  flex-wrap: wrap;
+  overflow: hidden;
+  background: #1a1714;
+  color: #f6f3ee;
+}
+
+.alt-home-look__copy {
+  display: flex;
+  min-width: 280px;
+  padding: clamp(48px, 7vw, 110px);
+  flex: 1 1 320px;
+  justify-content: center;
+  flex-direction: column;
+  color: #f6f3ee;
+}
+
+.alt-home-look__eyebrow {
+  margin: 0 0 26px;
+  color: rgba(246, 243, 238, 0.7);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.alt-home-look__title {
+  margin: 0 0 24px;
+  color: #f6f3ee;
+  font-family: "Bodoni Moda", "Bodoni 72", Didot, serif;
+  font-size: clamp(34px, 4vw, 64px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+}
+
+.alt-home-look__description {
+  max-width: 380px;
+  margin: 0 0 36px;
+  color: rgba(246, 243, 238, 0.8);
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+.alt-home-look__cta {
+  align-self: flex-start;
+}
+
+.alt-home-look__media {
+  position: relative;
+  min-width: 300px;
+  min-height: 460px;
+  flex: 1 1 380px;
+  overflow: hidden;
+  background: #d8c7ad;
+}
+
+.alt-home-look__image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 43%;
+}
+
+.alt-home-look__hotspot {
+  position: absolute;
+  z-index: 2;
+  width: 26px;
+  height: 26px;
+  transform: translate(-50%, -50%);
+}
+
+.alt-home-look__hotspot-button {
+  position: relative;
+  display: flex;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(246, 243, 238, 0.95);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  color: #1a1714;
+}
+
+.alt-home-look__hotspot-pulse {
+  position: absolute;
+  inset: 0;
+  border: 1px solid rgba(246, 243, 238, 0.6);
+  border-radius: inherit;
+  animation: alt-home-look-pulse 2.4s ease-out infinite;
+}
+
+.alt-home-look__hotspot-minus,
+.alt-home-look__hotspot-plus {
+  position: absolute;
+  display: block;
+  background: #1a1714;
+}
+
+.alt-home-look__hotspot-minus {
+  width: 8px;
+  height: 1.4px;
+}
+
+.alt-home-look__hotspot-plus {
+  width: 1.4px;
+  height: 8px;
+  transform: scaleY(1);
+  transition: transform 300ms ease;
+}
+
+.alt-home-look__hotspot-button[aria-expanded="true"]
+  .alt-home-look__hotspot-plus {
+  transform: scaleY(0);
+}
+
+.alt-home-look__popover {
+  position: absolute;
+  z-index: 5;
+  display: flex;
+  width: 232px;
+  padding: 12px;
+  align-items: stretch;
+  gap: 12px;
+  border-radius: 4px;
+  opacity: 1;
+  background: #f6f3ee;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+  color: #1a1714;
+  animation:
+    alt-home-look-popover-in 350ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+.alt-home-look__popover--below {
+  top: 34px;
+  left: -8px;
+}
+
+.alt-home-look__popover--above {
+  bottom: 34px;
+  left: -8px;
+}
+
+.alt-home-look__popover--left {
+  top: 34px;
+  right: -8px;
+}
+
+.alt-home-look__popover-media {
+  display: block;
+  width: 54px;
+  height: 70px;
+  flex: none;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #efeae1;
+}
+
+.alt-home-look__popover-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.alt-home-look__popover-copy {
+  display: flex;
+  min-width: 0;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.alt-home-look__popover-copy strong {
+  overflow: hidden;
+  color: #1a1714;
+  font-family: "Bodoni Moda", "Bodoni 72", Didot, serif;
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+}
+
+.alt-home-look__popover-copy > span {
+  color: #1a1714;
+  font-size: 13px;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.alt-home-look__popover-copy small {
+  color: #a6855b;
+  font-size: 10px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+@keyframes alt-home-look-pulse {
+  0% {
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  70% {
+    opacity: 0;
+    transform: scale(2.4);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes alt-home-look-popover-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ==========================================================================
+   ALT HOME — LOOKBOOK
+   ========================================================================== */
+.alt-home-lookbook {
+  position: relative;
+  width: 100%;
+  height: var(--alt-home-lookbook-scroll-height, 100vh);
+  overflow: clip;
+  background: #1a1714;
+  color: #f6f3ee;
+}
+
+.alt-home-lookbook__stage {
+  position: sticky;
+  top: 0;
+  display: flex;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  justify-content: center;
+  flex-direction: column;
+  background: #1a1714;
+}
+
+.alt-home-lookbook__header {
+  display: flex;
+  width: 100%;
+  margin: 0 0 26px;
+  padding: 0 clamp(24px, 6vw, 96px);
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.alt-home-lookbook__eyebrow {
+  margin: 0 0 14px;
+  color: rgba(246, 243, 238, 0.75);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+}
+
+.alt-home-lookbook__title {
+  margin: 0;
+  color: #f6f3ee;
+  font-family: "Bodoni Moda", "Bodoni 72", Didot, serif;
+  font-size: clamp(36px, 5vw, 76px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.alt-home-lookbook__cue {
+  margin: 0;
+  padding-bottom: 6px;
+  color: rgba(246, 243, 238, 0.7);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.alt-home-lookbook__viewport {
+  width: 100%;
+  overflow: hidden;
+  outline: none;
+}
+
+.alt-home-lookbook__viewport:focus-visible {
+  outline: 1px solid rgba(246, 243, 238, 0.75);
+  outline-offset: -5px;
+}
+
+.alt-home-lookbook__track {
+  display: flex;
+  width: max-content;
+  margin: 0;
+  padding: 0 8vw 0 clamp(24px, 6vw, 96px);
+  align-items: stretch;
+  gap: 20px;
+  list-style: none;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.alt-home-lookbook__card {
+  position: relative;
+  width: clamp(260px, 30vw, 430px);
+  height: 66vh;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 3px;
+  background: #2a2622;
+}
+
+.alt-home-lookbook__card-link {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  color: #f6f3ee;
+}
+
+.alt-home-lookbook__card-link:focus-visible {
+  outline: 2px solid #f6f3ee;
+  outline-offset: -7px;
+}
+
+.alt-home-lookbook__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1);
+  transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
+}
+
+.alt-home-lookbook__card-link:hover .alt-home-lookbook__image,
+.alt-home-lookbook__card-link:focus-visible .alt-home-lookbook__image {
+  transform: scale(1.05);
+}
+
+.alt-home-lookbook__shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      transparent 55%,
+      rgba(20, 17, 14, 0.6) 100%
+    );
+  pointer-events: none;
+}
+
+.alt-home-lookbook__caption {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  pointer-events: none;
+}
+
+.alt-home-lookbook__caption small {
+  color: rgba(246, 243, 238, 0.8);
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.alt-home-lookbook__caption strong {
+  margin-top: 4px;
+  color: #f6f3ee;
+  font-family: "Bodoni Moda", "Bodoni 72", Didot, serif;
+  font-size: 24px;
+  font-weight: 400;
+  line-height: 1.1;
+}
+
+.alt-home-lookbook__progress {
+  height: 1px;
+  margin: 30px clamp(24px, 6vw, 96px) 0;
+  overflow: hidden;
+  background: rgba(246, 243, 238, 0.18);
+}
+
+.alt-home-lookbook__progress > span {
+  display: block;
+  width: 0;
+  height: 100%;
+  background: #f6f3ee;
+  transform-origin: left center;
+}
+
+.alt-home-lookbook--static {
+  height: auto;
+  padding: clamp(56px, 8vh, 110px) 0;
+  overflow: hidden;
+}
+
+.alt-home-lookbook--static .alt-home-lookbook__stage {
+  position: relative;
+  top: auto;
+  height: auto;
+  overflow: visible;
+  justify-content: flex-start;
+}
+
+.alt-home-lookbook--static .alt-home-lookbook__viewport {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.alt-home-lookbook--static .alt-home-lookbook__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.alt-home-lookbook--static .alt-home-lookbook__track {
+  padding-bottom: 8px;
+  gap: 16px;
+  transform: none !important;
+  will-change: auto;
+}
+
+.alt-home-lookbook--static .alt-home-lookbook__card {
+  height: auto;
+  aspect-ratio: 3 / 4;
+  scroll-snap-align: center;
+}
+
+.alt-home-lookbook--static .alt-home-lookbook__progress {
+  display: none;
+}
+
+@media (max-width: 1199px) {
+  .alt-home-campaign {
+    height: 74vh;
+    min-height: 580px;
+    padding: 24px;
+  }
+}
+
+@media (max-width: 579px) {
+  .alt-home-campaign__image {
+    object-position: 29% 42%;
+  }
+
+  .alt-home-campaign__content {
+    padding: 7vh 7vw;
+  }
+
+  .alt-home-campaign__eyebrow {
+    font-size: 10px;
+  }
+
+  .alt-home-look__copy {
+    width: 100%;
+    min-width: 0;
+    padding: 56px 24px;
+    flex-basis: 100%;
+  }
+
+  .alt-home-look__description {
+    font-size: 15px;
+  }
+
+  .alt-home-look__media {
+    width: 100%;
+    min-width: 0;
+    min-height: 520px;
+    flex-basis: 100%;
+  }
+
+  .alt-home-look__image {
+    object-position: 50% 36%;
+  }
+
+  .alt-home-look__popover--below,
+  .alt-home-look__popover--above {
+    left: calc(50% - 116px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alt-home-campaign__eyebrow,
+  .alt-home-campaign__line > span,
+  .alt-home-campaign__cta {
+    opacity: 1;
+    transform: none;
+    transition: none !important;
+  }
+
+  .alt-home-campaign__cta svg,
+  .alt-home-look__cta svg,
+  .alt-home-look__hotspot-plus {
+    transition: none !important;
+  }
+
+  .alt-home-look__hotspot-pulse,
+  .alt-home-look__popover {
+    animation: none !important;
+  }
+
+  .alt-home-lookbook__image {
+    transition: none !important;
+  }
+
+  .alt-home-lookbook__card-link:hover .alt-home-lookbook__image,
+  .alt-home-lookbook__card-link:focus-visible .alt-home-lookbook__image {
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .alt-home-new-in__header,
+  .alt-home-new-in__title span,
+  .alt-home-new-in__card {
+    animation: none !important;
+    opacity: 1;
+    filter: none;
+    transform: none;
+  }
+
+  .alt-home-new-in__media,
+  .alt-home-new-in__image,
+  .alt-home-new-in__media-action,
+  .alt-home-new-in__bag-wrap,
+  .alt-home-new-in__view-all svg {
+    transition: none !important;
+  }
+
+  .alt-home-new-in__skeleton-media {
+    animation: none;
+  }
+
+  .alt-home-new-in__cursor-layer {
+    display: none;
+  }
+}

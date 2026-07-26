@@ -1,11 +1,23 @@
-import { ArrowRight } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ArrowRight, Eye, Heart } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import heroFinalFrame from '../assets/images/hero-female-model-final.avif';
 import heroMotionFrame from '../assets/images/hero-female-model-motion.avif';
 import heroOpeningFrame from '../assets/images/hero-female-model-opening.avif';
+import consideredSilhouetteImage from '../assets/images/editorial/considered-silhouette.webp';
+import lookbookEveningImage from '../assets/images/editorial/lookbook/look-06-evening.webp';
+import lookbookKnitwearImage from '../assets/images/editorial/lookbook/look-05-knitwear.webp';
+import lookbookLongOvercoatImage from '../assets/images/editorial/lookbook/look-02-long-overcoat.webp';
+import lookbookSlipImage from '../assets/images/editorial/lookbook/look-04-the-slip.webp';
+import lookbookSoftTailoringImage from '../assets/images/editorial/lookbook/look-03-soft-tailoring.webp';
+import winterCampaignImage from '../assets/images/editorial/winter-campaign.webp';
 import { LiquidHoverCanvas } from '../components/LiquidHoverCanvas.jsx';
 import { Seo } from '../components/Seo.jsx';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import { useCart } from '../contexts/CartContext.jsx';
+import { useCurrency } from '../contexts/CurrencyContext.jsx';
+import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
 
 const WORDMARK = 'LAHVENTURE';
 const HERO_FRAMES = [
@@ -30,6 +42,61 @@ const MARQUEE_ITEMS = [
   'Accessories',
   'New arrivals'
 ];
+const LOOK_HOTSPOTS = [
+  {
+    left: '47%',
+    top: '26%',
+    popoverPosition: 'below'
+  },
+  {
+    left: '40%',
+    top: '70%',
+    popoverPosition: 'above'
+  },
+  {
+    left: '63%',
+    top: '50%',
+    popoverPosition: 'left'
+  }
+];
+const LOOKBOOK_SLIDES = [
+  {
+    label: 'Look 01',
+    title: 'The Camel Coat',
+    image: consideredSilhouetteImage,
+    alt: 'Camel coat styled with ivory knitwear and tailored trousers'
+  },
+  {
+    label: 'Look 02',
+    title: 'Long Overcoat',
+    image: lookbookLongOvercoatImage,
+    alt: 'Long ivory overcoat layered over soft winter tailoring'
+  },
+  {
+    label: 'Look 03',
+    title: 'Soft Tailoring',
+    image: lookbookSoftTailoringImage,
+    alt: 'Soft stone tailoring layered over a flowing silk dress'
+  },
+  {
+    label: 'Look 04',
+    title: 'The Slip',
+    image: lookbookSlipImage,
+    alt: 'Champagne silk slip dress in a warm architectural studio'
+  },
+  {
+    label: 'Look 05',
+    title: 'Knitwear Edit',
+    image: lookbookKnitwearImage,
+    alt: 'Oversized ivory knitwear with fluid cream trousers'
+  },
+  {
+    label: 'Look 06',
+    title: 'Evening',
+    image: lookbookEveningImage,
+    alt: 'Minimal ivory evening look in a softly lit studio'
+  }
+];
 
 const clamp = (value, minimum = 0, maximum = 1) => (
   Math.min(maximum, Math.max(minimum, value))
@@ -41,9 +108,816 @@ const easeInOutQuad = (value) => (
     : 1 - ((-2 * value + 2) ** 2) / 2
 );
 
+const productMeta = (product) => {
+  const colorAttribute = (product.attributes || []).find((attribute) => (
+    /colou?r/i.test(attribute?.name || '')
+  ));
+  const colorVariant = (product.variants || []).find((variant) => (
+    /colou?r/i.test(variant?.name || '') && variant.options?.length
+  ));
+
+  return (
+    colorAttribute?.value
+    || colorVariant?.options?.[0]
+    || product.brand
+    || product.category?.name
+    || ''
+  );
+};
+
+const applyNewInImageFallback = (event, fallbackUrl) => {
+  const image = event.currentTarget;
+  const alternateUrl = mediaUrl(fallbackUrl);
+
+  if (
+    !image.dataset.newInFallback
+    && fallbackUrl
+    && image.currentSrc !== alternateUrl
+  ) {
+    image.dataset.newInFallback = 'alternate';
+    image.src = alternateUrl;
+    return;
+  }
+
+  if (image.dataset.newInFallback !== 'hero') {
+    image.dataset.newInFallback = 'hero';
+    image.src = heroFinalFrame;
+  }
+};
+
+const NewInProductCard = ({ product, index, formatMoney }) => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading, refreshUser } = useAuth();
+  const { addItem } = useCart();
+  const resetLabelTimerRef = useRef(null);
+  const [cartLabel, setCartLabel] = useState('Add to bag');
+  const [statusMessage, setStatusMessage] = useState('');
+  const [isAdding, setIsAdding] = useState(false);
+  const [isUpdatingWishlist, setIsUpdatingWishlist] = useState(false);
+
+  const productUrl = `/products/${product.slug || product._id}`;
+  const primaryImage = product.images?.[0];
+  const secondaryImage = product.images?.[1] || primaryImage;
+  const inStock = product.inventory?.trackQuantity === false
+    || Number(product.inventory?.stock || 0) > 0;
+  const hasOptions = (product.variants || []).some((variant) => (
+    variant.name && variant.options?.length
+  ));
+  const isWishlisted = user?.wishlist?.some(
+    (item) => (typeof item === 'string' ? item : item?._id) === product._id
+  );
+
+  useEffect(() => () => {
+    if (resetLabelTimerRef.current) {
+      window.clearTimeout(resetLabelTimerRef.current);
+    }
+  }, []);
+
+  const resetCartLabelAfterDelay = () => {
+    if (resetLabelTimerRef.current) {
+      window.clearTimeout(resetLabelTimerRef.current);
+    }
+    resetLabelTimerRef.current = window.setTimeout(() => {
+      setCartLabel('Add to bag');
+    }, 1600);
+  };
+
+  const handleAddToBag = async () => {
+    if (!inStock || authLoading) return;
+    if (hasOptions) {
+      navigate(productUrl);
+      return;
+    }
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    setIsAdding(true);
+    setCartLabel('Adding');
+    try {
+      await addItem(product._id, 1);
+      refreshUser?.();
+      setCartLabel('Added');
+      setStatusMessage(`${product.name} added to your bag.`);
+    } catch (error) {
+      setCartLabel('Try again');
+      setStatusMessage(apiErrorMessage(error));
+    } finally {
+      setIsAdding(false);
+      resetCartLabelAfterDelay();
+    }
+  };
+
+  const handleWishlist = async () => {
+    if (authLoading || isUpdatingWishlist) return;
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    setIsUpdatingWishlist(true);
+    try {
+      await api.post(`/users/wishlist/${product._id}`);
+      await refreshUser?.();
+      setStatusMessage(`${product.name} wishlist updated.`);
+    } catch (error) {
+      setStatusMessage(apiErrorMessage(error));
+    } finally {
+      setIsUpdatingWishlist(false);
+    }
+  };
+
+  return (
+    <div className="alt-home-new-in__card-stage">
+      <article className="alt-home-new-in__card">
+        <div className="alt-home-new-in__media">
+          <Link
+            className="alt-home-new-in__media-link"
+            to={productUrl}
+            data-alt-cursor="active"
+            data-alt-cursor-label="View"
+            aria-label={`View ${product.name}`}
+          >
+            <img
+              className="alt-home-new-in__image alt-home-new-in__image--primary"
+              src={mediaUrl(primaryImage?.url)}
+              alt={primaryImage?.alt || product.name}
+              loading="lazy"
+              decoding="async"
+              onError={(event) => {
+                applyNewInImageFallback(event, secondaryImage?.url);
+              }}
+            />
+            <img
+              className="alt-home-new-in__image alt-home-new-in__image--secondary"
+              src={mediaUrl(secondaryImage?.url)}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              aria-hidden="true"
+              onError={(event) => {
+                applyNewInImageFallback(event, primaryImage?.url);
+              }}
+            />
+          </Link>
+
+          {index < 2 ? (
+            <span className="alt-home-new-in__badge">New</span>
+          ) : null}
+
+          <button
+            className="alt-home-new-in__media-action alt-home-new-in__media-action--view"
+            type="button"
+            onClick={() => navigate(productUrl)}
+            data-alt-cursor="active"
+            data-alt-cursor-label="View"
+            aria-label={`Quick view ${product.name}`}
+          >
+            <Eye size={17} strokeWidth={1.4} aria-hidden="true" />
+          </button>
+
+          <button
+            className="alt-home-new-in__media-action alt-home-new-in__media-action--wishlist"
+            type="button"
+            onClick={handleWishlist}
+            disabled={authLoading || isUpdatingWishlist}
+            data-alt-cursor="active"
+            data-alt-cursor-label={isWishlisted ? 'Saved' : 'Save'}
+            aria-label={`${isWishlisted ? 'Remove' : 'Add'} ${product.name} ${
+              isWishlisted ? 'from' : 'to'
+            } wishlist`}
+          >
+            <Heart
+              size={17}
+              strokeWidth={1.4}
+              fill={isWishlisted ? 'currentColor' : 'none'}
+              aria-hidden="true"
+            />
+          </button>
+
+          <div className="alt-home-new-in__bag-wrap">
+            <button
+              className="alt-home-new-in__bag"
+              type="button"
+              onClick={handleAddToBag}
+              disabled={isAdding || authLoading || !inStock}
+              data-alt-cursor="active"
+              data-alt-cursor-label={
+                !inStock ? 'Sold' : hasOptions ? 'View' : 'Add'
+              }
+            >
+              {!inStock
+                ? 'Sold out'
+                : hasOptions
+                  ? 'Choose options'
+                  : cartLabel}
+            </button>
+          </div>
+        </div>
+
+        <div className="alt-home-new-in__details">
+          <Link className="alt-home-new-in__name" to={productUrl}>
+            {product.name}
+          </Link>
+          <div className="alt-home-new-in__meta-row">
+            <span className="alt-home-new-in__price">
+              {formatMoney(product.price)}
+            </span>
+            <span className="alt-home-new-in__meta">
+              {productMeta(product)}
+            </span>
+          </div>
+        </div>
+
+        <span className="sr-only" aria-live="polite">
+          {statusMessage}
+        </span>
+      </article>
+    </div>
+  );
+};
+
+const CampaignStorySection = ({ reduceMotion }) => {
+  const sectionRef = useRef(null);
+  const imageRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(reduceMotion);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    if (!section) return undefined;
+
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      setIsVisible(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setIsVisible(true);
+        observer.disconnect();
+      },
+      { threshold: 0.4 }
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const image = imageRef.current;
+    if (!section || !image) return undefined;
+
+    let animationFrame = 0;
+
+    const updateImage = () => {
+      animationFrame = 0;
+
+      if (reduceMotion) {
+        image.style.transform = 'translateY(0) scale(1.1)';
+        return;
+      }
+
+      const bounds = section.getBoundingClientRect();
+      const progress = clamp(
+        (window.innerHeight - bounds.top) / (window.innerHeight + bounds.height)
+      );
+      const scale = 1.25 - progress * 0.25;
+      const translateY = -6 + progress * 12;
+
+      image.style.transform = [
+        `translateY(${translateY.toFixed(3)}%)`,
+        `scale(${scale.toFixed(4)})`
+      ].join(' ');
+    };
+
+    const requestUpdate = () => {
+      if (!animationFrame) {
+        animationFrame = window.requestAnimationFrame(updateImage);
+      }
+    };
+
+    updateImage();
+    window.addEventListener('scroll', requestUpdate, { passive: true });
+    window.addEventListener('resize', requestUpdate);
+
+    return () => {
+      window.removeEventListener('scroll', requestUpdate);
+      window.removeEventListener('resize', requestUpdate);
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
+  }, [reduceMotion]);
+
+  return (
+    <section
+      ref={sectionRef}
+      className={`alt-home-campaign${
+        isVisible ? ' alt-home-campaign--visible' : ''
+      }${reduceMotion ? ' alt-home-campaign--reduced' : ''}`}
+      aria-labelledby="alt-home-campaign-title"
+      data-alt-cursor-zone
+    >
+      <div className="alt-home-campaign__stage">
+        <img
+          ref={imageRef}
+          className="alt-home-campaign__image"
+          src={winterCampaignImage}
+          alt=""
+          loading="lazy"
+          decoding="async"
+        />
+        <div className="alt-home-campaign__shade" aria-hidden="true" />
+
+        <div className="alt-home-campaign__content">
+          <p className="alt-home-campaign__eyebrow">
+            The Winter Campaign
+          </p>
+          <h2 id="alt-home-campaign-title" className="alt-home-campaign__title">
+            <span className="alt-home-campaign__line">
+              <span>Worn slowly,</span>
+            </span>
+            <span className="alt-home-campaign__line">
+              <span>kept for years</span>
+            </span>
+          </h2>
+          <Link
+            className="alt-home-campaign__cta"
+            to="/products?category=fashion"
+            data-alt-cursor="active"
+            data-alt-cursor-label="View"
+          >
+            <span>View the campaign</span>
+            <ArrowRight size={20} strokeWidth={1.2} aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const ShopLookHotspot = ({
+  product,
+  index,
+  isActive,
+  formatMoney,
+  openHotspot,
+  toggleHotspot,
+  scheduleClose,
+  cancelClose
+}) => {
+  if (!product) return null;
+
+  const layout = LOOK_HOTSPOTS[index];
+  const productUrl = `/products/${product.slug || product._id}`;
+  const popoverId = `alt-home-look-product-${product._id}`;
+  const primaryImage = product.images?.[0];
+  const secondaryImage = product.images?.[1];
+
+  return (
+    <div
+      className="alt-home-look__hotspot"
+      style={{ left: layout.left, top: layout.top }}
+      onPointerEnter={(event) => {
+        if (event.pointerType !== 'mouse') return;
+        cancelClose();
+        openHotspot(index);
+      }}
+      onPointerLeave={(event) => {
+        if (event.pointerType === 'mouse') scheduleClose();
+      }}
+      onFocus={(event) => {
+        if (event.currentTarget.matches(':focus-visible')) {
+          openHotspot(index);
+        }
+      }}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) {
+          scheduleClose();
+        }
+      }}
+    >
+      <button
+        className="alt-home-look__hotspot-button"
+        type="button"
+        aria-label={`View ${product.name}`}
+        aria-expanded={isActive}
+        aria-controls={popoverId}
+        onClick={() => toggleHotspot(index)}
+        data-look-hotspot-trigger={index}
+        data-alt-cursor="active"
+        data-alt-cursor-label="Open"
+      >
+        <span className="alt-home-look__hotspot-pulse" aria-hidden="true" />
+        <span className="alt-home-look__hotspot-minus" aria-hidden="true" />
+        <span
+          className="alt-home-look__hotspot-plus"
+          aria-hidden="true"
+        />
+      </button>
+
+      {isActive ? (
+        <Link
+          id={popoverId}
+          className={`alt-home-look__popover alt-home-look__popover--${
+            layout.popoverPosition
+          }`}
+          to={productUrl}
+          onPointerEnter={(event) => {
+            if (event.pointerType === 'mouse') cancelClose();
+          }}
+          data-alt-cursor="active"
+          data-alt-cursor-label="View"
+        >
+          <span className="alt-home-look__popover-media">
+            <img
+              src={primaryImage?.url
+                ? mediaUrl(primaryImage.url)
+                : consideredSilhouetteImage}
+              alt=""
+              loading="lazy"
+              decoding="async"
+              onError={(event) => {
+                const image = event.currentTarget;
+                if (!image.dataset.lookFallback && secondaryImage?.url) {
+                  image.dataset.lookFallback = 'alternate';
+                  image.src = mediaUrl(secondaryImage.url);
+                } else if (image.dataset.lookFallback !== 'editorial') {
+                  image.dataset.lookFallback = 'editorial';
+                  image.src = consideredSilhouetteImage;
+                }
+              }}
+            />
+          </span>
+          <span className="alt-home-look__popover-copy">
+            <strong>{product.name}</strong>
+            <span>{formatMoney(product.price)}</span>
+            <small>View →</small>
+          </span>
+        </Link>
+      ) : null}
+    </div>
+  );
+};
+
+const ShopTheLookSection = ({ products, formatMoney }) => {
+  const sectionRef = useRef(null);
+  const closeTimerRef = useRef(null);
+  const [activeHotspot, setActiveHotspot] = useState(null);
+
+  useEffect(() => () => {
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (activeHotspot === null) return undefined;
+
+    const handlePointerDown = (event) => {
+      if (!event.target.closest?.('.alt-home-look__hotspot')) {
+        setActiveHotspot(null);
+      }
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        const trigger = sectionRef.current?.querySelector(
+          `[data-look-hotspot-trigger="${activeHotspot}"]`
+        );
+        setActiveHotspot(null);
+        window.requestAnimationFrame(() => trigger?.focus());
+      }
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeHotspot]);
+
+  const cancelClose = () => {
+    if (closeTimerRef.current) {
+      window.clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = null;
+    }
+  };
+
+  const openHotspot = (index) => {
+    cancelClose();
+    setActiveHotspot(index);
+  };
+
+  const scheduleClose = () => {
+    cancelClose();
+    closeTimerRef.current = window.setTimeout(() => {
+      setActiveHotspot(null);
+    }, 140);
+  };
+
+  const toggleHotspot = (index) => {
+    cancelClose();
+    setActiveHotspot((current) => (current === index ? null : index));
+  };
+
+  return (
+    <section
+      ref={sectionRef}
+      className="alt-home-look"
+      aria-labelledby="alt-home-look-title"
+      data-alt-cursor-zone
+    >
+      <div className="alt-home-look__copy">
+        <p className="alt-home-look__eyebrow">Styled by the Atelier</p>
+        <h2 id="alt-home-look-title" className="alt-home-look__title">
+          The Considered Silhouette
+        </h2>
+        <p className="alt-home-look__description">
+          One coat, three quiet essentials — composed as a single confident
+          look. Hover the pieces to shop the story.
+        </p>
+        <Link
+          className="alt-home-look__cta"
+          to="/products?category=fashion"
+          data-alt-cursor="active"
+          data-alt-cursor-label="Shop"
+        >
+          <span>Shop this look</span>
+          <ArrowRight size={20} strokeWidth={1.2} aria-hidden="true" />
+        </Link>
+      </div>
+
+      <div className="alt-home-look__media">
+        <img
+          className="alt-home-look__image"
+          src={consideredSilhouetteImage}
+          alt="A considered camel and cream winter silhouette"
+          loading="lazy"
+          decoding="async"
+        />
+
+        {products.slice(0, 3).map((product, index) => (
+          <ShopLookHotspot
+            product={product}
+            index={index}
+            isActive={activeHotspot === index}
+            formatMoney={formatMoney}
+            openHotspot={openHotspot}
+            toggleHotspot={toggleHotspot}
+            scheduleClose={scheduleClose}
+            cancelClose={cancelClose}
+            key={product._id}
+          />
+        ))}
+      </div>
+    </section>
+  );
+};
+
+const LookbookSection = ({ reduceMotion }) => {
+  const sectionRef = useRef(null);
+  const viewportRef = useRef(null);
+  const trackRef = useRef(null);
+  const progressRef = useRef(null);
+  const maxScrollRef = useRef(0);
+  const [useStaticCarousel, setUseStaticCarousel] = useState(() => (
+    reduceMotion
+    || (
+      typeof window !== 'undefined'
+      && window.matchMedia('(hover: none), (pointer: coarse)').matches
+    )
+  ));
+
+  useEffect(() => {
+    const pointerQuery = window.matchMedia(
+      '(hover: none), (pointer: coarse)'
+    );
+    const syncMode = () => {
+      setUseStaticCarousel(reduceMotion || pointerQuery.matches);
+    };
+
+    syncMode();
+    pointerQuery.addEventListener?.('change', syncMode);
+    return () => pointerQuery.removeEventListener?.('change', syncMode);
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+    const track = trackRef.current;
+    const progress = progressRef.current;
+    if (!section || !track || !progress) return undefined;
+
+    if (useStaticCarousel) {
+      section.style.removeProperty('--alt-home-lookbook-scroll-height');
+      track.style.transform = '';
+      progress.style.width = '0%';
+      maxScrollRef.current = 0;
+      return undefined;
+    }
+
+    let animationFrame = 0;
+    const settleTimers = [];
+
+    const updatePosition = () => {
+      animationFrame = 0;
+      const maxScroll = maxScrollRef.current;
+      const sectionTop = section.getBoundingClientRect().top;
+      const offset = clamp(-sectionTop, 0, maxScroll);
+      const completion = maxScroll > 0 ? offset / maxScroll : 0;
+
+      track.style.transform = `translate3d(${-offset.toFixed(2)}px, 0, 0)`;
+      progress.style.width = `${(completion * 100).toFixed(3)}%`;
+    };
+
+    const requestPositionUpdate = () => {
+      if (!animationFrame) {
+        animationFrame = window.requestAnimationFrame(updatePosition);
+      }
+    };
+
+    const measure = () => {
+      const maxScroll = Math.max(
+        0,
+        track.scrollWidth - window.innerWidth + window.innerWidth * 0.08
+      );
+      maxScrollRef.current = maxScroll;
+      section.style.setProperty(
+        '--alt-home-lookbook-scroll-height',
+        `${window.innerHeight + maxScroll}px`
+      );
+      requestPositionUpdate();
+    };
+
+    const resizeObserver = 'ResizeObserver' in window
+      ? new ResizeObserver(measure)
+      : null;
+
+    resizeObserver?.observe(track);
+    window.addEventListener('scroll', requestPositionUpdate, { passive: true });
+    window.addEventListener('resize', measure);
+    settleTimers.push(window.setTimeout(measure, 400));
+    settleTimers.push(window.setTimeout(measure, 1200));
+    measure();
+
+    return () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('scroll', requestPositionUpdate);
+      window.removeEventListener('resize', measure);
+      settleTimers.forEach((timer) => window.clearTimeout(timer));
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
+  }, [useStaticCarousel]);
+
+  const handleKeyboardBrowse = (event) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) {
+      return;
+    }
+
+    const section = sectionRef.current;
+    const viewport = viewportRef.current;
+    const track = trackRef.current;
+    if (!section || !viewport || !track) return;
+
+    event.preventDefault();
+
+    if (!useStaticCarousel) {
+      const sectionTop = section.getBoundingClientRect().top + window.scrollY;
+      const maxScroll = maxScrollRef.current;
+      const step = (
+        track.querySelector('.alt-home-lookbook__card')?.getBoundingClientRect()
+          .width || 320
+      ) + 20;
+      const target = event.key === 'Home'
+        ? sectionTop
+        : event.key === 'End'
+          ? sectionTop + maxScroll
+          : window.scrollY + (event.key === 'ArrowRight' ? step : -step);
+
+      window.scrollTo({
+        top: target,
+        behavior: reduceMotion ? 'auto' : 'smooth'
+      });
+      return;
+    }
+
+    const cards = Array.from(
+      track.querySelectorAll('.alt-home-lookbook__card')
+    );
+    if (!cards.length) return;
+
+    const currentIndex = cards.reduce((nearest, card, index) => (
+      Math.abs(card.offsetLeft - viewport.scrollLeft)
+        < Math.abs(cards[nearest].offsetLeft - viewport.scrollLeft)
+        ? index
+        : nearest
+    ), 0);
+    const targetIndex = event.key === 'Home'
+      ? 0
+      : event.key === 'End'
+        ? cards.length - 1
+        : clamp(
+          currentIndex + (event.key === 'ArrowRight' ? 1 : -1),
+          0,
+          cards.length - 1
+        );
+
+    viewport.scrollTo({
+      left: cards[targetIndex].offsetLeft,
+      behavior: reduceMotion ? 'auto' : 'smooth'
+    });
+  };
+
+  return (
+    <section
+      ref={sectionRef}
+      className={`alt-home-lookbook${
+        useStaticCarousel ? ' alt-home-lookbook--static' : ''
+      }`}
+      aria-labelledby="alt-home-lookbook-title"
+      data-alt-cursor-zone
+    >
+      <div className="alt-home-lookbook__stage">
+        <header className="alt-home-lookbook__header">
+          <div>
+            <p className="alt-home-lookbook__eyebrow">
+              Autumn — Winter 2026
+            </p>
+            <h2
+              id="alt-home-lookbook-title"
+              className="alt-home-lookbook__title"
+            >
+              The Lookbook
+            </h2>
+          </div>
+          <p className="alt-home-lookbook__cue" aria-hidden="true">
+            {useStaticCarousel ? 'Swipe' : 'Scroll'} →
+          </p>
+        </header>
+
+        <p id="alt-home-lookbook-instructions" className="sr-only">
+          {useStaticCarousel
+            ? 'Swipe horizontally or use the left and right arrow keys to browse.'
+            : 'Scroll vertically or use the left and right arrow keys to browse.'}
+        </p>
+
+        <div
+          ref={viewportRef}
+          className="alt-home-lookbook__viewport"
+          role="region"
+          tabIndex={0}
+          aria-describedby="alt-home-lookbook-instructions"
+          aria-label="Autumn Winter 2026 lookbook"
+          onKeyDown={handleKeyboardBrowse}
+        >
+          <ul ref={trackRef} className="alt-home-lookbook__track">
+            {LOOKBOOK_SLIDES.map((slide) => (
+              <li className="alt-home-lookbook__card" key={slide.label}>
+                <Link
+                  className="alt-home-lookbook__card-link"
+                  to="/products?category=fashion"
+                  data-alt-cursor="active"
+                  data-alt-cursor-label="Drag"
+                >
+                  <img
+                    className="alt-home-lookbook__image"
+                    src={slide.image}
+                    alt={slide.alt}
+                    loading="lazy"
+                    decoding="async"
+                    draggable="false"
+                  />
+                  <span
+                    className="alt-home-lookbook__shade"
+                    aria-hidden="true"
+                  />
+                  <span className="alt-home-lookbook__caption">
+                    <small>{slide.label}</small>
+                    <strong>{slide.title}</strong>
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="alt-home-lookbook__progress" aria-hidden="true">
+          <span ref={progressRef} />
+        </div>
+      </div>
+    </section>
+  );
+};
+
 export const AltHomePage = () => {
+  const wrapperRef = useRef(null);
   const trackRef = useRef(null);
   const pinnedRef = useRef(null);
+  const newInRef = useRef(null);
+  const newInCursorRef = useRef(null);
+  const newInCursorDotRef = useRef(null);
+  const newInCursorLabelRef = useRef(null);
   const liquidProgressRef = useRef(0);
   const eyebrowRef = useRef(null);
   const wordmarkRef = useRef(null);
@@ -61,6 +935,30 @@ export const AltHomePage = () => {
       ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
       : false
   ));
+  const [newInVisible, setNewInVisible] = useState(false);
+  const { formatMoney } = useCurrency();
+
+  const { data: newInProducts = [], isLoading: newInLoading } = useQuery({
+    queryKey: ['alt-home-new-in-products'],
+    queryFn: async () => {
+      const { data } = await api.get('/products', {
+        params: { sort: 'newest', limit: 4 }
+      });
+      return data.data.products;
+    },
+    staleTime: 60 * 1000
+  });
+
+  const { data: lookProducts = [] } = useQuery({
+    queryKey: ['alt-home-look-products'],
+    queryFn: async () => {
+      const { data } = await api.get('/products', {
+        params: { category: 'fashion', sort: 'newest', limit: 3 }
+      });
+      return data.data.products;
+    },
+    staleTime: 5 * 60 * 1000
+  });
 
   useEffect(() => {
     const mobileQuery = window.matchMedia('(max-width: 809px)');
@@ -351,8 +1249,152 @@ export const AltHomePage = () => {
     };
   }, [reduceMotion]);
 
+  useEffect(() => {
+    const section = newInRef.current;
+    if (!section) return undefined;
+
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      setNewInVisible(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        setNewInVisible(true);
+        observer.disconnect();
+      },
+      {
+        threshold: 0.18,
+        rootMargin: '0px 0px -8% 0px'
+      }
+    );
+
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [reduceMotion]);
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    const cursor = newInCursorRef.current;
+    const dot = newInCursorDotRef.current;
+    const label = newInCursorLabelRef.current;
+    const cursorZones = wrapper
+      ? Array.from(wrapper.querySelectorAll('[data-alt-cursor-zone]'))
+      : [];
+    const finePointer = window.matchMedia(
+      '(hover: hover) and (pointer: fine)'
+    ).matches;
+
+    if (
+      !cursorZones.length
+      || !cursor
+      || !dot
+      || !label
+      || !finePointer
+      || reduceMotion
+    ) {
+      return undefined;
+    }
+
+    let animationFrame = 0;
+    let isInside = false;
+    const target = { x: -100, y: -100, scale: 1 };
+    const cursorPosition = { x: -100, y: -100, scale: 1 };
+    const dotPosition = { x: -100, y: -100 };
+
+    const renderCursor = () => {
+      cursorPosition.x += (target.x - cursorPosition.x) * 0.15;
+      cursorPosition.y += (target.y - cursorPosition.y) * 0.15;
+      cursorPosition.scale += (target.scale - cursorPosition.scale) * 0.18;
+      dotPosition.x += (target.x - dotPosition.x) * 0.5;
+      dotPosition.y += (target.y - dotPosition.y) * 0.5;
+
+      cursor.style.transform = [
+        `translate3d(${cursorPosition.x}px, ${cursorPosition.y}px, 0)`,
+        'translate(-50%, -50%)',
+        `scale(${cursorPosition.scale})`
+      ].join(' ');
+      dot.style.transform = [
+        `translate3d(${dotPosition.x}px, ${dotPosition.y}px, 0)`,
+        'translate(-50%, -50%)'
+      ].join(' ');
+
+      animationFrame = isInside
+        ? window.requestAnimationFrame(renderCursor)
+        : 0;
+    };
+
+    const updateCursorState = (event) => {
+      target.x = event.clientX;
+      target.y = event.clientY;
+
+      const interactiveTarget = event.target.closest?.(
+        '[data-alt-cursor="active"]'
+      );
+      const isActive = Boolean(interactiveTarget);
+      target.scale = isActive ? 2.4 : 1;
+      label.textContent = interactiveTarget?.dataset.altCursorLabel || '';
+      cursor.classList.toggle('alt-home-new-in__cursor--active', isActive);
+    };
+
+    const onPointerEnter = (event) => {
+      isInside = true;
+      event.currentTarget.classList.add('alt-home-cursor-engaged');
+      target.x = event.clientX;
+      target.y = event.clientY;
+      cursorPosition.x = target.x;
+      cursorPosition.y = target.y;
+      dotPosition.x = target.x;
+      dotPosition.y = target.y;
+      cursor.classList.add('alt-home-new-in__cursor--visible');
+      dot.classList.add('alt-home-new-in__cursor-dot--visible');
+      updateCursorState(event);
+      if (!animationFrame) {
+        animationFrame = window.requestAnimationFrame(renderCursor);
+      }
+    };
+
+    const onPointerMove = (event) => {
+      if (!isInside) onPointerEnter(event);
+      updateCursorState(event);
+    };
+
+    const onPointerLeave = (event) => {
+      isInside = false;
+      event.currentTarget.classList.remove('alt-home-cursor-engaged');
+      target.scale = 1;
+      label.textContent = '';
+      cursor.classList.remove(
+        'alt-home-new-in__cursor--visible',
+        'alt-home-new-in__cursor--active'
+      );
+      dot.classList.remove('alt-home-new-in__cursor-dot--visible');
+      if (animationFrame) {
+        window.cancelAnimationFrame(animationFrame);
+        animationFrame = 0;
+      }
+    };
+
+    cursorZones.forEach((zone) => {
+      zone.addEventListener('pointerenter', onPointerEnter);
+      zone.addEventListener('pointermove', onPointerMove);
+      zone.addEventListener('pointerleave', onPointerLeave);
+    });
+
+    return () => {
+      cursorZones.forEach((zone) => {
+        zone.removeEventListener('pointerenter', onPointerEnter);
+        zone.removeEventListener('pointermove', onPointerMove);
+        zone.removeEventListener('pointerleave', onPointerLeave);
+        zone.classList.remove('alt-home-cursor-engaged');
+      });
+      if (animationFrame) window.cancelAnimationFrame(animationFrame);
+    };
+  }, [reduceMotion]);
+
   return (
-    <div className="alt-home-wrapper">
+    <div ref={wrapperRef} className="alt-home-wrapper">
       <Seo
         title="lahVenture — Autumn / Winter"
         description="A quieter luxury, made to last a lifetime."
@@ -469,6 +1511,74 @@ export const AltHomePage = () => {
         </div>
       </section>
 
+      <section
+        ref={newInRef}
+        className={`alt-home-new-in${
+          newInVisible ? ' alt-home-new-in--visible' : ''
+        }${reduceMotion ? ' alt-home-new-in--reduced' : ''}`}
+        aria-labelledby="alt-home-new-in-title"
+        data-alt-cursor-zone
+      >
+        <div className="alt-home-new-in__inner">
+          <div className="alt-home-new-in__header">
+            <div className="alt-home-new-in__heading">
+              <p className="alt-home-new-in__eyebrow">Just Arrived</p>
+              <h2 id="alt-home-new-in-title" className="alt-home-new-in__title">
+                <span>New</span>{' '}
+                <span>In</span>
+              </h2>
+            </div>
+
+            <Link
+              className="alt-home-new-in__view-all"
+              to="/products?sort=newest"
+            >
+              <span>View all</span>
+              <ArrowRight size={17} strokeWidth={1.4} aria-hidden="true" />
+            </Link>
+          </div>
+
+          <div
+            className="alt-home-new-in__grid"
+            aria-busy={newInLoading}
+          >
+            {newInLoading
+              ? [0, 1, 2, 3].map((index) => (
+                <div className="alt-home-new-in__card-stage" key={index}>
+                  <div
+                    className="alt-home-new-in__card alt-home-new-in__card--skeleton"
+                    aria-hidden="true"
+                  >
+                    <div className="alt-home-new-in__skeleton-media" />
+                    <div className="alt-home-new-in__skeleton-copy">
+                      <i />
+                      <i />
+                    </div>
+                  </div>
+                </div>
+              ))
+              : newInProducts.map((product, index) => (
+                <NewInProductCard
+                  product={product}
+                  index={index}
+                  formatMoney={formatMoney}
+                  key={product._id}
+                />
+              ))}
+          </div>
+        </div>
+
+      </section>
+
+      <CampaignStorySection reduceMotion={reduceMotion} />
+
+      <ShopTheLookSection
+        products={lookProducts}
+        formatMoney={formatMoney}
+      />
+
+      <LookbookSection reduceMotion={reduceMotion} />
+
       <div className="alt-home-marquee" aria-label="Explore our collections">
         <div className="alt-home-marquee__track">
           {[0, 1].map((copyIndex) => (
@@ -486,6 +1596,13 @@ export const AltHomePage = () => {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="alt-home-new-in__cursor-layer" aria-hidden="true">
+        <div ref={newInCursorRef} className="alt-home-new-in__cursor">
+          <span ref={newInCursorLabelRef} />
+        </div>
+        <div ref={newInCursorDotRef} className="alt-home-new-in__cursor-dot" />
       </div>
     </div>
   );
