@@ -21,6 +21,9 @@ import editCamelCoatImage from '../assets/images/editorial/the-edit/camel-wool-c
 import editTrenchCoatImage from '../assets/images/editorial/the-edit/oversized-trench-coat.jpg';
 import editLeatherToteImage from '../assets/images/editorial/the-edit/leather-tote-bag.jpg';
 import editSilkDressImage from '../assets/images/editorial/the-edit/silk-slip-dress.jpg';
+import wovenFibresTextureImage from '../assets/images/editorial/materials/woven-fibres-texture.jpg';
+import handStitchingCraftImage from '../assets/images/editorial/materials/hand-stitching-craft.jpg';
+
 
 import { LiquidHoverCanvas } from '../components/LiquidHoverCanvas.jsx';
 import { Seo } from '../components/Seo.jsx';
@@ -1202,6 +1205,103 @@ const LookbookSection = ({ reduceMotion }) => {
   );
 };
 
+const STATS_DATA = [
+  {
+    value: '100',
+    unit: '%',
+    label: 'NATURAL FIBRES'
+  },
+  {
+    value: '12',
+    label: 'FAMILY ATELIERS'
+  },
+  {
+    value: '0',
+    label: 'SEASONS WASTED'
+  }
+];
+
+const MaterialMakeSection = () => {
+  return (
+    <section
+      className="alt-home-materials"
+      aria-labelledby="alt-home-materials-title"
+      data-alt-cursor-zone
+    >
+      <div className="alt-home-materials__inner">
+        <div className="alt-home-materials__top">
+          <div className="alt-home-materials__copy">
+            <p className="alt-home-materials__eyebrow">Material & Make</p>
+            <h2 id="alt-home-materials-title" className="alt-home-materials__title">
+              Better things, made to last.
+            </h2>
+            <p className="alt-home-materials__description">
+              We work only with natural fibres — wool, cashmere, silk and cotton — chosen
+              for how they wear, soften and age. Less, but better.
+            </p>
+          </div>
+
+          <div className="alt-home-materials__gallery">
+            <div className="alt-home-materials__card alt-home-materials__card--tall">
+              <img
+                src={wovenFibresTextureImage}
+                alt="Close-up macro texture of natural woven wool fibres"
+                className="alt-home-materials__image"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+            <div className="alt-home-materials__card alt-home-materials__card--staggered">
+              <img
+                src={handStitchingCraftImage}
+                alt="Artisan hands carefully hand-stitching natural linen garment"
+                className="alt-home-materials__image"
+                loading="lazy"
+                decoding="async"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="alt-home-materials__bottom">
+          <div className="alt-home-materials__stats">
+            {STATS_DATA.map((stat, index) => (
+              <div className="alt-home-materials__stat-item" key={index}>
+                <div className="alt-home-materials__stat-value">
+                  <span>{stat.value}</span>
+                  {stat.unit && (
+                    <span className="alt-home-materials__stat-unit">{stat.unit}</span>
+                  )}
+                </div>
+                <p className="alt-home-materials__stat-label">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const HouseQuoteSection = () => {
+  return (
+    <section
+      className="alt-home-quote"
+      aria-labelledby="alt-home-quote-title"
+      data-alt-cursor-zone
+    >
+      <div className="alt-home-quote__inner">
+        <p className="alt-home-quote__eyebrow">The House of Lahventure</p>
+        <h2 id="alt-home-quote-title" className="alt-home-quote__heading">
+          Luxury is the <em className="alt-home-quote__highlight">quiet</em> confidence of a thing kept for a lifetime.
+        </h2>
+      </div>
+    </section>
+  );
+};
+
+
+
 export const AltHomePage = () => {
   const wrapperRef = useRef(null);
   const trackRef = useRef(null);
@@ -1876,6 +1976,12 @@ export const AltHomePage = () => {
       <CuratedEditSection formatMoney={formatMoney} />
 
       <LookbookSection reduceMotion={reduceMotion} />
+
+      <MaterialMakeSection />
+
+      <HouseQuoteSection />
+
+
 
 
 
