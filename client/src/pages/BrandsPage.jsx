@@ -399,6 +399,7 @@ const EditorialCollectionSection = ({
       className={`editorial-collections${isActive ? ' is-active' : ''}${isDetailSource ? ' has-detail-open' : ''}`}
       aria-labelledby={headingId}
       data-collection-key={collection.categoryKey}
+      style={{ '--editorial-stack-index': collectionIndex + 1 }}
     >
       <div className={`editorial-collections__showcase${isDetailSource && detailPhase === 'closing' ? ' is-returning' : ''}`}>
         <img
@@ -988,19 +989,21 @@ export const BrandsPage = () => {
         inert={selectedProduct || menuOpen ? true : undefined}
         aria-hidden={selectedProduct || menuOpen ? 'true' : undefined}
       >
-        {collections.map((collection, collectionIndex) => (
-          <EditorialCollectionSection
-            key={collection.uiKey}
-            collection={collection}
-            collectionIndex={collectionIndex}
-            detailContext={detailContext}
-            detailPhase={detailPhase}
-            isActive={activeCollectionIndex === collectionIndex}
-            onOpenProduct={openProduct}
-            onSectionRef={setSectionRef}
-            totalCollections={collections.length}
-          />
-        ))}
+        <div className="editorial-collections-page__stack">
+          {collections.map((collection, collectionIndex) => (
+            <EditorialCollectionSection
+              key={collection.uiKey}
+              collection={collection}
+              collectionIndex={collectionIndex}
+              detailContext={detailContext}
+              detailPhase={detailPhase}
+              isActive={activeCollectionIndex === collectionIndex}
+              onOpenProduct={openProduct}
+              onSectionRef={setSectionRef}
+              totalCollections={collections.length}
+            />
+          ))}
+        </div>
 
         <SiteFooter variant="immersive" onVisibilityChange={setFooterVisible} />
       </div>

@@ -15889,13 +15889,21 @@ body.collections-immersive-active .scroll-to-top-button {
   outline-offset: -3px;
 }
 
+.editorial-collections-page__stack {
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+}
+
 .editorial-collections-page.has-detail-open .editorial-collections-page__scroller,
 .editorial-collections-page.has-menu-open .editorial-collections-page__scroller {
   overflow-y: hidden;
 }
 
 .editorial-collections {
-  position: relative;
+  position: sticky;
+  z-index: var(--editorial-stack-index, 1);
+  top: 0;
   isolation: isolate;
   width: 100%;
   height: 100dvh;
@@ -15904,6 +15912,12 @@ body.collections-immersive-active .scroll-to-top-button {
   background: #303948;
   color: #ffffff;
   font-family: Inter, "Helvetica Neue", Arial, sans-serif;
+  transform: translateZ(0);
+}
+
+.editorial-collections + .editorial-collections {
+  border-radius: clamp(18px, 1.7vw, 28px) clamp(18px, 1.7vw, 28px) 0 0;
+  box-shadow: 0 -18px 54px rgba(7, 11, 17, 0.3);
 }
 
 .editorial-collections-page button,
@@ -17213,6 +17227,10 @@ body.collections-immersive-active .scroll-to-top-button {
     min-height: 520px;
   }
 
+  .editorial-collections + .editorial-collections {
+    border-radius: 16px 16px 0 0;
+  }
+
   .editorial-collections__header {
     padding: 20px 18px;
   }
@@ -17416,6 +17434,15 @@ body.collections-immersive-active .scroll-to-top-button {
   .editorial-collections-page *::before,
   .editorial-collections-page *::after {
     scroll-behavior: auto !important;
+  }
+
+  .editorial-collections {
+    position: relative;
+    z-index: auto;
+    top: auto;
+    border-radius: 0 !important;
+    box-shadow: none;
+    transform: none;
   }
 
   .editorial-collections__hero-image,
@@ -21812,6 +21839,3 @@ body.collections-immersive-active .scroll-to-top-button {
     transform: none;
   }
 }
-
-
-
