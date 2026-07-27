@@ -1283,18 +1283,130 @@ const MaterialMakeSection = () => {
   );
 };
 
-const HouseQuoteSection = () => {
+const HouseQuoteSection = ({ reduceMotion }) => {
   return (
     <section
-      className="alt-home-quote"
-      aria-labelledby="alt-home-quote-title"
+      className={`alt-home-quote${
+        reduceMotion ? ' alt-home-quote--reduced' : ''
+      }`}
+      aria-label="The House of Lahventure"
       data-alt-cursor-zone
     >
-      <div className="alt-home-quote__inner">
-        <p className="alt-home-quote__eyebrow">The House of Lahventure</p>
-        <h2 id="alt-home-quote-title" className="alt-home-quote__heading">
-          Luxury is the <em className="alt-home-quote__highlight">quiet</em> confidence of a thing kept for a lifetime.
-        </h2>
+      <div className="alt-home-quote__stack">
+        <article className="alt-home-quote__card alt-home-quote__card--campaign">
+          <img
+            className="alt-home-quote__campaign-image"
+            src={winterCampaignImage}
+            alt="A model wearing a camel coat in a warm, sunlit studio"
+            loading="lazy"
+            decoding="async"
+          />
+          <span className="alt-home-quote__campaign-shade" aria-hidden="true" />
+
+          <div className="alt-home-quote__campaign-copy">
+            <p className="alt-home-quote__eyebrow alt-home-quote__eyebrow--light">
+              The Campaign
+            </p>
+            <h2 className="alt-home-quote__campaign-title">
+              <span>Worn for years.</span>
+              <em>Not seasons.</em>
+            </h2>
+            <Link
+              className="alt-home-quote__link alt-home-quote__link--light"
+              to="/products?category=fashion"
+              data-alt-cursor="active"
+              data-alt-cursor-label="View"
+            >
+              <span>View the campaign</span>
+              <ArrowRight size={16} strokeWidth={1.3} aria-hidden="true" />
+            </Link>
+          </div>
+        </article>
+
+        <article className="alt-home-quote__card alt-home-quote__card--atelier">
+          <div className="alt-home-quote__atelier-media">
+            <img
+              src={handStitchingCraftImage}
+              alt="A craftsperson hand-stitching a natural-fibre garment"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+
+          <div className="alt-home-quote__atelier-copy">
+            <p className="alt-home-quote__eyebrow">The Atelier</p>
+            <h2 className="alt-home-quote__panel-title">
+              Made by a pair of hands.
+            </h2>
+            <p className="alt-home-quote__body">
+              Each piece is cut, sewn and finished in small ateliers by people
+              who have spent a lifetime on a single craft. Nothing is rushed.
+            </p>
+            <Link
+              className="alt-home-quote__link"
+              to="/about"
+              data-alt-cursor="active"
+              data-alt-cursor-label="Discover"
+            >
+              <span>Inside the atelier</span>
+              <ArrowRight size={16} strokeWidth={1.3} aria-hidden="true" />
+            </Link>
+          </div>
+        </article>
+
+        <article className="alt-home-quote__card alt-home-quote__card--materials">
+          <div className="alt-home-quote__materials-copy">
+            <div>
+              <p className="alt-home-quote__eyebrow">Material &amp; Make</p>
+              <h2 className="alt-home-quote__panel-title">
+                Better, by every measure.
+              </h2>
+              <p className="alt-home-quote__body">
+                Only natural fibres — wool, cashmere, silk and cotton — chosen
+                for how they soften, wear and age. Less, but better.
+              </p>
+            </div>
+
+            <dl className="alt-home-quote__stats">
+              <div>
+                <dt>
+                  100<sup>%</sup>
+                </dt>
+                <dd>Natural fibres</dd>
+              </div>
+              <div>
+                <dt>12</dt>
+                <dd>Family ateliers</dd>
+              </div>
+              <div>
+                <dt>0</dt>
+                <dd>Seasons wasted</dd>
+              </div>
+            </dl>
+          </div>
+
+          <div className="alt-home-quote__materials-media">
+            <img
+              src={madeByHandAtelierImage}
+              alt="A considered camel coat in a quiet, naturally lit interior"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
+        </article>
+
+        <article className="alt-home-quote__card alt-home-quote__card--statement">
+          <div className="alt-home-quote__statement-copy">
+            <p className="alt-home-quote__eyebrow alt-home-quote__eyebrow--light">
+              The House of Lahventure
+            </p>
+            <h2 id="alt-home-quote-title" className="alt-home-quote__heading">
+              Luxury is the{' '}
+              <em className="alt-home-quote__highlight">quiet</em>{' '}
+              confidence of a thing kept for a lifetime.
+            </h2>
+          </div>
+        </article>
       </div>
     </section>
   );
@@ -1979,7 +2091,7 @@ export const AltHomePage = () => {
 
       <MaterialMakeSection />
 
-      <HouseQuoteSection />
+      <HouseQuoteSection reduceMotion={reduceMotion} />
 
 
 
