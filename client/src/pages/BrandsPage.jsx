@@ -385,6 +385,7 @@ const EditorialCollectionSection = ({
   isActive,
   onOpenProduct,
   onSectionRef,
+  stackState,
   totalCollections
 }) => {
   const heading = collectionHeading(collection);
@@ -396,9 +397,11 @@ const EditorialCollectionSection = ({
     <section
       ref={(node) => onSectionRef(collectionIndex, node)}
       id={`collection-${collection.uiKey}`}
-      className={`editorial-collections${isActive ? ' is-active' : ''}${isDetailSource ? ' has-detail-open' : ''}`}
+      className={`editorial-collections ${stackState}${isActive ? ' is-active' : ''}${isDetailSource ? ' has-detail-open' : ''}`}
       aria-labelledby={headingId}
+      aria-hidden={isActive ? undefined : 'true'}
       data-collection-key={collection.categoryKey}
+      inert={isActive ? undefined : true}
       style={{ '--editorial-stack-index': collectionIndex + 1 }}
     >
       <div className={`editorial-collections__showcase${isDetailSource && detailPhase === 'closing' ? ' is-returning' : ''}`}>
@@ -472,10 +475,15 @@ export const BrandsPage = () => {
   const sourceRailRef = useRef(null);
   const scrollerRef = useRef(null);
   const sectionRefs = useRef([]);
-  const scrollPositionRef = useRef(0);
-  const scrollTargetRef = useRef(0);
-  const scrollAnimationRef = useRef(null);
-  const activeUpdateFrameRef = useRef(null);
+  const activeCollectionIndexRef = useRef(0);
+  const collectionTransitionActiveRef = useRef(false);
+  const collectionTransitionTimerRef = useRef(null);
+  const wheelDeltaRef = useRef(0);
+  const wheelDirectionRef = useRef(0);
+  const wheelInputTypeRef = useRef(null);
+  const wheelGestureLockedRef = useRef(false);
+  const wheelReleaseTimerRef = useRef(null);
+  const touchStartYRef = useRef(null);
   const openTimerRef = useRef(null);
   const closeTimerRef = useRef(null);
   const focusTimerRef = useRef(null);
@@ -537,7 +545,12 @@ export const BrandsPage = () => {
   }, [brandPageData]);
 
   useEffect(() => {
-    if (activeCollectionIndex > collections.length - 1) setActiveCollectionIndex(0);
+    if (activeCollectionIndex > collections.length - 1) {
+      activeCollectionIndexRef.current = 0;
+      setActiveCollectionIndex(0);
+      return;
+    }
+    activeCollectionIndexRef.current = activeCollectionIndex;
   }, [activeCollectionIndex, collections.length]);
 
   const activeCollection = collections[activeCollectionIndex] || fallbackCollections[0];
@@ -571,63 +584,40 @@ export const BrandsPage = () => {
     window.requestAnimationFrame(() => menuTriggerRef.current?.focus?.({ preventScroll: true }));
   }, []);
 
-  const cancelSmoothScroll = useCallback(() => {
-    if (scrollAnimationRef.current !== null) {
-      window.cancelAnimationFrame(scrollAnimationRef.current);
-      scrollAnimationRef.current = null;
-    }
+  const transitionToCollection = useCallback((index) => {
+    const maximumIndex = Math.max(0, collections.length - 1);
+    const nextIndex = Math.min(maximumIndex, Math.max(0, index));
+    if (nextIndex === activeCollectionIndexRef.current) return false;
+
+    activeCollectionIndexRef.current = nextIndex;
+    setActiveCollectionIndex(nextIndex);
+    window.clearTimeout(collectionTransitionTimerRef.current);
 
     const scroller = scrollerRef.current;
-    if (scroller) {
-      scrollPositionRef.current = scroller.scrollTop;
-      scrollTargetRef.current = scroller.scrollTop;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      collectionTransitionActiveRef.current = false;
+      scroller?.classList.remove('is-card-transitioning');
+      return true;
     }
-  }, []);
 
-  const startSmoothScroll = useCallback(() => {
-    if (scrollAnimationRef.current !== null || !scrollerRef.current) return;
-
-    const tick = () => {
-      const scroller = scrollerRef.current;
-      if (!scroller) {
-        scrollAnimationRef.current = null;
-        return;
-      }
-
-      const distance = scrollTargetRef.current - scrollPositionRef.current;
-      if (Math.abs(distance) < 0.45) {
-        scrollPositionRef.current = scrollTargetRef.current;
-        scroller.scrollTop = scrollTargetRef.current;
-        scrollAnimationRef.current = null;
-        return;
-      }
-
-      scrollPositionRef.current += distance * 0.105;
-      scroller.scrollTop = scrollPositionRef.current;
-      scrollAnimationRef.current = window.requestAnimationFrame(tick);
-    };
-
-    scrollAnimationRef.current = window.requestAnimationFrame(tick);
-  }, []);
+    collectionTransitionActiveRef.current = true;
+    scroller?.classList.add('is-card-transitioning');
+    collectionTransitionTimerRef.current = window.setTimeout(() => {
+      collectionTransitionActiveRef.current = false;
+      scrollerRef.current?.classList.remove('is-card-transitioning');
+    }, 920);
+    return true;
+  }, [collections.length]);
 
   const scrollToCollection = useCallback((index, focusHeading = false) => {
     const scroller = scrollerRef.current;
     const section = sectionRefs.current[index];
     if (!scroller || !section) return;
 
-    const destination = section.offsetTop;
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    cancelSmoothScroll();
-    setActiveCollectionIndex(index);
-
-    if (reducedMotion) {
-      scroller.scrollTo({ top: destination, behavior: 'auto' });
-      scrollPositionRef.current = destination;
-      scrollTargetRef.current = destination;
-    } else {
-      scrollPositionRef.current = scroller.scrollTop;
-      scrollTargetRef.current = destination;
-      startSmoothScroll();
+    transitionToCollection(index);
+    if (scroller.scrollTop > 1) {
+      scroller.scrollTo({ top: 0, behavior: reducedMotion ? 'instant' : 'smooth' });
     }
 
     if (focusHeading) {
@@ -636,83 +626,194 @@ export const BrandsPage = () => {
           ?.focus({ preventScroll: true });
       });
     }
-  }, [cancelSmoothScroll, startSmoothScroll]);
+  }, [transitionToCollection]);
 
   useEffect(() => {
     const scroller = scrollerRef.current;
     if (!scroller) return undefined;
 
-    const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const releaseWheelGesture = () => {
+      if (collectionTransitionActiveRef.current) {
+        wheelReleaseTimerRef.current = window.setTimeout(releaseWheelGesture, 60);
+        return;
+      }
 
-    const updateActiveCollection = () => {
-      activeUpdateFrameRef.current = null;
-      const viewportMidpoint = scroller.scrollTop + scroller.clientHeight / 2;
-      let nextIndex = 0;
-
-      sectionRefs.current.forEach((section, index) => {
-        if (section && section.offsetTop <= viewportMidpoint) nextIndex = index;
-      });
-
-      setActiveCollectionIndex((current) => (current === nextIndex ? current : nextIndex));
+      wheelGestureLockedRef.current = false;
+      wheelDeltaRef.current = 0;
+      wheelDirectionRef.current = 0;
+      wheelInputTypeRef.current = null;
+      wheelReleaseTimerRef.current = null;
     };
 
-    const scheduleActiveCollectionUpdate = () => {
-      if (activeUpdateFrameRef.current === null) {
-        activeUpdateFrameRef.current = window.requestAnimationFrame(updateActiveCollection);
+    const scheduleWheelGestureRelease = (quietDelay = 180) => {
+      window.clearTimeout(wheelReleaseTimerRef.current);
+      wheelReleaseTimerRef.current = window.setTimeout(releaseWheelGesture, quietDelay);
+    };
+
+    const resetWheelGesture = () => {
+      window.clearTimeout(wheelReleaseTimerRef.current);
+      wheelReleaseTimerRef.current = null;
+      wheelGestureLockedRef.current = false;
+      wheelDeltaRef.current = 0;
+      wheelDirectionRef.current = 0;
+      wheelInputTypeRef.current = null;
+    };
+
+    const onTouchStart = (event) => {
+      touchStartYRef.current = event.touches[0]?.clientY ?? null;
+      resetWheelGesture();
+    };
+
+    const onTouchMove = (event) => {
+      const touch = event.touches[0];
+      if (!touch || touchStartYRef.current === null || scroller.scrollTop > 1) return;
+      const direction = Math.sign(touchStartYRef.current - touch.clientY);
+      const activeIndex = activeCollectionIndexRef.current;
+      const hasCollectionDestination = direction > 0
+        ? activeIndex < collections.length - 1
+        : direction < 0 && activeIndex > 0;
+      if (hasCollectionDestination && event.cancelable) event.preventDefault();
+    };
+
+    const onTouchEnd = (event) => {
+      const endingTouch = event.changedTouches[0];
+      if (!endingTouch || touchStartYRef.current === null || scroller.scrollTop > 1) return;
+      const delta = touchStartYRef.current - endingTouch.clientY;
+      touchStartYRef.current = null;
+      if (Math.abs(delta) < 42 || collectionTransitionActiveRef.current) return;
+
+      const direction = Math.sign(delta);
+      const nextIndex = activeCollectionIndexRef.current + direction;
+      if (nextIndex >= 0 && nextIndex < collections.length) {
+        transitionToCollection(nextIndex);
       }
     };
-
-    const onScroll = () => {
-      if (scrollAnimationRef.current === null) {
-        scrollPositionRef.current = scroller.scrollTop;
-        scrollTargetRef.current = scroller.scrollTop;
-      }
-      scheduleActiveCollectionUpdate();
-    };
-
-    const onTouchStart = () => cancelSmoothScroll();
 
     const onWheel = (event) => {
-      if (reducedMotionQuery.matches || selectedProduct || menuOpen || event.ctrlKey || event.shiftKey) return;
-      if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+      if (selectedProduct || menuOpen || event.ctrlKey || event.shiftKey) return;
 
-      event.preventDefault();
-      if (scrollAnimationRef.current === null) {
-        scrollPositionRef.current = scroller.scrollTop;
-        scrollTargetRef.current = scroller.scrollTop;
+      // Below the card stage, the footer keeps the browser's native scrolling.
+      // Once native scrolling reaches the top again, the same card gesture
+      // handler takes over in either direction.
+      if (scroller.scrollTop > 1) {
+        resetWheelGesture();
+        return;
       }
 
+      const hasCapturedVerticalGesture = wheelInputTypeRef.current !== null
+        || wheelGestureLockedRef.current
+        || collectionTransitionActiveRef.current;
+      if (!hasCapturedVerticalGesture && Math.abs(event.deltaY) <= Math.abs(event.deltaX) * 1.2) return;
+      if (!event.cancelable) {
+        resetWheelGesture();
+        return;
+      }
+
+      const direction = Math.sign(event.deltaY);
+      if (!direction) return;
+
       const multiplier = event.deltaMode === 1
-        ? 18
+        ? 16
         : event.deltaMode === 2
           ? scroller.clientHeight
           : 1;
-      const maximum = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
-      scrollTargetRef.current = Math.min(
-        maximum,
-        Math.max(0, scrollTargetRef.current + event.deltaY * multiplier)
-      );
-      startSmoothScroll();
+      const normalizedDelta = event.deltaY * multiplier;
+      const detectedInputType = event.deltaMode !== 0 || Math.abs(normalizedDelta) >= 60
+        ? 'discrete'
+        : 'continuous';
+      let reverseIntentConfirmed = false;
+
+      if (!wheelInputTypeRef.current) {
+        wheelInputTypeRef.current = detectedInputType;
+      }
+      const activationThreshold = wheelInputTypeRef.current === 'continuous' ? 24 : 1;
+      const quietDelay = wheelInputTypeRef.current === 'continuous' ? 240 : 140;
+
+      if (
+        wheelGestureLockedRef.current
+        || collectionTransitionActiveRef.current
+      ) {
+        event.preventDefault();
+        scheduleWheelGestureRelease(quietDelay);
+
+        const isOppositeDirection = wheelDirectionRef.current !== 0
+          && direction !== wheelDirectionRef.current;
+        if (!isOppositeDirection) {
+          wheelDeltaRef.current = 0;
+          return;
+        }
+
+        wheelDeltaRef.current += normalizedDelta;
+        if (Math.abs(wheelDeltaRef.current) < activationThreshold) return;
+
+        wheelGestureLockedRef.current = false;
+        wheelDeltaRef.current = 0;
+        reverseIntentConfirmed = true;
+      }
+
+      const nextCollectionIndex = activeCollectionIndexRef.current + direction;
+      if (nextCollectionIndex < 0 || nextCollectionIndex >= collections.length) {
+        resetWheelGesture();
+        return;
+      }
+
+      event.preventDefault();
+      scheduleWheelGestureRelease(quietDelay);
+
+      if (wheelDirectionRef.current !== direction) {
+        wheelDeltaRef.current = 0;
+        wheelDirectionRef.current = direction;
+      }
+
+      if (!reverseIntentConfirmed) {
+        wheelDeltaRef.current += normalizedDelta;
+        if (Math.abs(wheelDeltaRef.current) < activationThreshold) return;
+      }
+
+      wheelGestureLockedRef.current = true;
+      wheelDeltaRef.current = 0;
+      wheelDirectionRef.current = direction;
+      transitionToCollection(nextCollectionIndex);
     };
 
-    scrollPositionRef.current = scroller.scrollTop;
-    scrollTargetRef.current = scroller.scrollTop;
-    scheduleActiveCollectionUpdate();
-    scroller.addEventListener('scroll', onScroll, { passive: true });
+    const onKeyDown = (event) => {
+      if (event.target !== scroller || selectedProduct || menuOpen || scroller.scrollTop > 1) return;
+
+      let nextIndex = null;
+      if (event.key === 'ArrowDown' || event.key === 'PageDown' || (event.key === ' ' && !event.shiftKey)) {
+        nextIndex = activeCollectionIndexRef.current + 1;
+      } else if (event.key === 'ArrowUp' || event.key === 'PageUp' || (event.key === ' ' && event.shiftKey)) {
+        nextIndex = activeCollectionIndexRef.current - 1;
+      } else if (event.key === 'Home') {
+        nextIndex = 0;
+      } else if (event.key === 'End') {
+        nextIndex = collections.length - 1;
+      }
+
+      if (nextIndex === null || nextIndex < 0 || nextIndex >= collections.length) return;
+      event.preventDefault();
+      resetWheelGesture();
+      transitionToCollection(nextIndex);
+    };
+
     scroller.addEventListener('touchstart', onTouchStart, { passive: true });
+    scroller.addEventListener('touchmove', onTouchMove, { passive: false });
+    scroller.addEventListener('touchend', onTouchEnd, { passive: true });
     scroller.addEventListener('wheel', onWheel, { passive: false });
+    scroller.addEventListener('keydown', onKeyDown);
 
     return () => {
-      scroller.removeEventListener('scroll', onScroll);
       scroller.removeEventListener('touchstart', onTouchStart);
+      scroller.removeEventListener('touchmove', onTouchMove);
+      scroller.removeEventListener('touchend', onTouchEnd);
       scroller.removeEventListener('wheel', onWheel);
-      cancelSmoothScroll();
-      if (activeUpdateFrameRef.current !== null) {
-        window.cancelAnimationFrame(activeUpdateFrameRef.current);
-        activeUpdateFrameRef.current = null;
-      }
+      scroller.removeEventListener('keydown', onKeyDown);
+      window.clearTimeout(collectionTransitionTimerRef.current);
+      collectionTransitionActiveRef.current = false;
+      scroller.classList.remove('is-card-transitioning');
+      resetWheelGesture();
     };
-  }, [cancelSmoothScroll, collections.length, menuOpen, selectedProduct, startSmoothScroll]);
+  }, [collections.length, menuOpen, selectedProduct, transitionToCollection]);
 
   const closeDetail = useCallback(() => {
     if (!selectedProduct || detailPhase === 'closing') return;
@@ -1000,6 +1101,7 @@ export const BrandsPage = () => {
               isActive={activeCollectionIndex === collectionIndex}
               onOpenProduct={openProduct}
               onSectionRef={setSectionRef}
+              stackState={collectionIndex <= activeCollectionIndex ? 'is-before' : 'is-after'}
               totalCollections={collections.length}
             />
           ))}

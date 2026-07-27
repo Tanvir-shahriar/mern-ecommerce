@@ -15876,6 +15876,7 @@ body.collections-immersive-active .scroll-to-top-button {
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior-y: contain;
+  scroll-snap-type: none;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -15892,6 +15893,9 @@ body.collections-immersive-active .scroll-to-top-button {
 .editorial-collections-page__stack {
   position: relative;
   width: 100%;
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow: hidden;
   isolation: isolate;
 }
 
@@ -15901,18 +15905,52 @@ body.collections-immersive-active .scroll-to-top-button {
 }
 
 .editorial-collections {
-  position: sticky;
+  position: absolute;
   z-index: var(--editorial-stack-index, 1);
-  top: 0;
+  inset: 0;
   isolation: isolate;
   width: 100%;
   height: 100dvh;
-  min-height: 620px;
+  min-height: 100dvh;
   overflow: hidden;
   background: #303948;
   color: #ffffff;
   font-family: Inter, "Helvetica Neue", Arial, sans-serif;
-  transform: translateZ(0);
+  backface-visibility: hidden;
+  contain: layout paint style;
+  transform: translate3d(0, 100%, 0);
+  transform-origin: center top;
+  transition: transform 860ms var(--editorial-ease);
+  pointer-events: none;
+}
+
+.editorial-collections.is-before,
+.editorial-collections.is-active {
+  transform: translate3d(0, 0, 0);
+}
+
+.editorial-collections.is-after {
+  transform: translate3d(0, 100%, 0);
+}
+
+.editorial-collections.is-active {
+  pointer-events: auto;
+}
+
+.editorial-collections.is-active,
+.editorial-collections.is-active + .editorial-collections.is-after {
+  will-change: transform;
+}
+
+.editorial-collections-page__scroller.is-card-transitioning .editorial-collections {
+  will-change: transform;
+}
+
+.editorial-collections:not(.is-active) .editorial-collections__stamp svg,
+.editorial-collections:not(.is-active) .editorial-collections__rail-controls > span i,
+.editorial-collections-page__scroller.is-card-transitioning .editorial-collections__stamp svg,
+.editorial-collections-page__scroller.is-card-transitioning .editorial-collections__rail-controls > span i {
+  animation-play-state: paused;
 }
 
 .editorial-collections + .editorial-collections {
@@ -15971,7 +16009,7 @@ body.collections-immersive-active .scroll-to-top-button {
 }
 
 .editorial-collections.is-active .editorial-collections__hero-image {
-  animation: editorialHeroBreathe 8.2s ease-out both;
+  animation: none;
 }
 
 .editorial-collections__showcase.is-returning .editorial-collections__hero-image {
@@ -17038,7 +17076,6 @@ body.collections-immersive-active .scroll-to-top-button {
 }
 
 @media (min-width: 901px) and (max-height: 720px) {
-  .editorial-collections,
   .editorial-detail {
     min-height: 540px;
   }
@@ -17077,8 +17114,8 @@ body.collections-immersive-active .scroll-to-top-button {
 
 @media (min-width: 901px) and (max-height: 539px) {
   .editorial-collections {
-    height: 540px;
-    min-height: 540px;
+    height: 100dvh;
+    min-height: 100dvh;
   }
 
   .editorial-detail {
@@ -17094,7 +17131,7 @@ body.collections-immersive-active .scroll-to-top-button {
 
 @media (max-width: 900px) {
   .editorial-collections {
-    min-height: 560px;
+    min-height: 100dvh;
   }
 
   .editorial-collections__hero-image {
@@ -17224,7 +17261,7 @@ body.collections-immersive-active .scroll-to-top-button {
 
 @media (max-width: 640px) {
   .editorial-collections {
-    min-height: 520px;
+    min-height: 100dvh;
   }
 
   .editorial-collections + .editorial-collections {
@@ -17430,6 +17467,10 @@ body.collections-immersive-active .scroll-to-top-button {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .editorial-collections-page__scroller {
+    scroll-snap-type: none;
+  }
+
   .editorial-collections-page *,
   .editorial-collections-page *::before,
   .editorial-collections-page *::after {
@@ -17437,12 +17478,9 @@ body.collections-immersive-active .scroll-to-top-button {
   }
 
   .editorial-collections {
-    position: relative;
-    z-index: auto;
-    top: auto;
     border-radius: 0 !important;
     box-shadow: none;
-    transform: none;
+    transition: none !important;
   }
 
   .editorial-collections__hero-image,
