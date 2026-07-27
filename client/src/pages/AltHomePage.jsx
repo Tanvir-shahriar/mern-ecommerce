@@ -12,12 +12,99 @@ import lookbookLongOvercoatImage from '../assets/images/editorial/lookbook/look-
 import lookbookSlipImage from '../assets/images/editorial/lookbook/look-04-the-slip.webp';
 import lookbookSoftTailoringImage from '../assets/images/editorial/lookbook/look-03-soft-tailoring.webp';
 import winterCampaignImage from '../assets/images/editorial/winter-campaign.webp';
+import categoryOuterwearImage from '../assets/images/editorial/categories/outerwear.jpg';
+import categoryKnitwearImage from '../assets/images/editorial/categories/knitwear.jpg';
+import categoryDressesImage from '../assets/images/editorial/categories/dresses.jpg';
+import categoryAccessoriesImage from '../assets/images/editorial/categories/accessories.jpg';
+import madeByHandAtelierImage from '../assets/images/editorial/made-by-hand-atelier.jpg';
+import editCamelCoatImage from '../assets/images/editorial/the-edit/camel-wool-coat.jpg';
+import editTrenchCoatImage from '../assets/images/editorial/the-edit/oversized-trench-coat.jpg';
+import editLeatherToteImage from '../assets/images/editorial/the-edit/leather-tote-bag.jpg';
+import editSilkDressImage from '../assets/images/editorial/the-edit/silk-slip-dress.jpg';
+
 import { LiquidHoverCanvas } from '../components/LiquidHoverCanvas.jsx';
 import { Seo } from '../components/Seo.jsx';
 import { useAuth } from '../contexts/AuthContext.jsx';
 import { useCart } from '../contexts/CartContext.jsx';
 import { useCurrency } from '../contexts/CurrencyContext.jsx';
 import { api, apiErrorMessage, mediaUrl } from '../services/api.js';
+
+const CATEGORY_ITEMS = [
+  {
+    id: 'outerwear',
+    title: 'Outerwear',
+    subtitle: 'SHOP NOW',
+    image: categoryOuterwearImage,
+    link: '/products?category=outerwear',
+    alt: 'Tailored luxury outerwear coat'
+  },
+  {
+    id: 'knitwear',
+    title: 'Knitwear',
+    subtitle: 'SHOP NOW',
+    image: categoryKnitwearImage,
+    link: '/products?category=knitwear',
+    alt: 'Chunky cream ribbed turtleneck sweater'
+  },
+  {
+    id: 'dresses',
+    title: 'Dresses',
+    subtitle: 'SHOP NOW',
+    image: categoryDressesImage,
+    link: '/products?category=dresses',
+    alt: 'Flowing silk champagne slip dress'
+  },
+  {
+    id: 'accessories',
+    title: 'Accessories',
+    subtitle: 'SHOP NOW',
+    image: categoryAccessoriesImage,
+    link: '/products?category=accessories',
+    alt: 'Rich tan brown leather tote bag and fine jewelry'
+  }
+];
+
+const EDIT_PRODUCTS = [
+  {
+    id: 'camel-wool-coat',
+    title: 'The Camel Wool Coat',
+    price: 890,
+    color: 'Camel',
+    badge: 'NEW',
+    image: editCamelCoatImage,
+    link: '/products?category=outerwear',
+    alt: 'The Camel Wool Coat'
+  },
+  {
+    id: 'oversized-trench-coat',
+    title: 'Oversized Trench Coat',
+    price: 760,
+    originalPrice: 950,
+    color: 'Sand',
+    image: editTrenchCoatImage,
+    link: '/products?category=outerwear',
+    alt: 'Oversized Trench Coat in Sand'
+  },
+  {
+    id: 'leather-tote-bag',
+    title: 'Leather Tote Bag',
+    price: 540,
+    color: 'Tan',
+    image: editLeatherToteImage,
+    link: '/products?category=accessories',
+    alt: 'Structured Leather Tote Bag in Tan'
+  },
+  {
+    id: 'silk-slip-dress',
+    title: 'Silk Slip Dress',
+    price: 420,
+    color: 'Champagne',
+    image: editSilkDressImage,
+    link: '/products?category=dresses',
+    alt: 'Silk Slip Dress in Champagne'
+  }
+];
+
 
 const WORDMARK = 'LAHVENTURE';
 const HERO_FRAMES = [
@@ -675,6 +762,211 @@ const ShopTheLookSection = ({ products, formatMoney }) => {
     </section>
   );
 };
+
+const ShopByCategorySection = () => {
+  return (
+    <section
+      className="alt-home-categories"
+      aria-labelledby="alt-home-categories-title"
+      data-alt-cursor-zone
+    >
+      <div className="alt-home-categories__inner">
+        <header className="alt-home-categories__header">
+          <p className="alt-home-categories__eyebrow">Explore</p>
+          <h2 id="alt-home-categories-title" className="alt-home-categories__title">
+            Shop by Category
+          </h2>
+        </header>
+
+        <div className="alt-home-categories__grid">
+          {CATEGORY_ITEMS.map((category) => (
+            <Link
+              key={category.id}
+              to={category.link}
+              className="alt-home-categories__card"
+              data-alt-cursor="active"
+              data-alt-cursor-label="Shop"
+            >
+              <div className="alt-home-categories__media">
+                <img
+                  src={category.image}
+                  alt={category.alt}
+                  className="alt-home-categories__image"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div className="alt-home-categories__shade" aria-hidden="true" />
+              </div>
+
+              <div className="alt-home-categories__content">
+                <h3 className="alt-home-categories__card-title">
+                  {category.title}
+                </h3>
+                <span className="alt-home-categories__card-cta">
+                  <span>{category.subtitle}</span>
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const MadeByHandSection = () => {
+  return (
+    <section
+      className="alt-home-craft"
+      aria-labelledby="alt-home-craft-title"
+      data-alt-cursor-zone
+    >
+      <div className="alt-home-craft__inner">
+        <div className="alt-home-craft__media">
+          <img
+            src={madeByHandAtelierImage}
+            alt="Artisanal craftsmanship inside the atelier"
+            className="alt-home-craft__image"
+            loading="lazy"
+            decoding="async"
+          />
+        </div>
+
+        <div className="alt-home-craft__content">
+          <div className="alt-home-craft__eyebrow">
+            <span className="alt-home-craft__line" aria-hidden="true" />
+            <span>MADE BY HAND</span>
+          </div>
+
+          <h2 id="alt-home-craft-title" className="alt-home-craft__title">
+            Every seam,<br />considered.
+          </h2>
+
+          <p className="alt-home-craft__description">
+            Our pieces are cut and finished in small ateliers, by people
+            who have spent a lifetime perfecting a single craft. Nothing
+            is rushed. Nothing is wasted.
+          </p>
+
+          <Link
+            to="/about"
+            className="alt-home-craft__cta"
+            data-alt-cursor="active"
+            data-alt-cursor-label="Discover"
+          >
+            <span>INSIDE THE ATELIER</span>
+            <ArrowRight size={16} strokeWidth={1.4} aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const CuratedEditSection = ({ formatMoney }) => {
+  return (
+    <section
+      className="alt-home-edit"
+      aria-labelledby="alt-home-edit-title"
+      data-alt-cursor-zone
+    >
+      <div className="alt-home-edit__inner">
+        <header className="alt-home-edit__header">
+          <div className="alt-home-edit__heading">
+            <p className="alt-home-edit__eyebrow">Curated</p>
+            <h2 id="alt-home-edit-title" className="alt-home-edit__title">
+              The Edit
+            </h2>
+          </div>
+
+          <Link
+            to="/products"
+            className="alt-home-edit__view-all"
+            data-alt-cursor="active"
+            data-alt-cursor-label="Browse"
+          >
+            <span>VIEW ALL</span>
+            <ArrowRight size={15} strokeWidth={1.4} aria-hidden="true" />
+          </Link>
+        </header>
+
+        <div className="alt-home-edit__grid">
+          {EDIT_PRODUCTS.map((product) => (
+            <div className="alt-home-edit__card" key={product.id}>
+              <div className="alt-home-edit__media-wrap">
+                {product.badge && (
+                  <span className="alt-home-edit__badge">{product.badge}</span>
+                )}
+
+                <Link
+                  to={product.link}
+                  className="alt-home-edit__media-link"
+                  data-alt-cursor="active"
+                  data-alt-cursor-label="View"
+                >
+                  <img
+                    src={product.image}
+                    alt={product.alt}
+                    className="alt-home-edit__image"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </Link>
+
+                <div className="alt-home-edit__actions">
+                  <button
+                    type="button"
+                    className="alt-home-edit__action-btn"
+                    aria-label="Quick view"
+                  >
+                    <Eye size={16} strokeWidth={1.4} />
+                  </button>
+                  <button
+                    type="button"
+                    className="alt-home-edit__action-btn"
+                    aria-label="Add to wishlist"
+                  >
+                    <Heart size={16} strokeWidth={1.4} />
+                  </button>
+                </div>
+
+                <Link
+                  to={product.link}
+                  className="alt-home-edit__add-btn"
+                  data-alt-cursor="active"
+                >
+                  <span>ADD TO BAG</span>
+                </Link>
+              </div>
+
+              <div className="alt-home-edit__info">
+                <div className="alt-home-edit__meta">
+                  <h3 className="alt-home-edit__product-title">
+                    <Link to={product.link}>{product.title}</Link>
+                  </h3>
+                  <span className="alt-home-edit__color">{product.color}</span>
+                </div>
+
+                <div className="alt-home-edit__prices">
+                  <span className="alt-home-edit__price">
+                    {formatMoney ? formatMoney(product.price) : `$${product.price}`}
+                  </span>
+                  {product.originalPrice && (
+                    <span className="alt-home-edit__original-price">
+                      {formatMoney ? formatMoney(product.originalPrice) : `$${product.originalPrice}`}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+
 
 const LookbookSection = ({ reduceMotion }) => {
   const sectionRef = useRef(null);
@@ -1577,7 +1869,15 @@ export const AltHomePage = () => {
         formatMoney={formatMoney}
       />
 
+      <ShopByCategorySection />
+
+      <MadeByHandSection />
+
+      <CuratedEditSection formatMoney={formatMoney} />
+
       <LookbookSection reduceMotion={reduceMotion} />
+
+
 
       <div className="alt-home-marquee" aria-label="Explore our collections">
         <div className="alt-home-marquee__track">
