@@ -1412,6 +1412,135 @@ const HouseQuoteSection = ({ reduceMotion }) => {
   );
 };
 
+const MOST_LOVED_PRODUCTS = [
+  {
+    id: 'wool-overcoat',
+    title: 'The Wool Overcoat',
+    price: 890,
+    color: 'Camel',
+    image: editCamelCoatImage,
+    alt: 'The Wool Overcoat in Camel',
+    link: '/products?category=outerwear'
+  },
+  {
+    id: 'ribbed-cashmere-knit',
+    title: 'Ribbed Cashmere Knit',
+    price: 340,
+    color: 'Oat',
+    image: lookbookKnitwearImage,
+    alt: 'Ribbed Cashmere Knit in Oat',
+    link: '/products?category=knitwear'
+  },
+  {
+    id: 'long-overcoat',
+    title: 'The Long Overcoat',
+    price: 980,
+    color: 'Stone',
+    image: editTrenchCoatImage,
+    alt: 'The Long Overcoat in Stone',
+    link: '/products?category=outerwear'
+  },
+  {
+    id: 'woven-leather-tote',
+    title: 'Woven Leather Tote',
+    price: 540,
+    color: 'Tan',
+    image: editLeatherToteImage,
+    alt: 'Woven Leather Tote in Tan',
+    link: '/products?category=accessories'
+  }
+];
+
+const MostLovedFavouritesSection = ({ formatMoney }) => {
+  const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
+  const { addItem } = useCart();
+  const [addingId, setAddingId] = useState(null);
+
+  const handleAdd = async (e, item) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (authLoading) return;
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    setAddingId(item.id);
+    try {
+      await addItem(item.id, 1);
+    } catch {
+      // Fallback feedback state
+    } finally {
+      setTimeout(() => setAddingId(null), 1400);
+    }
+  };
+
+  return (
+    <section
+      className="alt-home-favourites"
+      aria-labelledby="alt-home-favourites-title"
+      data-alt-cursor-zone
+    >
+      <div className="alt-home-favourites__inner">
+        <header className="alt-home-favourites__header">
+          <p className="alt-home-favourites__eyebrow">MOST LOVED</p>
+          <h2 id="alt-home-favourites-title" className="alt-home-favourites__title">
+            Quietly, the favourites.
+          </h2>
+        </header>
+
+        <div className="alt-home-favourites__grid">
+          {MOST_LOVED_PRODUCTS.map((product) => (
+            <article className="alt-home-favourites__card" key={product.id}>
+              <div className="alt-home-favourites__media">
+                <Link
+                  to={product.link}
+                  className="alt-home-favourites__media-link"
+                  data-alt-cursor="active"
+                  data-alt-cursor-label="VIEW"
+                  aria-label={`View ${product.title}`}
+                >
+                  <img
+                    src={product.image}
+                    alt={product.alt}
+                    className="alt-home-favourites__image"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </Link>
+                <button
+                  type="button"
+                  className="alt-home-favourites__add-btn"
+                  onClick={(e) => handleAdd(e, product)}
+                  data-alt-cursor="active"
+                  data-alt-cursor-label="ADD"
+                >
+                  {addingId === product.id ? 'ADDED TO BAG' : 'ADD TO BAG'}
+                </button>
+              </div>
+
+              <div className="alt-home-favourites__info">
+                <h3 className="alt-home-favourites__card-title">
+                  <Link to={product.link}>{product.title}</Link>
+                </h3>
+                <div className="alt-home-favourites__meta-row">
+                  <span className="alt-home-favourites__card-price">
+                    {formatMoney ? formatMoney(product.price) : `$${product.price}`}
+                  </span>
+                  <span className="alt-home-favourites__card-color">
+                    {product.color}
+                  </span>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+
 
 
 export const AltHomePage = () => {
@@ -2092,6 +2221,9 @@ export const AltHomePage = () => {
       <MaterialMakeSection />
 
       <HouseQuoteSection reduceMotion={reduceMotion} />
+
+      <MostLovedFavouritesSection formatMoney={formatMoney} />
+
 
 
 
