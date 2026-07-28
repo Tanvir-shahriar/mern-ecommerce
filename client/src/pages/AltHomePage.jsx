@@ -1207,21 +1207,94 @@ const LookbookSection = ({ reduceMotion }) => {
 
 const STATS_DATA = [
   {
-    value: '100',
+    target: 100,
     unit: '%',
     label: 'NATURAL FIBRES'
   },
   {
-    value: '12',
+    target: 12,
     label: 'FAMILY ATELIERS'
   },
   {
-    value: '0',
+    target: 0,
     label: 'SEASONS WASTED'
   }
 ];
 
-const MaterialMakeSection = () => {
+const AnimatedStatItem = ({ stat, isVisible, index, reduceMotion }) => {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isVisible) return undefined;
+    if (reduceMotion || stat.target === 0) {
+      setCount(stat.target);
+      return undefined;
+    }
+
+    let animationFrameId = 0;
+    const duration = 1800;
+    const startTime = performance.now();
+
+    const updateCount = (now) => {
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      const currentVal = Math.round(easeOut * stat.target);
+      setCount(currentVal);
+
+      if (progress < 1) {
+        animationFrameId = requestAnimationFrame(updateCount);
+      }
+    };
+
+    animationFrameId = requestAnimationFrame(updateCount);
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [isVisible, stat.target, reduceMotion]);
+
+  return (
+    <div
+      className={`alt-home-materials__stat-item${
+        isVisible ? ' alt-home-materials__stat-item--visible' : ''
+      }`}
+      style={{ transitionDelay: `${index * 160}ms` }}
+    >
+      <div className="alt-home-materials__stat-value">
+        <span>{count}</span>
+        {stat.unit && (
+          <span className="alt-home-materials__stat-unit">{stat.unit}</span>
+        )}
+      </div>
+      <p className="alt-home-materials__stat-label">{stat.label}</p>
+    </div>
+  );
+};
+
+const MaterialMakeSection = ({ reduceMotion }) => {
+  const statsRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(reduceMotion);
+
+  useEffect(() => {
+    const node = statsRef.current;
+    if (!node) return undefined;
+    if (reduceMotion || !('IntersectionObserver' in window)) {
+      setIsVisible(true);
+      return undefined;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.3 }
+    );
+
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [reduceMotion]);
+
   return (
     <section
       className="alt-home-materials"
@@ -1231,7 +1304,7 @@ const MaterialMakeSection = () => {
       <div className="alt-home-materials__inner">
         <div className="alt-home-materials__top">
           <div className="alt-home-materials__copy">
-            <p className="alt-home-materials__eyebrow">Material & Make</p>
+            <p className="alt-home-materials__eyebrow">Material &amp; Make</p>
             <h2 id="alt-home-materials-title" className="alt-home-materials__title">
               Better things, made to last.
             </h2>
@@ -1264,17 +1337,15 @@ const MaterialMakeSection = () => {
         </div>
 
         <div className="alt-home-materials__bottom">
-          <div className="alt-home-materials__stats">
+          <div className="alt-home-materials__stats" ref={statsRef}>
             {STATS_DATA.map((stat, index) => (
-              <div className="alt-home-materials__stat-item" key={index}>
-                <div className="alt-home-materials__stat-value">
-                  <span>{stat.value}</span>
-                  {stat.unit && (
-                    <span className="alt-home-materials__stat-unit">{stat.unit}</span>
-                  )}
-                </div>
-                <p className="alt-home-materials__stat-label">{stat.label}</p>
-              </div>
+              <AnimatedStatItem
+                key={index}
+                stat={stat}
+                index={index}
+                isVisible={isVisible}
+                reduceMotion={reduceMotion}
+              />
             ))}
           </div>
         </div>
@@ -1282,6 +1353,7 @@ const MaterialMakeSection = () => {
     </section>
   );
 };
+
 
 const HouseQuoteSection = ({ reduceMotion }) => {
   return (
@@ -2523,7 +2595,8 @@ export const AltHomePage = () => {
 
       <LookbookSection reduceMotion={reduceMotion} />
 
-      <MaterialMakeSection />
+      <MaterialMakeSection reduceMotion={reduceMotion} />
+
 
       <HouseQuoteSection reduceMotion={reduceMotion} />
 

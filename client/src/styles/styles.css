@@ -21337,7 +21337,18 @@ body.collections-immersive-active .scroll-to-top-button {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 750ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 750ms cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+.alt-home-materials__stat-item--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 
 .alt-home-materials__stat-value {
   display: inline-flex;
