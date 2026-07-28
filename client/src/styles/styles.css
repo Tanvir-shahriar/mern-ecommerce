@@ -21927,14 +21927,21 @@ body.collections-immersive-active .scroll-to-top-button {
   grid-template-columns: repeat(4, 1fr);
   gap: clamp(20px, 2.4vw, 38px);
   align-items: start;
+  transition: opacity 350ms cubic-bezier(0.16, 1, 0.3, 1), transform 350ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.alt-home-favourites__grid--shuffling {
+  opacity: 0.72;
+  transform: translateY(4px) scale(0.995);
 }
 
 .alt-home-favourites__card {
   position: relative;
   display: flex;
   flex-direction: column;
-  transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 650ms cubic-bezier(0.16, 1, 0.3, 1), opacity 500ms ease;
 }
+
 
 /* Stagger even cards downwards on desktop viewports */
 @media (min-width: 992px) {
@@ -22081,4 +22088,384 @@ body.collections-immersive-active .scroll-to-top-button {
     bottom: 14px;
   }
 }
+
+/* ==========================================================================
+   ALT HOME — PRESS REVIEWS CAROUSEL
+   Luxury dark press section with quote icon, serif quote, publication line,
+   and animated gold pill pagination indicators.
+   ========================================================================== */
+.alt-home-press {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  padding: clamp(80px, 10vw, 150px) clamp(24px, 5vw, 72px);
+  background: #1a1714;
+  color: #f6f3ee;
+  text-align: center;
+  overflow: hidden;
+}
+
+.alt-home-press__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.alt-home-press__icon {
+  margin-bottom: 22px;
+  opacity: 0.9;
+}
+
+.alt-home-press__eyebrow {
+  margin: 0 0 clamp(24px, 3.5vw, 42px);
+  color: rgba(246, 243, 238, 0.55);
+  font-size: clamp(10px, 0.78vw, 12px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.alt-home-press__carousel {
+  position: relative;
+  width: 100%;
+  min-height: clamp(140px, 16vw, 210px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.alt-home-press__slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: translateY(16px) scale(0.985);
+  pointer-events: none;
+  transition:
+    opacity 650ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 650ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.alt-home-press__slide--active {
+  position: relative;
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.alt-home-press__quote {
+  margin: 0 0 clamp(20px, 2.5vw, 32px);
+  padding: 0;
+  color: #f6f3ee;
+  font-family: "Bodoni Moda", "Bodoni 72", "Playfair Display", Didot, serif;
+  font-size: clamp(26px, 3.8vw, 54px);
+  font-weight: 400;
+  font-style: italic;
+  line-height: 1.18;
+  letter-spacing: -0.02em;
+  max-width: 960px;
+}
+
+.alt-home-press__author {
+  color: #b59975;
+  font-size: clamp(10px, 0.78vw, 12px);
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1.2;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+/* Pagination bar / dots */
+.alt-home-press__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: clamp(36px, 4vw, 56px);
+}
+
+.alt-home-press__dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: rgba(246, 243, 238, 0.28);
+  cursor: pointer;
+  transition:
+    width 380ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-radius 380ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 300ms ease;
+}
+
+.alt-home-press__dot:hover {
+  background: rgba(246, 243, 238, 0.55);
+}
+
+.alt-home-press__dot--active {
+  width: 28px;
+  border-radius: 4px;
+  background: #b59975;
+}
+
+/* ==========================================================================
+   ALT HOME — STORIES & EDITORIALS (THE JOURNAL)
+   ========================================================================== */
+.alt-home-journal {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  padding: clamp(70px, 9vw, 130px) clamp(24px, 5vw, 72px);
+  background: #f7f4ee;
+  color: #1a1714;
+}
+
+.alt-home-journal__inner {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.alt-home-journal__header {
+  margin-bottom: clamp(40px, 5vw, 72px);
+  text-align: center;
+}
+
+.alt-home-journal__eyebrow {
+  margin: 0 0 clamp(10px, 1vw, 16px);
+  color: rgba(26, 23, 20, 0.52);
+  font-size: clamp(10px, 0.78vw, 12px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.alt-home-journal__title {
+  margin: 0;
+  color: #1a1714;
+  font-family: "Bodoni Moda", "Bodoni 72", "Playfair Display", Didot, serif;
+  font-size: clamp(38px, 4.8vw, 72px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.025em;
+}
+
+.alt-home-journal__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(24px, 3vw, 44px);
+}
+
+.alt-home-journal__card {
+  display: flex;
+  flex-direction: column;
+}
+
+.alt-home-journal__media {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #eae4d9;
+}
+
+.alt-home-journal__media-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.alt-home-journal__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 650ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.alt-home-journal__media:hover .alt-home-journal__image,
+.alt-home-journal__media-link:focus-visible .alt-home-journal__image {
+  transform: scale(1.045);
+}
+
+.alt-home-journal__copy {
+  margin-top: clamp(16px, 1.8vw, 24px);
+}
+
+.alt-home-journal__meta {
+  margin: 0 0 8px;
+  color: rgba(26, 23, 20, 0.48);
+  font-size: clamp(10px, 0.78vw, 12px);
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.alt-home-journal__dash {
+  margin: 0 8px;
+  color: rgba(26, 23, 20, 0.32);
+}
+
+.alt-home-journal__card-title {
+  margin: 0;
+  font-family: "Bodoni Moda", "Bodoni 72", "Playfair Display", serif;
+  font-size: clamp(18px, 1.5vw, 24px);
+  font-weight: 400;
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+}
+
+.alt-home-journal__card-title a {
+  color: #1a1714;
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.alt-home-journal__card-title a:hover {
+  color: #746655;
+}
+
+@media (max-width: 900px) {
+  .alt-home-journal__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 580px) {
+  .alt-home-journal__grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ==========================================================================
+   ALT HOME — THE COMMUNITY (@lahventure)
+   ========================================================================== */
+.alt-home-community {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  padding: clamp(70px, 9vw, 130px) clamp(24px, 5vw, 72px);
+  background: #f7f4ee;
+  color: #1a1714;
+}
+
+.alt-home-community__inner {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.alt-home-community__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: clamp(36px, 4.5vw, 64px);
+}
+
+.alt-home-community__eyebrow {
+  margin: 0 0 clamp(8px, 0.9vw, 14px);
+  color: rgba(26, 23, 20, 0.52);
+  font-size: clamp(10px, 0.78vw, 12px);
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.alt-home-community__title {
+  margin: 0;
+  color: #1a1714;
+  font-family: "Bodoni Moda", "Bodoni 72", "Playfair Display", Didot, serif;
+  font-size: clamp(40px, 5.2vw, 84px);
+  font-weight: 400;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+}
+
+.alt-home-community__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(26, 23, 20, 0.35);
+  color: #1a1714;
+  font-size: clamp(10px, 0.78vw, 12px);
+  font-weight: 650;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: border-color 200ms ease, gap 300ms ease;
+}
+
+.alt-home-community__cta svg {
+  transition: transform 300ms ease;
+}
+
+.alt-home-community__cta:hover {
+  border-color: #1a1714;
+  gap: 14px;
+}
+
+.alt-home-community__cta:hover svg {
+  transform: translateX(3px);
+}
+
+.alt-home-community__grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: clamp(14px, 1.6vw, 24px);
+}
+
+.alt-home-community__card {
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #eae4d9;
+}
+
+.alt-home-community__media-link {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.alt-home-community__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  transition: transform 650ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.alt-home-community__card:hover .alt-home-community__image,
+.alt-home-community__media-link:focus-visible .alt-home-community__image {
+  transform: scale(1.055);
+}
+
+@media (max-width: 1024px) {
+  .alt-home-community__grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .alt-home-community__header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+
+  .alt-home-community__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+
 

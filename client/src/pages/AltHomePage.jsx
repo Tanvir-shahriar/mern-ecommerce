@@ -1456,6 +1456,28 @@ const MostLovedFavouritesSection = ({ formatMoney }) => {
   const { user, loading: authLoading } = useAuth();
   const { addItem } = useCart();
   const [addingId, setAddingId] = useState(null);
+  const [items, setItems] = useState(MOST_LOVED_PRODUCTS);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isShuffling, setIsShuffling] = useState(false);
+
+  useEffect(() => {
+    if (isPaused) return undefined;
+
+    const timer = setInterval(() => {
+      setIsShuffling(true);
+      setTimeout(() => {
+        setItems((prevItems) => {
+          const next = [...prevItems];
+          const firstItem = next.shift();
+          if (firstItem) next.push(firstItem);
+          return next;
+        });
+        setIsShuffling(false);
+      }, 350);
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [isPaused]);
 
   const handleAdd = async (e, item) => {
     e.preventDefault();
@@ -1480,6 +1502,10 @@ const MostLovedFavouritesSection = ({ formatMoney }) => {
       className="alt-home-favourites"
       aria-labelledby="alt-home-favourites-title"
       data-alt-cursor-zone
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onBlur={() => setIsPaused(false)}
     >
       <div className="alt-home-favourites__inner">
         <header className="alt-home-favourites__header">
@@ -1489,9 +1515,12 @@ const MostLovedFavouritesSection = ({ formatMoney }) => {
           </h2>
         </header>
 
-        <div className="alt-home-favourites__grid">
-          {MOST_LOVED_PRODUCTS.map((product) => (
-            <article className="alt-home-favourites__card" key={product.id}>
+        <div className={`alt-home-favourites__grid${isShuffling ? ' alt-home-favourites__grid--shuffling' : ''}`}>
+          {items.map((product, index) => (
+            <article
+              className="alt-home-favourites__card"
+              key={product.id}
+            >
               <div className="alt-home-favourites__media">
                 <Link
                   to={product.link}
@@ -1539,6 +1568,282 @@ const MostLovedFavouritesSection = ({ formatMoney }) => {
     </section>
   );
 };
+
+
+const PRESS_REVIEWS = [
+  {
+    id: 1,
+    quote: 'Restraint, rendered beautifully. The coats alone are worth the pilgrimage.',
+    author: "HARPER'S BAZAAR"
+  },
+  {
+    id: 2,
+    quote: 'A masterclass in buying less, and buying better.',
+    author: 'THE TIMES'
+  },
+  {
+    id: 3,
+    quote: 'LAHVENTURE has quietly become the most considered wardrobe in modern luxury.',
+    author: 'VOGUE'
+  }
+];
+
+const PressReviewsSection = ({ reduceMotion }) => {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    if (reduceMotion || isPaused) return undefined;
+
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % PRESS_REVIEWS.length);
+    }, 5500);
+
+    return () => clearInterval(timer);
+  }, [reduceMotion, isPaused]);
+
+  return (
+    <section
+      className="alt-home-press"
+      aria-label="Press Reviews"
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
+      onFocus={() => setIsPaused(true)}
+      onBlur={() => setIsPaused(false)}
+    >
+      <div className="alt-home-press__inner">
+        <div className="alt-home-press__icon" aria-hidden="true">
+          <svg width="28" height="22" viewBox="0 0 24 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 11.6C0 5.2 4.2 1.4 9.8 0L11.2 2.6C7.6 3.8 5.6 5.8 5.2 8.4H9.6V20H0V11.6ZM12.8 11.6C12.8 5.2 17 1.4 22.6 0L24 2.6C20.4 3.8 18.4 5.8 18 8.4H22.4V20H12.8V11.6Z" fill="#b59975"/>
+          </svg>
+        </div>
+
+        <p className="alt-home-press__eyebrow">THE PRESS</p>
+
+        <div className="alt-home-press__carousel">
+          {PRESS_REVIEWS.map((review, index) => {
+            const isActive = index === activeIndex;
+            return (
+              <div
+                key={review.id}
+                className={`alt-home-press__slide${isActive ? ' alt-home-press__slide--active' : ''}`}
+                aria-hidden={!isActive}
+              >
+                <blockquote className="alt-home-press__quote">
+                  {review.quote}
+                </blockquote>
+                <cite className="alt-home-press__author">{review.author}</cite>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="alt-home-press__nav" role="tablist" aria-label="Press reviews navigation">
+          {PRESS_REVIEWS.map((review, index) => {
+            const isActive = index === activeIndex;
+            return (
+              <button
+                key={review.id}
+                type="button"
+                role="tab"
+                aria-selected={isActive}
+                aria-label={`Go to slide ${index + 1}: ${review.author}`}
+                className={`alt-home-press__dot${isActive ? ' alt-home-press__dot--active' : ''}`}
+                onClick={() => setActiveIndex(index)}
+              />
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const JOURNAL_ARTICLES = [
+  {
+    id: 'capsule-wardrobe',
+    category: 'STYLE',
+    date: 'May 18, 2026',
+    title: 'How to Build a Capsule Wardrobe',
+    image: categoryOuterwearImage,
+    alt: 'Capsule wardrobe hanging on rail',
+    link: '/about'
+  },
+  {
+    id: 'making-of-ss26',
+    category: 'ATELIER',
+    date: 'Apr 22, 2026',
+    title: 'Inside the Making of SS26',
+    image: handStitchingCraftImage,
+    alt: 'Artisan tailoring in atelier',
+    link: '/about'
+  },
+  {
+    id: 'buying-less-better',
+    category: 'LIVING',
+    date: 'Mar 30, 2026',
+    title: 'The Case for Buying Less, Better',
+    image: editCamelCoatImage,
+    alt: 'Minimalist coat hanging on wall rail',
+    link: '/about'
+  }
+];
+
+const JournalStoriesSection = () => {
+  return (
+    <section
+      className="alt-home-journal"
+      aria-labelledby="alt-home-journal-title"
+      data-alt-cursor-zone
+    >
+      <div className="alt-home-journal__inner">
+        <header className="alt-home-journal__header">
+          <p className="alt-home-journal__eyebrow">THE JOURNAL</p>
+          <h2 id="alt-home-journal-title" className="alt-home-journal__title">
+            Stories &amp; Editorials
+          </h2>
+        </header>
+
+        <div className="alt-home-journal__grid">
+          {JOURNAL_ARTICLES.map((article) => (
+            <article className="alt-home-journal__card" key={article.id}>
+              <div className="alt-home-journal__media">
+                <Link
+                  to={article.link}
+                  className="alt-home-journal__media-link"
+                  data-alt-cursor="active"
+                  data-alt-cursor-label="READ"
+                  aria-label={`Read article: ${article.title}`}
+                >
+                  <img
+                    src={article.image}
+                    alt={article.alt}
+                    className="alt-home-journal__image"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </Link>
+              </div>
+
+              <div className="alt-home-journal__copy">
+                <p className="alt-home-journal__meta">
+                  <span>{article.category}</span>
+                  <span className="alt-home-journal__dash" aria-hidden="true">—</span>
+                  <time>{article.date}</time>
+                </p>
+                <h3 className="alt-home-journal__card-title">
+                  <Link to={article.link}>{article.title}</Link>
+                </h3>
+              </div>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const COMMUNITY_POSTS = [
+  {
+    id: 1,
+    image: lookbookKnitwearImage,
+    alt: 'Lahventure community style 1'
+  },
+  {
+    id: 2,
+    image: lookbookSoftTailoringImage,
+    alt: 'Lahventure community style 2'
+  },
+  {
+    id: 3,
+    image: editSilkDressImage,
+    alt: 'Lahventure community style 3'
+  },
+  {
+    id: 4,
+    image: editLeatherToteImage,
+    alt: 'Lahventure community style 4'
+  },
+  {
+    id: 5,
+    image: lookbookEveningImage,
+    alt: 'Lahventure community style 5'
+  },
+  {
+    id: 6,
+    image: categoryAccessoriesImage,
+    alt: 'Lahventure community style 6'
+  },
+  {
+    id: 7,
+    image: madeByHandAtelierImage,
+    alt: 'Lahventure community style 7'
+  },
+  {
+    id: 8,
+    image: lookbookLongOvercoatImage,
+    alt: 'Lahventure community style 8'
+  }
+];
+
+const CommunityInstagramSection = () => {
+  return (
+    <section
+      className="alt-home-community"
+      aria-labelledby="alt-home-community-title"
+      data-alt-cursor-zone
+    >
+      <div className="alt-home-community__inner">
+        <header className="alt-home-community__header">
+          <div className="alt-home-community__heading">
+            <p className="alt-home-community__eyebrow">THE COMMUNITY</p>
+            <h2 id="alt-home-community-title" className="alt-home-community__title">
+              @lahventure
+            </h2>
+          </div>
+
+          <a
+            href="https://instagram.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="alt-home-community__cta"
+            data-alt-cursor="active"
+            data-alt-cursor-label="OPEN"
+          >
+            <span>FOLLOW ON INSTAGRAM</span>
+            <ArrowRight size={16} strokeWidth={1.4} aria-hidden="true" />
+          </a>
+        </header>
+
+        <div className="alt-home-community__grid">
+          {COMMUNITY_POSTS.map((post) => (
+            <div className="alt-home-community__card" key={post.id}>
+              <a
+                href="https://instagram.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="alt-home-community__media-link"
+                data-alt-cursor="active"
+                data-alt-cursor-label="OPEN"
+                aria-label="View Instagram post"
+              >
+                <img
+                  src={post.image}
+                  alt={post.alt}
+                  className="alt-home-community__image"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </a>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+
 
 
 
@@ -2223,6 +2528,14 @@ export const AltHomePage = () => {
       <HouseQuoteSection reduceMotion={reduceMotion} />
 
       <MostLovedFavouritesSection formatMoney={formatMoney} />
+
+      <PressReviewsSection reduceMotion={reduceMotion} />
+
+      <JournalStoriesSection />
+
+      <CommunityInstagramSection />
+
+
 
 
 
