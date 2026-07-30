@@ -428,90 +428,15 @@ const NewInProductCard = ({ product, index, formatMoney }) => {
   );
 };
 
-const CampaignStorySection = ({ reduceMotion }) => {
-  const sectionRef = useRef(null);
-  const imageRef = useRef(null);
-  const [isVisible, setIsVisible] = useState(reduceMotion);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    if (!section) return undefined;
-
-    if (reduceMotion || !('IntersectionObserver' in window)) {
-      setIsVisible(true);
-      return undefined;
-    }
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-        setIsVisible(true);
-        observer.disconnect();
-      },
-      { threshold: 0.4 }
-    );
-
-    observer.observe(section);
-    return () => observer.disconnect();
-  }, [reduceMotion]);
-
-  useEffect(() => {
-    const section = sectionRef.current;
-    const image = imageRef.current;
-    if (!section || !image) return undefined;
-
-    let animationFrame = 0;
-
-    const updateImage = () => {
-      animationFrame = 0;
-
-      if (reduceMotion) {
-        image.style.transform = 'translateY(0) scale(1.1)';
-        return;
-      }
-
-      const bounds = section.getBoundingClientRect();
-      const progress = clamp(
-        (window.innerHeight - bounds.top) / (window.innerHeight + bounds.height)
-      );
-      const scale = 1.25 - progress * 0.25;
-      const translateY = -6 + progress * 12;
-
-      image.style.transform = [
-        `translateY(${translateY.toFixed(3)}%)`,
-        `scale(${scale.toFixed(4)})`
-      ].join(' ');
-    };
-
-    const requestUpdate = () => {
-      if (!animationFrame) {
-        animationFrame = window.requestAnimationFrame(updateImage);
-      }
-    };
-
-    updateImage();
-    window.addEventListener('scroll', requestUpdate, { passive: true });
-    window.addEventListener('resize', requestUpdate);
-
-    return () => {
-      window.removeEventListener('scroll', requestUpdate);
-      window.removeEventListener('resize', requestUpdate);
-      if (animationFrame) window.cancelAnimationFrame(animationFrame);
-    };
-  }, [reduceMotion]);
-
+const CampaignStorySection = () => {
   return (
     <section
-      ref={sectionRef}
-      className={`alt-home-campaign${
-        isVisible ? ' alt-home-campaign--visible' : ''
-      }${reduceMotion ? ' alt-home-campaign--reduced' : ''}`}
+      className="alt-home-campaign alt-home-campaign--visible"
       aria-labelledby="alt-home-campaign-title"
       data-alt-cursor-zone
     >
       <div className="alt-home-campaign__stage">
         <img
-          ref={imageRef}
           className="alt-home-campaign__image"
           src={winterCampaignImage}
           alt=""
@@ -2580,7 +2505,7 @@ export const AltHomePage = () => {
 
       </section>
 
-      <CampaignStorySection reduceMotion={reduceMotion} />
+      <CampaignStorySection />
 
       <ShopTheLookSection
         products={lookProducts}
