@@ -19,8 +19,8 @@ const contactItems = [
     className: 'contact-grid-item-1',
     icon: Mail,
     label: 'Email',
-    value: 'lahventure@gmail.com',
-    href: 'mailto:lahventure@gmail.com'
+    value: 'email@lahventure.com',
+    href: 'mailto:email@lahventure.com'
   },
   {
     className: 'contact-grid-item-2',
@@ -33,8 +33,8 @@ const contactItems = [
     className: 'contact-grid-item-3',
     icon: Phone,
     label: 'Phone',
-    value: '+880-1853379787',
-    href: 'tel:+8801853379787'
+    value: '+8801895626746',
+    href: 'tel:+8801895626746'
   },
   {
     className: 'contact-grid-item-4',
@@ -134,8 +134,8 @@ export const ContactPage = () => {
       '@type': 'Organization',
       name: 'LahVenture',
       url: 'https://lahventure.com',
-      email: 'lahventure@gmail.com',
-      telephone: '+8801853379787',
+      email: 'email@lahventure.com',
+      telephone: '+8801895626746',
       address: {
         '@type': 'PostalAddress',
         addressLocality: 'Dhaka',

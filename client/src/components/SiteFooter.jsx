@@ -35,8 +35,8 @@ const footerColumns = [
   {
     title: 'Connect',
     links: [
-      { label: 'Email us', href: 'mailto:lahventure@gmail.com', external: false },
-      { label: 'Call us', href: 'tel:+8801853379787', external: false },
+      { label: 'Email us', href: 'mailto:email@lahventure.com', external: false },
+      { label: 'Call us', href: 'tel:+8801895626746', external: false },
       { label: 'Contact page', to: '/contact' },
       { label: 'About LahVenture', to: '/about' }
     ]
@@ -286,7 +286,7 @@ export const SiteFooter = ({ onVisibilityChange, variant = 'default' }) => {
           <div>
             <Link to="/contact">Contact</Link>
             <Link to="/about">About</Link>
-            <a href="mailto:lahventure@gmail.com">Email</a>
+            <a href="mailto:email@lahventure.com">Email</a>
             <span>Dhaka, Bangladesh</span>
           </div>
         </div>
