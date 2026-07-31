@@ -623,6 +623,12 @@ export const AboutPage = () => {
                 width: 24rem;
             }
 
+            .slide .about-bio-laham {
+                bottom: clamp(2rem, 10vh, 6rem) !important;
+                bottom: clamp(2rem, 10svh, 6rem) !important;
+                width: clamp(20rem, 28vw, 30rem) !important;
+            }
+
             .about-bio h3 {
                 margin-bottom: 1.5rem;
                 font-size: 0.875rem;
@@ -964,11 +970,16 @@ export const AboutPage = () => {
             <img src={img1} alt="Laham"
               className="about-profile-img profile-img relative md:absolute md:bottom-0 md:left-1/2 md:-translate-x-1/2 h-[35vh] sm:h-[40vh] md:h-[80vh] lg:h-[85vh] w-auto object-contain object-bottom drop-shadow-2xl" />
 
-            <div className="about-bio relative md:absolute md:left-auto md:right-[10%] md:bottom-[20%] w-full md:w-80 bio-text">
-              <h3 className="text-[10px] md:text-sm font-sans font-bold text-maroon uppercase mb-2 md:mb-6 tracking-wider text-center md:text-right">Welcome To <br className="hidden md:inline" />Our Website</h3>
-              <p className="about-bio-copy text-[11px] sm:text-xs md:text-sm font-sans text-maroon uppercase leading-relaxed font-semibold text-center md:text-right">
-                I am Laham Islam Tamim, I <br className="hidden md:inline" />feel that life is too <br className="hidden md:inline" />short to stay in one <br className="hidden md:inline" />place, inspiring others <br className="hidden md:inline" />to explore the world <br className="hidden md:inline" />and confront a <br className="hidden md:inline" />challenge head-on.
-              </p>
+            <div className="about-bio about-bio-laham relative md:absolute md:left-auto md:right-[6%] lg:right-[9%] md:bottom-[10%] w-full md:w-[28rem] bio-text">
+              <h3 className="text-[10px] md:text-sm font-sans font-bold text-maroon uppercase mb-2 md:mb-4 tracking-wider text-center md:text-right">
+                Welcome to Lahventure.
+              </h3>
+              <div className="about-bio-copy text-[11px] sm:text-xs md:text-sm font-sans text-maroon normal-case leading-relaxed font-semibold text-center md:text-right space-y-2 md:space-y-3">
+                <p>Living in China has given me the opportunity to explore one of the world's largest sourcing markets. Through our direct connection with manufacturers and suppliers, we carefully select and collect products that represent quality, style, and value.</p>
+                <p>Lahventure was created with a simple vision — to bring carefully sourced fashion and lifestyle products from China to customers worldwide.</p>
+                <p>We are committed to offering trusted products, unique collections, and a shopping experience where customers can find everything they need under one roof.</p>
+                <p>Thank you for being part of our journey.</p>
+              </div>
             </div>
           </div>
         </div>
